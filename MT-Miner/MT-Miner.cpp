@@ -7,6 +7,7 @@
 #include <vector>
 #include <list>
 #include <set>
+#include <cassert>
 
 // --------------------------------------------------------------------------------------------------------------------- //
 
@@ -232,17 +233,17 @@ bool buildBinaryRepresentationFromFile(const char* filename, double support)
 /// <returns></returns>
 std::vector<int> splitPattern(const std::string& s, const std::string& delimiter)
 {
+	std::string tmpstr = s;
 	size_t pos = 0;
 	std::string token;
-	vector<int> v;
-	while ((pos = s.find(delimiter)) != std::string::npos) 
+	std::vector<int> v;
+	while ((pos = tmpstr.find(delimiter)) != std::string::npos)
 	{
-		token = s.substr(0, pos);
+		token = tmpstr.substr(0, pos);
 		v.push_back(atol(token.c_str()));
-		s.erase(0, pos + delimiter.length());
+		tmpstr.erase(0, pos + delimiter.length());
 	}
-	v.push_back(atol(s.c_str()));
-
+	v.push_back(atol(tmpstr.c_str()));
 	return v;
 }
 
@@ -252,7 +253,7 @@ std::vector<int> splitPattern(const std::string& s, const std::string& delimiter
 /// </summary>
 /// <param name="pattern"></param>
 /// <returns></returns>
-int computeDisjonctifSupport(const std::string& pattern)
+unsigned int computeDisjonctifSupport(const std::string& pattern)
 {
 	//N_nodes++;
 	std::vector<int> itemsOfpattern = splitPattern(pattern, " ");
@@ -264,13 +265,14 @@ int computeDisjonctifSupport(const std::string& pattern)
 	{
 		for (int j = 0; j < objectCount; j++)
 		{
-			SumOfN_1Items[j] = SumOfN_1Items[j] | binaryRep[itemsOfpattern[i]][j];
+			//SumOfN_1Items[j] = SumOfN_1Items[j] | binaryRep[itemsOfpattern[i]][j];
+			SumOfN_1Items[j] = (SumOfN_1Items[j] != 0) | binaryRep[itemsOfpattern[i]][j];
 			//std::cout << SumOfN_1Items[j] << " ";
 		}
 		//std::cout << std::endl;
 	}
-	int disSupp = 0;
-	for (int i = 0; i < num_obj; i++)
+	unsigned int disSupp = 0;
+	for (int i = 0; i < objectCount; i++)
 	{
 		if (SumOfN_1Items[i] == 1)
 			disSupp++;
@@ -284,9 +286,29 @@ int main()
 {
     std::cout << "Hello World!\n";
 
+	// performing some unitary tests
+
 	buildBinaryRepresentationFromFile("test.txt", 0);
 	std::cout << "itemCount " << itemCount << std::endl;
 	std::cout << "objectCount " << objectCount << std::endl;
+	assert(itemCount == 8);
+	assert(objectCount == 6);
+
+	unsigned int disjonctifSupport = computeDisjonctifSupport("1");
+	std::cout << "disjonctifSupport(V1) " << disjonctifSupport << std::endl;
+	assert(disjonctifSupport == 1);
+
+	disjonctifSupport = computeDisjonctifSupport("1 2");
+	std::cout << "disjonctifSupport(V12) " << disjonctifSupport << std::endl;
+	assert(disjonctifSupport == 2);
+
+	disjonctifSupport = computeDisjonctifSupport("1 2 3");
+	std::cout << "disjonctifSupport(V123) " << disjonctifSupport << std::endl;
+	assert(disjonctifSupport == 3);
+
+	disjonctifSupport = computeDisjonctifSupport("1 2 3 4");
+	std::cout << "disjonctifSupport(V1234) " << disjonctifSupport << std::endl;
+	assert(disjonctifSupport == 4);
 
 	getchar();
 }
