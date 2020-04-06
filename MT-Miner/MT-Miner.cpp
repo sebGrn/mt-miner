@@ -282,11 +282,23 @@ unsigned int computeDisjonctifSupport(const std::string& pattern)
 
 // --------------------------------------------------------------------------------------------------------------------- //
 
+std::vector<int> minimalTransversals;
+
+void computeMinimalTransversals()
+{
+	std::vector<int> maxClique;
+	std::vector<int> toExplore;
+
+	
+
+}
+
+// --------------------------------------------------------------------------------------------------------------------- //
+
 int main()
 {
-    std::cout << "Hello World!\n";
-
 	// performing some unitary tests
+	std::cout << "performing tests..." << std::endl;
 
 	buildBinaryRepresentationFromFile("test.txt", 0);
 	std::cout << "itemCount " << itemCount << std::endl;
@@ -310,7 +322,7 @@ int main()
 	std::cout << "disjonctifSupport(V1234) " << disjonctifSupport << std::endl;
 	assert(disjonctifSupport == 4);
 
-	getchar();
+	std::cout << "unitary tests are OK!\n";
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
