@@ -40,8 +40,18 @@ std::map<int, bool*> binaryRep;
 
 const std::vector<std::string> originTraverse{ "1", "2", "3", "4", "5", "6", "7", "8" };
 
+bool verbose = true;
+
 // --------------------------------------------------------------------------------------------------------------------- //
 
+void printStringVectorList(const std::vector<std::string>& v)
+{
+	for_each(v.begin(), v.end(), [&](const std::string& elt) {
+		std::cout << "{" << elt << "}, ";
+		});
+}
+
+// --------------------------------------------------------------------------------------------------------------------- //
 
 /// <summary>
 ///	load a file containing representation of hypergraph from formal context
@@ -343,42 +353,6 @@ std::vector<std::string> combineInVector(const std::string& eltToCombine, const 
 		}
 	});
 
-			
-			/*
-	std::vector<unsigned int> intList1 = splitToVectorOfInt(str1, ' ');
-	std::vector<unsigned int> intList2 = splitToVectorOfInt(str2, ' ');
-	// "1" + "2" => "12"
-	// "71" + "72" => "712"
-	std::vector<std::string> combinedListElt;
-	for_each(intList1.begin(), intList1.end(), [&](unsigned int i) {
-		for_each(intList2.begin(), intList2.end(), [&](unsigned int j) {
-			if (i != j)
-			{
-				std::string combinedElt = std::to_string(i) + ' ' + std::to_string(j);
-				combinedListElt.push_back(combinedElt);
-			}
-
-		//auto it = std::find_if(intList2.begin(), intList2.end(), compare(i));
-		//if (it != intList2.end())
-		//{
-		//	// remove elt
-		//	intList2.erase(it);
-		//}
-		});
-	});
-	*/
-	/*
-	// merge 2 lists into intList1
-	intList1.insert(intList1.end(), intList2.begin(), intList2.end());
-	// transform int list into string list seperated by ' '
-	std::string combinaisonElt;
-	for_each(intList1.begin(), intList1.end(), [&](unsigned int i) {
-		combinaisonElt += std::to_string(i) + ' ';
-	});
-	// remove last character
-	combinaisonElt.pop_back();
-	//std::string combinaisonElt = str1 + " " + str2;
-	*/
 	return combinedListElt;
 }
 
@@ -518,30 +492,49 @@ void computeMinimalTransversals_loop(std::vector<std::string>& toTraverse, std::
 			{
 				previousElt = currentElt;
 				maxClique.push_back(currentElt);
+				if (verbose)
+					std::cout << "add \"" << currentElt << "\" to maxClique list" << std::endl;
 			}
 			else
 			{
 				// here we add element into toExplore list or into minimumTrasversals list ?
 				toExplore.push_back(currentElt);
+				if (verbose)
+					std::cout << "add \"" << currentElt << "\" to toExplore list" << std::endl;
 			}
 		}
 		else
 		{
-			// add combinaison of previous + current
-			std::string lastElt = previousElt;
-			// make a union on 2 elements
-			std::string combinaisonStr = combineIntoString(lastElt, currentElt);
-			unsigned int disjSup = computeDisjonctifSupport(combinaisonStr);
-			if (disjSup != objectCount)
+			unsigned int disjSup = computeDisjonctifSupport(currentElt);
+			if (disjSup == objectCount)
 			{
-				previousElt = combinaisonStr;
-				maxClique.push_back(currentElt);
+				mt.push_back(currentElt);
+				if (verbose)
+					std::cout << "add \"" << currentElt << "\" to minimalTraversal list" << std::endl;
 			}
 			else
 			{
-				// here we add element into toExplore list or into minimumTrasversals list ?
-				// do not recurse if we add element into minimumTrasversals list !!!
-				toExplore.push_back(currentElt);
+				// add combinaison of previous + current
+				std::string lastElt = previousElt;
+				// make a union on 2 elements
+				std::string combinedElement = combineIntoString(lastElt, currentElt);
+				if (verbose)
+					std::cout << "testing combined element \"" << combinedElement << "\"" << std::endl;
+				// compute disjonctif support of the concatenation
+				unsigned int disjSup = computeDisjonctifSupport(combinedElement);
+				if (disjSup != objectCount)
+				{
+					previousElt = combinedElement;
+					maxClique.push_back(currentElt);
+					if (verbose)
+						std::cout << "add \"" << currentElt << "\" to maxClique list" << std::endl;
+				}
+				else
+				{
+					toExplore.push_back(currentElt);
+					if (verbose)
+						std::cout << "add \"" << currentElt << "\" to toExplore list" << std::endl;
+				}
 			}
 		}
 	});
@@ -551,47 +544,62 @@ void computeMinimalTransversals_loop(std::vector<std::string>& toTraverse, std::
 
 		// get new combined to traverse list
 		std::vector<std::string> newCombinedList = combineInVector(toExploreElt, originTraverse);
+		if (verbose)
+		{
+			std::cout << "recurse with toExplore list" << std::endl;
+			printStringVectorList(newCombinedList);
+			std::cout << std::endl;
+		}
 		
 		// clear lists and continue...
 		computeMinimalTransversals_loop(newCombinedList, mt);
 	});
-
 }
+
+// --------------------------------------------------------------------------------------------------------------------- //
 
 // --------------------------------------------------------------------------------------------------------------------- //
 
 int main()
 {
-	// performing some unitary tests
 	std::cout << "performing tests..." << std::endl;
+	{
+		buildBinaryRepresentationFromFile("test.txt", 0);
+		std::cout << "itemCount " << itemCount << std::endl;
+		std::cout << "objectCount " << objectCount << std::endl;
+		assert(itemCount == 8);
+		assert(objectCount == 6);
 
-	buildBinaryRepresentationFromFile("test.txt", 0);
-	std::cout << "itemCount " << itemCount << std::endl;
-	std::cout << "objectCount " << objectCount << std::endl;
-	assert(itemCount == 8);
-	assert(objectCount == 6);
+		unsigned int disjonctifSupport = computeDisjonctifSupport("1");
+		std::cout << "disjonctifSupport(V1) " << disjonctifSupport << std::endl;
+		assert(disjonctifSupport == 1);
 
-	unsigned int disjonctifSupport = computeDisjonctifSupport("1");
-	std::cout << "disjonctifSupport(V1) " << disjonctifSupport << std::endl;
-	assert(disjonctifSupport == 1);
+		disjonctifSupport = computeDisjonctifSupport("1 2");
+		std::cout << "disjonctifSupport(V12) " << disjonctifSupport << std::endl;
+		assert(disjonctifSupport == 2);
 
-	disjonctifSupport = computeDisjonctifSupport("1 2");
-	std::cout << "disjonctifSupport(V12) " << disjonctifSupport << std::endl;
-	assert(disjonctifSupport == 2);
+		disjonctifSupport = computeDisjonctifSupport("1 2 3");
+		std::cout << "disjonctifSupport(V123) " << disjonctifSupport << std::endl;
+		assert(disjonctifSupport == 3);
 
-	disjonctifSupport = computeDisjonctifSupport("1 2 3");
-	std::cout << "disjonctifSupport(V123) " << disjonctifSupport << std::endl;
-	assert(disjonctifSupport == 3);
+		disjonctifSupport = computeDisjonctifSupport("1 2 3 4");
+		std::cout << "disjonctifSupport(V1234) " << disjonctifSupport << std::endl;
+		assert(disjonctifSupport == 4);
+	}
+	std::cout << "unitary tests are OK!" << std::endl << std::endl;
 
-	disjonctifSupport = computeDisjonctifSupport("1 2 3 4");
-	std::cout << "disjonctifSupport(V1234) " << disjonctifSupport << std::endl;
-	assert(disjonctifSupport == 4);
+	// -------------------------------------------------------------------------------------------------------- //
 
-	std::cout << "unitary tests are OK!\n";
-
+	std::cout << "computing minimal transversals  ..." << std::endl;
 	std::vector<std::string> minimalTransversals;
 	std::vector<std::string> toTraverse = originTraverse;
 	computeMinimalTransversals_loop(toTraverse, minimalTransversals);
+	for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const std::string& elt) {
+		std::cout << "{" << elt << "}, ";
+	});
+
+	// -------------------------------------------------------------------------------------------------------- //
+
 	
 	//std::vector<std::string> maxClique;
 	//std::vector<std::string> toExplore;
