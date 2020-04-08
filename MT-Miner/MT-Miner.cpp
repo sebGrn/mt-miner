@@ -431,7 +431,7 @@ std::vector<std::string> getStringVectorFromString(const std::string& s)
 	return vstrings;
 }
 
-void computeMinimalTransversals(unsigned int currentIndex, std::string& previousElt, std::vector<std::string>& toTraverse, std::vector<std::string>& maxClique, std::vector<std::string>& toExplore, std::vector<std::string>& mt)
+void computeMinimalTransversals_recurse(unsigned int currentIndex, std::string& previousElt, std::vector<std::string>& toTraverse, std::vector<std::string>& maxClique, std::vector<std::string>& toExplore, std::vector<std::string>& mt)
 {
 	if (currentIndex >= toTraverse.size())
 	{
@@ -443,18 +443,20 @@ void computeMinimalTransversals(unsigned int currentIndex, std::string& previous
 			//std::string toTraverseStr = getStringFromStringVector(toTraverse, ' ');
 			//std::string toExploreStr = getStringFromStringVector(toExplore, ' ');
 
+			// develop the tree with toExplore elements
+
 			// recurse for each element of toExplore list
 			for_each(toExplore.begin(), toExplore.end(), [&](const std::string& toExploreElt) {
 
 				std::vector<std::string> combinedList = combineInVector(toExploreElt, originTraverse);
 				toTraverse = combinedList;
-			
+
 				// clear lists and continue...
 				toExplore.clear();
 				maxClique.clear();
 				previousElt = "";
-				computeMinimalTransversals(0, previousElt, toTraverse, maxClique, toExplore, mt);
-			});
+				computeMinimalTransversals_recurse(0, previousElt, toTraverse, maxClique, toExplore, mt);
+				});
 		}
 	}
 	else if (currentIndex == 0 && toTraverse[currentIndex].size() == 1)
@@ -474,7 +476,7 @@ void computeMinimalTransversals(unsigned int currentIndex, std::string& previous
 		}
 
 		currentIndex++;
-		computeMinimalTransversals(currentIndex, previousElt, toTraverse, maxClique, toExplore, mt);
+		computeMinimalTransversals_recurse(currentIndex, previousElt, toTraverse, maxClique, toExplore, mt);
 	}
 	else
 	{
@@ -496,8 +498,64 @@ void computeMinimalTransversals(unsigned int currentIndex, std::string& previous
 			toExplore.push_back(currentElt);
 		}
 		currentIndex++;
-		computeMinimalTransversals(currentIndex, previousElt, toTraverse, maxClique, toExplore, mt);
+		computeMinimalTransversals_recurse(currentIndex, previousElt, toTraverse, maxClique, toExplore, mt);
 	}
+}
+
+void computeMinimalTransversals_loop(std::vector<std::string>& toTraverse, std::vector<std::string>& mt)
+{
+	std::vector<std::string> maxClique;
+	std::vector<std::string> toExplore;
+	std::string previousElt;
+
+	for_each(toTraverse.begin(), toTraverse.end(), [&](const std::string& currentElt) {
+
+		if (currentElt == *toTraverse.begin() && currentElt.size() == 1)
+		{
+			// add solo element
+			unsigned int disjSup = computeDisjonctifSupport(currentElt);
+			if (disjSup != objectCount)
+			{
+				previousElt = currentElt;
+				maxClique.push_back(currentElt);
+			}
+			else
+			{
+				// here we add element into toExplore list or into minimumTrasversals list ?
+				toExplore.push_back(currentElt);
+			}
+		}
+		else
+		{
+			// add combinaison of previous + current
+			std::string lastElt = previousElt;
+			// make a union on 2 elements
+			std::string combinaisonStr = combineIntoString(lastElt, currentElt);
+			unsigned int disjSup = computeDisjonctifSupport(combinaisonStr);
+			if (disjSup != objectCount)
+			{
+				previousElt = combinaisonStr;
+				maxClique.push_back(currentElt);
+			}
+			else
+			{
+				// here we add element into toExplore list or into minimumTrasversals list ?
+				// do not recurse if we add element into minimumTrasversals list !!!
+				toExplore.push_back(currentElt);
+			}
+		}
+	});
+
+	// recurse for each element of toExplore list, develop the branch
+	for_each(toExplore.begin(), toExplore.end(), [&](const std::string& toExploreElt) {
+
+		// get new combined to traverse list
+		std::vector<std::string> newCombinedList = combineInVector(toExploreElt, originTraverse);
+		
+		// clear lists and continue...
+		computeMinimalTransversals_loop(newCombinedList, mt);
+	});
+
 }
 
 // --------------------------------------------------------------------------------------------------------------------- //
@@ -531,10 +589,14 @@ int main()
 
 	std::cout << "unitary tests are OK!\n";
 
-	std::vector<std::string> maxClique;
-	std::vector<std::string> toExplore;
 	std::vector<std::string> minimalTransversals;
 	std::vector<std::string> toTraverse = originTraverse;
-	std::string previousElt = "";	
-	computeMinimalTransversals(0, previousElt, toTraverse, maxClique, toExplore, minimalTransversals);
+	computeMinimalTransversals_loop(toTraverse, minimalTransversals);
+	
+	//std::vector<std::string> maxClique;
+	//std::vector<std::string> toExplore;
+	//std::vector<std::string> minimalTransversals;
+	//std::vector<std::string> toTraverse = originTraverse;
+	//std::string previousElt = "";	
+	//computeMinimalTransversals_recurse(0, previousElt, toTraverse, maxClique, toExplore, minimalTransversals);
 }
