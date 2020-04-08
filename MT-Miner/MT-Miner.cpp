@@ -330,10 +330,33 @@ unsigned int computeDisjonctifSupport(const std::string& pattern)
 // --------------------------------------------------------------------------------------------------------------------- //
 // --------------------------------------------------------------------------------------------------------------------- //
 
-struct compare
+std::string getStringFromStringVector(const std::vector<std::string> v, char delim)
+{
+	std::string res;
+	for_each(v.begin(), v.end(), [&](const std::string& str) {
+		res += str + delim;
+		});
+	// remove last character (delimiter)
+	res.pop_back();
+	return res;
+}
+
+std::vector<std::string> getStringVectorFromString(const std::string& s)
+{
+	std::stringstream ss(s);
+	std::istream_iterator<std::string> begin(ss);
+	std::istream_iterator<std::string> end;
+	std::vector<std::string> vstrings(begin, end);
+	//std::copy(vstrings.begin(), vstrings.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
+	return vstrings;
+}
+
+// --------------------------------------------------------------------------------------------------------------------- //
+
+struct compare_int
 {
 	int key;
-	compare(int const& i) : key(i) { }
+	compare_int(int const& i) : key(i) { }
 
 	bool operator()(int const& i)
 	{
@@ -341,12 +364,25 @@ struct compare
 	}
 };
 
+struct compare_str
+{
+	std::string key;
+	compare_str(std::string const& i) : key(i) { }
+
+	bool operator()(std::string const& i)
+	{
+		return (i == key);
+	}
+};
 
 std::vector<std::string> combineInVector(const std::string& eltToCombine, const std::vector<std::string>& v)
 {
+	std::vector<std::string> eltToCombinedVector = getStringVectorFromString(eltToCombine);
+
 	std::vector<std::string> combinedListElt;
 	for_each(v.begin(), v.end(), [&](const std::string& s) {
-		if (eltToCombine != s)
+		auto it = std::find_if(eltToCombinedVector.begin(), eltToCombinedVector.end(), compare_str(s));
+		if (it == eltToCombinedVector.end())
 		{
 			std::string combinedElt = eltToCombine + ' ' + s;
 			combinedListElt.push_back(combinedElt);			
@@ -364,7 +400,7 @@ std::string combineIntoString(const std::string& str1, const std::string& str2)
 	// "71" + "72" => "712"
 	std::vector<std::string> combinedListElt;
 	for_each(intList1.begin(), intList1.end(), [&](unsigned int i) {
-		auto it = std::find_if(intList2.begin(), intList2.end(), compare(i));
+		auto it = std::find_if(intList2.begin(), intList2.end(), compare_int(i));
 		if (it != intList2.end())
 		{
 			// remove elt
@@ -380,103 +416,10 @@ std::string combineIntoString(const std::string& str1, const std::string& str2)
 	});
 	// remove last character
 	combinedElt.pop_back();
-	//std::string combinedElt = str1 + " " + str2;
 	return combinedElt;
 }
 
-std::string getStringFromStringVector(const std::vector<std::string> v, char delim)
-{
-	std::string res;
-	for_each(v.begin(), v.end(), [&](const std::string& str) {
-		res += str + delim;
-	});
-	// remove last character (delimiter)
-	res.pop_back();
-	return res;
-}
-
-std::vector<std::string> getStringVectorFromString(const std::string& s)
-{
-	std::stringstream ss(s);
-	std::istream_iterator<std::string> begin(ss);
-	std::istream_iterator<std::string> end;
-	std::vector<std::string> vstrings(begin, end);
-	std::copy(vstrings.begin(), vstrings.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
-	return vstrings;
-}
-
-void computeMinimalTransversals_recurse(unsigned int currentIndex, std::string& previousElt, std::vector<std::string>& toTraverse, std::vector<std::string>& maxClique, std::vector<std::string>& toExplore, std::vector<std::string>& mt)
-{
-	if (currentIndex >= toTraverse.size())
-	{
-		if (toExplore.empty())
-			return;
-		else
-		{
-			// combine toExplore results with toTraverse
-			//std::string toTraverseStr = getStringFromStringVector(toTraverse, ' ');
-			//std::string toExploreStr = getStringFromStringVector(toExplore, ' ');
-
-			// develop the tree with toExplore elements
-
-			// recurse for each element of toExplore list
-			for_each(toExplore.begin(), toExplore.end(), [&](const std::string& toExploreElt) {
-
-				std::vector<std::string> combinedList = combineInVector(toExploreElt, originTraverse);
-				toTraverse = combinedList;
-
-				// clear lists and continue...
-				toExplore.clear();
-				maxClique.clear();
-				previousElt = "";
-				computeMinimalTransversals_recurse(0, previousElt, toTraverse, maxClique, toExplore, mt);
-				});
-		}
-	}
-	else if (currentIndex == 0 && toTraverse[currentIndex].size() == 1)
-	{
-		// add solo element
-		std::string currentElt = toTraverse[currentIndex];
-		unsigned int disjSup = computeDisjonctifSupport(currentElt);
-		if (disjSup != objectCount)
-		{
-			previousElt = currentElt;
-			maxClique.push_back(currentElt);
-		}
-		else
-		{
-			// here we add element into toExplore list or into minimumTrasversals list ?
-			toExplore.push_back(currentElt);
-		}
-
-		currentIndex++;
-		computeMinimalTransversals_recurse(currentIndex, previousElt, toTraverse, maxClique, toExplore, mt);
-	}
-	else
-	{
-		// add combinaison of previous + current
-		std::string lastElt = previousElt;
-		std::string currentElt = toTraverse[currentIndex];
-		// make a union on 2 elements
-		std::string combinaisonStr = combineIntoString(lastElt, currentElt);
-		unsigned int disjSup = computeDisjonctifSupport(combinaisonStr);
-		if (disjSup != objectCount)
-		{
-			previousElt = combinaisonStr;
-			maxClique.push_back(currentElt);
-		}
-		else
-		{
-			// here we add element into toExplore list or into minimumTrasversals list ?
-			// do not recurse if we add element into minimumTrasversals list !!!
-			toExplore.push_back(currentElt);
-		}
-		currentIndex++;
-		computeMinimalTransversals_recurse(currentIndex, previousElt, toTraverse, maxClique, toExplore, mt);
-	}
-}
-
-void computeMinimalTransversals_loop(std::vector<std::string>& toTraverse, std::vector<std::string>& mt)
+void computeMinimalTransversals(std::vector<std::string>& toTraverse, std::vector<std::string>& mt)
 {
 	std::vector<std::string> maxClique;
 	std::vector<std::string> toExplore;
@@ -493,14 +436,22 @@ void computeMinimalTransversals_loop(std::vector<std::string>& toTraverse, std::
 				previousElt = currentElt;
 				maxClique.push_back(currentElt);
 				if (verbose)
-					std::cout << "add \"" << currentElt << "\" to maxClique list" << std::endl;
+				{
+					std::cout << "maxClique list : ";
+					printStringVectorList(maxClique);
+					std::cout << std::endl;
+				}
 			}
 			else
 			{
 				// here we add element into toExplore list or into minimumTrasversals list ?
 				toExplore.push_back(currentElt);
 				if (verbose)
-					std::cout << "add \"" << currentElt << "\" to toExplore list" << std::endl;
+				{
+					std::cout << "toExplore list : ";
+					printStringVectorList(toExplore);
+					std::cout << std::endl;
+				}
 			}
 		}
 		else
@@ -509,8 +460,11 @@ void computeMinimalTransversals_loop(std::vector<std::string>& toTraverse, std::
 			if (disjSup == objectCount)
 			{
 				mt.push_back(currentElt);
-				if (verbose)
-					std::cout << "add \"" << currentElt << "\" to minimalTraversal list" << std::endl;
+				{
+					std::cout << "minimalTraversal list : ";
+					printStringVectorList(mt);
+					std::cout << std::endl;
+				}
 			}
 			else
 			{
@@ -518,22 +472,29 @@ void computeMinimalTransversals_loop(std::vector<std::string>& toTraverse, std::
 				std::string lastElt = previousElt;
 				// make a union on 2 elements
 				std::string combinedElement = combineIntoString(lastElt, currentElt);
-				if (verbose)
-					std::cout << "testing combined element \"" << combinedElement << "\"" << std::endl;
 				// compute disjonctif support of the concatenation
 				unsigned int disjSup = computeDisjonctifSupport(combinedElement);
+				if(verbose)
+					std::cout << "disjonctive support for element \"" << combinedElement << "\" : " << disjSup << std::endl;
 				if (disjSup != objectCount)
 				{
 					previousElt = combinedElement;
 					maxClique.push_back(currentElt);
-					if (verbose)
-						std::cout << "add \"" << currentElt << "\" to maxClique list" << std::endl;
+					{
+						std::cout << "maxClique list : ";
+						printStringVectorList(maxClique);
+						std::cout << std::endl;
+					}
 				}
 				else
 				{
 					toExplore.push_back(currentElt);
 					if (verbose)
-						std::cout << "add \"" << currentElt << "\" to toExplore list" << std::endl;
+					{
+						std::cout << "toExplore list : ";
+						printStringVectorList(toExplore);
+						std::cout << std::endl;
+					}
 				}
 			}
 		}
@@ -546,13 +507,14 @@ void computeMinimalTransversals_loop(std::vector<std::string>& toTraverse, std::
 		std::vector<std::string> newCombinedList = combineInVector(toExploreElt, originTraverse);
 		if (verbose)
 		{
+			std::cout << "----------------------------------------------------------" << std::endl;
 			std::cout << "recurse with toExplore list" << std::endl;
 			printStringVectorList(newCombinedList);
 			std::cout << std::endl;
 		}
 		
 		// clear lists and continue...
-		computeMinimalTransversals_loop(newCombinedList, mt);
+		computeMinimalTransversals(newCombinedList, mt);
 	});
 }
 
@@ -593,18 +555,9 @@ int main()
 	std::cout << "computing minimal transversals  ..." << std::endl;
 	std::vector<std::string> minimalTransversals;
 	std::vector<std::string> toTraverse = originTraverse;
-	computeMinimalTransversals_loop(toTraverse, minimalTransversals);
+	computeMinimalTransversals(toTraverse, minimalTransversals);
 	for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const std::string& elt) {
 		std::cout << "{" << elt << "}, ";
 	});
 
-	// -------------------------------------------------------------------------------------------------------- //
-
-	
-	//std::vector<std::string> maxClique;
-	//std::vector<std::string> toExplore;
-	//std::vector<std::string> minimalTransversals;
-	//std::vector<std::string> toTraverse = originTraverse;
-	//std::string previousElt = "";	
-	//computeMinimalTransversals_recurse(0, previousElt, toTraverse, maxClique, toExplore, minimalTransversals);
 }
