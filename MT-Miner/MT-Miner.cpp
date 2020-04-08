@@ -61,6 +61,15 @@ void printStringVectorList(const std::vector<std::string>& v)
 bool buildBinaryRepresentationFromFile(const char* filename, double support)
 {
 	FILE* in = NULL;
+#ifdef __linux__
+	in = fopen(filename, "r");
+	if (in == NULL)
+	{
+		std::cout << "read wrong!" << std::endl;
+		fclose(in);
+		return false;
+	}
+#else
 	errno_t err = fopen_s(&in, filename, "r");
 	if(err != 0)
 	{
@@ -68,6 +77,7 @@ bool buildBinaryRepresentationFromFile(const char* filename, double support)
 		fclose(in);
 		return false;
 	}
+#endif
 
 	char str[MAX_READ_BUFFER];
 	//char strpre[MAX_READ_BUFFER];
@@ -188,7 +198,11 @@ bool buildBinaryRepresentationFromFile(const char* filename, double support)
 
 	// 2nd pass
 	// - read file to update binary representation boolean value to true if a value exists
-	err = fopen_s(&in, filename, "r");
+#ifdef __linux__
+	in = fopen(filename, "r");
+#else
+	fopen_s(&in, filename, "r");
+#endif
 	int tr = -1;
 	while (fgets(str, MAX_READ_BUFFER, in))
 	{
