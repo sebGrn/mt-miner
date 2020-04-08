@@ -6,8 +6,12 @@
 #include <map>
 #include <vector>
 #include <list>
+#include <string>
 #include <set>
 #include <cassert>
+#include <sstream>
+#include <algorithm>
+#include <iterator>
 
 // --------------------------------------------------------------------------------------------------------------------- //
 
@@ -33,6 +37,8 @@ int objectCount = 0;
 // binary representation map of boolean list
 // very usefull for disjonctif support computation
 std::map<int, bool*> binaryRep;
+
+const std::vector<std::string> originTraverse{ "1", "2", "3", "4", "5", "6", "7", "8" };
 
 // --------------------------------------------------------------------------------------------------------------------- //
 
@@ -231,6 +237,35 @@ bool buildBinaryRepresentationFromFile(const char* filename, double support)
 /// <param name="s"></param>
 /// <param name="delimiter"></param>
 /// <returns></returns>
+template <typename Out>
+void split(const std::string& s, char delim, Out result)
+{
+	std::istringstream iss(s);
+	std::string item;
+	while (std::getline(iss, item, delim)) {
+		*result++ = std::stoi(item);
+	}
+}
+
+/// <summary>
+/// extract a list of int from a string
+/// </summary>
+/// <param name="s"></param>
+/// <param name="delimiter"></param>
+/// <returns></returns>
+std::vector<unsigned int> splitToVectorOfInt(const std::string& s, char delim)
+{
+	std::vector<unsigned int> elems;
+	split(s, delim, std::back_inserter(elems));
+	return elems;
+}
+
+/// <summary>
+/// extract a list of int from a string
+/// </summary>
+/// <param name="s"></param>
+/// <param name="delimiter"></param>
+/// <returns></returns>
 std::vector<int> splitPattern(const std::string& s, const std::string& delimiter)
 {
 	std::string tmpstr = s;
@@ -256,8 +291,9 @@ std::vector<int> splitPattern(const std::string& s, const std::string& delimiter
 unsigned int computeDisjonctifSupport(const std::string& pattern)
 {
 	//N_nodes++;
-	std::vector<int> itemsOfpattern = splitPattern(pattern, " ");
-	std::vector<int> SumOfN_1Items;
+	//std::vector<int> itemsOfpattern = splitPattern(pattern, " ");
+	std::vector<unsigned int> itemsOfpattern = splitToVectorOfInt(pattern, ' ');
+	std::vector<unsigned int> SumOfN_1Items;
 	for (int i = 0; i < objectCount; i++)
 		SumOfN_1Items.push_back(0);
 
@@ -281,16 +317,187 @@ unsigned int computeDisjonctifSupport(const std::string& pattern)
 }
 
 // --------------------------------------------------------------------------------------------------------------------- //
+// --------------------------------------------------------------------------------------------------------------------- //
+// --------------------------------------------------------------------------------------------------------------------- //
 
-std::vector<int> minimalTransversals;
-
-void computeMinimalTransversals()
+struct compare
 {
-	std::vector<int> maxClique;
-	std::vector<int> toExplore;
+	int key;
+	compare(int const& i) : key(i) { }
 
-	
+	bool operator()(int const& i)
+	{
+		return (i == key);
+	}
+};
 
+
+std::vector<std::string> combineInVector(const std::string& eltToCombine, const std::vector<std::string>& v)
+{
+	std::vector<std::string> combinedListElt;
+	for_each(v.begin(), v.end(), [&](const std::string& s) {
+		if (eltToCombine != s)
+		{
+			std::string combinedElt = eltToCombine + ' ' + s;
+			combinedListElt.push_back(combinedElt);			
+		}
+	});
+
+			
+			/*
+	std::vector<unsigned int> intList1 = splitToVectorOfInt(str1, ' ');
+	std::vector<unsigned int> intList2 = splitToVectorOfInt(str2, ' ');
+	// "1" + "2" => "12"
+	// "71" + "72" => "712"
+	std::vector<std::string> combinedListElt;
+	for_each(intList1.begin(), intList1.end(), [&](unsigned int i) {
+		for_each(intList2.begin(), intList2.end(), [&](unsigned int j) {
+			if (i != j)
+			{
+				std::string combinedElt = std::to_string(i) + ' ' + std::to_string(j);
+				combinedListElt.push_back(combinedElt);
+			}
+
+		//auto it = std::find_if(intList2.begin(), intList2.end(), compare(i));
+		//if (it != intList2.end())
+		//{
+		//	// remove elt
+		//	intList2.erase(it);
+		//}
+		});
+	});
+	*/
+	/*
+	// merge 2 lists into intList1
+	intList1.insert(intList1.end(), intList2.begin(), intList2.end());
+	// transform int list into string list seperated by ' '
+	std::string combinaisonElt;
+	for_each(intList1.begin(), intList1.end(), [&](unsigned int i) {
+		combinaisonElt += std::to_string(i) + ' ';
+	});
+	// remove last character
+	combinaisonElt.pop_back();
+	//std::string combinaisonElt = str1 + " " + str2;
+	*/
+	return combinedListElt;
+}
+
+std::string combineIntoString(const std::string& str1, const std::string& str2)
+{
+	std::vector<unsigned int> intList1 = splitToVectorOfInt(str1, ' ');
+	std::vector<unsigned int> intList2 = splitToVectorOfInt(str2, ' ');
+	// "1" + "2" => "12"
+	// "71" + "72" => "712"
+	std::vector<std::string> combinedListElt;
+	for_each(intList1.begin(), intList1.end(), [&](unsigned int i) {
+		auto it = std::find_if(intList2.begin(), intList2.end(), compare(i));
+		if (it != intList2.end())
+		{
+			// remove elt
+			intList2.erase(it);
+		}
+	});
+	// merge 2 lists into intList1
+	intList1.insert(intList1.end(), intList2.begin(), intList2.end());
+	// transform int list into string list seperated by ' '
+	std::string combinedElt;
+	for_each(intList1.begin(), intList1.end(), [&](unsigned int i) {
+		combinedElt += std::to_string(i) + ' ';
+	});
+	// remove last character
+	combinedElt.pop_back();
+	//std::string combinedElt = str1 + " " + str2;
+	return combinedElt;
+}
+
+std::string getStringFromStringVector(const std::vector<std::string> v, char delim)
+{
+	std::string res;
+	for_each(v.begin(), v.end(), [&](const std::string& str) {
+		res += str + delim;
+	});
+	// remove last character (delimiter)
+	res.pop_back();
+	return res;
+}
+
+std::vector<std::string> getStringVectorFromString(const std::string& s)
+{
+	std::stringstream ss(s);
+	std::istream_iterator<std::string> begin(ss);
+	std::istream_iterator<std::string> end;
+	std::vector<std::string> vstrings(begin, end);
+	std::copy(vstrings.begin(), vstrings.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
+	return vstrings;
+}
+
+void computeMinimalTransversals(unsigned int currentIndex, std::string& previousElt, std::vector<std::string>& toTraverse, std::vector<std::string>& maxClique, std::vector<std::string>& toExplore, std::vector<std::string>& mt)
+{
+	if (currentIndex >= toTraverse.size())
+	{
+		if (toExplore.empty())
+			return;
+		else
+		{
+			// combine toExplore results with toTraverse
+			//std::string toTraverseStr = getStringFromStringVector(toTraverse, ' ');
+			//std::string toExploreStr = getStringFromStringVector(toExplore, ' ');
+
+			// recurse for each element of toExplore list
+			for_each(toExplore.begin(), toExplore.end(), [&](const std::string& toExploreElt) {
+
+				std::vector<std::string> combinedList = combineInVector(toExploreElt, originTraverse);
+				toTraverse = combinedList;
+			
+				// clear lists and continue...
+				toExplore.clear();
+				maxClique.clear();
+				previousElt = "";
+				computeMinimalTransversals(0, previousElt, toTraverse, maxClique, toExplore, mt);
+			});
+		}
+	}
+	else if (currentIndex == 0 && toTraverse[currentIndex].size() == 1)
+	{
+		// add solo element
+		std::string currentElt = toTraverse[currentIndex];
+		unsigned int disjSup = computeDisjonctifSupport(currentElt);
+		if (disjSup != objectCount)
+		{
+			previousElt = currentElt;
+			maxClique.push_back(currentElt);
+		}
+		else
+		{
+			// here we add element into toExplore list or into minimumTrasversals list ?
+			toExplore.push_back(currentElt);
+		}
+
+		currentIndex++;
+		computeMinimalTransversals(currentIndex, previousElt, toTraverse, maxClique, toExplore, mt);
+	}
+	else
+	{
+		// add combinaison of previous + current
+		std::string lastElt = previousElt;
+		std::string currentElt = toTraverse[currentIndex];
+		// make a union on 2 elements
+		std::string combinaisonStr = combineIntoString(lastElt, currentElt);
+		unsigned int disjSup = computeDisjonctifSupport(combinaisonStr);
+		if (disjSup != objectCount)
+		{
+			previousElt = combinaisonStr;
+			maxClique.push_back(currentElt);
+		}
+		else
+		{
+			// here we add element into toExplore list or into minimumTrasversals list ?
+			// do not recurse if we add element into minimumTrasversals list !!!
+			toExplore.push_back(currentElt);
+		}
+		currentIndex++;
+		computeMinimalTransversals(currentIndex, previousElt, toTraverse, maxClique, toExplore, mt);
+	}
 }
 
 // --------------------------------------------------------------------------------------------------------------------- //
@@ -323,15 +530,11 @@ int main()
 	assert(disjonctifSupport == 4);
 
 	std::cout << "unitary tests are OK!\n";
+
+	std::vector<std::string> maxClique;
+	std::vector<std::string> toExplore;
+	std::vector<std::string> minimalTransversals;
+	std::vector<std::string> toTraverse = originTraverse;
+	std::string previousElt = "";	
+	computeMinimalTransversals(0, previousElt, toTraverse, maxClique, toExplore, minimalTransversals);
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
