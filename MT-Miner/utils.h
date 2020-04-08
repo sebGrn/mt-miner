@@ -93,6 +93,17 @@ struct compare_int
 	}
 };
 
+struct compare_str
+{
+	std::string key;
+	compare_str(std::string const& i) : key(i) { }
+
+	bool operator()(std::string const& i)
+	{
+		return (i == key);
+	}
+};
+
 inline std::string combineIntoString(const std::string& str1, const std::string& str2)
 {
 	std::vector<unsigned int> intList1 = splitToVectorOfInt(str1, ' ');
