@@ -1,4 +1,4 @@
-// MT-Miner.cpp : This file contains the 'main' function. Program execution begins and ends there.
+﻿// MT-Miner.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
 #include <iostream>
@@ -21,7 +21,6 @@
 // --------------------------------------------------------------------------------------------------------------------- //
 // globals
 
-//int numOfFItem;
 int minSupport;
 
 struct Item
@@ -35,12 +34,11 @@ int itemCount = 0;
 int objectCount = 0;
 
 // binary representation map of boolean list
-// very usefull for disjonctif support computation
+// very usefull to optimize disjonctif support computation
 std::map<int, bool*> binaryRep;
 
-const std::vector<std::string> originTraverse{ "1", "2", "3", "4", "5", "6", "7", "8" };
-
-bool verbose = true;
+// verbose mode
+const bool verbose = false;
 
 // --------------------------------------------------------------------------------------------------------------------- //
 
@@ -222,7 +220,7 @@ bool buildBinaryRepresentationFromFile(const char* filename, double support)
 	//iter->second[tr]
 
 	//-----Affichage du binary rep--------//
-/*	for(iter = binaryRep.begin(); iter != binaryRep.end(); ++iter)
+	/*for(iter = binaryRep.begin(); iter != binaryRep.end(); ++iter)
 	{
 		cout << "Key: " << (*iter).first <<endl;
 		for(int i=0; i<num_obj;i++)
@@ -232,8 +230,8 @@ bool buildBinaryRepresentationFromFile(const char* filename, double support)
 		}
 		cout<<endl;
 		cout<<"$$$$$$"<<endl;
-	}
-*/
+	}*/
+
 
 	fclose(in);
 	return true;
@@ -364,34 +362,6 @@ struct compare_int
 	}
 };
 
-struct compare_str
-{
-	std::string key;
-	compare_str(std::string const& i) : key(i) { }
-
-	bool operator()(std::string const& i)
-	{
-		return (i == key);
-	}
-};
-
-std::vector<std::string> combineInVector(const std::string& eltToCombine, const std::vector<std::string>& v)
-{
-	std::vector<std::string> eltToCombinedVector = getStringVectorFromString(eltToCombine);
-
-	std::vector<std::string> combinedListElt;
-	for_each(v.begin(), v.end(), [&](const std::string& s) {
-		auto it = std::find_if(eltToCombinedVector.begin(), eltToCombinedVector.end(), compare_str(s));
-		if (it == eltToCombinedVector.end())
-		{
-			std::string combinedElt = eltToCombine + ' ' + s;
-			combinedListElt.push_back(combinedElt);			
-		}
-	});
-
-	return combinedListElt;
-}
-
 std::string combineIntoString(const std::string& str1, const std::string& str2)
 {
 	std::vector<unsigned int> intList1 = splitToVectorOfInt(str1, ' ');
@@ -460,6 +430,7 @@ void computeMinimalTransversals(std::vector<std::string>& toTraverse, std::vecto
 			if (disjSup == objectCount)
 			{
 				mt.push_back(currentElt);
+				if (verbose)
 				{
 					std::cout << "minimalTraversal list : ";
 					printStringVectorList(mt);
@@ -480,6 +451,7 @@ void computeMinimalTransversals(std::vector<std::string>& toTraverse, std::vecto
 				{
 					previousElt = combinedElement;
 					maxClique.push_back(currentElt);
+					if (verbose)
 					{
 						std::cout << "maxClique list : ";
 						printStringVectorList(maxClique);
@@ -500,31 +472,60 @@ void computeMinimalTransversals(std::vector<std::string>& toTraverse, std::vecto
 		}
 	});
 
-	// recurse for each element of toExplore list, develop the branch
-	for_each(toExplore.begin(), toExplore.end(), [&](const std::string& toExploreElt) {
-
-		// get new combined to traverse list
-		std::vector<std::string> newCombinedList = combineInVector(toExploreElt, originTraverse);
+	// explore then branch
+	if (!toExplore.empty())
+	{
 		if (verbose)
 		{
 			std::cout << "----------------------------------------------------------" << std::endl;
-			std::cout << "recurse with toExplore list" << std::endl;
-			printStringVectorList(newCombinedList);
+
+			std::cout << "toExplore list" << std::endl;
+			printStringVectorList(toExplore);
+			std::cout << std::endl;
+
+			std::cout << "maxClique list" << std::endl;
+			printStringVectorList(maxClique);
 			std::cout << std::endl;
 		}
-		
-		// clear lists and continue...
-		computeMinimalTransversals(newCombinedList, mt);
-	});
-}
 
-// --------------------------------------------------------------------------------------------------------------------- //
+		// store toExploreList max index
+		unsigned int lastIndexToTest = toExplore.size();
+		// combine toExplore (left part) with maxClique list (right part) into a combined list
+		std::vector<std::string> combinedList = toExplore;
+		combinedList.insert(combinedList.end(), maxClique.begin(), maxClique.end());
+
+		for (unsigned int i = 0; i < lastIndexToTest; i++)
+		{
+			std::vector<std::string> newToTraverse;
+			std::string toCombinedLeft = combinedList[i];
+
+			for (unsigned int j = i + 1; j < combinedList.size(); j++)
+			{
+				assert(j < combinedList.size());
+				std::string toCombinedRight = combinedList[j];
+				std::string combinedString = combineIntoString(toCombinedLeft, toCombinedRight);
+				newToTraverse.push_back(combinedString);
+			}
+
+			if (verbose)
+			{
+				std::cout << "new toTraverse list" << std::endl;
+				printStringVectorList(newToTraverse);
+				std::cout << std::endl;
+
+				std::cout << "----------------------------------------------------------" << std::endl;
+			}
+
+			computeMinimalTransversals(newToTraverse, mt);
+		}
+	}
+}
 
 // --------------------------------------------------------------------------------------------------------------------- //
 
 int main()
 {
-	std::cout << "performing tests..." << std::endl;
+	std::cout << "performing unitary tests..." << std::endl;
 	{
 		buildBinaryRepresentationFromFile("test.txt", 0);
 		std::cout << "itemCount " << itemCount << std::endl;
@@ -553,11 +554,22 @@ int main()
 	// -------------------------------------------------------------------------------------------------------- //
 
 	std::cout << "computing minimal transversals  ..." << std::endl;
+
+	// initialize toTraverse list with { "1", "2", "3", "4", "5", "6", "7", "8" }
+	std::vector<std::string> toTraverse;
+	for (unsigned int i = 1; i <= itemCount; i++)
+		toTraverse.push_back(std::to_string(i));
+	
+	// compute minimal transversals
 	std::vector<std::string> minimalTransversals;
-	std::vector<std::string> toTraverse = originTraverse;
 	computeMinimalTransversals(toTraverse, minimalTransversals);
+
+	// print minimal transversals
+	std::cout << "show minimal transversals" << std::endl;
 	for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const std::string& elt) {
 		std::cout << "{" << elt << "}, ";
 	});
+	std::cout << std::endl;
 
+	std::cout << "***** je pense qu'il va etre super bon ce resto *****" << std::endl;
 }
