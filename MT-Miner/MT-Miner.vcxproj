@@ -137,10 +137,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="HypergraphParser.cpp" />
     <ClCompile Include="MT-Miner.cpp" />
+    <ClCompile Include="MT_Miner.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="HypergraphParser.h" />
+    <ClInclude Include="MT_Miner.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
