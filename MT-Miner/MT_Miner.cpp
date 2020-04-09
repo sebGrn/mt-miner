@@ -120,12 +120,22 @@ void MT_Miner::computeMinimalTransversals(std::vector<std::string>& toTraverse, 
 
 	for_each(toTraverse.begin(), toTraverse.end(), [&](const std::string& currentElt) {
 
-		if (currentElt == *toTraverse.begin() && currentElt.size() == 1)
+		unsigned int disjSup = computeDisjonctifSupport(currentElt);
+		if (disjSup == objectCount)
 		{
-			// add solo element
-			unsigned int disjSup = computeDisjonctifSupport(currentElt);
-			if (disjSup != objectCount)
+			mt.push_back(currentElt);
+			if (verbose)
 			{
+				std::cout << "minimalTraversal list : ";
+				printStringVectorList(mt);
+				std::cout << std::endl;
+			}
+		}
+		else
+		{
+			if (currentElt == *toTraverse.begin() && currentElt.size() == 1)
+			{
+				// must be the 1st element with only one element
 				previousElt = currentElt;
 				maxClique.push_back(currentElt);
 				if (verbose)
@@ -137,63 +147,53 @@ void MT_Miner::computeMinimalTransversals(std::vector<std::string>& toTraverse, 
 			}
 			else
 			{
-				// here we add element into toExplore list or into minimumTrasversals list ?
-				toExplore.push_back(currentElt);
-				if (verbose)
+				// here, we can combine with previous element
+				unsigned int disjSup = computeDisjonctifSupport(currentElt);
+				if (disjSup == objectCount)
 				{
-					std::cout << "toExplore list : ";
-					printStringVectorList(toExplore);
-					std::cout << std::endl;
-				}
-			}
-		}
-		else
-		{
-			unsigned int disjSup = computeDisjonctifSupport(currentElt);
-			if (disjSup == objectCount)
-			{
-				mt.push_back(currentElt);
-				if (verbose)
-				{
-					std::cout << "minimalTraversal list : ";
-					printStringVectorList(mt);
-					std::cout << std::endl;
-				}
-			}
-			else
-			{
-				// add combinaison of previous + current
-				std::string lastElt = previousElt;
-				// make a union on 2 elements
-				std::string combinedElement = combineIntoString(lastElt, currentElt);
-				// compute disjonctif support of the concatenation
-				unsigned int disjSup = computeDisjonctifSupport(combinedElement);
-				if (verbose)
-					std::cout << "disjonctive support for element \"" << combinedElement << "\" : " << disjSup << std::endl;
-				if (disjSup != objectCount)
-				{
-					previousElt = combinedElement;
-					maxClique.push_back(currentElt);
+					mt.push_back(currentElt);
 					if (verbose)
 					{
-						std::cout << "maxClique list : ";
-						printStringVectorList(maxClique);
+						std::cout << "minimalTraversal list : ";
+						printStringVectorList(mt);
 						std::cout << std::endl;
 					}
 				}
 				else
 				{
-					toExplore.push_back(currentElt);
+					// add combinaison of previous + current
+					std::string lastElt = previousElt;
+					// make a union on 2 elements
+					std::string combinedElement = combineIntoString(lastElt, currentElt);
+					// compute disjonctif support of the concatenation
+					unsigned int disjSup = computeDisjonctifSupport(combinedElement);
 					if (verbose)
+						std::cout << "disjonctive support for element \"" << combinedElement << "\" : " << disjSup << std::endl;
+					if (disjSup != objectCount)
 					{
-						std::cout << "toExplore list : ";
-						printStringVectorList(toExplore);
-						std::cout << std::endl;
+						previousElt = combinedElement;
+						maxClique.push_back(currentElt);
+						if (verbose)
+						{
+							std::cout << "maxClique list : ";
+							printStringVectorList(maxClique);
+							std::cout << std::endl;
+						}
+					}
+					else
+					{
+						toExplore.push_back(currentElt);
+						if (verbose)
+						{
+							std::cout << "toExplore list : ";
+							printStringVectorList(toExplore);
+							std::cout << std::endl;
+						}
 					}
 				}
 			}
 		}
-		});
+	});
 
 	// explore then branch
 	if (!toExplore.empty())
