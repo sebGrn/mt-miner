@@ -41,21 +41,21 @@ inline std::vector<unsigned int> splitToVectorOfInt(const std::string& s, char d
 /// <param name="s"></param>
 /// <param name="delimiter"></param>
 /// <returns></returns>
-inline std::vector<int> splitPattern(const std::string& s, const std::string& delimiter)
-{
-	std::string tmpstr = s;
-	size_t pos = 0;
-	std::string token;
-	std::vector<int> v;
-	while ((pos = tmpstr.find(delimiter)) != std::string::npos)
-	{
-		token = tmpstr.substr(0, pos);
-		v.push_back(atol(token.c_str()));
-		tmpstr.erase(0, pos + delimiter.length());
-	}
-	v.push_back(atol(tmpstr.c_str()));
-	return v;
-}
+//inline std::vector<int> splitPattern(const std::string& s, const std::string& delimiter)
+//{
+//	std::string tmpstr = s;
+//	size_t pos = 0;
+//	std::string token;
+//	std::vector<int> v;
+//	while ((pos = tmpstr.find(delimiter)) != std::string::npos)
+//	{
+//		token = tmpstr.substr(0, pos);
+//		v.push_back(atol(token.c_str()));
+//		tmpstr.erase(0, pos + delimiter.length());
+//	}
+//	v.push_back(atol(tmpstr.c_str()));
+//	return v;
+//}
 
 
 inline std::string& ltrim(std::string& str, const std::string& chars = "\t\n\v\f\r ")

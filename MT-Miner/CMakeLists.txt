@@ -13,10 +13,11 @@ set (CMAKE_CXX_STANDARD 17)
 #find_package(OpenMP)
 
 # set sources and headers
-set(SOURCES ${SOURCES} MT-Miner.cpp )
+set(SOURCES ${HEADERS} HypergraphParser.h MT_Miner.h )
+set(SOURCES ${SOURCES} HypergraphParser.cpp MT_Miner.cpp MT-Miner.cpp )
 
 # create static library .a
-add_executable(mt_miner ${SOURCES})
+add_executable(mt_miner ${SOURCES} ${HEADERS})
 
 #target_link_libraries(mt_miner PUBLIC OpenMP::OpenMP_CXX)
 

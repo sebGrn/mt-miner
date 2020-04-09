@@ -5,7 +5,7 @@ MT_Miner::MT_Miner()
 {
 	this->itemCount = 0;
 	this->objectCount = 0;
-	this->verbose = false;
+	this->verbose = true;
 }
 
 MT_Miner::~MT_Miner()
@@ -50,22 +50,62 @@ void MT_Miner::init(unsigned int itemCount, unsigned int objectCount, const std:
 	}
 }
 
-unsigned int MT_Miner::computeDisjonctifSupport(const std::string& pattern)
+bool MT_Miner::checkOneItem(int itemBar, const std::vector<unsigned int>& itemsOfpattern)
 {
-	std::vector<unsigned int> itemsOfpattern = splitToVectorOfInt(pattern, ' ');
 	std::vector<unsigned int> SumOfN_1Items;
-	for (int i = 0; i < objectCount; i++)
+	for (int i = 0; i < this->objectCount; i++)
 		SumOfN_1Items.push_back(0);
 
 	for (int i = 0; i < itemsOfpattern.size(); i++)
 	{
-		for (int j = 0; j < objectCount; j++)
+		if (itemsOfpattern[i] != itemBar)
 		{
-			SumOfN_1Items[j] = (SumOfN_1Items[j] != 0) | binaryRep[itemsOfpattern[i]][j];
+			for (int j = 0; j < this->objectCount; j++)
+			{
+				SumOfN_1Items[j] = SumOfN_1Items[j] || binaryRep[itemsOfpattern[i]][j];
+			}
+		}
+	}
+
+	for (int i = 0; i < this->objectCount; i++)
+	{
+		if (SumOfN_1Items[i] == 0 && binaryRep[itemBar][i] == 1)
+			return true;
+	}
+	return false;
+}
+
+// return true if element is essential
+bool MT_Miner::isEss(const std::string& pattern)
+{
+	std::vector<unsigned int> itemsOfPattern = splitToVectorOfInt(pattern, ' ');
+	if (itemsOfPattern.size() == 1)
+		return true;
+
+	for (int i = 0; i < itemsOfPattern.size(); i++)
+	{
+		if (!checkOneItem(itemsOfPattern[i], itemsOfPattern))
+			return false;
+	}
+	return true;
+}
+
+unsigned int MT_Miner::computeDisjonctifSupport(const std::string& pattern)
+{
+	std::vector<unsigned int> itemsOfpattern = splitToVectorOfInt(pattern, ' ');
+	std::vector<unsigned int> SumOfN_1Items;
+	for (int i = 0; i < this->objectCount; i++)
+		SumOfN_1Items.push_back(0);
+
+	for (int i = 0; i < itemsOfpattern.size(); i++)
+	{
+		for (int j = 0; j < this->objectCount; j++)
+		{
+			SumOfN_1Items[j] = (SumOfN_1Items[j] != 0) | this->binaryRep[itemsOfpattern[i]][j];
 		}
 	}
 	unsigned int disSupp = 0;
-	for (int i = 0; i < objectCount; i++)
+	for (int i = 0; i < this->objectCount; i++)
 	{
 		if (SumOfN_1Items[i] == 1)
 			disSupp++;
@@ -191,6 +231,23 @@ void MT_Miner::computeMinimalTransversals(std::vector<std::string>& toTraverse, 
 				newToTraverse.push_back(combinedString);
 			}
 
+			std::vector<unsigned int> indexToRemove;
+			for (unsigned int i = 0; i < newToTraverse.size(); i++)
+			{
+				if (!isEss(newToTraverse[i]))
+				{
+					indexToRemove.push_back(i);
+					if (verbose)
+					{
+						std::cout << "remove element {" << newToTraverse[i] << "} from next iteration, not essential" << std::endl;
+					}
+				}
+			}
+			for (unsigned int i = indexToRemove.size(); i--; )
+			{
+				newToTraverse.erase(newToTraverse.begin() + indexToRemove[i]);
+			}
+
 			if (verbose)
 			{
 				std::cout << "new toTraverse list" << std::endl;
@@ -201,6 +258,13 @@ void MT_Miner::computeMinimalTransversals(std::vector<std::string>& toTraverse, 
 			}
 
 			computeMinimalTransversals(newToTraverse, mt);
+		}
+	}
+	else
+	{
+		if (verbose)
+		{
+			std::cout << "toExplore list is empty, end of the branch" << std::endl;
 		}
 	}
 }
