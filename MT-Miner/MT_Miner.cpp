@@ -1,11 +1,11 @@
 #include "MT_Miner.h"
 #include "utils.h"
 
-MT_Miner::MT_Miner()
+MT_Miner::MT_Miner(bool verbose)
 {
 	this->itemCount = 0;
 	this->objectCount = 0;
-	this->verbose = true;
+	this->verbose = verbose;
 }
 
 MT_Miner::~MT_Miner()
@@ -21,7 +21,6 @@ void MT_Miner::init(unsigned int itemCount, unsigned int objectCount, const std:
 
 	// build formal context
 	std::vector<std::vector<bool>> formalContext;
-
 	for (unsigned int i = 0; i < hypergraph.size(); i++)
 	{
 		std::vector<bool> bitset(this->itemCount);
@@ -39,7 +38,7 @@ void MT_Miner::init(unsigned int itemCount, unsigned int objectCount, const std:
 	}
 
 	// build binary representation from formal context
-	for (unsigned int j = 0; j < this->itemCount; j++)	// 8 on test.txt
+	for (unsigned int j = 0; j < this->itemCount; j++)		// 8 on test.txt
 	{
 		std::vector<bool> bitset(this->objectCount);
 		for (unsigned int i = 0; i < this->objectCount; i++)	// 6 on test.txt

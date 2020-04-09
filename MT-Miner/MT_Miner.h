@@ -13,8 +13,8 @@ private:
 	// number of columns
 	unsigned int objectCount;
 	// binary representation 
-	//  - note1 : we should use a dynamic bitset here to optimise & operation
-	//  - note2 : not sure if a map is usefull here
+	//  - TODO: we should use a dynamic bitset here to optimise & operation
+	//  - TODO: not sure if a map is usefull here
 	std::map<int, std::vector<bool>> binaryRep;
 
 	bool verbose;
@@ -24,12 +24,17 @@ private:
 	bool checkOneItem(int itemBar, const std::vector<unsigned int>& itemsOfpattern);
 
 public:
-	MT_Miner();
+	MT_Miner(bool verbose = true);
 	~MT_Miner();
 
+	/// initialize the minimal transversals miner
+	/// this function build a format context from the hypergraph, then build the binary representation
 	void init(unsigned int itemCount, unsigned int objectCount, const std::vector<std::vector<unsigned int>>& hypergraph);
-	unsigned int computeDisjonctifSupport(const std::string& pattern);
-	void computeMinimalTransversals(std::vector<std::string>& toTraverse, std::vector<std::string>& mt);
 	
+	///
+	unsigned int computeDisjonctifSupport(const std::string& pattern);
+
+	///
+	void computeMinimalTransversals(std::vector<std::string>& toTraverse, std::vector<std::string>& mt);	
 };
 

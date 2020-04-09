@@ -13,7 +13,7 @@ set (CMAKE_CXX_STANDARD 17)
 #find_package(OpenMP)
 
 # set sources and headers
-set(SOURCES ${HEADERS} HypergraphParser.h MT_Miner.h )
+set(SOURCES ${HEADERS} HypergraphParser.h MT_Miner.h utils.h)
 set(SOURCES ${SOURCES} HypergraphParser.cpp MT_Miner.cpp MT-Miner.cpp )
 
 # create static library .a

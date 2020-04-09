@@ -16,112 +16,7 @@
 #include "utils.h"
 #include "HypergraphParser.h"
 
-int main(int argc, char* argv[])
-{
-	if (argc <= 1)
-	{
-		std::cout << "Usage " << argv[0] << "<filename> <option><resultfile>" << std::endl;
-		return 0;
-	}
-
-	std::string file = argv[1];
-
-	std::string resfile;
-	if (argc >= 2)
-		resfile = argv[2];
-
-	// -------------------------------------------------------------------------------------------------------- //
-
-	// parse file
-	HypergraphParser parser;
-	parser.parse(file);
-	// get data from parser
-	std::vector<std::vector<unsigned int>> hypergraph = parser.getHypergraph();
-	unsigned int objectCount = parser.getObjectCount();
-	unsigned int itemCount = parser.getItemCount();
-	std::cout << "itemCount " << itemCount << std::endl;
-	std::cout << "objectCount " << objectCount << std::endl;
-
-	// allocate miner
-	MT_Miner miner;
-	miner.init(itemCount, objectCount, hypergraph);
-
-	std::cout << std::endl;
-	std::cout << "computing minimal transversals  ..." << std::endl;
-
-	std::vector<std::string> toTraverse;
-	for (unsigned int i = 1; i <= itemCount; i++)
-		toTraverse.push_back(std::to_string(i));
-
-	// compute minimal transversals
-	std::vector<std::string> minimalTransversals;
-	miner.computeMinimalTransversals(toTraverse, minimalTransversals);
-	minimalTransversals = sortVectorOfString(minimalTransversals);
-
-
-	// print minimal transversals	
-	std::cout << std::endl;
-	std::cout << "minimal transversals count : " << minimalTransversals.size() << std::endl;
-	for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const std::string& elt) {
-		std::cout << "{" << elt << "}" << std::endl;
-		});
-	std::cout << std::endl;
-
-	// -------------------------------------------------------------------------------------------------------- //
-
-	bool notGood = false;
-		
-	std::cout << "----------------------------------------------------------" << std::endl;
-	{
-		std::vector<std::string> mt_resuls;
-		std::ifstream inputFile = std::ifstream();
-		inputFile.open(resfile);
-		if (!inputFile.fail())
-		{
-			// Parse the file line by line
-			while (!inputFile.eof())
-			{
-				// read and clean line from file
-				std::string line;
-				getline(inputFile, line);
-				if (!line.empty())
-					mt_resuls.push_back(line);
-			}
-			inputFile.close();
-		}
-
-		// sort results before comparing
-		mt_resuls = sortVectorOfString(mt_resuls);
-
-		// check with our results
-		for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const std::string& str) {
-			auto it = std::find_if(mt_resuls.begin(), mt_resuls.end(), compare_str(str));
-			if (it == mt_resuls.end())
-			{
-				std::cout << "{" << str << "} from our computed transverals list has not been found in " << resfile << std::endl;
-				notGood = true;
-			}
-		});
-
-		std::cout << std::endl;
-
-		for_each(mt_resuls.begin(), mt_resuls.end(), [&](const std::string& str) {
-			auto it = std::find_if(minimalTransversals.begin(), minimalTransversals.end(), compare_str(str));
-			if (it == minimalTransversals.end())
-			{
-				std::cout << "{" << str << "} from " << resfile << " has not been found in our computed transverals list" << std::endl;
-				notGood = true;
-			}
-		});
-
-		if (!notGood)
-		{
-			std::cout << "!!! results are the same !!!" << std::endl;
-		}
-	}
-	std::cout << "----------------------------------------------------------" << std::endl;
-}
-
+///
 void unitaryTesting()
 {
 	// parse file
@@ -159,7 +54,151 @@ void unitaryTesting()
 	std::cout << "----------------------------------------------------------" << std::endl;
 	std::cout << "computing minimal transversals  ..." << std::endl;
 
-	// initialize toTraverse list with { "1", "2", "3", "4", "5", "6", "7", "8" }
+	std::vector<std::string> toTraverse;
+	for (unsigned int i = 1; i <= itemCount; i++)
+		toTraverse.push_back(std::to_string(i));
+
+	std::vector<std::string> correctToTraverse = { "1", "2", "3", "4", "5", "6", "7", "8" };
+	assert(correctToTraverse == toTraverse);
+
+	// compute minimal transversals
+	std::vector<std::string> minimalTransversals;
+	miner.computeMinimalTransversals(toTraverse, minimalTransversals);
+	minimalTransversals = sortVectorOfString(minimalTransversals);
+
+	// print minimal transversals	
+	std::cout << "show minimal transversals" << std::endl;
+	for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const std::string& elt) {
+		std::cout << "{" << elt << "}" << std::endl;
+		});
+	std::cout << std::endl;
+}
+
+/// Compare results between Hyp1.txt and TM_Hyp1.txt, Hyp2.txt and TM_Hyp2.txt, Hyp2.txt and TM_Hyp2.txt, 
+bool compareResults()
+{
+	std::vector<std::string> files = { "Hyp1.txt", "Hyp2.txt", "Hyp3.txt" };
+
+	bool notGood = false;
+	for (auto it = files.begin(); it != files.end(); it++)
+	{
+		std::cout << "----------------------------------------------------------" << std::endl;
+		std::string resfile = "TM_" + (*it);
+
+		std::cout << "comparing results between " << *it << " and " << resfile << std::endl;
+
+		// parse hypergraph
+		HypergraphParser parser;
+		parser.parse(*it);
+
+		// make toTraverseList
+		std::vector<std::string> toTraverse;
+		for (unsigned int i = 1; i <= parser.getItemCount(); i++)
+			toTraverse.push_back(std::to_string(i));
+
+		// call mt_miner and compute minimal transverse
+		std::vector<std::string> minimalTransversals;
+		MT_Miner miner(false);
+		miner.init(parser.getItemCount(), parser.getObjectCount(), parser.getHypergraph());
+		miner.computeMinimalTransversals(toTraverse, minimalTransversals);
+		// sort results
+		minimalTransversals = sortVectorOfString(minimalTransversals);
+
+		// print minimal transversals	
+		std::cout << std::endl;
+		std::cout << "minimal transversals count : " << minimalTransversals.size() << std::endl;
+		for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const std::string& elt) { std::cout << "{" << elt << "}" << std::endl; });
+		std::cout << std::endl;
+
+		std::vector<std::string> mt_resuls;
+		std::ifstream inputFile = std::ifstream();
+		inputFile.open(resfile);
+		if (!inputFile.fail())
+		{
+			// Parse the file line by line
+			while (!inputFile.eof())
+			{
+				// read and clean line from file
+				std::string line;
+				getline(inputFile, line);
+				if (!line.empty())
+					mt_resuls.push_back(line);
+			}
+			inputFile.close();
+		}
+
+		// sort results before comparing
+		mt_resuls = sortVectorOfString(mt_resuls);
+
+		// check with our results
+		for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const std::string& str) {
+			auto it = std::find_if(mt_resuls.begin(), mt_resuls.end(), compare_str(str));
+			if (it == mt_resuls.end())
+			{
+				std::cout << "{" << str << "} from our computed transverals list has not been found in " << resfile << std::endl;
+				notGood = true;
+			}
+			});
+
+		std::cout << std::endl;
+
+		for_each(mt_resuls.begin(), mt_resuls.end(), [&](const std::string& str) {
+			auto it = std::find_if(minimalTransversals.begin(), minimalTransversals.end(), compare_str(str));
+			if (it == minimalTransversals.end())
+			{
+				std::cout << "{" << str << "} from " << resfile << " has not been found in our computed transverals list" << std::endl;
+				notGood = true;
+			}
+			});
+
+		if (!notGood)
+		{
+			std::cout << "!!! results are the same !!!" << std::endl;
+		}
+		std::cout << "----------------------------------------------------------" << std::endl;
+	}
+
+	return !notGood;
+}
+
+// ----------------------------------------------------------------------------------------------------------- //
+// ----------------------------------------------------------------------------------------------------------- //
+
+int main(int argc, char* argv[])
+{
+	// performs tests
+	//unitaryTesting();
+	if (compareResults())
+	{
+		std::cout << "****** all tests are OK ******" << std::endl;
+	}
+
+
+	if (argc <= 1)
+	{
+		std::cout << "Usage " << argv[0] << "<filename>" << std::endl;
+		return 0;
+	}
+
+	std::string file = argv[1];
+
+	// parse file
+	HypergraphParser parser;
+	parser.parse(file);
+	// get data from parser
+	std::vector<std::vector<unsigned int>> hypergraph = parser.getHypergraph();
+	unsigned int objectCount = parser.getObjectCount();
+	unsigned int itemCount = parser.getItemCount();
+	std::cout << "itemCount " << itemCount << std::endl;
+	std::cout << "objectCount " << objectCount << std::endl;
+
+	// allocate miner
+	MT_Miner miner;
+	miner.init(itemCount, objectCount, hypergraph);
+
+	std::cout << std::endl;
+	std::cout << "computing minimal transversals  ..." << std::endl;
+
 	std::vector<std::string> toTraverse;
 	for (unsigned int i = 1; i <= itemCount; i++)
 		toTraverse.push_back(std::to_string(i));
@@ -170,9 +209,9 @@ void unitaryTesting()
 	minimalTransversals = sortVectorOfString(minimalTransversals);
 
 	// print minimal transversals	
-	std::cout << "show minimal transversals" << std::endl;
-	for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const std::string& elt) {
-		std::cout << "{" << elt << "}, ";
-		});
+	std::cout << std::endl;
+	std::cout << "minimal transversals count : " << minimalTransversals.size() << std::endl;
+	for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const std::string& elt) { std::cout << "{" << elt << "}" << std::endl; });
 	std::cout << std::endl;
 }
+

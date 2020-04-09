@@ -15,13 +15,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="MT-Miner.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="HypergraphParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MT_Miner.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

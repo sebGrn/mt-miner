@@ -138,7 +138,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="HypergraphParser.cpp" />
-    <ClCompile Include="MT-Miner.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="MT_Miner.cpp" />
   </ItemGroup>
   <ItemGroup>
