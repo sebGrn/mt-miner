@@ -31,6 +31,7 @@ void MT_Miner::init(unsigned int itemCount, unsigned int objectCount, const std:
 		{
 			assert(line[j] >= 1);
 			unsigned int index = line[j] - 1;
+			//unsigned int index = line[j];
 			assert(index < bitset.size());
 			bitset[index] = true;
 		}

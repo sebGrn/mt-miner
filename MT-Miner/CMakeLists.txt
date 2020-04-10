@@ -14,7 +14,7 @@ set (CMAKE_CXX_STANDARD 17)
 
 # set sources and headers
 set(SOURCES ${HEADERS} HypergraphParser.h MT_Miner.h utils.h)
-set(SOURCES ${SOURCES} HypergraphParser.cpp MT_Miner.cpp MT-Miner.cpp )
+set(SOURCES ${SOURCES} HypergraphParser.cpp MT_Miner.cpp main.cpp )
 
 # create static library .a
 add_executable(mt_miner ${SOURCES} ${HEADERS})
