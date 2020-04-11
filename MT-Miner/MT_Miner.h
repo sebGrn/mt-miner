@@ -12,6 +12,7 @@
 class MT_Miner
 {
 	using Bitset = boost::dynamic_bitset<>;
+	using Itemset = std::vector<unsigned int>;
 
 private:
 	// number of lines
@@ -27,8 +28,8 @@ private:
 	bool verbose;
 
 private:
-	bool isEss(const std::string& pattern);
-	bool checkOneItem(int itemBar, const std::vector<unsigned int>& itemsOfpattern);
+	bool isEssential(const Itemset& pattern);
+	bool checkOneItem(int itemBar, const Itemset& itemsOfpattern);
 
 public:
 	MT_Miner(bool verbose = true);
@@ -39,9 +40,9 @@ public:
 	void init(const std::shared_ptr<HyperGraph>& hypergraph);
 	
 	///
-	unsigned int computeDisjonctifSupport(const std::string& pattern);
+	unsigned int computeDisjonctifSupport(const Itemset& pattern);
 
 	///
-	void computeMinimalTransversals(std::vector<std::string>& toTraverse, std::vector<std::string>& mt);	
+	void computeMinimalTransversals(std::vector<Itemset>& toTraverse, std::vector<Itemset>& mt);
 };
 

@@ -17,6 +17,8 @@
 #include "utils.h"
 #include "HypergraphParser.h"
 
+using Intset = std::vector<unsigned int>;
+
 ///
 /*
 void unitaryTesting()
@@ -88,30 +90,34 @@ bool compareResults(const std::string& input_file, const std::string& res_file)
 	parser.parse(input_file);
 
 	// make toTraverseList
-	std::vector<std::string> toTraverse;
+	std::vector<Itemset> toTraverse;
 	for (unsigned int i = 1; i <= parser.getItemCount(); i++)
-		toTraverse.push_back(std::to_string(i));
+	{
+		Itemset v(1);
+		v[0] = i;
+		toTraverse.push_back(v);
+	}
 
 	// call mt_miner and compute minimal transverse
-	std::vector<std::string> minimalTransversals;
+	std::vector<Intset> minimalTransversals;
 	MT_Miner miner(false);
 	miner.init(parser.getHypergraph());
 	miner.computeMinimalTransversals(toTraverse, minimalTransversals);
 	// sort results
-	minimalTransversals = sortVectorOfString(minimalTransversals);
+	minimalTransversals = sortVectorOfItemset(minimalTransversals);
 
 	// print minimal transversals	
 	// print minimal transversals	
 	std::cout << std::endl;
 	std::cout << "minimal transversals count : " << minimalTransversals.size() << std::endl;
 	if (minimalTransversals.size() > 5)
-		for_each(minimalTransversals.begin(), minimalTransversals.begin() + 5, [&](const std::string& elt) { std::cout << "{" << elt << "}" << std::endl; });
+		for_each(minimalTransversals.begin(), minimalTransversals.begin() + 5, [&](const Itemset& elt) { std::cout << itemsetToString(elt) << std::endl; });
 	else
-		for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const std::string& elt) { std::cout << "{" << elt << "}" << std::endl; });
+		for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { std::cout << itemsetToString(elt) << std::endl; });
 	std::cout << std::endl;
 
 
-	std::vector<std::string> mt_resuls;
+	std::vector<Itemset> mt_resuls;
 	std::ifstream inputFile = std::ifstream();
 	inputFile.open(res_file);
 	if (!inputFile.fail())
@@ -123,31 +129,34 @@ bool compareResults(const std::string& input_file, const std::string& res_file)
 			std::string line;
 			getline(inputFile, line);
 			if (!line.empty())
-				mt_resuls.push_back(line);
+			{
+				Itemset data = splitToVectorOfInt(line, ' ');
+				mt_resuls.push_back(data);
+			}
 		}
 		inputFile.close();
 	}
 
 	// sort results before comparing
-	mt_resuls = sortVectorOfString(mt_resuls);
+	mt_resuls = sortVectorOfItemset(mt_resuls);
 
 	// check with our results
-	for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const std::string& str) {
-		auto it = std::find_if(mt_resuls.begin(), mt_resuls.end(), compare_str(str));
+	for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& item) {
+		auto it = std::find_if(mt_resuls.begin(), mt_resuls.end(), compare_itemset(item));
 		if (it == mt_resuls.end())
 		{
-			std::cout << "{" << str << "} from our computed transverals list has not been found in " << res_file << std::endl;
+			std::cout << itemsetToString(item) << " from our computed transverals list has not been found in " << res_file << std::endl;
 			notGood = true;
 		}
 		});
 
 	std::cout << std::endl;
 
-	for_each(mt_resuls.begin(), mt_resuls.end(), [&](const std::string& str) {
-		auto it = std::find_if(minimalTransversals.begin(), minimalTransversals.end(), compare_str(str));
+	for_each(mt_resuls.begin(), mt_resuls.end(), [&](const Itemset& item) {
+		auto it = std::find_if(minimalTransversals.begin(), minimalTransversals.end(), compare_itemset(item));
 		if (it == minimalTransversals.end())
 		{
-			std::cout << "{" << str << "} from " << res_file << " has not been found in our computed transverals list" << std::endl;
+			std::cout << itemsetToString(item) << "from " << res_file << " has not been found in our computed transverals list" << std::endl;
 			notGood = true;
 		}
 		});
@@ -181,6 +190,8 @@ int main(int argc, char* argv[])
 	// performs tests
 	//unitaryTesting();
 	//compareResults(file, resfile);
+
+	std::cout << "computing minimal transversals on file " << file << std::endl;
 	
 	unsigned int objectCount = 0;
 	unsigned int itemCount = 0;
@@ -203,17 +214,19 @@ int main(int argc, char* argv[])
 	std::cout << std::endl;
 	
 	// minimal transversals computing
-	std::vector<std::string> minimalTransversals;
+	std::vector<Itemset> minimalTransversals;
 	beginTime = std::chrono::system_clock::now();
-	{
-		std::cout << "computing minimal transversals  ..." << std::endl;
-				
-		MT_Miner miner(true);
+	{			
+		MT_Miner miner(false);
 		miner.init(hypergraph);		
 
-		std::vector<std::string> toTraverse;
+		std::vector<Itemset> toTraverse;
 		for (unsigned int i = 1; i <= itemCount; i++)
-			toTraverse.push_back(std::to_string(i));
+		{
+			Itemset v(1);
+			v[0] = i;
+			toTraverse.push_back(v);
+		}
 
 		// compute minimal transversals		
 		miner.computeMinimalTransversals(toTraverse, minimalTransversals);
@@ -222,16 +235,16 @@ int main(int argc, char* argv[])
 	std::cout << "minimal transversals done in " << duration << " ms" << std::endl;
 
 	// sort transversals computing
-	minimalTransversals = sortVectorOfString(minimalTransversals);
+	//minimalTransversals = sortVectorOfItemset(minimalTransversals);
 
 	// print minimal transversals	
 	std::cout << std::endl;
 	std::cout << "minimal transversals count : " << minimalTransversals.size() << std::endl;
-	if(minimalTransversals.size() > 5)
-		for_each(minimalTransversals.begin(), minimalTransversals.begin() + 5, [&](const std::string& elt) { std::cout << "{" << elt << "}" << std::endl; });
-	else
-		for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const std::string& elt) { std::cout << "{" << elt << "}" << std::endl; });
-	std::cout << "..." << std::endl << std::endl;
+	//if(minimalTransversals.size() > 5)
+	//	for_each(minimalTransversals.begin(), minimalTransversals.begin() + 5, [&](const Itemset& elt) { std::cout << itemsetToString(elt) << std::endl; });
+	//else
+	//	for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { std::cout << itemsetToString(elt) << std::endl; });
+	//std::cout << "..." << std::endl << std::endl;
 
 	// ----------------------------------------------------- //
 
@@ -241,7 +254,7 @@ int main(int argc, char* argv[])
 		std::cout << "saving minimal transversals into file : " << resfile << std::endl;
 		std::ofstream outputStream;
 		outputStream.open(resfile);
-		for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const std::string& elt) { outputStream << elt << std::endl; });
+		for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { outputStream << itemsetToString(elt) << std::endl; });
 		outputStream.close();
 	}
 }

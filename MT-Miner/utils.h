@@ -6,6 +6,8 @@
 #include <sstream>
 #include <algorithm>
 
+using Itemset = std::vector<unsigned int>;
+
 /// <summary>
 /// extract a list of int from a string
 /// </summary>
@@ -23,7 +25,7 @@ inline void split(const std::string& s, char delim, Out result)
 }
 
 /// <summary>
-/// extract a list of int from a string
+/// 
 /// </summary>
 /// <param name="s"></param>
 /// <param name="delimiter"></param>
@@ -34,29 +36,6 @@ inline std::vector<unsigned int> splitToVectorOfInt(const std::string& s, char d
 	split(s, delim, std::back_inserter(elems));
 	return elems;
 }
-
-/// <summary>
-/// extract a list of int from a string
-/// </summary>
-/// <param name="s"></param>
-/// <param name="delimiter"></param>
-/// <returns></returns>
-//inline std::vector<int> splitPattern(const std::string& s, const std::string& delimiter)
-//{
-//	std::string tmpstr = s;
-//	size_t pos = 0;
-//	std::string token;
-//	std::vector<int> v;
-//	while ((pos = tmpstr.find(delimiter)) != std::string::npos)
-//	{
-//		token = tmpstr.substr(0, pos);
-//		v.push_back(atol(token.c_str()));
-//		tmpstr.erase(0, pos + delimiter.length());
-//	}
-//	v.push_back(atol(tmpstr.c_str()));
-//	return v;
-//}
-
 
 inline std::string& ltrim(std::string& str, const std::string& chars = "\t\n\v\f\r ")
 {
@@ -75,11 +54,28 @@ inline std::string& trim(std::string& str, const std::string& chars = "\t\n\v\f\
 	return ltrim(rtrim(str, chars), chars);
 }
 
-inline void printStringVectorList(const std::vector<std::string>& v)
+inline std::string itemsetToString(const Itemset& v)
 {
-	for_each(v.begin(), v.end(), [&](const std::string& elt) {
-		std::cout << "{" << elt << "}, ";
+	std::string res = "{";
+	for_each(v.begin(), v.end(), [&](unsigned int i) {
+		res += std::to_string(i);
+		res += ",";
 		});
+	res.pop_back();
+	res += "}";
+	return res;
+}
+
+inline std::string itemsetListToString(const std::vector<Itemset>& v)
+{
+	std::string res = "{";
+	for_each(v.begin(), v.end(), [&](const Itemset& elt) {
+		res += itemsetToString(elt);
+		res += ",";
+	});
+	res.pop_back();
+	res += "}";
+	return res;
 }
 
 struct compare_int
@@ -93,57 +89,60 @@ struct compare_int
 	}
 };
 
-struct compare_str
+struct compare_itemset
 {
-	std::string key;
-	compare_str(std::string const& i) : key(i) { }
+	Itemset key;
+	compare_itemset(Itemset const& i) : key(i) { }
 
-	bool operator()(std::string const& i)
+	bool operator()(Itemset const& item)
 	{
-		return (i == key);
+		for_each(item.begin(), item.end(), [&](unsigned int i) {
+			auto it = std::find_if(item.begin(), item.end(), compare_int(i));
+			if (it == item.end())
+				return false;
+		});
+		return true;
 	}
 };
 
-inline std::string combineIntoString(const std::string& str1, const std::string& str2)
+inline Itemset combineItemset(const Itemset& str1, const Itemset& str2)
 {
-	std::vector<unsigned int> intList1 = splitToVectorOfInt(str1, ' ');
-	std::vector<unsigned int> intList2 = splitToVectorOfInt(str2, ' ');
 	// "1" + "2" => "12"
 	// "71" + "72" => "712"
-	std::vector<std::string> combinedListElt;
-	for_each(intList1.begin(), intList1.end(), [&](unsigned int i) {
-		auto it = std::find_if(intList2.begin(), intList2.end(), compare_int(i));
-		if (it != intList2.end())
+	Itemset left = str1; 
+	Itemset right = str2;	
+	std::vector<Itemset> combinedListElt;
+	for_each(str1.begin(), str1.end(), [&](unsigned int i) {
+		auto it = std::find_if(right.begin(), right.end(), compare_int(i));
+		if (it != right.end())
 		{
 			// remove elt
-			intList2.erase(it);
+			right.erase(it);
 		}
 		});
 	// merge 2 lists into intList1
-	intList1.insert(intList1.end(), intList2.begin(), intList2.end());
+	left.insert(left.end(), right.begin(), right.end());
 	// transform int list into string list seperated by ' '
-	std::string combinedElt;
-	for_each(intList1.begin(), intList1.end(), [&](unsigned int i) {
-		combinedElt += std::to_string(i) + ' ';
+	Itemset combinedElt;
+	for_each(left.begin(), left.end(), [&](unsigned int i) {
+		combinedElt.push_back(i);
 		});
-	// remove last character
-	combinedElt.pop_back();
 	return combinedElt;
 }
 
 // sort each element of minimalTransversals
-inline std::vector<std::string> sortVectorOfString(const std::vector<std::string>& strVector)
+inline std::vector<Itemset> sortVectorOfItemset(const std::vector<Itemset>& strVector)
 {
-	std::vector<std::string> sortedList = strVector;
-	transform(strVector.begin(), strVector.end(), sortedList.begin(), [&](const std::string& elt) {
-		std::vector<unsigned int> v = splitToVectorOfInt(elt, ' ');
+	std::vector<Itemset> sortedList = strVector;
+	transform(strVector.begin(), strVector.end(), sortedList.begin(), [&](const Itemset& elt) {
+		//Itemset v = splitToVectorOfInt(elt, ' ');		
+		Itemset v = elt;
 		std::sort(v.begin(), v.end());
 
-		std::string res;
+		Itemset res;
 		for_each(v.begin(), v.end(), [&](unsigned int i) {
-			res += std::to_string(i) + ' ';
+			res.push_back(i);
 		});
-		res.pop_back();
 		return res;
 	});
 	return sortedList;

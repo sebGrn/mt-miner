@@ -34,7 +34,7 @@ bool HypergraphParser::parse(const std::string& file)
 		{
 			line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
 			line = trim(line);
-			std::vector<unsigned int> data = splitToVectorOfInt(line, ' ');
+			Itemset data = splitToVectorOfInt(line, ' ');
 			maxItemCount = std::max(*std::max_element(data.begin(), data.end()), maxItemCount);
 
 			hypergraph->addLine(data);
