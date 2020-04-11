@@ -28,8 +28,9 @@ private:
 	bool verbose;
 
 private:
-	bool isEssential(const Itemset& pattern);
-	bool checkOneItem(int itemBar, const Itemset& itemsOfpattern);
+	Itemset combineItemset(const Itemset& str1, const Itemset& str2) const;
+	bool isEssential(const Itemset& pattern) const;
+	bool checkOneItem(int itemBar, const Itemset& itemsOfpattern) const;
 
 public:
 	MT_Miner(bool verbose = true);
@@ -40,9 +41,9 @@ public:
 	void init(const std::shared_ptr<HyperGraph>& hypergraph);
 	
 	///
-	unsigned int computeDisjonctifSupport(const Itemset& pattern);
+	unsigned int computeDisjonctifSupport(const Itemset& pattern) const;
 
 	///
-	void computeMinimalTransversals(std::vector<Itemset>& toTraverse, std::vector<Itemset>& mt);
+	void computeMinimalTransversals(std::vector<Itemset>& toTraverse, std::vector<Itemset>& mt) const;
 };
 
