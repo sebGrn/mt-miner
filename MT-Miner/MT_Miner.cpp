@@ -13,63 +13,36 @@ MT_Miner::~MT_Miner()
 
 }
 
-void MT_Miner::init(unsigned int itemCount, unsigned int objectCount, const std::vector<std::vector<unsigned int>>& hypergraph)
+
+void MT_Miner::init(const std::shared_ptr<HyperGraph>& hypergraph)
 {
-	this->itemCount = itemCount;
-	this->objectCount = objectCount;
-	assert(hypergraph.size() == this->objectCount);
-
-	// build formal context
-	std::vector<std::vector<bool>> formalContext;
-	for (unsigned int i = 0; i < hypergraph.size(); i++)
-	{
-		std::vector<bool> bitset(this->itemCount);
-		transform(bitset.begin(), bitset.end(), bitset.begin(), [](bool b) { return false; });
-
-		std::vector<unsigned int> line = hypergraph[i];
-		for (unsigned int j = 0; j < line.size(); j++)
-		{
-			assert(line[j] >= 1);
-			unsigned int index = line[j] - 1;
-			//unsigned int index = line[j];
-			assert(index < bitset.size());
-			bitset[index] = true;
-		}
-		formalContext.push_back(bitset);
-	}
+	this->itemCount = hypergraph->getItemCount();
+	this->objectCount = hypergraph->getObjectCount();
+	
+	// build formal context from hypergraph
+	FormalContext formalContext(hypergraph);
 
 	// build binary representation from formal context
-	for (unsigned int j = 0; j < this->itemCount; j++)		// 8 on test.txt
-	{
-		std::vector<bool> bitset(this->objectCount);
-		for (unsigned int i = 0; i < this->objectCount; i++)	// 6 on test.txt
-		{
-			bitset[i] = formalContext[i][j];
-		}
-		this->binaryRep[j + 1] = bitset;
-	}
+	binaryRepresentation.reset(nullptr);
+	binaryRepresentation = std::make_unique<BinaryRepresentation>(formalContext);
 }
 
 bool MT_Miner::checkOneItem(int itemBar, const std::vector<unsigned int>& itemsOfpattern)
 {
-	std::vector<unsigned int> SumOfN_1Items;
-	for (int i = 0; i < this->objectCount; i++)
-		SumOfN_1Items.push_back(0);
+	Bitset SumOfN_1Items(this->objectCount);
 
 	for (int i = 0; i < itemsOfpattern.size(); i++)
 	{
 		if (itemsOfpattern[i] != itemBar)
 		{
-			for (int j = 0; j < this->objectCount; j++)
-			{
-				SumOfN_1Items[j] = SumOfN_1Items[j] || binaryRep[itemsOfpattern[i]][j];
-			}
+			SumOfN_1Items = SumOfN_1Items | this->binaryRepresentation->getElement(itemsOfpattern[i]);
 		}
 	}
 
+	Bitset bitset = this->binaryRepresentation->getElement(itemBar);
 	for (int i = 0; i < this->objectCount; i++)
 	{
-		if (SumOfN_1Items[i] == 0 && binaryRep[itemBar][i] == 1)
+		if (SumOfN_1Items[i] == false && bitset[i] == true)
 			return true;
 	}
 	return false;
@@ -93,16 +66,11 @@ bool MT_Miner::isEss(const std::string& pattern)
 unsigned int MT_Miner::computeDisjonctifSupport(const std::string& pattern)
 {
 	std::vector<unsigned int> itemsOfpattern = splitToVectorOfInt(pattern, ' ');
-	std::vector<unsigned int> SumOfN_1Items;
-	for (int i = 0; i < this->objectCount; i++)
-		SumOfN_1Items.push_back(0);
+	Bitset SumOfN_1Items(this->objectCount);
 
 	for (int i = 0; i < itemsOfpattern.size(); i++)
 	{
-		for (int j = 0; j < this->objectCount; j++)
-		{
-			SumOfN_1Items[j] = (SumOfN_1Items[j] != 0) | this->binaryRep[itemsOfpattern[i]][j];
-		}
+		SumOfN_1Items = SumOfN_1Items | this->binaryRepresentation->getElement(itemsOfpattern[i]);
 	}
 	unsigned int disSupp = 0;
 	for (int i = 0; i < this->objectCount; i++)

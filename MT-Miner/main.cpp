@@ -18,6 +18,7 @@
 #include "HypergraphParser.h"
 
 ///
+/*
 void unitaryTesting()
 {
 	// parse file
@@ -74,7 +75,7 @@ void unitaryTesting()
 		});
 	std::cout << std::endl;
 }
-
+*/
 /// Compare results between input and attended results
 bool compareResults(const std::string& input_file, const std::string& res_file)
 {
@@ -94,7 +95,7 @@ bool compareResults(const std::string& input_file, const std::string& res_file)
 	// call mt_miner and compute minimal transverse
 	std::vector<std::string> minimalTransversals;
 	MT_Miner miner(false);
-	miner.init(parser.getItemCount(), parser.getObjectCount(), parser.getHypergraph());
+	miner.init(parser.getHypergraph());
 	miner.computeMinimalTransversals(toTraverse, minimalTransversals);
 	// sort results
 	minimalTransversals = sortVectorOfString(minimalTransversals);
@@ -180,10 +181,10 @@ int main(int argc, char* argv[])
 	// performs tests
 	//unitaryTesting();
 	//compareResults(file, resfile);
-
+	
 	unsigned int objectCount = 0;
 	unsigned int itemCount = 0;
-	std::vector<std::vector<unsigned int>> hypergraph;
+	std::shared_ptr<HyperGraph> hypergraph;
 
 	// parsing
 	auto beginTime = std::chrono::system_clock::now();
@@ -207,8 +208,8 @@ int main(int argc, char* argv[])
 	{
 		std::cout << "computing minimal transversals  ..." << std::endl;
 				
-		MT_Miner miner(false);
-		miner.init(itemCount, objectCount, hypergraph);		
+		MT_Miner miner(true);
+		miner.init(hypergraph);		
 
 		std::vector<std::string> toTraverse;
 		for (unsigned int i = 1; i <= itemCount; i++)

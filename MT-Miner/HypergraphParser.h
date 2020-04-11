@@ -7,6 +7,7 @@
 #include <map>
 #include <sstream>
 
+#include "HyperGraph.h"
 #include "MT_Miner.h"
 
 /// this class parse a hypergraph and store it
@@ -16,13 +17,7 @@ class HypergraphParser
 {
 private:
 	/// hypergraph ie matrix of int
-	std::vector<std::vector<unsigned int>> hypergraph;
-
-	/// number of objects/lines
-	unsigned int objectCount;
-
-	/// number of items/attributes/columns
-	unsigned int itemCount;
+	std::shared_ptr<HyperGraph> hypergraph;
 
 public:
 	HypergraphParser();
@@ -31,19 +26,19 @@ public:
 	/// parse a hypergraph and store it
 	bool parse(const std::string& file);
 
-	std::vector<std::vector<unsigned int>> getHypergraph() const
+	std::shared_ptr<HyperGraph> getHypergraph() const
 	{
 		return this->hypergraph;
 	};
 
 	unsigned int getItemCount() const
 	{
-		return this->itemCount;
+		return this->hypergraph->getItemCount();
 	};
 
 	unsigned int getObjectCount() const
 	{
-		return this->objectCount;
-	}
+		return this->hypergraph->getObjectCount();
+	};
 };
 

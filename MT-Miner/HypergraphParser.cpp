@@ -5,18 +5,15 @@
 
 HypergraphParser::HypergraphParser()
 {
-	itemCount = 0;
-	objectCount = 0;
 }
 
 HypergraphParser::~HypergraphParser()
 {
-
 }
 
 bool HypergraphParser::parse(const std::string& file)
 {
-	assert(hypergraph.empty());
+	hypergraph.reset();
 
 	std::ifstream inputStream = std::ifstream();
 	inputStream.open(file);
@@ -26,6 +23,10 @@ bool HypergraphParser::parse(const std::string& file)
 		return false;
 	}
 
+	unsigned int maxItemCount = 0;
+	unsigned int objectCount = 0;
+	hypergraph = std::make_shared<HyperGraph>();
+
 	std::string line;
 	while (std::getline(inputStream, line))
 	{
@@ -34,14 +35,16 @@ bool HypergraphParser::parse(const std::string& file)
 			line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
 			line = trim(line);
 			std::vector<unsigned int> data = splitToVectorOfInt(line, ' ');
-			this->itemCount = std::max(*std::max_element(data.begin(), data.end()), this->itemCount);
+			maxItemCount = std::max(*std::max_element(data.begin(), data.end()), maxItemCount);
 
-			hypergraph.push_back(data);
+			hypergraph->addLine(data);
 
 			// as many items as lines in the file
-			this->objectCount++;
+			objectCount++;
 		}
 	}
+	hypergraph->setItemCount(maxItemCount);
+	hypergraph->setObjectCount(objectCount);
 		
 	inputStream.close();
 	return true;
