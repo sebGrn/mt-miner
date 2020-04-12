@@ -26,7 +26,7 @@ void MT_Miner::init(const std::shared_ptr<HyperGraph>& hypergraph)
 	qui ont le meme support et qui couvrent exactement les memes objets
 	si tu fais le ET logique du support de la colonne avec son clone tu obtiens le meme vecteur
 	donc c'est comme ça que tu identifies ces clones
-	une fois tu les a
+	une fois tu les as
 
 	dans le fichier
 
@@ -42,9 +42,15 @@ void MT_Miner::init(const std::shared_ptr<HyperGraph>& hypergraph)
 	// build binary representation from formal context
 	binaryRepresentation.reset(nullptr);
 	binaryRepresentation = std::make_unique<BinaryRepresentation>(formalContext);
+
+	// build clone
+	//for(unsigned int i = 0; i < )
+	//checkClone(unsigned int index);
+
+	// remove clone columns
 }
 
-bool MT_Miner::checkOneItem(int itemBar, const Itemset& itemsOfpattern) const
+bool MT_Miner::checkOneItem(int itemBar, const Utils::Itemset& itemsOfpattern) const
 {
 	Bitset SumOfN_1Items(this->objectCount);
 
@@ -72,7 +78,7 @@ bool MT_Miner::checkOneItem(int itemBar, const Itemset& itemsOfpattern) const
 }
 
 // return true if element is essential
-bool MT_Miner::isEssential(const Itemset& itemsOfPattern) const
+bool MT_Miner::isEssential(const Utils::Itemset& itemsOfPattern) const
 {
 	if (itemsOfPattern.size() == 1)
 		return true;
@@ -85,19 +91,22 @@ bool MT_Miner::isEssential(const Itemset& itemsOfPattern) const
 	return true;
 }
 
-unsigned int MT_Miner::computeDisjonctifSupport(const Itemset& pattern) const
+unsigned int MT_Miner::computeDisjonctifSupport(const Utils::Itemset& pattern) const
 {
 	Bitset SumOfN_1Items(this->objectCount);
 
 	for (int i = 0; i < pattern.size(); i++)
 	{
+		unsigned int columnKey = pattern[i];
+
+		
 #ifdef _DEBUG
 		for (int j = 0; j < this->objectCount; j++)
 		{
-			SumOfN_1Items[j] = SumOfN_1Items[j] || this->binaryRepresentation->getElement(pattern[i])[j];
+			SumOfN_1Items[j] = SumOfN_1Items[j] || this->binaryRepresentation->getElement(columnKey)[j];
 		}
 #else
-		SumOfN_1Items = SumOfN_1Items | this->binaryRepresentation->getElement(pattern[i]);
+		SumOfN_1Items = SumOfN_1Items | this->binaryRepresentation->getElement(columnKey);
 #endif			
 	}
 	unsigned int disSupp = 0;
@@ -109,13 +118,13 @@ unsigned int MT_Miner::computeDisjonctifSupport(const Itemset& pattern) const
 	return disSupp;
 }
 
-MT_Miner::Itemset MT_Miner::combineItemset(const Itemset& str1, const Itemset& str2) const
+Utils::Itemset MT_Miner::combineItemset(const Utils::Itemset& str1, const Utils::Itemset& str2) const
 {
 	// "1" + "2" => "12"
 	// "71" + "72" => "712"
-	Itemset left = str1;
-	Itemset right = str2;
-	std::vector<Itemset> combinedListElt;
+	Utils::Itemset left = str1;
+	Utils::Itemset right = str2;
+	std::vector<Utils::Itemset> combinedListElt;
 	for_each(str1.begin(), str1.end(), [&](unsigned int i) {
 		auto it = std::find_if(right.begin(), right.end(), Utils::compare_int(i));
 		if (it != right.end())
@@ -127,20 +136,25 @@ MT_Miner::Itemset MT_Miner::combineItemset(const Itemset& str1, const Itemset& s
 	// merge 2 lists into intList1
 	left.insert(left.end(), right.begin(), right.end());
 	// transform int list into string list seperated by ' '
-	Itemset combinedElt;
+	Utils::Itemset combinedElt;
 	for_each(left.begin(), left.end(), [&](unsigned int i) {
 		combinedElt.push_back(i);
 		});
 	return combinedElt;
 }
 
-void MT_Miner::computeMinimalTransversals(std::vector<Itemset>& toTraverse, std::vector<Itemset>& mt) const
+std::vector<Utils::Itemset> MT_Miner::computeMinimalTransversals(std::vector<Utils::Itemset>& toTraverse) const
 {
-	std::vector<Itemset> maxClique;
-	std::vector<Itemset> toExplore;
-	Itemset previousElt;
+	// minimal transversal return list
+	std::vector<Utils::Itemset> mt;
 
-	for_each(toTraverse.begin(), toTraverse.end(), [&](const Itemset& currentElt) {
+	std::vector<Utils::Itemset> maxClique;
+	std::vector<Utils::Itemset> toExplore;
+	
+	Utils::Itemset previousElt;
+
+	// build maxClique, toExplore lists
+	for_each(toTraverse.begin(), toTraverse.end(), [&](const Utils::Itemset& currentElt) {
 
 		unsigned int disjSup = computeDisjonctifSupport(currentElt);
 		if (disjSup == objectCount)
@@ -172,9 +186,9 @@ void MT_Miner::computeMinimalTransversals(std::vector<Itemset>& toTraverse, std:
 				else
 				{
 					// add combinaison of previous + current
-					Itemset lastElt = previousElt;
+					Utils::Itemset lastElt = previousElt;
 					// make a union on 2 elements
-					Itemset combinedElement = combineItemset(lastElt, currentElt);
+					Utils::Itemset combinedElement = combineItemset(lastElt, currentElt);					
 					// compute disjonctif support of the concatenation
 					unsigned int disjSup = computeDisjonctifSupport(combinedElement);
 					if (verbose)
@@ -188,6 +202,15 @@ void MT_Miner::computeMinimalTransversals(std::vector<Itemset>& toTraverse, std:
 					}
 					else
 					{
+						// check if columnKey has a clone
+						// if it has a clone, use the clone value computation instead of computing the support
+						//{
+						//	for (unsigned int i = 0; i < toExplore.size(); i++)
+						//	{
+
+						//	}
+						//}
+
 						toExplore.push_back(currentElt);
 						if (verbose)
 							std::cout << "--> toExplore list : " << Utils::itemsetListToString(toExplore) << std::endl;
@@ -198,7 +221,14 @@ void MT_Miner::computeMinimalTransversals(std::vector<Itemset>& toTraverse, std:
 	});
 
 	// explore then branch and recurse
-	if (!toExplore.empty())
+	if (toExplore.empty())
+	{
+		if (verbose)
+			std::cout << "toExplore list is empty, end of the branch" << std::endl;
+		return mt;
+
+	}
+	else
 	{
 		if (verbose)
 		{
@@ -210,35 +240,35 @@ void MT_Miner::computeMinimalTransversals(std::vector<Itemset>& toTraverse, std:
 		// store toExploreList max index
 		unsigned int lastIndexToTest = toExplore.size();
 		// combine toExplore (left part) with maxClique list (right part) into a combined list
-		std::vector<Itemset> combinedList = toExplore;
+		std::vector<Utils::Itemset> combinedList = toExplore;
 		combinedList.insert(combinedList.end(), maxClique.begin(), maxClique.end());
 
 		for (unsigned int i = 0; i < lastIndexToTest; i++)
 		{
-			std::vector<Itemset> newToTraverse;
-			Itemset toCombinedLeft = combinedList[i];
+			std::vector<Utils::Itemset> newToTraverse;
+			Utils::Itemset toCombinedLeft = combinedList[i];
 
 			for (unsigned int j = i + 1; j < combinedList.size(); j++)
 			{
 				assert(j < combinedList.size());
-				Itemset toCombinedRight = combinedList[j];
-				Itemset combinedString = combineItemset(toCombinedLeft, toCombinedRight);
-				newToTraverse.push_back(combinedString);
-			}
+				Utils::Itemset toCombinedRight = combinedList[j];
+				Utils::Itemset combinedString = combineItemset(toCombinedLeft, toCombinedRight);
 
-			std::vector<unsigned int> indexToRemove;
-			for (unsigned int i = 0; i < newToTraverse.size(); i++)
-			{
-				if (!isEssential(newToTraverse[i]))
+				// check clone
+				/*for (unsigned int i = 0; i < newToTraverse.size(); i++)
 				{
-					indexToRemove.push_back(i);
+					Utils::Itemset item = newToTraverse[i];
+
+				}*/
+
+
+				if (isEssential(combinedString))
+					newToTraverse.push_back(combinedString);
+				else
+				{
 					if (verbose)
-						std::cout << "remove element " << Utils::itemsetToString(newToTraverse[i]) << " from next iteration, not essential" << std::endl;
+						std::cout << Utils::itemsetToString(combinedString) << " is not essential" << std::endl;
 				}
-			}
-			for (unsigned int i = indexToRemove.size(); i--; )
-			{
-				newToTraverse.erase(newToTraverse.begin() + indexToRemove[i]);
 			}
 
 			if (verbose)
@@ -247,13 +277,10 @@ void MT_Miner::computeMinimalTransversals(std::vector<Itemset>& toTraverse, std:
 				std::cout << "----------------------------------------------------------" << std::endl;
 			}
 
-			computeMinimalTransversals(newToTraverse, mt);
+			std::vector<Utils::Itemset> mtBranch = computeMinimalTransversals(newToTraverse);
+			mt.insert(mt.end(), mtBranch.begin(), mtBranch.end());
 		}
-	}
-	else
-	{
-		if (verbose)
-			std::cout << "toExplore list is empty, end of the branch" << std::endl;
+		return mt;
 	}
 }
 

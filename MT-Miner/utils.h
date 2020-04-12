@@ -8,6 +8,7 @@
 
 class Utils
 {
+public:
 	using Itemset = std::vector<unsigned int>;
 
 public:
@@ -29,11 +30,14 @@ public:
 
 		bool operator()(Itemset const& item)
 		{
-			for_each(item.begin(), item.end(), [&](unsigned int i) {
-				auto it = std::find_if(item.begin(), item.end(), compare_int(i));
+			for (auto it_item = item.begin(); it_item != item.end(); it_item++)
+			{
+				auto it = std::find_if(item.begin(), item.end(), compare_int(*it_item));
 				if (it == item.end())
+				{
 					return false;
-				});
+				}
+			}
 			return true;
 		}
 	};

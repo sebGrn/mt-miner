@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <map>
+#include <list>
 #include <boost/dynamic_bitset.hpp>
 
 #include "Bitset.h"
@@ -24,6 +25,63 @@ private:
 	/// number of items/attributes/columns
 	unsigned int itemCount;
 
+	/// contains the list of column indexes which have the same disjoncif support 
+	/// these are clones
+	//std::vector<std::list<unsigned int>> cloneList;
+
+private:
+	/*bool checkClone(unsigned int currentKey, const Bitset& currentBitset)
+	{
+		if (binaryRepresentation.empty())
+			return false;
+
+		bool clone = true;
+		unsigned int cloneKey = 0;
+		std::list<unsigned int> indexBitsetClone;
+		for (const auto& [key, bitset] : binaryRepresentation)
+		{
+#ifdef _DEBUG
+			// reset clone bolean
+			clone = true;
+			// loop on bits for bitset
+			for (unsigned int i = 0; i < bitset.size(); i++)
+			{
+				assert(i < currentBitset.size());
+				if (currentBitset[i] != bitset[i])
+				{
+					clone = false;
+					break;
+				}
+			}
+			if (clone) 
+			{
+				// columns at key and currentKey are the same
+				indexBitsetClone.push_back(key);
+				indexBitsetClone.push_back(currentKey);
+			}
+#else
+			clone = bitset & currentBitset;
+			if (clone)
+			{
+				// columns at key and currentKey are the same
+				indexBitsetClone.push_back(key);
+				indexBitsetClone.push_back(currentKey);
+			}
+#endif
+		}
+		if (clone)
+		{
+			// sort and remove duplicate elements
+			indexBitsetClone.sort();
+			indexBitsetClone.unique();
+
+			// store list of clones indexes
+			cloneList.push_back(indexBitsetClone);
+		}
+
+		return clone;
+	};*/
+
 public:
 	/// build binary representation from formal context
 	BinaryRepresentation(const FormalContext& context)
@@ -38,7 +96,14 @@ public:
 			{
 				bitset[i] = context.getElement(i, j);
 			}
-			this->binaryRepresentation[j + 1] = bitset;
+			unsigned int currentKey = j + 1;
+			this->binaryRepresentation[currentKey] = bitset;
+
+			/*// check if this bitset has not a clone
+			if (!checkClone(currentKey, bitset))
+			{
+				this->binaryRepresentation[currentKey] = bitset;
+			}*/
 		}
 	};
 

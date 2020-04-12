@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cassert>
 
+#include "utils.h"
 #include "Bitset.h"
 #include "FormalContext.h"
 #include "HyperGraph.h"
@@ -12,8 +13,6 @@
 
 class MT_Miner
 {
-	using Itemset = std::vector<unsigned int>;
-
 private:
 	// number of lines
 	unsigned int itemCount;
@@ -25,12 +24,17 @@ private:
 	//std::map<int, std::vector<bool>> binaryRep;
 	std::unique_ptr<BinaryRepresentation> binaryRepresentation;
 
+	/// contains the list of column indexes which have the same disjoncif support 
+	/// these are clones
+	//std::vector<unsigned int> cloneMap;
+
 	bool verbose;
 
 private:
-	Itemset combineItemset(const Itemset& str1, const Itemset& str2) const;
-	bool isEssential(const Itemset& pattern) const;
-	bool checkOneItem(int itemBar, const Itemset& itemsOfpattern) const;
+	Utils::Itemset combineItemset(const Utils::Itemset& str1, const Utils::Itemset& str2) const;
+	bool isEssential(const Utils::Itemset& pattern) const;
+	bool checkOneItem(int itemBar, const Utils::Itemset& itemsOfpattern) const;
+	//bool checkClone(unsigned int index);
 
 public:
 	MT_Miner(bool verbose = true);
@@ -41,9 +45,9 @@ public:
 	void init(const std::shared_ptr<HyperGraph>& hypergraph);
 	
 	///
-	unsigned int computeDisjonctifSupport(const Itemset& pattern) const;
+	unsigned int computeDisjonctifSupport(const Utils::Itemset& pattern) const;
 
 	///
-	void computeMinimalTransversals(std::vector<Itemset>& toTraverse, std::vector<Itemset>& mt) const;
+	std::vector<Utils::Itemset> computeMinimalTransversals(std::vector<Utils::Itemset>& toTraverse) const;
 };
 

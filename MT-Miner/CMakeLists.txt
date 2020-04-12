@@ -14,7 +14,7 @@ find_package(Boost REQUIRED)
 #find_package(OpenMP)
 
 # set sources and headers
-set(SOURCES ${HEADERS} HypergraphParser.h MT_Miner.h utils.h BinaryRepresentation.h FormalContext.h HyperGraph.h)
+set(SOURCES ${HEADERS} HypergraphParser.h MT_Miner.h utils.h BinaryRepresentation.h FormalContext.h HyperGraph.h bitset.h)
 set(SOURCES ${SOURCES} HypergraphParser.cpp MT_Miner.cpp main.cpp )
 
 # create static library .a

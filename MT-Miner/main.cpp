@@ -80,7 +80,7 @@ void unitaryTesting()
 }
 */
 /// Compare results between input and attended results
-bool compareResults(const std::string& input_file, const std::string& res_file)
+/*bool compareResults(const std::string& input_file, const std::string& res_file)
 {
 	bool notGood = false;
 	std::cout << "----------------------------------------------------------" << std::endl;
@@ -99,10 +99,9 @@ bool compareResults(const std::string& input_file, const std::string& res_file)
 	}
 
 	// call mt_miner and compute minimal transverse
-	std::vector<Itemset> minimalTransversals;
 	MT_Miner miner(false);
 	miner.init(parser.getHypergraph());
-	miner.computeMinimalTransversals(toTraverse, minimalTransversals);
+	std::vector<Itemset> minimalTransversals = miner.computeMinimalTransversals(toTraverse);
 	// sort results
 	minimalTransversals = Utils::sortVectorOfItemset(minimalTransversals);
 
@@ -168,7 +167,7 @@ bool compareResults(const std::string& input_file, const std::string& res_file)
 	std::cout << "----------------------------------------------------------" << std::endl;
 
 	return !notGood;
-}
+}*/
 
 // ----------------------------------------------------------------------------------------------------------- //
 // ----------------------------------------------------------------------------------------------------------- //
@@ -217,7 +216,7 @@ int main(int argc, char* argv[])
 	std::vector<Itemset> minimalTransversals;
 	beginTime = std::chrono::system_clock::now();
 	{			
-		MT_Miner miner(false);
+		MT_Miner miner(true);
 		miner.init(hypergraph);		
 
 		std::vector<Itemset> toTraverse;
@@ -228,7 +227,7 @@ int main(int argc, char* argv[])
 		}
 
 		// compute minimal transversals		
-		miner.computeMinimalTransversals(toTraverse, minimalTransversals);
+		minimalTransversals = miner.computeMinimalTransversals(toTraverse);
 	}
 	duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
 	std::cout << "minimal transversals done in " << duration << " ms" << std::endl;
@@ -239,11 +238,11 @@ int main(int argc, char* argv[])
 	// print minimal transversals	
 	std::cout << std::endl;
 	std::cout << "minimal transversals count : " << minimalTransversals.size() << std::endl;
-	//if(minimalTransversals.size() > 5)
-	//	for_each(minimalTransversals.begin(), minimalTransversals.begin() + 5, [&](const Itemset& elt) { std::cout << itemsetToString(elt) << std::endl; });
-	//else
-	//	for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { std::cout << itemsetToString(elt) << std::endl; });
-	//std::cout << "..." << std::endl << std::endl;
+	if(minimalTransversals.size() > 6)
+		for_each(minimalTransversals.begin(), minimalTransversals.begin() + 5, [&](const Itemset& elt) { std::cout << Utils::itemsetToString(elt) << std::endl; });
+	else
+		for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { std::cout << Utils::itemsetToString(elt) << std::endl; });
+	std::cout << "..." << std::endl << std::endl;
 
 	// ----------------------------------------------------- //
 
