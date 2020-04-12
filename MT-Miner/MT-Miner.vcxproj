@@ -148,6 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BinaryRepresentation.h" />
+    <ClInclude Include="Bitset.h" />
     <ClInclude Include="FormalContext.h" />
     <ClInclude Include="HyperGraph.h" />
     <ClInclude Include="HypergraphParser.h" />

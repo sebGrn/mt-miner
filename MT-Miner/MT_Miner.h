@@ -5,13 +5,13 @@
 #include <algorithm>
 #include <cassert>
 
+#include "Bitset.h"
 #include "FormalContext.h"
 #include "HyperGraph.h"
 #include "BinaryRepresentation.h"
 
 class MT_Miner
 {
-	using Bitset = boost::dynamic_bitset<>;
 	using Itemset = std::vector<unsigned int>;
 
 private:

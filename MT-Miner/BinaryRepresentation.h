@@ -4,12 +4,11 @@
 #include <map>
 #include <boost/dynamic_bitset.hpp>
 
+#include "Bitset.h"
 #include "FormalContext.h"
 
 class BinaryRepresentation
 {
-	using Bitset = boost::dynamic_bitset<>;
-
 private:
 	/// a binary representation is a formal context representation in columns
 	/// each vector contains the attributes/items boolean values

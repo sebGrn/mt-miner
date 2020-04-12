@@ -47,5 +47,8 @@
     <ClInclude Include="BinaryRepresentation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Bitset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

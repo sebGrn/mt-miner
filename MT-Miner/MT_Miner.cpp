@@ -21,6 +21,24 @@ void MT_Miner::init(const std::shared_ptr<HyperGraph>& hypergraph)
 	// build formal context from hypergraph
 	FormalContext formalContext(hypergraph);
 
+	/*
+	avant de commencer l'exploration des TM tu cherches dans le fichier les colonnes clones
+	qui ont le meme support et qui couvrent exactement les memes objets
+	si tu fais le ET logique du support de la colonne avec son clone tu obtiens le meme vecteur
+	donc c'est comme ça que tu identifies ces clones
+	une fois tu les a
+
+	dans le fichier
+
+	et tu gardes un clone  par groupe
+	tu vois comme l'exemple Hyp1
+
+	tu gardes soit 9 soit 10 dans ton contexte
+	apres tu n'as pas a explorer la branche de 10
+	tu vas prendre les MT obtenus de la branche 9
+	et tu remplaces 9 par 10
+	*/
+
 	// build binary representation from formal context
 	binaryRepresentation.reset(nullptr);
 	binaryRepresentation = std::make_unique<BinaryRepresentation>(formalContext);
@@ -33,7 +51,14 @@ bool MT_Miner::checkOneItem(int itemBar, const Itemset& itemsOfpattern) const
 	for_each(itemsOfpattern.begin(), itemsOfpattern.end(), [&](unsigned int elt) {
 		if (elt != itemBar)
 		{
+#ifdef _DEBUG
+			for (int j = 0; j < this->objectCount; j++)
+			{
+				SumOfN_1Items[j] = SumOfN_1Items[j] || this->binaryRepresentation->getElement(elt)[j];
+			}
+#else
 			SumOfN_1Items = SumOfN_1Items | this->binaryRepresentation->getElement(elt);
+#endif
 		}
 	});
 
@@ -66,7 +91,14 @@ unsigned int MT_Miner::computeDisjonctifSupport(const Itemset& pattern) const
 
 	for (int i = 0; i < pattern.size(); i++)
 	{
+#ifdef _DEBUG
+		for (int j = 0; j < this->objectCount; j++)
+		{
+			SumOfN_1Items[j] = SumOfN_1Items[j] || this->binaryRepresentation->getElement(pattern[i])[j];
+		}
+#else
 		SumOfN_1Items = SumOfN_1Items | this->binaryRepresentation->getElement(pattern[i]);
+#endif			
 	}
 	unsigned int disSupp = 0;
 	for (int i = 0; i < this->objectCount; i++)
@@ -101,6 +133,7 @@ MT_Miner::Itemset MT_Miner::combineItemset(const Itemset& str1, const Itemset& s
 		});
 	return combinedElt;
 }
+
 void MT_Miner::computeMinimalTransversals(std::vector<Itemset>& toTraverse, std::vector<Itemset>& mt) const
 {
 	std::vector<Itemset> maxClique;
@@ -223,3 +256,4 @@ void MT_Miner::computeMinimalTransversals(std::vector<Itemset>& toTraverse, std:
 			std::cout << "toExplore list is empty, end of the branch" << std::endl;
 	}
 }
+

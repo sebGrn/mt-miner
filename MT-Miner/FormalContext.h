@@ -3,12 +3,11 @@
 #include <cassert>
 #include <boost/dynamic_bitset.hpp>
 
+#include "Bitset.h"
 #include "HyperGraph.h"
 
 class FormalContext
 {
-	using Bitset = boost::dynamic_bitset<>;
-
 private:
 	// a formal context is a matrix of bool
 	std::vector<Bitset> formalContext;
