@@ -151,52 +151,54 @@ std::vector<Utils::Itemset> MT_Miner::computeMinimalTransversals(std::vector<Uti
 	std::vector<Utils::Itemset> maxClique;
 	std::vector<Utils::Itemset> toExplore;
 	
-	Utils::Itemset previousElt;
+	// results of cumulated combined items
+	// must be declared outside of the loop
+	Utils::Itemset previousItem;
 
 	// build maxClique, toExplore lists
-	for_each(toTraverse.begin(), toTraverse.end(), [&](const Utils::Itemset& currentElt) {
+	for_each(toTraverse.begin(), toTraverse.end(), [&](const Utils::Itemset& currentItem) {
 
-		unsigned int disjSup = computeDisjonctifSupport(currentElt);
+		unsigned int disjSup = computeDisjonctifSupport(currentItem);
 		if (disjSup == objectCount)
 		{
-			mt.push_back(currentElt);
+			mt.push_back(currentItem);
 			if (verbose)
 				std::cout << "--> minimalTraversal list : " << Utils::itemsetListToString(mt) << std::endl;
 		}
 		else
 		{
-			if (currentElt == *toTraverse.begin() && currentElt.size() == 1)
+			if (currentItem == *toTraverse.begin() && currentItem.size() == 1)
 			{
 				// must be the 1st element with only one element
-				previousElt = currentElt;
-				maxClique.push_back(currentElt);
+				previousItem = currentItem;
+				maxClique.push_back(currentItem);
 				if (verbose)
 					std::cout << "--> maxClique list : " << Utils::itemsetListToString(maxClique) << std::endl;
 			}
 			else
 			{
 				// here, we can combine with previous element
-				unsigned int disjSup = computeDisjonctifSupport(currentElt);
+				unsigned int disjSup = computeDisjonctifSupport(currentItem);
 				if (disjSup == objectCount)
 				{
-					mt.push_back(currentElt);
+					mt.push_back(currentItem);
 					if (verbose)
 						std::cout << "--> minimalTraversal list : " << Utils::itemsetListToString(mt) << std::endl;
 				}
 				else
 				{
 					// add combinaison of previous + current
-					Utils::Itemset lastElt = previousElt;
+					Utils::Itemset lastElt = previousItem;
 					// make a union on 2 elements
-					Utils::Itemset combinedElement = combineItemset(lastElt, currentElt);					
+					Utils::Itemset combinedItem = combineItemset(lastElt, currentItem);
 					// compute disjonctif support of the concatenation
-					unsigned int disjSup = computeDisjonctifSupport(combinedElement);
+					unsigned int disjSup = computeDisjonctifSupport(combinedItem);
 					if (verbose)
-						std::cout << "disjonctive support for element \"" << Utils::itemsetToString(combinedElement) << "\" : " << disjSup << std::endl;
+						std::cout << "disjonctive support for element \"" << Utils::itemsetToString(combinedItem) << "\" : " << disjSup << std::endl;
 					if (disjSup != objectCount)
 					{
-						previousElt = combinedElement;
-						maxClique.push_back(currentElt);
+						previousItem = combinedItem;
+						maxClique.push_back(currentItem);
 						if (verbose)
 							std::cout << "--> maxClique list : " << Utils::itemsetListToString(maxClique) << std::endl;
 					}
@@ -211,7 +213,7 @@ std::vector<Utils::Itemset> MT_Miner::computeMinimalTransversals(std::vector<Uti
 						//	}
 						//}
 
-						toExplore.push_back(currentElt);
+						toExplore.push_back(currentItem);
 						if (verbose)
 							std::cout << "--> toExplore list : " << Utils::itemsetListToString(toExplore) << std::endl;
 					}
@@ -225,8 +227,6 @@ std::vector<Utils::Itemset> MT_Miner::computeMinimalTransversals(std::vector<Uti
 	{
 		if (verbose)
 			std::cout << "toExplore list is empty, end of the branch" << std::endl;
-		return mt;
-
 	}
 	else
 	{
@@ -261,7 +261,6 @@ std::vector<Utils::Itemset> MT_Miner::computeMinimalTransversals(std::vector<Uti
 
 				}*/
 
-
 				if (isEssential(combinedString))
 					newToTraverse.push_back(combinedString);
 				else
@@ -277,10 +276,13 @@ std::vector<Utils::Itemset> MT_Miner::computeMinimalTransversals(std::vector<Uti
 				std::cout << "----------------------------------------------------------" << std::endl;
 			}
 
+			// get minimal transversals for the branch
 			std::vector<Utils::Itemset> mtBranch = computeMinimalTransversals(newToTraverse);
+
+			// concatenating mt from the branch with current mt list
 			mt.insert(mt.end(), mtBranch.begin(), mtBranch.end());
 		}
-		return mt;
 	}
+	return mt;
 }
 
