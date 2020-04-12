@@ -141,6 +141,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Graph.cpp" />
     <ClCompile Include="HypergraphParser.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MT_Miner.cpp" />
@@ -152,6 +153,7 @@
     <ClInclude Include="BinaryRepresentation.h" />
     <ClInclude Include="Bitset.h" />
     <ClInclude Include="FormalContext.h" />
+    <ClInclude Include="Graph.h" />
     <ClInclude Include="HyperGraph.h" />
     <ClInclude Include="HypergraphParser.h" />
     <ClInclude Include="MT_Miner.h" />

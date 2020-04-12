@@ -107,6 +107,72 @@ public:
 		}
 	};
 
+	bool checkOneItem(int itemBar, const Utils::Itemset& itemsOfpattern) const
+	{
+		Bitset SumOfN_1Items(this->objectCount);
+
+		for_each(itemsOfpattern.begin(), itemsOfpattern.end(), [&](unsigned int elt) {
+			if (elt != itemBar)
+			{
+#ifdef _DEBUG
+				for (int j = 0; j < this->objectCount; j++)
+				{
+					SumOfN_1Items[j] = SumOfN_1Items[j] || this->getElement(elt)[j];
+				}
+#else
+				SumOfN_1Items = SumOfN_1Items | this->binaryRepresentation->getElement(elt);
+#endif
+			}
+			});
+
+		Bitset bitset = this->getElement(itemBar);
+		for (int i = 0; i < this->objectCount; i++)
+		{
+			if (SumOfN_1Items[i] == false && bitset[i] == true)
+				return true;
+		}
+		return false;
+	}
+
+	// return true if element is essential
+	bool isEssential(const Utils::Itemset& itemsOfPattern) const
+	{
+		if (itemsOfPattern.size() == 1)
+			return true;
+
+		for (int i = 0; i < itemsOfPattern.size(); i++)
+		{
+			if (!checkOneItem(itemsOfPattern[i], itemsOfPattern))
+				return false;
+		}
+		return true;
+	}
+
+	unsigned int computeDisjonctifSupport(const Utils::Itemset& pattern) const
+	{
+		Bitset SumOfN_1Items(this->objectCount);
+
+		for (int i = 0; i < pattern.size(); i++)
+		{
+			unsigned int columnKey = pattern[i];
+#ifdef _DEBUG
+			for (int j = 0; j < this->objectCount; j++)
+			{
+				SumOfN_1Items[j] = SumOfN_1Items[j] || this->getElement(columnKey)[j];
+			}
+#else
+			SumOfN_1Items = SumOfN_1Items | this->binaryRepresentation->getElement(columnKey);
+#endif			
+		}
+		unsigned int disSupp = 0;
+		for (int i = 0; i < this->objectCount; i++)
+		{
+			if (SumOfN_1Items[i] == 1)
+				disSupp++;
+		}
+		return disSupp;
+	};
+
 	unsigned int getItemCount() const
 	{
 		return this->itemCount;

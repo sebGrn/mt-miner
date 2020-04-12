@@ -1,77 +1,32 @@
-#include "MT_Miner.h"
-#include "utils.h"
+#include "Graph.h"
 
-MT_Miner::MT_Miner(bool verbose)
+GraphNode::GraphNode(const std::vector<Utils::Itemset>& toTraverse, const std::shared_ptr<BinaryRepresentation> binaryRepresentation)
 {
-	//this->itemCount = 0;
-	//this->objectCount = 0;
-	this->verbose = verbose;
+	this->binaryRepresentation = binaryRepresentation;
+	this->verbose = true;
+	this->toTraverse = toTraverse;
 }
 
-MT_Miner::~MT_Miner()
+void GraphNode::addChild(const std::shared_ptr<GraphNode>& node)
 {
+	this->children.push_back(node);
+	std::vector<Utils::Itemset> mtBranch = node->computeMinimalTransversals();
 
+	// concatenating parent mt from the branch with current mt list
+	mt.insert(mt.end(), mtBranch.begin(), mtBranch.end());
 }
 
-void MT_Miner::init(const std::shared_ptr<HyperGraph>& hypergraph)
+std::vector<Utils::Itemset> GraphNode::computeMinimalTransversals()
 {
-	//this->itemCount = hypergraph->getItemCount();
-	//this->objectCount = hypergraph->getObjectCount();
-	
-	// build formal context from hypergraph
-	FormalContext formalContext(hypergraph);
-
-	/*
-	avant de commencer l'exploration des TM tu cherches dans le fichier les colonnes clones
-	qui ont le meme support et qui couvrent exactement les memes objets
-	si tu fais le ET logique du support de la colonne avec son clone tu obtiens le meme vecteur
-	donc c'est comme ça que tu identifies ces clones
-	une fois tu les as
-
-	dans le fichier
-
-	et tu gardes un clone  par groupe
-	tu vois comme l'exemple Hyp1
-
-	tu gardes soit 9 soit 10 dans ton contexte
-	apres tu n'as pas a explorer la branche de 10
-	tu vas prendre les MT obtenus de la branche 9
-	et tu remplaces 9 par 10
-	*/
-
-	// build binary representation from formal context
-	binaryRepresentation.reset();
-	binaryRepresentation = std::make_shared<BinaryRepresentation>(formalContext);
-
-	// build clone
-	//for(unsigned int i = 0; i < )
-	//checkClone(unsigned int index);
-
-	// remove clone columns
-}
-
-
-std::vector<Utils::Itemset> MT_Miner::computeMinimalTransversals(const std::vector<Utils::Itemset>& toTraverse) const
-{
-	std::shared_ptr<GraphNode> node = std::make_shared<GraphNode>(toTraverse, binaryRepresentation);
-	std::vector<Utils::Itemset> mt = node->computeMinimalTransversals();
-	return node->mt;
-
-	/*// minimal transversal return list
-	std::vector<Utils::Itemset> mt;
-
-	std::vector<Utils::Itemset> maxClique;
-	std::vector<Utils::Itemset> toExplore;
-	
 	// results of cumulated combined items
 	// must be declared outside of the loop
 	Utils::Itemset previousItem;
-
+	
 	// build maxClique, toExplore lists
 	for_each(toTraverse.begin(), toTraverse.end(), [&](const Utils::Itemset& currentItem) {
 
-		unsigned int disjSup = binaryRepresentation->computeDisjonctifSupport(currentItem);
-		if (disjSup == objectCount)
+		unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(currentItem);
+		if (disjSup == this->binaryRepresentation->getObjectCount())
 		{
 			mt.push_back(currentItem);
 			if (verbose)
@@ -90,8 +45,8 @@ std::vector<Utils::Itemset> MT_Miner::computeMinimalTransversals(const std::vect
 			else
 			{
 				// here, we can combine with previous element
-				unsigned int disjSup = binaryRepresentation->computeDisjonctifSupport(currentItem);
-				if (disjSup == objectCount)
+				unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(currentItem);
+				if (disjSup == this->binaryRepresentation->getObjectCount())
 				{
 					mt.push_back(currentItem);
 					if (verbose)
@@ -104,10 +59,10 @@ std::vector<Utils::Itemset> MT_Miner::computeMinimalTransversals(const std::vect
 					// make a union on 2 elements
 					Utils::Itemset combinedItem = Utils::combineItemset(lastElt, currentItem);
 					// compute disjonctif support of the concatenation
-					unsigned int disjSup = binaryRepresentation->computeDisjonctifSupport(combinedItem);
+					unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(combinedItem);
 					if (verbose)
 						std::cout << "disjonctive support for element \"" << Utils::itemsetToString(combinedItem) << "\" : " << disjSup << std::endl;
-					if (disjSup != objectCount)
+					if (disjSup != this->binaryRepresentation->getObjectCount())
 					{
 						previousItem = combinedItem;
 						maxClique.push_back(currentItem);
@@ -132,7 +87,7 @@ std::vector<Utils::Itemset> MT_Miner::computeMinimalTransversals(const std::vect
 				}
 			}
 		}
-	});
+		});
 
 	if (toExplore.empty())
 	{
@@ -141,7 +96,7 @@ std::vector<Utils::Itemset> MT_Miner::computeMinimalTransversals(const std::vect
 	}
 	else
 	{
-		if (verbose)	
+		if (verbose)
 		{
 			std::cout << "----------------------------------------------------------" << std::endl;
 			std::cout << "toExplore list" << Utils::itemsetListToString(toExplore) << std::endl;
@@ -170,13 +125,6 @@ std::vector<Utils::Itemset> MT_Miner::computeMinimalTransversals(const std::vect
 				Utils::Itemset toCombinedRight = combinedList[j];
 				Utils::Itemset combinedString = Utils::combineItemset(toCombinedLeft, toCombinedRight);
 
-				// check clone
-				//for (unsigned int i = 0; i < newToTraverse.size(); i++)
-				//{
-				//	Utils::Itemset item = newToTraverse[i];
-
-				//}
-
 				if (binaryRepresentation->isEssential(combinedString))
 					newToTraverse.push_back(combinedString);
 				else
@@ -192,13 +140,16 @@ std::vector<Utils::Itemset> MT_Miner::computeMinimalTransversals(const std::vect
 				std::cout << "----------------------------------------------------------" << std::endl;
 			}
 
+			std::shared_ptr<GraphNode> node = std::make_shared<GraphNode>(newToTraverse, this->binaryRepresentation);
+			this->addChild(node);
+
 			// compute minimal transversals for the branch
-			std::vector<Utils::Itemset> mtBranch = computeMinimalTransversals(newToTraverse);
+			//std::vector<Utils::Itemset> mtBranch = computeMinimalTransversals(binaryRepresentation);
 
 			// concatenating parent mt from the branch with current mt list
-			mt.insert(mt.end(), mtBranch.begin(), mtBranch.end());
+			//mt.insert(mt.end(), mtBranch.begin(), mtBranch.end());
 		}
 	}
-	return mt;*/
+	return this->mt;
 }
 
