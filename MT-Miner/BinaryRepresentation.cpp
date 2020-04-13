@@ -31,7 +31,7 @@ bool BinaryRepresentation::checkOneItem(int itemBar, const Utils::Itemset& items
 				SumOfN_1Items[j] = SumOfN_1Items[j] || this->getElement(elt)[j];
 			}
 #else
-			SumOfN_1Items = SumOfN_1Items | this->binaryRepresentation->getElement(elt);
+			SumOfN_1Items = SumOfN_1Items | getElement(elt);
 #endif
 		}
 	});
@@ -74,7 +74,7 @@ unsigned int BinaryRepresentation::computeDisjonctifSupport(const Utils::Itemset
 			SumOfN_1Items[j] = SumOfN_1Items[j] || bitset[j];
 		}
 #else
-		SumOfN_1Items = SumOfN_1Items | this->binaryRepresentation->getElement(columnKey);
+		SumOfN_1Items = SumOfN_1Items | getElement(columnKey);
 #endif			
 	}
 	for (int i = 0; i < this->objectCount; i++)
