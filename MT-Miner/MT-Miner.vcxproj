@@ -141,6 +141,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BinaryRepresentation.cpp" />
     <ClCompile Include="Graph.cpp" />
     <ClCompile Include="HypergraphParser.cpp" />
     <ClCompile Include="main.cpp" />

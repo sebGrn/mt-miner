@@ -5,23 +5,11 @@ GraphNode::GraphNode(const std::vector<Utils::Itemset>& toTraverse, const std::s
 	this->binaryRepresentation = binaryRepresentation;
 	this->verbose = true;
 	this->toTraverse = toTraverse;
-	//this->traverseDone = false;
-}
-
-void GraphNode::addChild(const std::shared_ptr<GraphNode>& node)
-{
-	this->children.push_back(node);
-
-	//node->computeMinimalTransversals();
-		
-	// concatenating parent mt from the branch with current mt list
-	//this->graph_mt.insert(this->graph_mt.end(), node->node_mt.begin(), node->node_mt.end());
 }
 
 void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt)
 {
-	// results of cumulated combined items
-	// must be declared outside of the loop
+	// results of cumulated combined items / must be declared outside of the loop
 	Utils::Itemset previousItem;
 	
 	// build maxClique, toExplore lists
@@ -30,9 +18,11 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 		unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(currentItem);
 		if (disjSup == this->binaryRepresentation->getObjectCount())
 		{
-			//this->node_itemset = currentItem;
-			//this->node_mt.push_back(currentItem);
+			// we have a minimal transversal
 			graph_mt.push_back(currentItem);
+			if (verbose)
+				std::cout << "-------> minimalTraversal list : " << Utils::itemsetListToString(graph_mt) << std::endl;
+
 
 			// if this itemset contains an original, add the same minimal transverals list with the clone
 			unsigned int originalIndex = 0;
@@ -42,10 +32,9 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 				Utils::Itemset clonedCurrentItem = currentItem;
 				replace(clonedCurrentItem.begin(), clonedCurrentItem.end(), originalIndex, clonedIndex);
 				graph_mt.push_back(clonedCurrentItem);
+				if (verbose)
+					std::cout << "-------> minimalTraversal list (with clone) : " << Utils::itemsetListToString(graph_mt) << std::endl;
 			}
-
-			if (verbose)
-				std::cout << "-------> minimalTraversal list : " << Utils::itemsetListToString(graph_mt) << std::endl;
 		}
 		else
 		{
@@ -59,8 +48,7 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 			}
 			else
 			{
-				// here, we can combine with previous element
-				// make a union on 2 elements
+				// here, we can combine with previous element / make a union on 2 elements
 				Utils::Itemset combinedItem = Utils::combineItemset(previousItem, currentItem);
 				// compute disjonctif support of the concatenation
 				unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(combinedItem);
@@ -85,7 +73,6 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 
 	if (toExplore.empty())
 	{
-		//this->traverseDone = true;
 		if (verbose)
 			std::cout << "toExplore list is empty, end of the branch" << std::endl;
 	}
@@ -98,36 +85,6 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 			std::cout << "maxClique list" << Utils::itemsetListToString(maxClique) << std::endl;
 		}
 
-		// analyse toExplore, if we have a clone, remove the clone from the list
-		// the add the result of the cloned itemset for the clone itemset
-		/*std::vector<std::vector<Utils::Itemset>::iterator> removeIteratorList;
-		std::map<Utils::Itemset, std::vector<Utils::Itemset>> clonedItemsetsMap;
-		for (auto it1 = toExplore.begin(); it1 != toExplore.end(); it1++)
-		{
-			std::vector<Utils::Itemset> clonedList;
-			for (auto it2 = it1; it2 != toExplore.end(); it2++)
-			{
-				if (it1 != it2)
-				{
-					if (binaryRepresentation->compareItemsets(*it1, *it2))
-					{
-						// we have a clone here
-						// remove it1 from the list
-						clonedList.push_back(*it2);
-						// add iterator to remove list
-						removeIteratorList.push_back(it2);
-					}
-				}
-			}
-			if(!clonedList.empty())
-				clonedItemsetsMap[*it1] = clonedList;
-		}
-		// remove clones
-		for (auto it : removeIteratorList)
-			toExplore.erase(it);*/
-
-
-			
 		// store toExploreList max index
 		unsigned int lastIndexToTest = toExplore.size();
 		// combine toExplore (left part) with maxClique list (right part) into a combined list
@@ -144,7 +101,6 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 			unsigned int clonedIndex = 0;
 			if (!this->binaryRepresentation->containsAClone(toCombinedLeft, originalIndex, clonedIndex))
 			{
-				bool containsAClone = false;
 				for (unsigned int j = i + 1; j < combinedItemsetList.size(); j++)
 				{
 					assert(j < combinedItemsetList.size());
@@ -166,47 +122,19 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 					std::cout << "----------------------------------------------------------" << std::endl;
 				}
 
+				// create a new child node for this newToTraverse list
 				std::shared_ptr<GraphNode> node = std::make_shared<GraphNode>(newToTraverse, this->binaryRepresentation);
-				this->addChild(node);
-
+				// add this node as a child
+				this->children.push_back(node);
 				// compute minimal transversals for the branch
 				node->computeMinimalTransversals(graph_mt);
-				int k = 0;
-
-				//for (auto it = newToTraverse.begin(); it < newToTraverse.end(); it++)
-				//{
-				//	// if this itemset contains an original, add the same minimal transverals list with the clone
-				//	if (this->binaryRepresentation->containsAnOriginal(*it))
-				//	{
-				//		int k = 0;
-				//	}
-				//}
 			}
-
-			// if this item contains a bitset index which has a clone, replace the 
-
-			// check it itemset has a clone
-			/*if (clonedItemsetsMap.find(toCombinedLeft) != clonedItemsetsMap.end())
+			else
 			{
-				std::vector<Utils::Itemset> clones = clonedItemsetsMap.at(toCombinedLeft);
-				for (Utils::Itemset itemset_from_clones : clones)
-				{
-					// replace itemset by copy ones from the minimal transversals of the cloned items
-					for (Utils::Itemset itemset_from_mt : graph_mt)
-					{  
-						// if itemset_from_clones is contained in itemset_from_mt
-						// replace itemset from graph_mt (itemset_from_mt) by cloned itemset (itemset_from_clones) 
-						// then build a new mt list
-
-						//std::replace(mt_itemset.begin(), mt_itemset.end(), 
-						int k = 0;
-					}
-				}
-			}*/
+				if (verbose)
+					std::cout << Utils::itemsetListToString(combinedItemsetList) << " contains a clone, do not compute mt" << std::endl;
+			}
 		}
-
-
 	}
-	//return this->node_mt;
 }
 
