@@ -216,7 +216,7 @@ int main(int argc, char* argv[])
 	std::vector<Itemset> minimalTransversals;
 	beginTime = std::chrono::system_clock::now();
 	{			
-		MT_Miner miner(true);
+		MT_Miner miner(false);
 		miner.init(hypergraph);		
 
 		std::vector<Itemset> toTraverse;

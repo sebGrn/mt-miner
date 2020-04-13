@@ -1,9 +1,9 @@
 #include "Graph.h"
 
-GraphNode::GraphNode(const std::vector<Utils::Itemset>& toTraverse, const std::shared_ptr<BinaryRepresentation> binaryRepresentation)
+GraphNode::GraphNode(bool verbose, const std::vector<Utils::Itemset>& toTraverse, const std::shared_ptr<BinaryRepresentation> binaryRepresentation)
 {
 	this->binaryRepresentation = binaryRepresentation;
-	this->verbose = true;
+	this->verbose = verbose;
 	this->toTraverse = toTraverse;
 }
 
@@ -123,7 +123,7 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 				}
 
 				// create a new child node for this newToTraverse list
-				std::shared_ptr<GraphNode> node = std::make_shared<GraphNode>(newToTraverse, this->binaryRepresentation);
+				std::shared_ptr<GraphNode> node = std::make_shared<GraphNode>(this->verbose, newToTraverse, this->binaryRepresentation);
 				// add this node as a child
 				this->children.push_back(node);
 				// compute minimal transversals for the branch

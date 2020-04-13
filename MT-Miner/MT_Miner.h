@@ -15,17 +15,9 @@
 class MT_Miner
 {
 private:
-	// number of lines
-	//unsigned int itemCount;
-	// number of columns
-	//unsigned int objectCount;
 	// binary representation 
 	std::shared_ptr<BinaryRepresentation> binaryRepresentation;
-
-	/// contains the list of column indexes which have the same disjoncif support 
-	/// these are clones
-	//std::vector<unsigned int> cloneMap;
-
+		
 	bool verbose;
 
 public:
