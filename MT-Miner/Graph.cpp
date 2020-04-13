@@ -5,18 +5,20 @@ GraphNode::GraphNode(const std::vector<Utils::Itemset>& toTraverse, const std::s
 	this->binaryRepresentation = binaryRepresentation;
 	this->verbose = true;
 	this->toTraverse = toTraverse;
+	this->traverseDone = false;
 }
 
 void GraphNode::addChild(const std::shared_ptr<GraphNode>& node)
 {
 	this->children.push_back(node);
-	std::vector<Utils::Itemset> mtBranch = node->computeMinimalTransversals();
 
+	//node->computeMinimalTransversals();
+		
 	// concatenating parent mt from the branch with current mt list
-	mt.insert(mt.end(), mtBranch.begin(), mtBranch.end());
+	//this->graph_mt.insert(this->graph_mt.end(), node->node_mt.begin(), node->node_mt.end());
 }
 
-std::vector<Utils::Itemset> GraphNode::computeMinimalTransversals()
+std::vector<Utils::Itemset> GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt)
 {
 	// results of cumulated combined items
 	// must be declared outside of the loop
@@ -28,9 +30,11 @@ std::vector<Utils::Itemset> GraphNode::computeMinimalTransversals()
 		unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(currentItem);
 		if (disjSup == this->binaryRepresentation->getObjectCount())
 		{
-			mt.push_back(currentItem);
+			this->node_itemset = currentItem;
+			this->node_mt.push_back(currentItem);
+			graph_mt.push_back(currentItem);
 			if (verbose)
-				std::cout << "--> minimalTraversal list : " << Utils::itemsetListToString(mt) << std::endl;
+				std::cout << "-------> minimalTraversal list : " << Utils::itemsetListToString(this->node_mt) << std::endl;
 		}
 		else
 		{
@@ -45,52 +49,41 @@ std::vector<Utils::Itemset> GraphNode::computeMinimalTransversals()
 			else
 			{
 				// here, we can combine with previous element
-				unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(currentItem);
-				if (disjSup == this->binaryRepresentation->getObjectCount())
+				// make a union on 2 elements
+				Utils::Itemset combinedItem = Utils::combineItemset(previousItem, currentItem);
+				// compute disjonctif support of the concatenation
+				unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(combinedItem);
+				if (verbose)
+					std::cout << "disjonctive support for element \"" << Utils::itemsetToString(combinedItem) << "\" : " << disjSup << std::endl;
+				if (disjSup != this->binaryRepresentation->getObjectCount())
 				{
-					mt.push_back(currentItem);
+					previousItem = combinedItem;
+					maxClique.push_back(currentItem);
 					if (verbose)
-						std::cout << "--> minimalTraversal list : " << Utils::itemsetListToString(mt) << std::endl;
+						std::cout << "--> maxClique list : " << Utils::itemsetListToString(maxClique) << std::endl;
 				}
 				else
 				{
-					// add combinaison of previous + current
-					Utils::Itemset lastElt = previousItem;
-					// make a union on 2 elements
-					Utils::Itemset combinedItem = Utils::combineItemset(lastElt, currentItem);
-					// compute disjonctif support of the concatenation
-					unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(combinedItem);
+					// check if columnKey has a clone
+					// if it has a clone, use the clone value computation instead of computing the support
+					//{
+					//	for (unsigned int i = 0; i < toExplore.size(); i++)
+					//	{
+
+					//	}
+					//}
+
+					toExplore.push_back(currentItem);
 					if (verbose)
-						std::cout << "disjonctive support for element \"" << Utils::itemsetToString(combinedItem) << "\" : " << disjSup << std::endl;
-					if (disjSup != this->binaryRepresentation->getObjectCount())
-					{
-						previousItem = combinedItem;
-						maxClique.push_back(currentItem);
-						if (verbose)
-							std::cout << "--> maxClique list : " << Utils::itemsetListToString(maxClique) << std::endl;
-					}
-					else
-					{
-						// check if columnKey has a clone
-						// if it has a clone, use the clone value computation instead of computing the support
-						//{
-						//	for (unsigned int i = 0; i < toExplore.size(); i++)
-						//	{
-
-						//	}
-						//}
-
-						toExplore.push_back(currentItem);
-						if (verbose)
-							std::cout << "--> toExplore list : " << Utils::itemsetListToString(toExplore) << std::endl;
-					}
+						std::cout << "--> toExplore list : " << Utils::itemsetListToString(toExplore) << std::endl;
 				}
 			}
 		}
-		});
+	});
 
 	if (toExplore.empty())
 	{
+		this->traverseDone = true;
 		if (verbose)
 			std::cout << "toExplore list is empty, end of the branch" << std::endl;
 	}
@@ -123,14 +116,14 @@ std::vector<Utils::Itemset> GraphNode::computeMinimalTransversals()
 			{
 				assert(j < combinedList.size());
 				Utils::Itemset toCombinedRight = combinedList[j];
-				Utils::Itemset combinedString = Utils::combineItemset(toCombinedLeft, toCombinedRight);
+				Utils::Itemset combinedItemset= Utils::combineItemset(toCombinedLeft, toCombinedRight);
 
-				if (binaryRepresentation->isEssential(combinedString))
-					newToTraverse.push_back(combinedString);
+				if (binaryRepresentation->isEssential(combinedItemset))
+					newToTraverse.push_back(combinedItemset);
 				else
 				{
 					if (verbose)
-						std::cout << Utils::itemsetToString(combinedString) << " is not essential" << std::endl;
+						std::cout << Utils::itemsetToString(combinedItemset) << " is not essential" << std::endl;
 				}
 			}
 
@@ -144,12 +137,9 @@ std::vector<Utils::Itemset> GraphNode::computeMinimalTransversals()
 			this->addChild(node);
 
 			// compute minimal transversals for the branch
-			//std::vector<Utils::Itemset> mtBranch = computeMinimalTransversals(binaryRepresentation);
-
-			// concatenating parent mt from the branch with current mt list
-			//mt.insert(mt.end(), mtBranch.begin(), mtBranch.end());
+			std::vector<Utils::Itemset> branch_mt = node->computeMinimalTransversals(graph_mt);
 		}
 	}
-	return this->mt;
+	return this->node_mt;
 }
 
