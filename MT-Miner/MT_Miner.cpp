@@ -43,6 +43,13 @@ void MT_Miner::init(const std::shared_ptr<HyperGraph>& hypergraph)
 	binaryRepresentation.reset();
 	binaryRepresentation = std::make_shared<BinaryRepresentation>(formalContext);
 
+	// explore binary representation to check if we have clone
+	// if we have, memorize the indexes of the original and the cloned
+	// if the cloned bitset index is into a toExplore list, dont compute the mt for the clone but use those from the original
+	binaryRepresentation->buildCloneList();
+
+	//std::vector<std::vector<Utils::Itemset>::iterator> removeIteratorList;
+	//std::map<Utils::Itemset, std::vector<Utils::Itemset>> clonedItemsetsMap;
 	// build clone
 	//for(unsigned int i = 0; i < )
 	//checkClone(unsigned int index);

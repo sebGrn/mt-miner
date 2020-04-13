@@ -25,62 +25,8 @@ private:
 	/// number of items/attributes/columns
 	unsigned int itemCount;
 
-	/// contains the list of column indexes which have the same disjoncif support 
-	/// these are clones
-	//std::vector<std::list<unsigned int>> cloneList;
-
-private:
-	/*bool checkClone(unsigned int currentKey, const Bitset& currentBitset)
-	{
-		if (binaryRepresentation.empty())
-			return false;
-
-		bool clone = true;
-		unsigned int cloneKey = 0;
-		std::list<unsigned int> indexBitsetClone;
-		for (const auto& [key, bitset] : binaryRepresentation)
-		{
-#ifdef _DEBUG
-			// reset clone bolean
-			clone = true;
-			// loop on bits for bitset
-			for (unsigned int i = 0; i < bitset.size(); i++)
-			{
-				assert(i < currentBitset.size());
-				if (currentBitset[i] != bitset[i])
-				{
-					clone = false;
-					break;
-				}
-			}
-			if (clone) 
-			{
-				// columns at key and currentKey are the same
-				indexBitsetClone.push_back(key);
-				indexBitsetClone.push_back(currentKey);
-			}
-#else
-			clone = bitset & currentBitset;
-			if (clone)
-			{
-				// columns at key and currentKey are the same
-				indexBitsetClone.push_back(key);
-				indexBitsetClone.push_back(currentKey);
-			}
-#endif
-		}
-		if (clone)
-		{
-			// sort and remove duplicate elements
-			indexBitsetClone.sort();
-			indexBitsetClone.unique();
-
-			// store list of clones indexes
-			cloneList.push_back(indexBitsetClone);
-		}
-
-		return clone;
-	};*/
+	/// pair of original index, clone index
+	std::vector<std::pair<unsigned int, unsigned int>> clonedBitsetIndexes;
 
 public:
 	/// build binary representation from formal context
@@ -150,21 +96,22 @@ public:
 
 	unsigned int computeDisjonctifSupport(const Utils::Itemset& pattern) const
 	{
+		unsigned int disSupp = 0;
 		Bitset SumOfN_1Items(this->objectCount);
 
 		for (int i = 0; i < pattern.size(); i++)
 		{
 			unsigned int columnKey = pattern[i];
+			Bitset bitset = this->getElement(columnKey);
 #ifdef _DEBUG
 			for (int j = 0; j < this->objectCount; j++)
 			{
-				SumOfN_1Items[j] = SumOfN_1Items[j] || this->getElement(columnKey)[j];
+				SumOfN_1Items[j] = SumOfN_1Items[j] || bitset[j];
 			}
 #else
 			SumOfN_1Items = SumOfN_1Items | this->binaryRepresentation->getElement(columnKey);
 #endif			
 		}
-		unsigned int disSupp = 0;
 		for (int i = 0; i < this->objectCount; i++)
 		{
 			if (SumOfN_1Items[i] == 1)
@@ -172,6 +119,86 @@ public:
 		}
 		return disSupp;
 	};
+
+	bool compareItemsets(const Utils::Itemset& itemset1, const Utils::Itemset& itemset2) const
+	{
+		bool sameItemset = true;
+		unsigned int supp1 = computeDisjonctifSupport(itemset1);
+		unsigned int supp2 = computeDisjonctifSupport(itemset2);
+		if (supp1 != supp2)
+			sameItemset = false;
+		else
+		{
+			for (int i = 0; i < itemset1.size(); i++)
+			{
+				unsigned int columnKey_itemset1 = itemset1[i];
+				unsigned int columnKey_itemset2 = itemset2[i];
+				
+				Bitset bitset1 = this->getElement(columnKey_itemset1);
+				Bitset bitset2 = this->getElement(columnKey_itemset2);
+#ifdef _DEBUG
+				Bitset result;
+				for (int j = 0; j < this->objectCount; j++)
+				{
+					result.push_back(bitset1[j] && bitset2[j]);
+				}
+				sameItemset = ((result == bitset1) && (result == bitset2));
+#else
+				Bitset result = bitset1 & bitset2;
+				sameItemset = ((result == bitset1) && (result == bitset2));
+#endif			
+			}
+		}
+		return sameItemset;
+	}
+
+	void buildCloneList()
+	{
+		for (auto it1 = this->binaryRepresentation.begin(); it1 != this->binaryRepresentation.end(); it1++)
+		{
+			for (auto it2 = it1; it2 != this->binaryRepresentation.end(); it2++)
+			{
+				if (it1 != it2)
+				{
+					if (it1->second == it2->second)
+					{
+						// push a clone <original index, clone index>
+						clonedBitsetIndexes.push_back(std::pair<unsigned int, unsigned int>(it1->first, it2->first));
+					}
+				}
+			}
+		}
+	};
+
+	bool containsAClone(const Utils::Itemset& itemset, unsigned int& originalIndex, unsigned int& clonedIndex)
+	{
+		for (auto it = clonedBitsetIndexes.begin(); it != clonedBitsetIndexes.end(); it++)
+		{
+			// check if 
+			if (std::find(itemset.begin(), itemset.end(), it->second) != itemset.end())
+			{
+				originalIndex = it->first;
+				clonedIndex = it->second;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool containsAnOriginal(const Utils::Itemset& itemset, unsigned int& originalIndex, unsigned int& clonedIndex)
+	{
+		for (auto it = clonedBitsetIndexes.begin(); it != clonedBitsetIndexes.end(); it++)
+		{
+			// check if 
+			if (std::find(itemset.begin(), itemset.end(), it->first) != itemset.end())
+			{
+				originalIndex = it->first;
+				clonedIndex = it->second;
+				return true;
+			}
+		}
+		return false;
+	}
 
 	unsigned int getItemCount() const
 	{
