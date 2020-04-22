@@ -29,6 +29,6 @@ public:
 	void init(const std::shared_ptr<HyperGraph>& hypergraph);
 
 	///
-	std::vector<Utils::Itemset> computeMinimalTransversals(const std::vector<Utils::Itemset>& toTraverse) const;
+	std::vector<Utils::Itemset> computeMinimalTransversals(bool showClones,  const std::vector<Utils::Itemset>& toTraverse) const;
 };
 

@@ -37,10 +37,10 @@ void MT_Miner::init(const std::shared_ptr<HyperGraph>& hypergraph)
 }
 
 
-std::vector<Utils::Itemset> MT_Miner::computeMinimalTransversals(const std::vector<Utils::Itemset>& toTraverse) const
+std::vector<Utils::Itemset> MT_Miner::computeMinimalTransversals(bool showClones, const std::vector<Utils::Itemset>& toTraverse) const
 {
 	std::vector<Utils::Itemset> graph_mt;
-	GraphNode rootNode(this->verbose, toTraverse, binaryRepresentation);
+	GraphNode rootNode(this->verbose, showClones, toTraverse, binaryRepresentation);
 	rootNode.computeMinimalTransversals(graph_mt);
 	return graph_mt;
 }

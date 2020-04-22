@@ -172,6 +172,77 @@ void unitaryTesting()
 // ----------------------------------------------------------------------------------------------------------- //
 // ----------------------------------------------------------------------------------------------------------- //
 
+///
+///
+///
+class ArgumentParser
+{
+public:
+	// arguments type
+	enum ParameterType {
+		OUTPUT_FILE,
+		SHOW_CLONE,
+		NB_PARAM
+	};
+
+	std::vector<std::pair<ParameterType, std::string>> argumentValues;
+
+	void buildParameters()
+	{
+		// give values to arguments
+		argumentValues.push_back(std::pair<ParameterType, std::string>(ParameterType::OUTPUT_FILE, "--output-file"));
+		argumentValues.push_back(std::pair<ParameterType, std::string>(ParameterType::SHOW_CLONE, "--show-clones"));
+	}
+
+	void showUsage(const std::string& name)
+	{
+		std::cout << "Usage: " << name << " intput <option(s)>"
+			<< "Options:\n"
+			<< "\t-h,--help\t\tShow this help message\n"
+			<< "\t--output-file\t\t<filename>\n"
+			<< "\t--show-clones\t\ttrue/false\n"
+			<< std::endl;
+	}
+
+	std::map<ParameterType, std::string> extractArguments(int argc, char* argv[])
+	{
+		std::map<ParameterType, std::string> parameterList;
+		// Parse the command line and the option file
+		if (argc < ParameterType::NB_PARAM)
+		{
+			showUsage(argv[0]);
+		}
+		else
+		{
+			for (int i = 1; i < argc; ++i)
+			{
+				std::string arg = argv[i];
+				if ((arg == "-h") || (arg == "--help"))
+				{
+					showUsage(argv[0]);
+					break;
+				}
+				else
+				{
+					for_each(argumentValues.begin(), argumentValues.end(), [&](const std::pair< ParameterType, std::string>& argument) {
+						std::string delimiter = "=";
+						std::string token = arg.substr(0, arg.find(delimiter));
+						std::string value = arg.substr(arg.find(delimiter) + 1, arg.size());
+
+						if (token == argument.second)
+						{
+							parameterList[argument.first] = value;
+						}
+						});
+				}
+			}
+		}
+		return parameterList;
+	}
+};
+
+// ----------------------------------------------------------------------------------------------------------- //
+
 int main(int argc, char* argv[])
 {
 	if (argc <= 1)
@@ -181,17 +252,21 @@ int main(int argc, char* argv[])
 	}
 
 	std::string file = argv[1];
-	
-	std::string resfile;
-	if (argc > 2)
-		resfile = argv[2];
+
+	// get parameter list
+	ArgumentParser parser;
+	parser.buildParameters();
+	std::map<ArgumentParser::ParameterType, std::string> parameterList = parser.extractArguments(argc, argv);
+
+	std::string outputFilename = parameterList[ArgumentParser::OUTPUT_FILE];
+	bool showClones = parameterList[ArgumentParser::SHOW_CLONE] == "true" || parameterList[ArgumentParser::SHOW_CLONE] == "True" || parameterList[ArgumentParser::SHOW_CLONE] == "TRUE";
 
 	// performs tests
 	//unitaryTesting();
 	//compareResults(file, resfile);
 
 	std::cout << "computing minimal transversals on file " << file << std::endl;
-	
+
 	unsigned int objectCount = 0;
 	unsigned int itemCount = 0;
 	std::shared_ptr<HyperGraph> hypergraph;
@@ -211,13 +286,13 @@ int main(int argc, char* argv[])
 	std::cout << "itemCount " << itemCount << std::endl;
 	std::cout << "objectCount " << objectCount << std::endl;
 	std::cout << std::endl;
-	
+
 	// minimal transversals computing
 	std::vector<Itemset> minimalTransversals;
 	beginTime = std::chrono::system_clock::now();
-	{			
+	{
 		MT_Miner miner(false);
-		miner.init(hypergraph);		
+		miner.init(hypergraph);
 
 		std::vector<Itemset> toTraverse;
 		for (unsigned int i = 1; i <= itemCount; i++)
@@ -227,7 +302,7 @@ int main(int argc, char* argv[])
 		}
 
 		// compute minimal transversals		
-		minimalTransversals = miner.computeMinimalTransversals(toTraverse);
+		minimalTransversals = miner.computeMinimalTransversals(showClones, toTraverse);
 	}
 	duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
 	std::cout << "minimal transversals done in " << duration << " ms" << std::endl;
@@ -238,7 +313,7 @@ int main(int argc, char* argv[])
 	// print minimal transversals	
 	std::cout << std::endl;
 	std::cout << "minimal transversals count : " << minimalTransversals.size() << std::endl;
-	if(minimalTransversals.size() > 6)
+	if (minimalTransversals.size() > 6)
 		for_each(minimalTransversals.begin(), minimalTransversals.begin() + 5, [&](const Itemset& elt) { std::cout << Utils::itemsetToString(elt) << std::endl; });
 	else
 		for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { std::cout << Utils::itemsetToString(elt) << std::endl; });
@@ -247,11 +322,11 @@ int main(int argc, char* argv[])
 	// ----------------------------------------------------- //
 
 	// save minimal transversals into a file
-	if (!resfile.empty())
+	if (!outputFilename.empty())
 	{
-		std::cout << "saving minimal transversals into file : " << resfile << std::endl;
+		std::cout << "saving minimal transversals into file : " << outputFilename << std::endl;
 		std::ofstream outputStream;
-		outputStream.open(resfile);
+		outputStream.open(outputFilename);
 		for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { outputStream << Utils::itemsetToString(elt) << std::endl; });
 		outputStream.close();
 	}

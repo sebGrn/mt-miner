@@ -1,17 +1,20 @@
 #include "Graph.h"
 
-GraphNode::GraphNode(bool verbose, const std::vector<Utils::Itemset>& toTraverse, const std::shared_ptr<BinaryRepresentation> binaryRepresentation)
+GraphNode::GraphNode(bool verbose, bool showClones, const std::vector<Utils::Itemset>& toTraverse, const std::shared_ptr<BinaryRepresentation> binaryRepresentation)
 {
 	this->binaryRepresentation = binaryRepresentation;
 	this->verbose = verbose;
+	this->showClones = showClones;
 	this->toTraverse = toTraverse;
 }
 
-void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt)
+void GraphNode::computeLists(std::vector<Utils::Itemset>& graph_mt)
 {
+	maxClique.clear();
+	toExplore.clear();
+
 	// results of cumulated combined items / must be declared outside of the loop
 	Utils::Itemset previousItem;
-	
 	// build maxClique, toExplore lists
 	for_each(toTraverse.begin(), toTraverse.end(), [&](const Utils::Itemset& currentItem) {
 
@@ -23,17 +26,19 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 			if (verbose)
 				std::cout << "-------> minimalTraversal list : " << Utils::itemsetListToString(graph_mt) << std::endl;
 
-
 			// if this itemset contains an original, add the same minimal transverals list with the clone
-			unsigned int originalIndex = 0;
-			unsigned int clonedIndex = 0;
-			if (this->binaryRepresentation->containsAnOriginal(currentItem, originalIndex, clonedIndex))
+			if (this->showClones)
 			{
-				Utils::Itemset clonedCurrentItem = currentItem;
-				replace(clonedCurrentItem.begin(), clonedCurrentItem.end(), originalIndex, clonedIndex);
-				graph_mt.push_back(clonedCurrentItem);
-				if (verbose)
-					std::cout << "-------> minimalTraversal list (with clone) : " << Utils::itemsetListToString(graph_mt) << std::endl;
+				unsigned int originalIndex = 0;
+				unsigned int clonedIndex = 0;
+				if (this->binaryRepresentation->containsAnOriginal(currentItem, originalIndex, clonedIndex))
+				{
+					Utils::Itemset clonedCurrentItem = currentItem;
+					replace(clonedCurrentItem.begin(), clonedCurrentItem.end(), originalIndex, clonedIndex);
+					graph_mt.push_back(clonedCurrentItem);
+					if (verbose)
+						std::cout << "-------> minimalTraversal list (with clone) : " << Utils::itemsetListToString(graph_mt) << std::endl;
+				}
 			}
 		}
 		else
@@ -70,6 +75,14 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 			}
 		}
 	});
+}
+
+void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt)
+{
+	// compute toExplore : contains list of itemsets that are candidates
+	// compute maxClique : contains list of itemsets that will be combined to the candidates
+	// update graph_mt : contains the final minimal transverals
+	computeLists(graph_mt);
 
 	if (toExplore.empty())
 	{
@@ -90,23 +103,25 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 		// combine toExplore (left part) with maxClique list (right part) into a combined list
 		std::vector<Utils::Itemset> combinedItemsetList = toExplore;
 		combinedItemsetList.insert(combinedItemsetList.end(), maxClique.begin(), maxClique.end());
-
+		
+		// loop on candidates from toExplore list only
 		for (unsigned int i = 0; i < lastIndexToTest; i++)
 		{
 			std::vector<Utils::Itemset> newToTraverse;
-			Utils::Itemset toCombinedLeft = combinedItemsetList[i];
-			
+			Utils::Itemset toCombinedLeft = combinedItemsetList[i];			
 			// if this itemset is a clone, do not compute the minimal transverals
 			unsigned int originalIndex = 0;
 			unsigned int clonedIndex = 0;
 			if (!this->binaryRepresentation->containsAClone(toCombinedLeft, originalIndex, clonedIndex))
 			{
+				// combine each element between [0, lastIndexToTest] with the entire combined itemset list
 				for (unsigned int j = i + 1; j < combinedItemsetList.size(); j++)
 				{
 					assert(j < combinedItemsetList.size());
 					Utils::Itemset toCombinedRight = combinedItemsetList[j];
 					Utils::Itemset combinedItemset = Utils::combineItemset(toCombinedLeft, toCombinedRight);
 
+					// test if combined itemset is essential
 					if (binaryRepresentation->isEssential(combinedItemset))
 						newToTraverse.push_back(combinedItemset);
 					else
@@ -123,7 +138,7 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 				}
 
 				// create a new child node for this newToTraverse list
-				std::shared_ptr<GraphNode> node = std::make_shared<GraphNode>(this->verbose, newToTraverse, this->binaryRepresentation);
+				std::shared_ptr<GraphNode> node = std::make_shared<GraphNode>(this->verbose, this->showClones, newToTraverse, this->binaryRepresentation);
 				// add this node as a child
 				this->children.push_back(node);
 				// compute minimal transversals for the branch
