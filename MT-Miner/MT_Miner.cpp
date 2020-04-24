@@ -1,9 +1,8 @@
 #include "MT_Miner.h"
 #include "utils.h"
 
-MT_Miner::MT_Miner(bool verbose)
+MT_Miner::MT_Miner()
 {
-	this->verbose = verbose;
 }
 
 MT_Miner::~MT_Miner()
@@ -39,8 +38,9 @@ void MT_Miner::init(const std::shared_ptr<HyperGraph>& hypergraph)
 
 std::vector<Utils::Itemset> MT_Miner::computeMinimalTransversals(bool showClones, const std::vector<Utils::Itemset>& toTraverse) const
 {
+	// create a graph, then compute minimal transversal from the binary representation
 	std::vector<Utils::Itemset> graph_mt;
-	GraphNode rootNode(this->verbose, showClones, toTraverse, binaryRepresentation);
+	GraphNode rootNode(showClones, toTraverse, binaryRepresentation);
 	rootNode.computeMinimalTransversals(graph_mt);
 	return graph_mt;
 }

@@ -1,4 +1,5 @@
 #include "BinaryRepresentation.h"
+#include "Logger.h"
 
 /// build binary representation from formal context
 BinaryRepresentation::BinaryRepresentation(const FormalContext& context)
@@ -129,6 +130,7 @@ void BinaryRepresentation::buildCloneList()
 				{
 					// push a clone <original index, clone index>
 					clonedBitsetIndexes.push_back(std::pair<unsigned int, unsigned int>(it1->first, it2->first));
+					Logger::log("** add clone at index <", std::to_string(it1->first), ", ", std::to_string(it2->first), ">\n");
 				}
 			}
 		}

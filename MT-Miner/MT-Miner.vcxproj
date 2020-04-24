@@ -144,6 +144,7 @@
     <ClCompile Include="BinaryRepresentation.cpp" />
     <ClCompile Include="Graph.cpp" />
     <ClCompile Include="HypergraphParser.cpp" />
+    <ClCompile Include="Logger.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MT_Miner.cpp" />
   </ItemGroup>
@@ -157,6 +158,7 @@
     <ClInclude Include="Graph.h" />
     <ClInclude Include="HyperGraph.h" />
     <ClInclude Include="HypergraphParser.h" />
+    <ClInclude Include="Logger.h" />
     <ClInclude Include="MT_Miner.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>

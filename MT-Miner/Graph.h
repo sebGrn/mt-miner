@@ -10,7 +10,6 @@
 class GraphNode
 {
 private:
-	bool verbose;
 	bool showClones;
 	std::vector<std::shared_ptr<GraphNode>> children;
 	std::shared_ptr<BinaryRepresentation> binaryRepresentation;
@@ -23,7 +22,7 @@ private:
 	void computeLists(std::vector<Utils::Itemset>& graph_mt);
 
 public:
-	GraphNode(bool verbose, bool showClones, const std::vector<Utils::Itemset>& toTraverse, const std::shared_ptr<BinaryRepresentation> binaryRepresentation);
+	GraphNode(bool showClones, const std::vector<Utils::Itemset>& toTraverse, const std::shared_ptr<BinaryRepresentation> binaryRepresentation);
 	void addChild(const std::shared_ptr<GraphNode>& node);
 
 	void computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt);

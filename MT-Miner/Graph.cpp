@@ -1,9 +1,9 @@
 #include "Graph.h"
+#include "Logger.h"
 
-GraphNode::GraphNode(bool verbose, bool showClones, const std::vector<Utils::Itemset>& toTraverse, const std::shared_ptr<BinaryRepresentation> binaryRepresentation)
+GraphNode::GraphNode(bool showClones, const std::vector<Utils::Itemset>& toTraverse, const std::shared_ptr<BinaryRepresentation> binaryRepresentation)
 {
 	this->binaryRepresentation = binaryRepresentation;
-	this->verbose = verbose;
 	this->showClones = showClones;
 	this->toTraverse = toTraverse;
 }
@@ -23,8 +23,9 @@ void GraphNode::computeLists(std::vector<Utils::Itemset>& graph_mt)
 		{
 			// we have a minimal transversal
 			graph_mt.push_back(currentItem);
-			if (verbose)
-				std::cout << "-------> minimalTraversal list : " << Utils::itemsetListToString(graph_mt) << std::endl;
+			Logger::log("--> minimalTraversal list, add : ", Utils::itemsetToString(currentItem), ", size : ", std::to_string(graph_mt.size()), "\n");
+			//if (verbose)
+			//	std::cout << "--> minimalTraversal list : " << Utils::itemsetListToString(graph_mt) << std::endl;
 
 			// if this itemset contains an original, add the same minimal transverals list with the clone
 			if (this->showClones)
@@ -36,8 +37,7 @@ void GraphNode::computeLists(std::vector<Utils::Itemset>& graph_mt)
 					Utils::Itemset clonedCurrentItem = currentItem;
 					replace(clonedCurrentItem.begin(), clonedCurrentItem.end(), originalIndex, clonedIndex);
 					graph_mt.push_back(clonedCurrentItem);
-					if (verbose)
-						std::cout << "-------> minimalTraversal list (with clone) : " << Utils::itemsetListToString(graph_mt) << std::endl;
+					Logger::log("--> minimalTraversal list (clone), add : ", Utils::itemsetToString(clonedCurrentItem), ", size : ", std::to_string(graph_mt.size()), "\n");
 				}
 			}
 		}
@@ -48,8 +48,7 @@ void GraphNode::computeLists(std::vector<Utils::Itemset>& graph_mt)
 				// must be the 1st element with only one element
 				previousItem = currentItem;
 				maxClique.push_back(currentItem);
-				if (verbose)
-					std::cout << "--> maxClique list : " << Utils::itemsetListToString(maxClique) << std::endl;
+				Logger::log("--> maxClique list : ", Utils::itemsetListToString(maxClique), "\n");
 			}
 			else
 			{
@@ -57,20 +56,18 @@ void GraphNode::computeLists(std::vector<Utils::Itemset>& graph_mt)
 				Utils::Itemset combinedItem = Utils::combineItemset(previousItem, currentItem);
 				// compute disjonctif support of the concatenation
 				unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(combinedItem);
-				if (verbose)
-					std::cout << "disjonctive support for element \"" << Utils::itemsetToString(combinedItem) << "\" : " << disjSup << std::endl;
+				Logger::log("disjonctive support for element ", Utils::itemsetToString(combinedItem), " : ", std::to_string(disjSup), "\n");
+
 				if (disjSup != this->binaryRepresentation->getObjectCount())
 				{
 					previousItem = combinedItem;
 					maxClique.push_back(currentItem);
-					if (verbose)
-						std::cout << "--> maxClique list : " << Utils::itemsetListToString(maxClique) << std::endl;
+					Logger::log("--> maxClique list : ", Utils::itemsetListToString(maxClique), "\n");
 				}
 				else
 				{
 					toExplore.push_back(currentItem);
-					if (verbose)
-						std::cout << "--> toExplore list : " << Utils::itemsetListToString(toExplore) << std::endl;
+					Logger::log("--> toExplore list : ", Utils::itemsetListToString(toExplore), "\n");
 				}
 			}
 		}
@@ -86,17 +83,13 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 
 	if (toExplore.empty())
 	{
-		if (verbose)
-			std::cout << "toExplore list is empty, end of the branch" << std::endl;
+		Logger::log("toExplore list is empty, end of the branch", "\n");
 	}
 	else
 	{
-		if (verbose)
-		{
-			std::cout << "----------------------------------------------------------" << std::endl;
-			std::cout << "toExplore list" << Utils::itemsetListToString(toExplore) << std::endl;
-			std::cout << "maxClique list" << Utils::itemsetListToString(maxClique) << std::endl;
-		}
+		Logger::log("----------------------------------------------------------", "\n");
+		Logger::log("toExplore list", Utils::itemsetListToString(toExplore), "\n");
+		Logger::log("maxClique list", Utils::itemsetListToString(maxClique), "\n");
 
 		// store toExploreList max index
 		unsigned int lastIndexToTest = toExplore.size();
@@ -126,19 +119,15 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 						newToTraverse.push_back(combinedItemset);
 					else
 					{
-						if (verbose)
-							std::cout << Utils::itemsetToString(combinedItemset) << " is not essential" << std::endl;
+						Logger::log("", Utils::itemsetToString(combinedItemset), " is not essential", "\n");
 					}
 				}
 
-				if (verbose)
-				{
-					std::cout << "new toTraverse list" << Utils::itemsetListToString(newToTraverse) << std::endl;
-					std::cout << "----------------------------------------------------------" << std::endl;
-				}
+				Logger::log("new toTraverse list", Utils::itemsetListToString(newToTraverse), "\n");
+				Logger::log("----------------------------------------------------------", "\n");
 
 				// create a new child node for this newToTraverse list
-				std::shared_ptr<GraphNode> node = std::make_shared<GraphNode>(this->verbose, this->showClones, newToTraverse, this->binaryRepresentation);
+				std::shared_ptr<GraphNode> node = std::make_shared<GraphNode>(this->showClones, newToTraverse, this->binaryRepresentation);
 				// add this node as a child
 				this->children.push_back(node);
 				// compute minimal transversals for the branch
@@ -146,8 +135,7 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 			}
 			else
 			{
-				if (verbose)
-					std::cout << Utils::itemsetListToString(combinedItemsetList) << " contains a clone, do not compute mt" << std::endl;
+				Logger::log("", Utils::itemsetListToString(combinedItemsetList), " contains a clone, do not compute mt", "\n");
 			}
 		}
 	}

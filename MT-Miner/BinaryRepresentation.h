@@ -16,7 +16,6 @@ private:
 	/// each vector contains the attributes/items boolean values
 	/// the index of the map is the item number
 	/// this representation is usefull to compute disjonctif support easyly (with a OR operator)
-	///  - TODO: we should use a dynamic bitset here to optimise & operation
 	///  - TODO: not sure if a map is usefull here
 	std::map<unsigned int, Bitset> binaryRepresentation;
 

@@ -18,10 +18,8 @@ private:
 	// binary representation 
 	std::shared_ptr<BinaryRepresentation> binaryRepresentation;
 		
-	bool verbose;
-
 public:
-	MT_Miner(bool verbose = true);
+	MT_Miner();
 	~MT_Miner();
 
 	/// initialize the minimal transversals miner
