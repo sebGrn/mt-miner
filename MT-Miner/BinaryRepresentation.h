@@ -42,7 +42,7 @@ public:
 	///
 	void buildCloneList();
 	///
-	bool containsAClone(const Utils::Itemset& itemset, unsigned int& originalIndex, unsigned int& clonedIndex) const;
+	bool containsAClone(const Utils::Itemset& itemset) const;
 	///
 	bool containsAnOriginal(const Utils::Itemset& itemset, unsigned int& originalIndex, unsigned int& clonedIndex) const;
 

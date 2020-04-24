@@ -137,15 +137,13 @@ void BinaryRepresentation::buildCloneList()
 	}
 };
 
-bool BinaryRepresentation::containsAClone(const Utils::Itemset& itemset, unsigned int& originalIndex, unsigned int& clonedIndex) const
+bool BinaryRepresentation::containsAClone(const Utils::Itemset& itemset) const
 {
 	for (auto it = clonedBitsetIndexes.begin(); it != clonedBitsetIndexes.end(); it++)
 	{
 		// check if 
 		if (std::find(itemset.begin(), itemset.end(), it->second) != itemset.end())
 		{
-			originalIndex = it->first;
-			clonedIndex = it->second;
 			return true;
 		}
 	}

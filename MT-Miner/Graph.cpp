@@ -23,6 +23,7 @@ void GraphNode::computeLists(std::vector<Utils::Itemset>& graph_mt)
 		{
 			// we have a minimal transversal
 			graph_mt.push_back(currentItem);
+			std::string tmp = Utils::itemsetToString(currentItem);
 			Logger::log("--> minimalTraversal list, add : ", Utils::itemsetToString(currentItem), ", size : ", std::to_string(graph_mt.size()), "\n");
 			//if (verbose)
 			//	std::cout << "--> minimalTraversal list : " << Utils::itemsetListToString(graph_mt) << std::endl;
@@ -48,7 +49,7 @@ void GraphNode::computeLists(std::vector<Utils::Itemset>& graph_mt)
 				// must be the 1st element with only one element
 				previousItem = currentItem;
 				maxClique.push_back(currentItem);
-				Logger::log("--> maxClique list : ", Utils::itemsetListToString(maxClique), "\n");
+				//Logger::log("--> maxClique list : ", Utils::itemsetListToString(maxClique), "\n");
 			}
 			else
 			{
@@ -56,18 +57,18 @@ void GraphNode::computeLists(std::vector<Utils::Itemset>& graph_mt)
 				Utils::Itemset combinedItem = Utils::combineItemset(previousItem, currentItem);
 				// compute disjonctif support of the concatenation
 				unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(combinedItem);
-				Logger::log("disjonctive support for element ", Utils::itemsetToString(combinedItem), " : ", std::to_string(disjSup), "\n");
+				//Logger::log("disjonctive support for element ", Utils::itemsetToString(combinedItem), " : ", std::to_string(disjSup), "\n");
 
 				if (disjSup != this->binaryRepresentation->getObjectCount())
 				{
 					previousItem = combinedItem;
 					maxClique.push_back(currentItem);
-					Logger::log("--> maxClique list : ", Utils::itemsetListToString(maxClique), "\n");
+					//Logger::log("--> maxClique list : ", Utils::itemsetListToString(maxClique), "\n");
 				}
 				else
 				{
 					toExplore.push_back(currentItem);
-					Logger::log("--> toExplore list : ", Utils::itemsetListToString(toExplore), "\n");
+					//Logger::log("--> toExplore list : ", Utils::itemsetListToString(toExplore), "\n");
 				}
 			}
 		}
@@ -87,9 +88,9 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 	}
 	else
 	{
-		Logger::log("----------------------------------------------------------", "\n");
-		Logger::log("toExplore list", Utils::itemsetListToString(toExplore), "\n");
-		Logger::log("maxClique list", Utils::itemsetListToString(maxClique), "\n");
+		//Logger::log("----------------------------------------------------------", "\n");
+		//Logger::log("toExplore list", Utils::itemsetListToString(toExplore), "\n");
+		//Logger::log("maxClique list", Utils::itemsetListToString(maxClique), "\n");
 
 		// store toExploreList max index
 		unsigned int lastIndexToTest = toExplore.size();
@@ -103,9 +104,8 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 			std::vector<Utils::Itemset> newToTraverse;
 			Utils::Itemset toCombinedLeft = combinedItemsetList[i];			
 			// if this itemset is a clone, do not compute the minimal transverals
-			unsigned int originalIndex = 0;
-			unsigned int clonedIndex = 0;
-			if (!this->binaryRepresentation->containsAClone(toCombinedLeft, originalIndex, clonedIndex))
+			std::string tmp = Utils::itemsetToString(toCombinedLeft);
+			if (!this->binaryRepresentation->containsAClone(toCombinedLeft))
 			{
 				// combine each element between [0, lastIndexToTest] with the entire combined itemset list
 				for (unsigned int j = i + 1; j < combinedItemsetList.size(); j++)
@@ -114,17 +114,24 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 					Utils::Itemset toCombinedRight = combinedItemsetList[j];
 					Utils::Itemset combinedItemset = Utils::combineItemset(toCombinedLeft, toCombinedRight);
 
-					// test if combined itemset is essential
-					if (binaryRepresentation->isEssential(combinedItemset))
-						newToTraverse.push_back(combinedItemset);
+					if (!this->binaryRepresentation->containsAClone(combinedItemset))
+					{
+						// test if combined itemset is essential
+						if (binaryRepresentation->isEssential(combinedItemset))
+							newToTraverse.push_back(combinedItemset);
+						else
+						{
+							//Logger::log("", Utils::itemsetToString(combinedItemset), " is not essential", "\n");
+						}
+					}
 					else
 					{
-						Logger::log("", Utils::itemsetToString(combinedItemset), " is not essential", "\n");
+						//Logger::log("", Utils::itemsetListToString(combinedItemset), " contains a clone, do not compute mt", "\n");
 					}
 				}
 
-				Logger::log("new toTraverse list", Utils::itemsetListToString(newToTraverse), "\n");
-				Logger::log("----------------------------------------------------------", "\n");
+				//Logger::log("new toTraverse list", Utils::itemsetListToString(newToTraverse), "\n");
+				//Logger::log("----------------------------------------------------------", "\n");
 
 				// create a new child node for this newToTraverse list
 				std::shared_ptr<GraphNode> node = std::make_shared<GraphNode>(this->showClones, newToTraverse, this->binaryRepresentation);
@@ -135,7 +142,7 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 			}
 			else
 			{
-				Logger::log("", Utils::itemsetListToString(combinedItemsetList), " contains a clone, do not compute mt", "\n");
+				//Logger::log("", Utils::itemsetListToString(combinedItemsetList), " contains a clone, do not compute mt", "\n");
 			}
 		}
 	}
