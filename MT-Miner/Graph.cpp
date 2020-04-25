@@ -148,7 +148,7 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 					}
 					else
 					{
-						Logger::log("", Utils::itemsetListToString(combinedItemset), " contains a clone, do not compute mt", "\n");
+						Logger::log("", Utils::itemsetToString(combinedItemset), " contains a clone, do not compute mt", "\n");
 					}
 				}
 

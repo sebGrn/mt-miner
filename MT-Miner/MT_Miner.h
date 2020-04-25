@@ -15,11 +15,13 @@
 class MT_Miner
 {
 private:
+	///
+	bool useCloneOptimization;
 	// binary representation 
 	std::shared_ptr<BinaryRepresentation> binaryRepresentation;
 		
 public:
-	MT_Miner();
+	MT_Miner(bool useCloneOptimization);
 	~MT_Miner();
 
 	/// initialize the minimal transversals miner
@@ -27,6 +29,6 @@ public:
 	void init(const std::shared_ptr<HyperGraph>& hypergraph);
 
 	///
-	std::vector<Utils::Itemset> computeMinimalTransversals(bool showClones,  const std::vector<Utils::Itemset>& toTraverse) const;
+	std::vector<Utils::Itemset> computeMinimalTransversals(const std::vector<Utils::Itemset>& toTraverse) const;
 };
 
