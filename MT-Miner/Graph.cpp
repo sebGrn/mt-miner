@@ -1,11 +1,32 @@
 #include "Graph.h"
 #include "Logger.h"
 
-GraphNode::GraphNode(bool showClones, const std::vector<Utils::Itemset>& toTraverse, const std::shared_ptr<BinaryRepresentation> binaryRepresentation)
+GraphNode::GraphNode(bool useCloneOptimization, const std::vector<Utils::Itemset>& toTraverse, const std::shared_ptr<BinaryRepresentation>& binaryRepresentation)
 {
 	this->binaryRepresentation = binaryRepresentation;
-	this->showClones = showClones;
+	this->useCloneOptimization = useCloneOptimization;
 	this->toTraverse = toTraverse;
+}
+
+void GraphNode::buildClonedCombinason(const Utils::Itemset& currentItem, std::vector<Utils::Itemset>& clonedCombination, const std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes)
+{
+	for (auto it = originalClonedIndexes.begin(); it != originalClonedIndexes.end(); it++)
+	{
+		unsigned int originalIndex = it->first;
+		unsigned int clonedIndex = it->second;
+		Utils::Itemset clonedCurrentItem = currentItem;
+		replace(clonedCurrentItem.begin(), clonedCurrentItem.end(), originalIndex, clonedIndex);
+		if (clonedCurrentItem != currentItem)
+		{
+			auto it = std::find_if(clonedCombination.begin(), clonedCombination.end(), Utils::compare_itemset(clonedCurrentItem));
+			if (it == clonedCombination.end())
+			{
+				clonedCombination.push_back(clonedCurrentItem);
+				// recurse on new combination
+				buildClonedCombinason(clonedCurrentItem, clonedCombination, originalClonedIndexes);
+			}
+		}
+	}
 }
 
 void GraphNode::computeLists(std::vector<Utils::Itemset>& graph_mt)
@@ -25,20 +46,21 @@ void GraphNode::computeLists(std::vector<Utils::Itemset>& graph_mt)
 			graph_mt.push_back(currentItem);
 			std::string tmp = Utils::itemsetToString(currentItem);
 			Logger::log("--> minimalTraversal list, add : ", Utils::itemsetToString(currentItem), ", size : ", std::to_string(graph_mt.size()), "\n");
-			//if (verbose)
-			//	std::cout << "--> minimalTraversal list : " << Utils::itemsetListToString(graph_mt) << std::endl;
 
 			// if this itemset contains an original, add the same minimal transverals list with the clone
-			if (this->showClones)
+			if (this->useCloneOptimization)
 			{
-				unsigned int originalIndex = 0;
-				unsigned int clonedIndex = 0;
-				if (this->binaryRepresentation->containsAnOriginal(currentItem, originalIndex, clonedIndex))
+				std::vector<std::pair<unsigned int, unsigned int>> originalClonedIndexes;
+				if (this->binaryRepresentation->containsOriginals(currentItem, originalClonedIndexes))
 				{
-					Utils::Itemset clonedCurrentItem = currentItem;
-					replace(clonedCurrentItem.begin(), clonedCurrentItem.end(), originalIndex, clonedIndex);
-					graph_mt.push_back(clonedCurrentItem);
-					Logger::log("--> minimalTraversal list (clone), add : ", Utils::itemsetToString(clonedCurrentItem), ", size : ", std::to_string(graph_mt.size()), "\n");
+					std::vector<Utils::Itemset> clonedCombination;					
+					buildClonedCombinason(currentItem, clonedCombination, originalClonedIndexes);
+					
+					for(auto it = clonedCombination.begin(); it != clonedCombination.end(); it++)
+					{
+						graph_mt.push_back(*it);
+						Logger::log("--> minimalTraversal list (clone), add : ", Utils::itemsetToString(*it), ", size : ", std::to_string(graph_mt.size()), "\n");
+					}
 				}
 			}
 		}
@@ -49,7 +71,7 @@ void GraphNode::computeLists(std::vector<Utils::Itemset>& graph_mt)
 				// must be the 1st element with only one element
 				previousItem = currentItem;
 				maxClique.push_back(currentItem);
-				//Logger::log("--> maxClique list : ", Utils::itemsetListToString(maxClique), "\n");
+				Logger::log("--> maxClique list : ", Utils::itemsetListToString(maxClique), "\n");
 			}
 			else
 			{
@@ -57,18 +79,18 @@ void GraphNode::computeLists(std::vector<Utils::Itemset>& graph_mt)
 				Utils::Itemset combinedItem = Utils::combineItemset(previousItem, currentItem);
 				// compute disjonctif support of the concatenation
 				unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(combinedItem);
-				//Logger::log("disjonctive support for element ", Utils::itemsetToString(combinedItem), " : ", std::to_string(disjSup), "\n");
+				Logger::log("disjonctive support for element ", Utils::itemsetToString(combinedItem), " : ", std::to_string(disjSup), "\n");
 
 				if (disjSup != this->binaryRepresentation->getObjectCount())
 				{
 					previousItem = combinedItem;
 					maxClique.push_back(currentItem);
-					//Logger::log("--> maxClique list : ", Utils::itemsetListToString(maxClique), "\n");
+					Logger::log("--> maxClique list : ", Utils::itemsetListToString(maxClique), "\n");
 				}
 				else
 				{
 					toExplore.push_back(currentItem);
-					//Logger::log("--> toExplore list : ", Utils::itemsetListToString(toExplore), "\n");
+					Logger::log("--> toExplore list : ", Utils::itemsetListToString(toExplore), "\n");
 				}
 			}
 		}
@@ -88,9 +110,9 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 	}
 	else
 	{
-		//Logger::log("----------------------------------------------------------", "\n");
-		//Logger::log("toExplore list", Utils::itemsetListToString(toExplore), "\n");
-		//Logger::log("maxClique list", Utils::itemsetListToString(maxClique), "\n");
+		Logger::log("----------------------------------------------------------", "\n");
+		Logger::log("toExplore list", Utils::itemsetListToString(toExplore), "\n");
+		Logger::log("maxClique list", Utils::itemsetListToString(maxClique), "\n");
 
 		// store toExploreList max index
 		unsigned int lastIndexToTest = toExplore.size();
@@ -121,20 +143,20 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 							newToTraverse.push_back(combinedItemset);
 						else
 						{
-							//Logger::log("", Utils::itemsetToString(combinedItemset), " is not essential", "\n");
+							Logger::log("", Utils::itemsetToString(combinedItemset), " is not essential", "\n");
 						}
 					}
 					else
 					{
-						//Logger::log("", Utils::itemsetListToString(combinedItemset), " contains a clone, do not compute mt", "\n");
+						Logger::log("", Utils::itemsetListToString(combinedItemset), " contains a clone, do not compute mt", "\n");
 					}
 				}
 
-				//Logger::log("new toTraverse list", Utils::itemsetListToString(newToTraverse), "\n");
-				//Logger::log("----------------------------------------------------------", "\n");
+				Logger::log("new toTraverse list", Utils::itemsetListToString(newToTraverse), "\n");
+				Logger::log("----------------------------------------------------------", "\n");
 
 				// create a new child node for this newToTraverse list
-				std::shared_ptr<GraphNode> node = std::make_shared<GraphNode>(this->showClones, newToTraverse, this->binaryRepresentation);
+				std::shared_ptr<GraphNode> node = std::make_shared<GraphNode>(this->useCloneOptimization, newToTraverse, this->binaryRepresentation);
 				// add this node as a child
 				this->children.push_back(node);
 				// compute minimal transversals for the branch
@@ -142,7 +164,7 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 			}
 			else
 			{
-				//Logger::log("", Utils::itemsetListToString(combinedItemsetList), " contains a clone, do not compute mt", "\n");
+				Logger::log("", Utils::itemsetListToString(combinedItemsetList), " contains a clone, do not compute mt", "\n");
 			}
 		}
 	}

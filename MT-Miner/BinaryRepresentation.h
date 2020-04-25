@@ -44,7 +44,7 @@ public:
 	///
 	bool containsAClone(const Utils::Itemset& itemset) const;
 	///
-	bool containsAnOriginal(const Utils::Itemset& itemset, unsigned int& originalIndex, unsigned int& clonedIndex) const;
+	bool containsOriginals(const Utils::Itemset& itemset, std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes) const;
 
 	unsigned int getItemCount() const
 	{

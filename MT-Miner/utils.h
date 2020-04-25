@@ -23,29 +23,29 @@ public:
 			return (i == key);
 		}
 	};
-//
-//	struct compare_itemset
-//	{
-//		Itemset key;
-//		compare_itemset(Itemset const& i) : key(i) { }
-//
-//		bool operator()(Itemset const& item)
-//		{
-//			// use AND operator for comparaison
-//#ifdef _DEBUG
-//			for (unsigned int i = 0; i < item.size(); i++)
-//			{
-//				assert(i < key.size());
-//				if (item[i] != key[i])
-//					return false;				
-//			}
-//			return true;
-//#else
-//			return key == item;
-//#endif
-//
-//		}
-//	};
+
+	struct compare_itemset
+	{
+		Itemset key;
+		compare_itemset(Itemset const& i) : key(i) { }
+
+		bool operator()(Itemset const& item)
+		{
+			// use AND operator for comparaison
+#ifdef _DEBUG
+			for (unsigned int i = 0; i < item.size(); i++)
+			{
+				assert(i < key.size());
+				if (item[i] != key[i])
+					return false;				
+			}
+			return true;
+#else
+			return key == item;
+#endif
+
+		}
+	};
 
 	/// <summary>
 	/// extract a list of int from a string

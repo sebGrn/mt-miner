@@ -150,17 +150,17 @@ bool BinaryRepresentation::containsAClone(const Utils::Itemset& itemset) const
 	return false;
 }
 
-bool BinaryRepresentation::containsAnOriginal(const Utils::Itemset& itemset, unsigned int& originalIndex, unsigned int& clonedIndex) const
+// 
+bool BinaryRepresentation::containsOriginals(const Utils::Itemset& itemset, std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes) const
 {
+	originalClonedIndexes.clear();
 	for (auto it = clonedBitsetIndexes.begin(); it != clonedBitsetIndexes.end(); it++)
 	{
 		// check if 
 		if (std::find(itemset.begin(), itemset.end(), it->first) != itemset.end())
 		{
-			originalIndex = it->first;
-			clonedIndex = it->second;
-			return true;
+			originalClonedIndexes.push_back(std::pair<unsigned int, unsigned int>(it->first, it->second));
 		}
-	}
-	return false;
+	}	
+	return !originalClonedIndexes.empty();
 }
