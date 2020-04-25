@@ -7,7 +7,7 @@
 #include "utils.h"
 #include "BinaryRepresentation.h"
 
-class GraphNode
+class TreeNode
 {
 private:
 	/// true if we want to use clone optimization
@@ -28,11 +28,11 @@ private:
 	void computeLists(std::vector<Utils::Itemset>& graph_mt);
 
 public:
-	GraphNode(bool useCloneOptimization, const std::vector<Utils::Itemset>& toTraverse, const std::shared_ptr<BinaryRepresentation>& binaryRepresentation);
+	TreeNode(bool useCloneOptimization, const std::vector<Utils::Itemset>& toTraverse, const std::shared_ptr<BinaryRepresentation>& binaryRepresentation);
 
 	/// add add a new node as a child of this current node
 	/// @param node child node
-	void addChild(const std::shared_ptr<GraphNode>& node);
+	void addChild(const std::shared_ptr<TreeNode>& node);
 
 	/// recursive function, trasvere treen node to compute minimal transversals for binary representation
 	/// @param graph_mt minimal transversal itemset list, updated at each branch trasversal

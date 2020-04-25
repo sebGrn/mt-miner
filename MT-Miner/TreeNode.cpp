@@ -1,14 +1,14 @@
-#include "Graph.h"
+#include "TreeNode.h"
 #include "Logger.h"
 
-GraphNode::GraphNode(bool useCloneOptimization, const std::vector<Utils::Itemset>& toTraverse, const std::shared_ptr<BinaryRepresentation>& binaryRepresentation)
+TreeNode::TreeNode(bool useCloneOptimization, const std::vector<Utils::Itemset>& toTraverse, const std::shared_ptr<BinaryRepresentation>& binaryRepresentation)
 {
 	this->binaryRepresentation = binaryRepresentation;
 	this->useCloneOptimization = useCloneOptimization;
 	this->toTraverse = toTraverse;
 }
 
-void GraphNode::buildClonedCombinason(const Utils::Itemset& currentItem, std::vector<Utils::Itemset>& clonedCombination, const std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes)
+void TreeNode::buildClonedCombinason(const Utils::Itemset& currentItem, std::vector<Utils::Itemset>& clonedCombination, const std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes)
 {
 	for (auto it = originalClonedIndexes.begin(); it != originalClonedIndexes.end(); it++)
 	{
@@ -29,7 +29,7 @@ void GraphNode::buildClonedCombinason(const Utils::Itemset& currentItem, std::ve
 	}
 }
 
-void GraphNode::computeLists(std::vector<Utils::Itemset>& graph_mt)
+void TreeNode::computeLists(std::vector<Utils::Itemset>& graph_mt)
 {
 	maxClique.clear();
 	toExplore.clear();
@@ -97,7 +97,7 @@ void GraphNode::computeLists(std::vector<Utils::Itemset>& graph_mt)
 	});
 }
 
-void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt)
+void TreeNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt)
 {
 	// compute toExplore : contains list of itemsets that are candidates
 	// compute maxClique : contains list of itemsets that will be combined to the candidates
@@ -156,7 +156,7 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 				Logger::log("----------------------------------------------------------", "\n");
 
 				// create a new child node for this newToTraverse list
-				std::shared_ptr<GraphNode> node = std::make_shared<GraphNode>(this->useCloneOptimization, newToTraverse, this->binaryRepresentation);
+				std::shared_ptr<TreeNode> node = std::make_shared<TreeNode>(this->useCloneOptimization, newToTraverse, this->binaryRepresentation);
 				// add this node as a child
 				this->children.push_back(node);
 				// compute minimal transversals for the branch

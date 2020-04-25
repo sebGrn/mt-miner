@@ -44,7 +44,7 @@ std::vector<Utils::Itemset> MT_Miner::computeMinimalTransversals(const std::vect
 {
 	// create a graph, then compute minimal transversal from the binary representation
 	std::vector<Utils::Itemset> graph_mt;
-	GraphNode rootNode(this->useCloneOptimization, toTraverse, binaryRepresentation);
+	TreeNode rootNode(this->useCloneOptimization, toTraverse, binaryRepresentation);
 	rootNode.computeMinimalTransversals(graph_mt);
 	return graph_mt;
 }

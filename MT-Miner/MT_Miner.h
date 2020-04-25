@@ -10,7 +10,7 @@
 #include "FormalContext.h"
 #include "HyperGraph.h"
 #include "BinaryRepresentation.h"
-#include "Graph.h"
+#include "TreeNode.h"
 
 class MT_Miner
 {
