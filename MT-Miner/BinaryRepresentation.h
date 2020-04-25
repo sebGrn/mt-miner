@@ -56,7 +56,7 @@ public:
 		return this->objectCount;
 	};
 
-	Bitset getElement(unsigned int key) const
+	Bitset getBitset(unsigned int key) const
 	{
 		assert(binaryRepresentation.find(key) != binaryRepresentation.end());
 		return binaryRepresentation.at(key);

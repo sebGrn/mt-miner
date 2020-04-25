@@ -22,67 +22,110 @@ BinaryRepresentation::BinaryRepresentation(const FormalContext& context)
 bool BinaryRepresentation::checkOneItem(int itemBar, const Utils::Itemset& itemsOfpattern) const
 {
 	Bitset SumOfN_1Items(this->objectCount);
-
-	for_each(itemsOfpattern.begin(), itemsOfpattern.end(), [&](unsigned int elt) {
-		if (elt != itemBar)
+	for (auto it = itemsOfpattern.begin(); it != itemsOfpattern.end(); it++)
+	{
+		if (*it != itemBar)
 		{
 #ifdef _DEBUG
+			Bitset bitset = this->getBitset(*it);
 			for (int j = 0; j < this->objectCount; j++)
 			{
-				SumOfN_1Items[j] = SumOfN_1Items[j] || this->getElement(elt)[j];
+				SumOfN_1Items[j] = SumOfN_1Items[j] || bitset[j];
 			}
 #else
-			SumOfN_1Items = SumOfN_1Items | getElement(elt);
+			SumOfN_1Items = SumOfN_1Items | this->getBitset(elt);
 #endif
 		}
-	});
+	}
 
-	Bitset bitset = this->getElement(itemBar);
+	Bitset bitset = this->getBitset(itemBar);
+	bool res = false;
 	for (int i = 0; i < this->objectCount; i++)
 	{
 		if (SumOfN_1Items[i] == false && bitset[i] == true)
-			return true;
+		{
+			res = true;
+			break;
+		}
 	}
-	return false;
+	return res;
 }
 
 // return true if element is essential
-bool BinaryRepresentation::isEssential(const Utils::Itemset& itemsOfPattern) const
+bool BinaryRepresentation::isEssential(const Utils::Itemset& itemset) const
 {
-	if (itemsOfPattern.size() == 1)
+	if (itemset.size() == 1)
 		return true;
 
-	for (int i = 0; i < itemsOfPattern.size(); i++)
+	bool result = false;
+	for (auto it1 = itemset.begin(); it1 != itemset.end(); it1++)
 	{
-		if (!checkOneItem(itemsOfPattern[i], itemsOfPattern))
+		Bitset SumOfN_1Items(this->objectCount);
+		for (auto it2 = itemset.begin(); it2 != itemset.end(); it2++)
+		{
+			if (it1 != it2)
+			{
+#ifdef _DEBUG
+				Bitset bitset = this->getBitset(*it2);
+				for (int j = 0; j < this->objectCount; j++)
+				{
+					SumOfN_1Items[j] = SumOfN_1Items[j] || bitset[j];
+				}
+#else
+				SumOfN_1Items = SumOfN_1Items | this->getBitset(elt); 
+#endif
+			}
+		}
+		Bitset bitset = this->getBitset(*it1);
+		for (int i = 0; i < this->objectCount; i++)
+		{
+			if (SumOfN_1Items[i] == false && bitset[i] == true)
+			{
+				result = true;
+				break;
+			}
+		}
+
+		if (!result)
+			break;
+	}
+	return result;
+
+	/*for (unsigned int i = 0; i < itemset.size(); i++)
+	{
+		if (!checkOneItem(itemset[i], itemset))
 			return false;
 	}
-	return true;
+	return true;*/
 }
 
 unsigned int BinaryRepresentation::computeDisjonctifSupport(const Utils::Itemset& pattern) const
 {
-	unsigned int disSupp = 0;
 	Bitset SumOfN_1Items(this->objectCount);
-
 	for (int i = 0; i < pattern.size(); i++)
 	{
 		unsigned int columnKey = pattern[i];
-		Bitset bitset = this->getElement(columnKey);
+		Bitset bitset = this->getBitset(columnKey);
 #ifdef _DEBUG
 		for (int j = 0; j < this->objectCount; j++)
 		{
 			SumOfN_1Items[j] = SumOfN_1Items[j] || bitset[j];
 		}
 #else
-		SumOfN_1Items = SumOfN_1Items | getElement(columnKey);
-#endif			
+		SumOfN_1Items = SumOfN_1Items | getBitset(columnKey);
+#endif
 	}
+
+	unsigned int disSupp = 0;
+#ifdef _DEBUG
 	for (int i = 0; i < this->objectCount; i++)
 	{
 		if (SumOfN_1Items[i] == 1)
 			disSupp++;
 	}
+#else
+	disSupp = SumOfN_1Items.count();
+#endif
 	return disSupp;
 };
 
@@ -100,8 +143,8 @@ bool BinaryRepresentation::compareItemsets(const Utils::Itemset& itemset1, const
 			unsigned int columnKey_itemset1 = itemset1[i];
 			unsigned int columnKey_itemset2 = itemset2[i];
 
-			Bitset bitset1 = this->getElement(columnKey_itemset1);
-			Bitset bitset2 = this->getElement(columnKey_itemset2);
+			Bitset bitset1 = this->getBitset(columnKey_itemset1);
+			Bitset bitset2 = this->getBitset(columnKey_itemset2);
 #ifdef _DEBUG
 			Bitset result;
 			for (int j = 0; j < this->objectCount; j++)
