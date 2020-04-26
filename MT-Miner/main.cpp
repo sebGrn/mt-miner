@@ -29,8 +29,9 @@ class ArgumentParser
 public:
 	// arguments type
 	enum ParameterType {
-		OUTPUT_FILE,
-		SHOW_CLONE,
+		VERBOSE_MODE,
+		LOG_TO_FILE,
+		USE_CLONE,
 		NB_PARAM
 	};
 
@@ -39,8 +40,9 @@ public:
 	void buildParameters()
 	{
 		// give values to arguments
-		argumentValues.push_back(std::pair<ParameterType, std::string>(ParameterType::OUTPUT_FILE, "--output-file"));
-		argumentValues.push_back(std::pair<ParameterType, std::string>(ParameterType::SHOW_CLONE, "--show-clones"));
+		argumentValues.push_back(std::pair<ParameterType, std::string>(ParameterType::VERBOSE_MODE, "--verbose"));
+		argumentValues.push_back(std::pair<ParameterType, std::string>(ParameterType::LOG_TO_FILE, "--log"));
+		argumentValues.push_back(std::pair<ParameterType, std::string>(ParameterType::USE_CLONE, "--use-clone"));
 	}
 
 	void showUsage(const std::string& name)
@@ -48,8 +50,9 @@ public:
 		std::cout << "Usage: " << name << " intput <option(s)>"
 			<< "Options:\n"
 			<< "\t-h,--help\t\tShow this help message\n"
-			<< "\t--output-file\t\t<filename>\n"
-			<< "\t--show-clones\t\ttrue/false\n"
+			<< "\t--verbose\t\ttrue/false\n"
+			<< "\t--log\t\ttrue/false\n"
+			<< "\t--use-clone\t\ttrue/false\n"
 			<< std::endl;
 	}
 
@@ -92,6 +95,89 @@ public:
 
 // ----------------------------------------------------------------------------------------------------------- //
 
+void runMinimalTransversals(const std::string& file, bool useCloneOptimization, bool verbose, bool useOutputLogFile)
+{
+	std::cout << "computing minimal transversals on file " << file << std::endl;
+
+	unsigned int objectCount = 0;
+	unsigned int itemCount = 0;
+	std::shared_ptr<HyperGraph> hypergraph;
+
+	std::string logFile = file;
+	logFile += ".log";
+	Logger::init(logFile, verbose, useOutputLogFile);
+
+	// parsing
+	auto beginTime = std::chrono::system_clock::now();
+	{
+		HypergraphParser parser;
+		parser.parse(file);
+		// get data from parser
+		hypergraph = parser.getHypergraph();
+		objectCount = parser.getObjectCount();
+		itemCount = parser.getItemCount();
+	}
+
+	int64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
+	Logger::log("parsing hypergraph done in ", duration, " ms\n");
+	Logger::log("itemCount ", itemCount, "\n");
+	Logger::log("objectCount ", objectCount, "\n\n");
+
+	// minimal transversals computing
+	int64_t isEssentialDuration = 0;
+	std::vector<Itemset> minimalTransversals;
+	beginTime = std::chrono::system_clock::now();
+	{
+		MT_Miner miner(useCloneOptimization);
+		miner.init(hypergraph);
+
+		std::vector<Itemset> toTraverse;
+		for (unsigned int i = 1; i <= itemCount; i++)
+		{
+			// initialize item set			
+			toTraverse.push_back(Itemset(1, i));
+		}
+
+		// compute minimal transversals		
+		minimalTransversals = miner.computeMinimalTransversals(toTraverse);
+		isEssentialDuration = miner.getIsEssentialDuration();
+	}
+
+	Logger::close();
+
+	duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
+	Logger::log("\nminimal transversals done in ", duration, " ms\n");
+	Logger::log("isEssential total duraton ", isEssentialDuration, " ms\n\n");
+
+	// sort transversals itemset
+	//minimalTransversals = sortVectorOfItemset(minimalTransversals);
+
+	// print minimal transversals	
+	std::cout << "minimal transversals count : " << minimalTransversals.size() << std::endl;
+	if (minimalTransversals.size() > 6)
+		for_each(minimalTransversals.begin(), minimalTransversals.begin() + 5, [&](const Itemset& elt) { std::cout << Utils::itemsetToString(elt) << std::endl; });
+	else
+		for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { std::cout << Utils::itemsetToString(elt) << std::endl; });
+	std::cout << "..." << std::endl << std::endl;
+
+	// ----------------------------------------------------- //
+
+	// save minimal transversals into a file
+	if (useOutputLogFile)
+	{
+		std::string outFile = file;
+		outFile += ".out";
+
+		std::cout << "saving minimal transversals into file : " << outFile << std::endl;
+		std::ofstream outputStream;
+		outputStream.open(outFile);
+		for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { outputStream << Utils::itemsetToString(elt) << std::endl; });
+		outputStream.close();
+	}
+}
+
+// ----------------------------------------------------------------------------------------------------------- //
+
 int main(int argc, char* argv[])
 {
 	if (argc <= 1)
@@ -107,85 +193,17 @@ int main(int argc, char* argv[])
 	parser.buildParameters();
 	std::map<ArgumentParser::ParameterType, std::string> parameterList = parser.extractArguments(argc, argv);
 
-	std::string outputFilename = parameterList[ArgumentParser::OUTPUT_FILE];
-	bool showClones = parameterList[ArgumentParser::SHOW_CLONE] == "true" || parameterList[ArgumentParser::SHOW_CLONE] == "True" || parameterList[ArgumentParser::SHOW_CLONE] == "TRUE";
+	bool verboseMode = parameterList[ArgumentParser::VERBOSE_MODE] == "true" || parameterList[ArgumentParser::VERBOSE_MODE] == "True" || parameterList[ArgumentParser::VERBOSE_MODE] == "TRUE";
+	bool useOutputLogFile = parameterList[ArgumentParser::LOG_TO_FILE] == "true" || parameterList[ArgumentParser::LOG_TO_FILE] == "True" || parameterList[ArgumentParser::LOG_TO_FILE] == "TRUE";
+	bool useCloneOptimization = parameterList[ArgumentParser::USE_CLONE] == "true" || parameterList[ArgumentParser::USE_CLONE] == "True" || parameterList[ArgumentParser::USE_CLONE] == "TRUE";
+
+	runMinimalTransversals(file, useCloneOptimization, verboseMode, useOutputLogFile);
 
 	// performs tests
 	//unitaryTesting();
 	//compareResults(file, resfile);
 
-	std::cout << "computing minimal transversals on file " << file << std::endl;
 
-	unsigned int objectCount = 0;
-	unsigned int itemCount = 0;
-	std::shared_ptr<HyperGraph> hypergraph;
-
-	std::string logFile = outputFilename;
-	logFile += ".out";
-	Logger::init(logFile, true, true);
-
-	// parsing
-	auto beginTime = std::chrono::system_clock::now();
-	{
-		HypergraphParser parser;
-		parser.parse(file);
-		// get data from parser
-		hypergraph = parser.getHypergraph();
-		objectCount = parser.getObjectCount();
-		itemCount = parser.getItemCount();
-	}
-	int64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
-	std::cout << "parsing hypergraph done in " << duration << " ms" << std::endl;
-	std::cout << "itemCount " << itemCount << std::endl;
-	std::cout << "objectCount " << objectCount << std::endl;
-	std::cout << std::endl;
-
-	// minimal transversals computing
-	std::vector<Itemset> minimalTransversals;
-	beginTime = std::chrono::system_clock::now();
-	{
-		MT_Miner miner(true);
-		miner.init(hypergraph);
-
-		std::vector<Itemset> toTraverse;
-		for (unsigned int i = 1; i <= itemCount; i++)
-		{
-			// initialize item set			
-			toTraverse.push_back(Itemset(1, i));
-		}
-
-		// compute minimal transversals		
-		minimalTransversals = miner.computeMinimalTransversals(toTraverse);
-	}
-
-	Logger::close();
-
-	duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
-	std::cout << "minimal transversals done in " << duration << " ms" << std::endl;
-
-	// sort transversals computing
-	//minimalTransversals = sortVectorOfItemset(minimalTransversals);
-
-	// print minimal transversals	
-	std::cout << std::endl;
-	std::cout << "minimal transversals count : " << minimalTransversals.size() << std::endl;
-	if (minimalTransversals.size() > 6)
-		for_each(minimalTransversals.begin(), minimalTransversals.begin() + 5, [&](const Itemset& elt) { std::cout << Utils::itemsetToString(elt) << std::endl; });
-	else
-		for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { std::cout << Utils::itemsetToString(elt) << std::endl; });
-	std::cout << "..." << std::endl << std::endl;
-
-	// ----------------------------------------------------- //
-
-	// save minimal transversals into a file
-	if (!outputFilename.empty())
-	{
-		std::cout << "saving minimal transversals into file : " << outputFilename << std::endl;
-		std::ofstream outputStream;
-		outputStream.open(outputFilename);
-		for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { outputStream << Utils::itemsetToString(elt) << std::endl; });
-		outputStream.close();
-	}
 }
 
 
@@ -198,7 +216,7 @@ void unitaryTesting()
 	HypergraphParser parser;
 	parser.parse("data/test.txt");
 
-	std::vector<std::vector<unsigned int>> hypergraph = parser.getHypergraph();
+	std::shared_ptr<HyperGraph> hypergraph = parser.getHypergraph();
 	unsigned int objectCount = parser.getObjectCount();
 	unsigned int itemCount = parser.getItemCount();
 	std::cout << "itemCount " << itemCount << std::endl;
@@ -207,8 +225,8 @@ void unitaryTesting()
 	assert(itemCount == 8);
 
 	// allocate miner
-	MT_Miner miner;
-	miner.init(itemCount, objectCount, hypergraph);
+	MT_Miner miner(true);
+	miner.init(hypergraph);
 
 	unsigned int disjonctifSupport = miner.computeDisjonctifSupport("1");
 	std::cout << "disjonctifSupport(V1) " << disjonctifSupport << std::endl;
@@ -247,8 +265,8 @@ void unitaryTesting()
 		std::cout << "{" << elt << "}" << std::endl;
 		});
 	std::cout << std::endl;
-}
-*/
+}*/
+
 /// Compare results between input and attended results
 /*bool compareResults(const std::string& input_file, const std::string& res_file)
 {

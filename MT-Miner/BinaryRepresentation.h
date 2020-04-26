@@ -3,7 +3,10 @@
 #include <vector>
 #include <map>
 #include <list>
+#include <chrono>
+#ifndef _DEBUG
 #include <boost/dynamic_bitset.hpp>
+#endif
 
 #include "utils.h"
 #include "Bitset.h"
@@ -28,8 +31,10 @@ private:
 	/// pair of original index, clone index
 	std::vector<std::pair<unsigned int, unsigned int>> clonedBitsetIndexes;
 
+	int64_t isEssentialDuration;
+
 private:
-	bool checkOneItem(int itemBar, const Utils::Itemset& itemsOfpattern) const;
+	//bool checkOneItem(int itemBar, const Utils::Itemset& itemsOfpattern) const;
 	bool compareItemsets(const Utils::Itemset& itemset1, const Utils::Itemset& itemset2) const;
 
 public:
@@ -38,7 +43,7 @@ public:
 	///
 	unsigned int computeDisjonctifSupport(const Utils::Itemset& pattern) const;
 	/// return true if element is essential
-	bool isEssential(const Utils::Itemset& itemsOfPattern) const;
+	bool isEssential(const Utils::Itemset& itemsOfPattern);
 	///
 	void buildCloneList();
 	///
@@ -60,5 +65,10 @@ public:
 	{
 		assert(binaryRepresentation.find(key) != binaryRepresentation.end());
 		return binaryRepresentation.at(key);
+	}
+
+	int64_t getIsEssentialDuration() const
+	{
+		return this->isEssentialDuration;
 	}
 };

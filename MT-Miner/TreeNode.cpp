@@ -38,7 +38,7 @@ void TreeNode::computeLists(std::vector<Utils::Itemset>& graph_mt)
 	Utils::Itemset previousItem;
 	// build maxClique, toExplore lists
 	for_each(toTraverse.begin(), toTraverse.end(), [&](const Utils::Itemset& currentItem) {
-
+	
 		unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(currentItem);
 		if (disjSup == this->binaryRepresentation->getObjectCount())
 		{
@@ -53,10 +53,10 @@ void TreeNode::computeLists(std::vector<Utils::Itemset>& graph_mt)
 				std::vector<std::pair<unsigned int, unsigned int>> originalClonedIndexes;
 				if (this->binaryRepresentation->containsOriginals(currentItem, originalClonedIndexes))
 				{
-					std::vector<Utils::Itemset> clonedCombination;					
+					std::vector<Utils::Itemset> clonedCombination;
 					buildClonedCombinason(currentItem, clonedCombination, originalClonedIndexes);
-					
-					for(auto it = clonedCombination.begin(); it != clonedCombination.end(); it++)
+
+					for (auto it = clonedCombination.begin(); it != clonedCombination.end(); it++)
 					{
 						graph_mt.push_back(*it);
 						Logger::log("--> minimalTraversal list (clone), add : ", Utils::itemsetToString(*it), ", size : ", std::to_string(graph_mt.size()), "\n");
@@ -71,7 +71,7 @@ void TreeNode::computeLists(std::vector<Utils::Itemset>& graph_mt)
 				// must be the 1st element with only one element
 				previousItem = currentItem;
 				maxClique.push_back(currentItem);
-				Logger::log("--> maxClique list : ", Utils::itemsetListToString(maxClique), "\n");
+				//Logger::log("--> maxClique list : ", Utils::itemsetListToString(maxClique), "\n");
 			}
 			else
 			{
@@ -79,18 +79,18 @@ void TreeNode::computeLists(std::vector<Utils::Itemset>& graph_mt)
 				Utils::Itemset combinedItem = Utils::combineItemset(previousItem, currentItem);
 				// compute disjonctif support of the concatenation
 				unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(combinedItem);
-				Logger::log("disjonctive support for element ", Utils::itemsetToString(combinedItem), " : ", std::to_string(disjSup), "\n");
+				//Logger::log("disjonctive support for element ", Utils::itemsetToString(combinedItem), " : ", std::to_string(disjSup), "\n");
 
 				if (disjSup != this->binaryRepresentation->getObjectCount())
 				{
 					previousItem = combinedItem;
 					maxClique.push_back(currentItem);
-					Logger::log("--> maxClique list : ", Utils::itemsetListToString(maxClique), "\n");
+					//Logger::log("--> maxClique list : ", Utils::itemsetListToString(maxClique), "\n");
 				}
 				else
 				{
 					toExplore.push_back(currentItem);
-					Logger::log("--> toExplore list : ", Utils::itemsetListToString(toExplore), "\n");
+					//Logger::log("--> toExplore list : ", Utils::itemsetListToString(toExplore), "\n");
 				}
 			}
 		}
@@ -121,7 +121,8 @@ void TreeNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt)
 		combinedItemsetList.insert(combinedItemsetList.end(), maxClique.begin(), maxClique.end());
 		
 		// loop on candidates from toExplore list only
-		for (unsigned int i = 0; i < lastIndexToTest; i++)
+		//#pragma omp parallel for
+		for (int i = 0; i < lastIndexToTest; i++)
 		{
 			std::vector<Utils::Itemset> newToTraverse;
 			Utils::Itemset toCombinedLeft = combinedItemsetList[i];			

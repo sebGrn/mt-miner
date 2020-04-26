@@ -4,104 +4,148 @@
 /// build binary representation from formal context
 BinaryRepresentation::BinaryRepresentation(const FormalContext& context)
 {
+	this->isEssentialDuration = 0;
 	this->objectCount = context.getObjectCount();
 	this->itemCount = context.getItemCount();
 
-	for (unsigned int j = 0; j < this->itemCount; j++)			// 8 on test.txt
+	//#pragma omp parallel for
+	for (int j = 0; j < this->itemCount; j++)			// 8 on test.txt
 	{
 		Bitset bitset(this->objectCount);
-		for (unsigned int i = 0; i < this->objectCount; i++)	// 6 on test.txt
+		
+		//#pragma omp parallel for
+		for (int i = 0; i < this->objectCount; i++)	// 6 on test.txt
 		{
+			//#pragma omp critical
 			bitset[i] = context.getElement(i, j);
 		}
-		unsigned int currentKey = j + 1;
-		this->binaryRepresentation[currentKey] = bitset;
+
+		// set a critical section to allow multiple thread to write in size_tuples vector
+		//#pragma omp critical
+		{
+			unsigned int currentKey = j + 1;
+			this->binaryRepresentation[currentKey] = bitset;
+		}
 	}
 };
 
-bool BinaryRepresentation::checkOneItem(int itemBar, const Utils::Itemset& itemsOfpattern) const
-{
-	Bitset SumOfN_1Items(this->objectCount);
-	for (auto it = itemsOfpattern.begin(); it != itemsOfpattern.end(); it++)
-	{
-		if (*it != itemBar)
-		{
-#ifdef _DEBUG
-			Bitset bitset = this->getBitset(*it);
-			for (int j = 0; j < this->objectCount; j++)
-			{
-				SumOfN_1Items[j] = SumOfN_1Items[j] || bitset[j];
-			}
-#else
-			SumOfN_1Items = SumOfN_1Items | this->getBitset(elt);
-#endif
-		}
-	}
-
-	Bitset bitset = this->getBitset(itemBar);
-	bool res = false;
-	for (int i = 0; i < this->objectCount; i++)
-	{
-		if (SumOfN_1Items[i] == false && bitset[i] == true)
-		{
-			res = true;
-			break;
-		}
-	}
-	return res;
-}
+//bool BinaryRepresentation::checkOneItem(int itemBar, const Utils::Itemset& itemsOfpattern) const
+//{
+//	Bitset SumOfN_1Items(this->objectCount);
+//	for (auto it = itemsOfpattern.begin(); it != itemsOfpattern.end(); it++)
+//	{
+//		if (*it != itemBar)
+//		{
+//#ifdef _DEBUG
+//			Bitset bitset = this->getBitset(*it);
+//			for (int j = 0; j < this->objectCount; j++)
+//			{
+//				SumOfN_1Items[j] = SumOfN_1Items[j] || bitset[j];
+//			}
+//#else
+//			SumOfN_1Items = SumOfN_1Items | this->getBitset(elt);
+//#endif
+//		}
+//	}
+//
+//	Bitset bitset = this->getBitset(itemBar);
+//	bool res = false;
+//	for (int i = 0; i < this->objectCount; i++)
+//	{
+//		if (SumOfN_1Items[i] == false && bitset[i] == true)
+//		{
+//			res = true;
+//			break;
+//		}
+//	}
+//	return res;
+//}
 
 // return true if element is essential
-bool BinaryRepresentation::isEssential(const Utils::Itemset& itemset) const
+bool BinaryRepresentation::isEssential(const Utils::Itemset& itemset)
 {
+	auto beginTime = std::chrono::system_clock::now();
+
 	if (itemset.size() == 1)
 		return true;
 
-	bool result = false;
-	for (auto it1 = itemset.begin(); it1 != itemset.end(); it1++)
+	bool isEssential = false;
+	for (int i1 = 0; i1 != static_cast<int>(itemset.size()); i1++)
 	{
 		Bitset SumOfN_1Items(this->objectCount);
-		for (auto it2 = itemset.begin(); it2 != itemset.end(); it2++)
-		{
-			if (it1 != it2)
+		
+		// dont forget to initialize boolean
+		isEssential = false;
+	
+		//#pragma omp parallel for
+		for (int i2 = 0; i2 < static_cast<int>(itemset.size()); i2++)
+		{			
+			if (i1 != i2)
 			{
 #ifdef _DEBUG
-				Bitset bitset = this->getBitset(*it2);
+				unsigned int key2 = itemset[i2];
+				Bitset bitset = this->getBitset(key2);
 				for (int j = 0; j < this->objectCount; j++)
 				{
+					//#pragma omp critical
 					SumOfN_1Items[j] = SumOfN_1Items[j] || bitset[j];
 				}
 #else
-				SumOfN_1Items = SumOfN_1Items | this->getBitset(elt); 
+				//#pragma omp critical
+				SumOfN_1Items = SumOfN_1Items | this->getBitset(key2);
 #endif
 			}
 		}
-		Bitset bitset = this->getBitset(*it1);
+
+		unsigned int key1 = itemset[i1];
+		Bitset bitset = this->getBitset(key1);
+
+		//#pragma omp parallel for
 		for (int i = 0; i < this->objectCount; i++)
 		{
 			if (SumOfN_1Items[i] == false && bitset[i] == true)
 			{
-				result = true;
+				// this bitset is essential, check we next bitset
+				isEssential = true;
 				break;
 			}
 		}
 
-		if (!result)
+		if (!isEssential)
+		{
+			// this bitset is not essential, return false
 			break;
+		}
 	}
-	return result;
+	
+	this->isEssentialDuration += std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
+	
+	return isEssential;
+/*
+	// all bitsets from itemset are essentials
+	//return isEssential;
 
-	/*for (unsigned int i = 0; i < itemset.size(); i++)
+	bool isEssential2 = true;
+	for (unsigned int i = 0; i < itemset.size(); i++)
 	{
 		if (!checkOneItem(itemset[i], itemset))
-			return false;
+		{
+			isEssential2 = false;
+			break;
+		}
 	}
-	return true;*/
+
+	if (isEssential != isEssential2)
+		int k = 0;
+	return isEssential2;
+*/
 }
 
 unsigned int BinaryRepresentation::computeDisjonctifSupport(const Utils::Itemset& pattern) const
 {
 	Bitset SumOfN_1Items(this->objectCount);
+
+	//#pragma omp parallel for
 	for (int i = 0; i < pattern.size(); i++)
 	{
 		unsigned int columnKey = pattern[i];
@@ -109,10 +153,12 @@ unsigned int BinaryRepresentation::computeDisjonctifSupport(const Utils::Itemset
 #ifdef _DEBUG
 		for (int j = 0; j < this->objectCount; j++)
 		{
-			SumOfN_1Items[j] = SumOfN_1Items[j] || bitset[j];
+			//#pragma omp critical
+			SumOfN_1Items[j] = SumOfN_1Items[j] || bitset[j];			
 		}
 #else
-		SumOfN_1Items = SumOfN_1Items | getBitset(columnKey);
+		//#pragma omp critical
+		SumOfN_1Items = SumOfN_1Items | getBitset(columnKey);		
 #endif
 	}
 
@@ -138,6 +184,7 @@ bool BinaryRepresentation::compareItemsets(const Utils::Itemset& itemset1, const
 		sameItemset = false;
 	else
 	{
+		//#pragma omp parallel for
 		for (int i = 0; i < itemset1.size(); i++)
 		{
 			unsigned int columnKey_itemset1 = itemset1[i];
@@ -173,7 +220,7 @@ void BinaryRepresentation::buildCloneList()
 				{
 					// push a clone <original index, clone index>
 					clonedBitsetIndexes.push_back(std::pair<unsigned int, unsigned int>(it1->first, it2->first));
-					Logger::log("** add clone at index <", std::to_string(it1->first), ", ", std::to_string(it2->first), ">\n");
+					Logger::log("** clone detected at index <", std::to_string(it1->first), ", ", std::to_string(it2->first), "> **\n");
 				}
 			}
 		}

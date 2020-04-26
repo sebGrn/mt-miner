@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <cassert>
+#include <omp.h>
 
 #include "utils.h"
 #include "Bitset.h"
@@ -30,5 +31,11 @@ public:
 
 	///
 	std::vector<Utils::Itemset> computeMinimalTransversals(const std::vector<Utils::Itemset>& toTraverse) const;
+
+	///
+	int64_t getIsEssentialDuration() const
+	{
+		return binaryRepresentation->getIsEssentialDuration();
+	}
 };
 

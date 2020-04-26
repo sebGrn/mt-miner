@@ -24,13 +24,13 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Graph.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="BinaryRepresentation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Logger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TreeNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -59,10 +59,10 @@
     <ClInclude Include="Bitset.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Graph.h">
+    <ClInclude Include="Logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Logger.h">
+    <ClInclude Include="TreeNode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

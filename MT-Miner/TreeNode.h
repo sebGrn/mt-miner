@@ -13,7 +13,7 @@ private:
 	/// true if we want to use clone optimization
 	/// a clone is a item from binary representation 
 	bool useCloneOptimization;
-	std::vector<std::shared_ptr<GraphNode>> children;
+	std::vector<std::shared_ptr<TreeNode>> children;
 	std::shared_ptr<BinaryRepresentation> binaryRepresentation;
 
 	std::vector<Utils::Itemset> toTraverse;
