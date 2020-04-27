@@ -47,6 +47,19 @@ public:
 		}
 	};
 
+	struct compare_second_value_of_pair
+	{
+		unsigned int key;
+		compare_second_value_of_pair(unsigned int const& i) : key(i) { }
+
+		// check that original (it1->first) is not already registered as a clone (it2->first) in clonedBitsetIndexes
+		bool operator()(std::pair<unsigned int, unsigned int> const& item)
+		{
+			return item.second == key;
+		}
+	};
+
+
 	/// <summary>
 	/// extract a list of int from a string
 	/// </summary>

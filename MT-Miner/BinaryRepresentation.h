@@ -51,6 +51,22 @@ public:
 	///
 	bool containsOriginals(const Utils::Itemset& itemset, std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes) const;
 
+	//
+	void serialize(const std::string& outputile) const
+	{
+		std::ofstream fileStream = std::ofstream(outputile, std::ofstream::out);
+		for (auto it = this->binaryRepresentation.begin(); it != this->binaryRepresentation.end(); it++)
+		{
+			for (int i = 0; i < it->second.size(); i++)
+			{
+				fileStream << (it->second)[i] ? "1" : "0";
+				fileStream << ";";
+			}
+			fileStream << std::endl;
+		}
+		fileStream.close();
+	};
+
 	unsigned int getItemCount() const
 	{
 		return this->itemCount;

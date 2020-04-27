@@ -11,14 +11,16 @@ MT_Miner::~MT_Miner()
 
 }
 
-void MT_Miner::init(const std::shared_ptr<HyperGraph>& hypergraph)
+void MT_Miner::init(const std::shared_ptr<HyperGraph>& hypergraph, std::vector<Utils::Itemset>& toTraverse)
 {
 	// build formal context from hypergraph
 	FormalContext formalContext(hypergraph);
+	//formalContext.serialize("format_context.csv");
 
 	// build binary representation from formal context
 	binaryRepresentation.reset();
 	binaryRepresentation = std::make_shared<BinaryRepresentation>(formalContext);
+	//binaryRepresentation->serialize("binary_rep.csv");
 
 	if (this->useCloneOptimization)
 	{
@@ -36,6 +38,14 @@ void MT_Miner::init(const std::shared_ptr<HyperGraph>& hypergraph)
 		// if we have, memorize the indexes of the original and the cloned
 		// if the cloned bitset index is into a toExplore list, dont compute the mt for the clone but use those from the original
 		binaryRepresentation->buildCloneList();
+	}
+
+	toTraverse.clear();
+	for (unsigned int i = 1; i <= formalContext.getItemCount(); i++)
+	{
+		Utils::Itemset itemset(1, i);
+		if (!this->binaryRepresentation->containsAClone(itemset))	
+			toTraverse.push_back(itemset);
 	}
 }
 

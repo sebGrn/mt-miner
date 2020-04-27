@@ -82,8 +82,8 @@ bool BinaryRepresentation::isEssential(const Utils::Itemset& itemset)
 		{			
 			if (i1 != i2)
 			{
-#ifdef _DEBUG
 				unsigned int key2 = itemset[i2];
+#ifdef _DEBUG				
 				Bitset bitset = this->getBitset(key2);
 				for (int j = 0; j < this->objectCount; j++)
 				{
@@ -212,15 +212,21 @@ void BinaryRepresentation::buildCloneList()
 {
 	for (auto it1 = this->binaryRepresentation.begin(); it1 != this->binaryRepresentation.end(); it1++)
 	{
+		//for (auto it2 = this->binaryRepresentation.begin(); it2 != this->binaryRepresentation.end(); it2++)
 		for (auto it2 = it1; it2 != this->binaryRepresentation.end(); it2++)
 		{
 			if (it1 != it2)
 			{
 				if (it1->second == it2->second)
 				{
-					// push a clone <original index, clone index>
-					clonedBitsetIndexes.push_back(std::pair<unsigned int, unsigned int>(it1->first, it2->first));
-					Logger::log("** clone detected at index <", std::to_string(it1->first), ", ", std::to_string(it2->first), "> **\n");
+					// check that original (it1->first) is not already registered as a clone (second) in clonedBitsetIndexes
+					auto it_finder = find_if(clonedBitsetIndexes.begin(), clonedBitsetIndexes.end(), Utils::compare_second_value_of_pair(it1->first));
+					if (it_finder == clonedBitsetIndexes.end())
+					{
+						// push a clone <original index, clone index>
+						clonedBitsetIndexes.push_back(std::pair<unsigned int, unsigned int>(it1->first, it2->first));
+						Logger::log("** clone detected at index <", std::to_string(it1->first), ", ", std::to_string(it2->first), "> **\n");
+					}
 				}
 			}
 		}

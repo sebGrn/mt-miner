@@ -2,6 +2,7 @@
 #include <vector>
 #include <cassert>
 #include <boost/dynamic_bitset.hpp>
+#include <fstream>
 
 #include "Bitset.h"
 #include "HyperGraph.h"
@@ -40,6 +41,21 @@ public:
 			}
 			this->formalContext.push_back(bitset);
 		}
+	};
+
+	void serialize(const std::string& outputile) const
+	{
+		std::ofstream fileStream = std::ofstream(outputile, std::ofstream::out);
+		for (auto it = this->formalContext.begin(); it != this->formalContext.end(); it++)
+		{
+			for (int i = 0; i < it->size(); i++)
+			{
+				fileStream << (*it)[i] ? "1" : "0";				
+				fileStream << ";";
+			}
+			fileStream << std::endl;
+		}
+		fileStream.close();
 	};
 
 	unsigned int getItemCount() const

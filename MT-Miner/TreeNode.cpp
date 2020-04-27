@@ -126,8 +126,9 @@ void TreeNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt)
 		{
 			std::vector<Utils::Itemset> newToTraverse;
 			Utils::Itemset toCombinedLeft = combinedItemsetList[i];			
+			//std::string tmp = Utils::itemsetToString(toCombinedLeft);
+			
 			// if this itemset is a clone, do not compute the minimal transverals
-			std::string tmp = Utils::itemsetToString(toCombinedLeft);
 			if (!this->binaryRepresentation->containsAClone(toCombinedLeft))
 			{
 				// combine each element between [0, lastIndexToTest] with the entire combined itemset list
@@ -136,7 +137,8 @@ void TreeNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt)
 					assert(j < combinedItemsetList.size());
 					Utils::Itemset toCombinedRight = combinedItemsetList[j];
 					Utils::Itemset combinedItemset = Utils::combineItemset(toCombinedLeft, toCombinedRight);
-
+					
+					// check if combined item is containing a clone
 					if (!this->binaryRepresentation->containsAClone(combinedItemset))
 					{
 						// test if combined itemset is essential

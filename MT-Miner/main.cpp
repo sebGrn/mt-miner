@@ -109,70 +109,65 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 
 	// parsing
 	auto beginTime = std::chrono::system_clock::now();
+	
+	HypergraphParser parser;
+	if (parser.parse(file))
 	{
-		HypergraphParser parser;
-		parser.parse(file);
 		// get data from parser
 		hypergraph = parser.getHypergraph();
 		objectCount = parser.getObjectCount();
 		itemCount = parser.getItemCount();
-	}
 
-	int64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
-	Logger::log("parsing hypergraph done in ", duration, " ms\n");
-	Logger::log("itemCount ", itemCount, "\n");
-	Logger::log("objectCount ", objectCount, "\n\n");
+		int64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
+		Logger::log("parsing hypergraph done in ", duration, " ms\n");
+		Logger::log("itemCount ", itemCount, "\n");
+		Logger::log("objectCount ", objectCount, "\n\n");
 
-	// minimal transversals computing
-	int64_t isEssentialDuration = 0;
-	std::vector<Itemset> minimalTransversals;
-	beginTime = std::chrono::system_clock::now();
-	{
-		MT_Miner miner(useCloneOptimization);
-		miner.init(hypergraph);
-
-		std::vector<Itemset> toTraverse;
-		for (unsigned int i = 1; i <= itemCount; i++)
+		// minimal transversals computing
+		int64_t isEssentialDuration = 0;
+		std::vector<Itemset> minimalTransversals;
+		beginTime = std::chrono::system_clock::now();
 		{
-			// initialize item set			
-			toTraverse.push_back(Itemset(1, i));
+			MT_Miner miner(useCloneOptimization);
+			std::vector<Itemset> toTraverse;
+			miner.init(hypergraph, toTraverse);
+
+			// compute minimal transversals		
+			minimalTransversals = miner.computeMinimalTransversals(toTraverse);
+			isEssentialDuration = miner.getIsEssentialDuration();
 		}
 
-		// compute minimal transversals		
-		minimalTransversals = miner.computeMinimalTransversals(toTraverse);
-		isEssentialDuration = miner.getIsEssentialDuration();
-	}
+		Logger::close();
 
-	Logger::close();
+		duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
+		Logger::log("\nminimal transversals done in ", duration, " ms\n");
+		Logger::log("isEssential total duraton ", isEssentialDuration, " ms\n\n");
 
-	duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
-	Logger::log("\nminimal transversals done in ", duration, " ms\n");
-	Logger::log("isEssential total duraton ", isEssentialDuration, " ms\n\n");
+		// sort transversals itemset
+		//minimalTransversals = sortVectorOfItemset(minimalTransversals);
 
-	// sort transversals itemset
-	//minimalTransversals = sortVectorOfItemset(minimalTransversals);
+		// print minimal transversals	
+		std::cout << "minimal transversals count : " << minimalTransversals.size() << std::endl;
+		if (minimalTransversals.size() > 6)
+			for_each(minimalTransversals.begin(), minimalTransversals.begin() + 5, [&](const Itemset& elt) { std::cout << Utils::itemsetToString(elt) << std::endl; });
+		else
+			for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { std::cout << Utils::itemsetToString(elt) << std::endl; });
+		std::cout << "..." << std::endl << std::endl;
 
-	// print minimal transversals	
-	std::cout << "minimal transversals count : " << minimalTransversals.size() << std::endl;
-	if (minimalTransversals.size() > 6)
-		for_each(minimalTransversals.begin(), minimalTransversals.begin() + 5, [&](const Itemset& elt) { std::cout << Utils::itemsetToString(elt) << std::endl; });
-	else
-		for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { std::cout << Utils::itemsetToString(elt) << std::endl; });
-	std::cout << "..." << std::endl << std::endl;
+		// ----------------------------------------------------- //
 
-	// ----------------------------------------------------- //
+		// save minimal transversals into a file
+		if (useOutputLogFile)
+		{
+			std::string outFile = file;
+			outFile += ".out";
 
-	// save minimal transversals into a file
-	if (useOutputLogFile)
-	{
-		std::string outFile = file;
-		outFile += ".out";
-
-		std::cout << "saving minimal transversals into file : " << outFile << std::endl;
-		std::ofstream outputStream;
-		outputStream.open(outFile);
-		for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { outputStream << Utils::itemsetToString(elt) << std::endl; });
-		outputStream.close();
+			std::cout << "saving minimal transversals into file : " << outFile << std::endl;
+			std::ofstream outputStream;
+			outputStream.open(outFile);
+			for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { outputStream << Utils::itemsetToString(elt) << std::endl; });
+			outputStream.close();
+		}
 	}
 }
 
@@ -198,164 +193,4 @@ int main(int argc, char* argv[])
 	bool useCloneOptimization = parameterList[ArgumentParser::USE_CLONE] == "true" || parameterList[ArgumentParser::USE_CLONE] == "True" || parameterList[ArgumentParser::USE_CLONE] == "TRUE";
 
 	runMinimalTransversals(file, useCloneOptimization, verboseMode, useOutputLogFile);
-
-	// performs tests
-	//unitaryTesting();
-	//compareResults(file, resfile);
-
-
 }
-
-
-
-///
-/*
-void unitaryTesting()
-{
-	// parse file
-	HypergraphParser parser;
-	parser.parse("data/test.txt");
-
-	std::shared_ptr<HyperGraph> hypergraph = parser.getHypergraph();
-	unsigned int objectCount = parser.getObjectCount();
-	unsigned int itemCount = parser.getItemCount();
-	std::cout << "itemCount " << itemCount << std::endl;
-	std::cout << "objectCount " << objectCount << std::endl;
-	assert(objectCount == 6);
-	assert(itemCount == 8);
-
-	// allocate miner
-	MT_Miner miner(true);
-	miner.init(hypergraph);
-
-	unsigned int disjonctifSupport = miner.computeDisjonctifSupport("1");
-	std::cout << "disjonctifSupport(V1) " << disjonctifSupport << std::endl;
-	assert(disjonctifSupport == 1);
-
-	disjonctifSupport = miner.computeDisjonctifSupport("1 2");
-	std::cout << "disjonctifSupport(V12) " << disjonctifSupport << std::endl;
-	assert(disjonctifSupport == 2);
-
-	disjonctifSupport = miner.computeDisjonctifSupport("1 2 3");
-	std::cout << "disjonctifSupport(V123) " << disjonctifSupport << std::endl;
-	assert(disjonctifSupport == 3);
-
-	disjonctifSupport = miner.computeDisjonctifSupport("1 2 3 4");
-	std::cout << "disjonctifSupport(V1234) " << disjonctifSupport << std::endl;
-	assert(disjonctifSupport == 4);
-
-	std::cout << "----------------------------------------------------------" << std::endl;
-	std::cout << "computing minimal transversals  ..." << std::endl;
-
-	std::vector<std::string> toTraverse;
-	for (unsigned int i = 1; i <= itemCount; i++)
-		toTraverse.push_back(std::to_string(i));
-
-	std::vector<std::string> correctToTraverse = { "1", "2", "3", "4", "5", "6", "7", "8" };
-	assert(correctToTraverse == toTraverse);
-
-	// compute minimal transversals
-	std::vector<std::string> minimalTransversals;
-	miner.computeMinimalTransversals(toTraverse, minimalTransversals);
-	minimalTransversals = sortVectorOfString(minimalTransversals);
-
-	// print minimal transversals
-	std::cout << "show minimal transversals" << std::endl;
-	for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const std::string& elt) {
-		std::cout << "{" << elt << "}" << std::endl;
-		});
-	std::cout << std::endl;
-}*/
-
-/// Compare results between input and attended results
-/*bool compareResults(const std::string& input_file, const std::string& res_file)
-{
-	bool notGood = false;
-	std::cout << "----------------------------------------------------------" << std::endl;
-	std::cout << "comparing results between " << input_file << " and " << res_file << std::endl;
-
-	// parse file and store hypergraph
-	HypergraphParser parser;
-	parser.parse(input_file);
-
-	// make toTraverseList
-	std::vector<Itemset> toTraverse;
-	for (unsigned int i = 1; i <= parser.getItemCount(); i++)
-	{
-		// initialize item set
-		toTraverse.push_back(Itemset(1, i));
-	}
-
-	// call mt_miner and compute minimal transverse
-	MT_Miner miner(false);
-	miner.init(parser.getHypergraph());
-	std::vector<Itemset> minimalTransversals = miner.computeMinimalTransversals(toTraverse);
-	// sort results
-	minimalTransversals = Utils::sortVectorOfItemset(minimalTransversals);
-
-	// print minimal transversals
-	// print minimal transversals
-	std::cout << std::endl;
-	std::cout << "minimal transversals count : " << minimalTransversals.size() << std::endl;
-	if (minimalTransversals.size() > 5)
-		for_each(minimalTransversals.begin(), minimalTransversals.begin() + 5, [&](const Itemset& elt) { std::cout << Utils::itemsetToString(elt) << std::endl; });
-	else
-		for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { std::cout << Utils::itemsetToString(elt) << std::endl; });
-	std::cout << std::endl;
-
-
-	std::vector<Itemset> mt_resuls;
-	std::ifstream inputFile = std::ifstream();
-	inputFile.open(res_file);
-	if (!inputFile.fail())
-	{
-		// Parse the file line by line
-		while (!inputFile.eof())
-		{
-			// read and clean line from file
-			std::string line;
-			getline(inputFile, line);
-			if (!line.empty())
-			{
-				Itemset data = Utils::splitToVectorOfInt(line, ' ');
-				mt_resuls.push_back(data);
-			}
-		}
-		inputFile.close();
-	}
-
-	// sort results before comparing
-	mt_resuls = Utils::sortVectorOfItemset(mt_resuls);
-
-	// check with our results
-	for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& item) {
-		auto it = std::find_if(mt_resuls.begin(), mt_resuls.end(), Utils::compare_itemset(item));
-		if (it == mt_resuls.end())
-		{
-			std::cout << Utils::itemsetToString(item) << " from our computed transverals list has not been found in " << res_file << std::endl;
-			notGood = true;
-		}
-		});
-
-	std::cout << std::endl;
-
-	for_each(mt_resuls.begin(), mt_resuls.end(), [&](const Itemset& item) {
-		auto it = std::find_if(minimalTransversals.begin(), minimalTransversals.end(), Utils::compare_itemset(item));
-		if (it == minimalTransversals.end())
-		{
-			std::cout << Utils::itemsetToString(item) << "from " << res_file << " has not been found in our computed transverals list" << std::endl;
-			notGood = true;
-		}
-		});
-
-	if (!notGood)
-	{
-		std::cout << "!!! results are the same !!!" << std::endl;
-	}
-	std::cout << "----------------------------------------------------------" << std::endl;
-
-	return !notGood;
-}*/
-
-// ----------------------------------------------------------------------------------------------------------- //
-// ----------------------------------------------------------------------------------------------------------- //

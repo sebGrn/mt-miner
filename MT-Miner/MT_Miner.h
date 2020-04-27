@@ -27,7 +27,7 @@ public:
 
 	/// initialize the minimal transversals miner
 	/// this function build a format context from the hypergraph, then build the binary representation
-	void init(const std::shared_ptr<HyperGraph>& hypergraph);
+	void init(const std::shared_ptr<HyperGraph>& hypergraph, std::vector<Utils::Itemset>& toTraverse);
 
 	///
 	std::vector<Utils::Itemset> computeMinimalTransversals(const std::vector<Utils::Itemset>& toTraverse) const;
@@ -36,6 +36,12 @@ public:
 	int64_t getIsEssentialDuration() const
 	{
 		return binaryRepresentation->getIsEssentialDuration();
+	}
+
+	///
+	unsigned int computeDisjonctifSupport(const Utils::Itemset& pattern) const
+	{
+		return binaryRepresentation->computeDisjonctifSupport(pattern);
 	}
 };
 
