@@ -119,9 +119,11 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 		itemCount = parser.getItemCount();
 
 		int64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
+		Logger::setVerbose(true);
 		Logger::log("parsing hypergraph done in ", duration, " ms\n");
 		Logger::log("itemCount ", itemCount, "\n");
 		Logger::log("objectCount ", objectCount, "\n\n");
+		Logger::setVerbose(verbose);
 
 		// minimal transversals computing
 		int64_t isEssentialDuration = 0;
@@ -139,9 +141,11 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 
 		Logger::close();
 
+		Logger::setVerbose(true);
 		duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
 		Logger::log("\nminimal transversals done in ", duration, " ms\n");
 		Logger::log("isEssential total duraton ", isEssentialDuration, " ms\n\n");
+		Logger::setVerbose(verbose);
 
 		// sort transversals itemset
 		//minimalTransversals = sortVectorOfItemset(minimalTransversals);

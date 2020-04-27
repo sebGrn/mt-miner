@@ -23,6 +23,11 @@ public:
 		}
 	}
 	
+	static void setVerbose(bool _verbose)
+	{
+		verbose = _verbose;
+	}
+
 	static void close()
 	{
 		if (verboseIntoFile)
