@@ -22,7 +22,7 @@ namespace MTMinerUnitTests_ac_no_clone
 
 			// compute minimal transversals
 			std::vector<Utils::Itemset> minimalTransversals = miner.computeMinimalTransversals(toTraverse);
-			Assert::AreEqual(static_cast<int>(minimalTransversals.size()), 1916);
+			Assert::AreEqual(1916, static_cast<int>(minimalTransversals.size()));
 		}
 
 		TEST_METHOD(TestingMinimalTransversalsSize_ac_150k)
@@ -39,7 +39,7 @@ namespace MTMinerUnitTests_ac_no_clone
 
 			// compute minimal transversals
 			std::vector<Utils::Itemset> minimalTransversals = miner.computeMinimalTransversals(toTraverse);
-			Assert::AreEqual(static_cast<int>(minimalTransversals.size()), 1039);
+			Assert::AreEqual(1039, static_cast<int>(minimalTransversals.size()));
 		}
 
 		TEST_METHOD(TestingMinimalTransversalsSize_ac_200k)
@@ -56,7 +56,7 @@ namespace MTMinerUnitTests_ac_no_clone
 
 			// compute minimal transversals
 			std::vector<Utils::Itemset> minimalTransversals = miner.computeMinimalTransversals(toTraverse);
-			Assert::AreEqual(static_cast<int>(minimalTransversals.size()), 253);
+			Assert::AreEqual(253, static_cast<int>(minimalTransversals.size()));
 		}
 	};
 }

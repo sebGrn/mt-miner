@@ -13,53 +13,17 @@ BinaryRepresentation::BinaryRepresentation(const FormalContext& context)
 	{
 		Bitset bitset(this->objectCount);
 		
-		//#pragma omp parallel for
 		for (int i = 0; i < this->objectCount; i++)	// 6 on test.txt
 		{
-			//#pragma omp critical
 			bitset[i] = context.getElement(i, j);
 		}
 
 		// set a critical section to allow multiple thread to write in size_tuples vector
+		unsigned int currentKey = j + 1; 
 		//#pragma omp critical
-		{
-			unsigned int currentKey = j + 1;
-			this->binaryRepresentation[currentKey] = bitset;
-		}
+		this->binaryRepresentation[currentKey] = bitset;		
 	}
 };
-
-//bool BinaryRepresentation::checkOneItem(int itemBar, const Utils::Itemset& itemsOfpattern) const
-//{
-//	Bitset SumOfN_1Items(this->objectCount);
-//	for (auto it = itemsOfpattern.begin(); it != itemsOfpattern.end(); it++)
-//	{
-//		if (*it != itemBar)
-//		{
-//#ifdef _DEBUG
-//			Bitset bitset = this->getBitset(*it);
-//			for (int j = 0; j < this->objectCount; j++)
-//			{
-//				SumOfN_1Items[j] = SumOfN_1Items[j] || bitset[j];
-//			}
-//#else
-//			SumOfN_1Items = SumOfN_1Items | this->getBitset(elt);
-//#endif
-//		}
-//	}
-//
-//	Bitset bitset = this->getBitset(itemBar);
-//	bool res = false;
-//	for (int i = 0; i < this->objectCount; i++)
-//	{
-//		if (SumOfN_1Items[i] == false && bitset[i] == true)
-//		{
-//			res = true;
-//			break;
-//		}
-//	}
-//	return res;
-//}
 
 // return true if element is essential
 bool BinaryRepresentation::isEssential(const Utils::Itemset& itemset)
@@ -121,24 +85,6 @@ bool BinaryRepresentation::isEssential(const Utils::Itemset& itemset)
 	this->isEssentialDuration += std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
 	
 	return isEssential;
-/*
-	// all bitsets from itemset are essentials
-	//return isEssential;
-
-	bool isEssential2 = true;
-	for (unsigned int i = 0; i < itemset.size(); i++)
-	{
-		if (!checkOneItem(itemset[i], itemset))
-		{
-			isEssential2 = false;
-			break;
-		}
-	}
-
-	if (isEssential != isEssential2)
-		int k = 0;
-	return isEssential2;
-*/
 }
 
 unsigned int BinaryRepresentation::computeDisjonctifSupport(const Utils::Itemset& pattern) const
