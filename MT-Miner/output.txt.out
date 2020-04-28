@@ -1,0 +1,68 @@
+--> maxClique list : {{1}}
+disjonctive support for element {1,2} : 2
+--> maxClique list : {{1},{2}}
+disjonctive support for element {1,2,3} : 3
+--> maxClique list : {{1},{2},{3}}
+disjonctive support for element {1,2,3,4} : 4
+--> maxClique list : {{1},{2},{3},{4}}
+disjonctive support for element {1,2,3,4,5} : 4
+--> maxClique list : {{1},{2},{3},{4},{5}}
+disjonctive support for element {1,2,3,4,5,6} : 5
+--> maxClique list : {{1},{2},{3},{4},{5},{6}}
+disjonctive support for element {1,2,3,4,5,6,7} : 6
+--> toExplore list : {{7}}
+disjonctive support for element {1,2,3,4,5,6,8} : 5
+--> maxClique list : {{1},{2},{3},{4},{5},{6},{8}}
+----------------------------------------------------------
+toExplore list{{7}}
+maxClique list{{1},{2},{3},{4},{5},{6},{8}}
+{7,8} is not essential
+new toTraverse list{{7,1},{7,2},{7,3},{7,4},{7,5},{7,6}}
+----------------------------------------------------------
+disjonctive support for element {7,1} : 4
+--> maxClique list : {{7,1}}
+disjonctive support for element {7,1,2} : 4
+--> maxClique list : {{7,1},{7,2}}
+disjonctive support for element {7,1,2,3} : 5
+--> maxClique list : {{7,1},{7,2},{7,3}}
+disjonctive support for element {7,1,2,3,4} : 6
+--> toExplore list : {{7,4}}
+disjonctive support for element {7,1,2,3,5} : 5
+--> maxClique list : {{7,1},{7,2},{7,3},{7,5}}
+disjonctive support for element {7,1,2,3,5,6} : 6
+--> toExplore list : {{7,4},{7,6}}
+----------------------------------------------------------
+toExplore list{{7,4},{7,6}}
+maxClique list{{7,1},{7,2},{7,3},{7,5}}
+{7,4,6} is not essential
+{7,4,3} is not essential
+{7,4,5} is not essential
+new toTraverse list{{7,4,1},{7,4,2}}
+----------------------------------------------------------
+--> minimalTraversal list, add : {7,4,1}, size : 1
+--> minimalTraversal list, add : {7,4,2}, size : 2
+toExplore list is empty, end of the branch
+new toTraverse list{{7,6,1},{7,6,2},{7,6,3},{7,6,5}}
+----------------------------------------------------------
+disjonctive support for element {7,6,1} : 5
+--> maxClique list : {{7,6,1}}
+disjonctive support for element {7,6,1,2} : 5
+--> maxClique list : {{7,6,1},{7,6,2}}
+disjonctive support for element {7,6,1,2,3} : 6
+--> toExplore list : {{7,6,3}}
+disjonctive support for element {7,6,1,2,5} : 6
+--> toExplore list : {{7,6,3},{7,6,5}}
+----------------------------------------------------------
+toExplore list{{7,6,3},{7,6,5}}
+maxClique list{{7,6,1},{7,6,2}}
+{7,6,3,5} is not essential
+new toTraverse list{{7,6,3,1},{7,6,3,2}}
+----------------------------------------------------------
+--> minimalTraversal list, add : {7,6,3,1}, size : 3
+--> minimalTraversal list, add : {7,6,3,2}, size : 4
+toExplore list is empty, end of the branch
+new toTraverse list{{7,6,5,1},{7,6,5,2}}
+----------------------------------------------------------
+--> minimalTraversal list, add : {7,6,5,1}, size : 5
+--> minimalTraversal list, add : {7,6,5,2}, size : 6
+toExplore list is empty, end of the branch

@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <cassert>
-#include <boost/dynamic_bitset.hpp>
+
 
 #include "Bitset.h"
 #include "HyperGraph.h"

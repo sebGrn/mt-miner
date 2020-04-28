@@ -1,5 +1,5 @@
 #pragma once
-#include <boost/dynamic_bitset.hpp>
+
 #include <cassert>
 
 #ifdef _DEBUG
