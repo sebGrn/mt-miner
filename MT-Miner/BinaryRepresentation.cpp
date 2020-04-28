@@ -154,29 +154,32 @@ bool BinaryRepresentation::compareItemsets(const Utils::Itemset& itemset1, const
 	return sameItemset;
 }
 
-void BinaryRepresentation::buildCloneList()
+
+unsigned int BinaryRepresentation::buildCloneList()
 {
 	for (auto it1 = this->binaryRepresentation.begin(); it1 != this->binaryRepresentation.end(); it1++)
 	{
-		//for (auto it2 = this->binaryRepresentation.begin(); it2 != this->binaryRepresentation.end(); it2++)
 		for (auto it2 = it1; it2 != this->binaryRepresentation.end(); it2++)
 		{
+			// check do not test the same bitset
 			if (it1 != it2)
 			{
+				// test if binary representation bitsets are equal (it2 is a clone of it1 ?)
 				if (it1->second == it2->second)
 				{
 					// check that original (it1->first) is not already registered as a clone (second) in clonedBitsetIndexes
 					auto it_finder = find_if(clonedBitsetIndexes.begin(), clonedBitsetIndexes.end(), Utils::compare_second_value_of_pair(it1->first));
 					if (it_finder == clonedBitsetIndexes.end())
 					{
-						// push a clone <original index, clone index>
+						// push a clone as <original index, clone index>
 						clonedBitsetIndexes.push_back(std::pair<unsigned int, unsigned int>(it1->first, it2->first));
-						Logger::log("** clone detected at index <", std::to_string(it1->first), ", ", std::to_string(it2->first), "> **\n");
+						//Logger::log("** clone detected at index <", std::to_string(it1->first), ", ", std::to_string(it2->first), "> **\n");
 					}
 				}
 			}
 		}
 	}
+	return clonedBitsetIndexes.size();
 };
 
 bool BinaryRepresentation::containsAClone(const Utils::Itemset& itemset) const

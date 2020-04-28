@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cassert>
 #include <omp.h>
+#include <chrono>
 
 #include "utils.h"
 #include "Bitset.h"
@@ -12,10 +13,13 @@
 #include "HyperGraph.h"
 #include "BinaryRepresentation.h"
 #include "TreeNode.h"
+#include "Logger.h"
 
 class MT_Miner
 {
 private:
+	///
+	bool computeMtDone;
 	///
 	bool useCloneOptimization;
 	// binary representation 
@@ -30,7 +34,7 @@ public:
 	void init(const std::shared_ptr<HyperGraph>& hypergraph, std::vector<Utils::Itemset>& toTraverse);
 
 	///
-	std::vector<Utils::Itemset> computeMinimalTransversals(const std::vector<Utils::Itemset>& toTraverse) const;
+	std::vector<Utils::Itemset> computeMinimalTransversals(const std::vector<Utils::Itemset>& toTraverse);
 
 	///
 	int64_t getIsEssentialDuration() const

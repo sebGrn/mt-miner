@@ -45,7 +45,7 @@ void TreeNode::computeLists(std::vector<Utils::Itemset>& graph_mt)
 			// we have a minimal transversal
 			graph_mt.push_back(currentItem);
 			std::string tmp = Utils::itemsetToString(currentItem);
-			Logger::log("--> minimalTraversal list, add : ", Utils::itemsetToString(currentItem), ", size : ", std::to_string(graph_mt.size()), "\n");
+			//Logger::log("--> minimalTraversal list, add : ", Utils::itemsetToString(currentItem), ", size : ", std::to_string(graph_mt.size()), "\n");
 
 			// if this itemset contains an original, add the same minimal transverals list with the clone
 			if (this->useCloneOptimization)
@@ -59,7 +59,7 @@ void TreeNode::computeLists(std::vector<Utils::Itemset>& graph_mt)
 					for (auto it = clonedCombination.begin(); it != clonedCombination.end(); it++)
 					{
 						graph_mt.push_back(*it);
-						Logger::log("--> minimalTraversal list (clone), add : ", Utils::itemsetToString(*it), ", size : ", std::to_string(graph_mt.size()), "\n");
+						//Logger::log("--> minimalTraversal list (clone), add : ", Utils::itemsetToString(*it), ", size : ", std::to_string(graph_mt.size()), "\n");
 					}
 				}
 			}
@@ -106,13 +106,13 @@ void TreeNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt)
 
 	if (toExplore.empty())
 	{
-		Logger::log("toExplore list is empty, end of the branch", "\n");
+		//Logger::log("toExplore list is empty, end of the branch", "\n");
 	}
 	else
 	{
-		Logger::log("----------------------------------------------------------", "\n");
-		Logger::log("toExplore list", Utils::itemsetListToString(toExplore), "\n");
-		Logger::log("maxClique list", Utils::itemsetListToString(maxClique), "\n");
+		//Logger::log("----------------------------------------------------------", "\n");
+		//Logger::log("toExplore list", Utils::itemsetListToString(toExplore), "\n");
+		//Logger::log("maxClique list", Utils::itemsetListToString(maxClique), "\n");
 
 		// store toExploreList max index
 		unsigned int lastIndexToTest = toExplore.size();
@@ -146,17 +146,17 @@ void TreeNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt)
 							newToTraverse.push_back(combinedItemset);
 						else
 						{
-							Logger::log("", Utils::itemsetToString(combinedItemset), " is not essential", "\n");
+							//Logger::log("", Utils::itemsetToString(combinedItemset), " is not essential", "\n");
 						}
 					}
 					else
 					{
-						Logger::log("", Utils::itemsetToString(combinedItemset), " contains a clone, do not compute mt", "\n");
+						//Logger::log("", Utils::itemsetToString(combinedItemset), " contains a clone, do not compute mt", "\n");
 					}
 				}
 
-				Logger::log("new toTraverse list", Utils::itemsetListToString(newToTraverse), "\n");
-				Logger::log("----------------------------------------------------------", "\n");
+				//Logger::log("new toTraverse list", Utils::itemsetListToString(newToTraverse), "\n");
+				//Logger::log("----------------------------------------------------------", "\n");
 
 				// create a new child node for this newToTraverse list
 				std::shared_ptr<TreeNode> node = std::make_shared<TreeNode>(this->useCloneOptimization, newToTraverse, this->binaryRepresentation);
@@ -167,7 +167,7 @@ void TreeNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt)
 			}
 			else
 			{
-				Logger::log("", Utils::itemsetListToString(combinedItemsetList), " contains a clone, do not compute mt", "\n");
+				//Logger::log("", Utils::itemsetListToString(combinedItemsetList), " contains a clone, do not compute mt", "\n");
 			}
 		}
 	}

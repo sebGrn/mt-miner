@@ -66,17 +66,18 @@ public:
 	}
 
 
-	/*static void log(const std::string& msg)
+	template <typename T>
+	static void forceLog(T t)
 	{
-		if (verbose)
-		{
-			std::cout << msg << std::endl;
-		}
-		if (verboseIntoFile)
-		{
-			std::ofstream fileStream(filename, std::ofstream::app);
-			fileStream << msg << std::endl;
-			fileStream.close();
-		}
-	};*/
+		std::cout << t;
+	}
+
+	// recursive variadic function with beautiful templates
+	template<typename T, typename... Args>
+	static void forceLog(T t, Args... args)
+	{
+		std::cout << t;
+
+		forceLog(args...);
+	}
 };

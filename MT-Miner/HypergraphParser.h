@@ -6,7 +6,10 @@
 #include <algorithm>
 #include <map>
 #include <sstream>
+#include <chrono>
+#include <thread>
 
+#include "Logger.h"
 #include "HyperGraph.h"
 #include "MT_Miner.h"
 
@@ -19,7 +22,8 @@ class HypergraphParser
 
 private:
 	/// hypergraph ie matrix of int
-	std::shared_ptr<HyperGraph> hypergraph;		
+	std::shared_ptr<HyperGraph> hypergraph;
+	bool parsingDone;
 
 public:
 	HypergraphParser();

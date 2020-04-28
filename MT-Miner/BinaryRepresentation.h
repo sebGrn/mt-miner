@@ -4,6 +4,8 @@
 #include <map>
 #include <list>
 #include <chrono>
+#include <thread>
+
 #ifndef _DEBUG
 #include <boost/dynamic_bitset.hpp>
 #endif
@@ -45,7 +47,7 @@ public:
 	/// return true if element is essential
 	bool isEssential(const Utils::Itemset& itemsOfPattern);
 	///
-	void buildCloneList();
+	unsigned int buildCloneList();
 	///
 	bool containsAClone(const Utils::Itemset& itemset) const;
 	///

@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <iterator>
 #include <chrono>
+#include <omp.h>
 
 using Itemset = std::vector<unsigned int>;
 
@@ -31,6 +32,7 @@ public:
 	enum ParameterType {
 		VERBOSE_MODE,
 		LOG_TO_FILE,
+		OUTPUT_TO_FILE,
 		USE_CLONE,
 		NB_PARAM
 	};
@@ -42,6 +44,7 @@ public:
 		// give values to arguments
 		argumentValues.push_back(std::pair<ParameterType, std::string>(ParameterType::VERBOSE_MODE, "--verbose"));
 		argumentValues.push_back(std::pair<ParameterType, std::string>(ParameterType::LOG_TO_FILE, "--log"));
+		argumentValues.push_back(std::pair<ParameterType, std::string>(ParameterType::OUTPUT_TO_FILE, "--output"));
 		argumentValues.push_back(std::pair<ParameterType, std::string>(ParameterType::USE_CLONE, "--use-clone"));
 	}
 
@@ -52,6 +55,7 @@ public:
 			<< "\t-h,--help\t\tShow this help message\n"
 			<< "\t--verbose\t\ttrue/false\n"
 			<< "\t--log\t\ttrue/false\n"
+			<< "\t--output\t\ttrue/false\n" 
 			<< "\t--use-clone\t\ttrue/false\n"
 			<< std::endl;
 	}
@@ -95,9 +99,9 @@ public:
 
 // ----------------------------------------------------------------------------------------------------------- //
 
-void runMinimalTransversals(const std::string& file, bool useCloneOptimization, bool verbose, bool useOutputLogFile)
+void runMinimalTransversals(const std::string& file, bool useCloneOptimization, bool verbose, bool useOutputFile, bool useOutputLogFile)
 {
-	std::cout << "computing minimal transversals on file " << file << std::endl;
+	std::cout << "***** Running MT Miner *****" << std::endl << std::endl;
 
 	unsigned int objectCount = 0;
 	unsigned int itemCount = 0;
@@ -107,9 +111,7 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 	logFile += ".log";
 	Logger::init(logFile, verbose, useOutputLogFile);
 
-	// parsing
-	auto beginTime = std::chrono::system_clock::now();
-	
+	// parser file
 	HypergraphParser parser;
 	if (parser.parse(file))
 	{
@@ -118,55 +120,49 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 		objectCount = parser.getObjectCount();
 		itemCount = parser.getItemCount();
 
-		int64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
-		Logger::setVerbose(true);
-		Logger::log("parsing hypergraph done in ", duration, " ms\n");
-		Logger::log("itemCount ", itemCount, "\n");
-		Logger::log("objectCount ", objectCount, "\n\n");
-		Logger::setVerbose(verbose);
-
 		// minimal transversals computing
 		int64_t isEssentialDuration = 0;
 		std::vector<Itemset> minimalTransversals;
-		beginTime = std::chrono::system_clock::now();
-		{
-			MT_Miner miner(useCloneOptimization);
-			std::vector<Itemset> toTraverse;
-			miner.init(hypergraph, toTraverse);
+		//beginTime = std::chrono::system_clock::now();
+		
+		MT_Miner miner(useCloneOptimization);
+		std::vector<Itemset> toTraverse;
+		miner.init(hypergraph, toTraverse);
 
-			// compute minimal transversals		
-			minimalTransversals = miner.computeMinimalTransversals(toTraverse);
-			isEssentialDuration = miner.getIsEssentialDuration();
-		}
+		// compute minimal transversals		
+		minimalTransversals = miner.computeMinimalTransversals(toTraverse);
+		isEssentialDuration = miner.getIsEssentialDuration();
+		
 
 		Logger::close();
 
-		Logger::setVerbose(true);
-		duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
-		Logger::log("\nminimal transversals done in ", duration, " ms\n");
-		Logger::log("isEssential total duraton ", isEssentialDuration, " ms\n\n");
-		Logger::setVerbose(verbose);
+		//Logger::setVerbose(true);
+		//duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
+		//Logger::log("\nminimal transversals done in ", duration, " ms\n");
+		//Logger::log("isEssential total duraton ", isEssentialDuration, " ms\n");
 
 		// sort transversals itemset
 		//minimalTransversals = sortVectorOfItemset(minimalTransversals);
 
 		// print minimal transversals	
-		std::cout << "minimal transversals count : " << minimalTransversals.size() << std::endl;
+		Logger::log("minimal transversals count : ", minimalTransversals.size(), "\n");
 		if (minimalTransversals.size() > 6)
-			for_each(minimalTransversals.begin(), minimalTransversals.begin() + 5, [&](const Itemset& elt) { std::cout << Utils::itemsetToString(elt) << std::endl; });
+		{
+			for_each(minimalTransversals.begin(), minimalTransversals.begin() + 5, [&](const Itemset& elt) { Logger::log("", Utils::itemsetToString(elt), "\n"); });
+			Logger::log("...\n");
+		}
 		else
-			for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { std::cout << Utils::itemsetToString(elt) << std::endl; });
-		std::cout << "..." << std::endl << std::endl;
-
+			for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { Logger::log("", Utils::itemsetToString(elt), "\n"); });
+		
 		// ----------------------------------------------------- //
 
 		// save minimal transversals into a file
-		if (useOutputLogFile)
+		if (useOutputFile)
 		{
 			std::string outFile = file;
 			outFile += ".out";
 
-			std::cout << "saving minimal transversals into file : " << outFile << std::endl;
+			Logger::log("saving minimal transversals into file : ", outFile);
 			std::ofstream outputStream;
 			outputStream.open(outFile);
 			for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { outputStream << Utils::itemsetToString(elt) << std::endl; });
@@ -175,6 +171,7 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 	}
 }
 
+// ----------------------------------------------------------------------------------------------------------- //
 // ----------------------------------------------------------------------------------------------------------- //
 
 int main(int argc, char* argv[])
@@ -194,7 +191,8 @@ int main(int argc, char* argv[])
 
 	bool verboseMode = parameterList[ArgumentParser::VERBOSE_MODE] == "true" || parameterList[ArgumentParser::VERBOSE_MODE] == "True" || parameterList[ArgumentParser::VERBOSE_MODE] == "TRUE";
 	bool useOutputLogFile = parameterList[ArgumentParser::LOG_TO_FILE] == "true" || parameterList[ArgumentParser::LOG_TO_FILE] == "True" || parameterList[ArgumentParser::LOG_TO_FILE] == "TRUE";
+	bool useOutputFile = parameterList[ArgumentParser::OUTPUT_TO_FILE] == "true" || parameterList[ArgumentParser::OUTPUT_TO_FILE] == "True" || parameterList[ArgumentParser::OUTPUT_TO_FILE] == "TRUE";
 	bool useCloneOptimization = parameterList[ArgumentParser::USE_CLONE] == "true" || parameterList[ArgumentParser::USE_CLONE] == "True" || parameterList[ArgumentParser::USE_CLONE] == "TRUE";
 
-	runMinimalTransversals(file, useCloneOptimization, verboseMode, useOutputLogFile);
+	runMinimalTransversals(file, useCloneOptimization, verboseMode, useOutputFile, useOutputLogFile);
 }
