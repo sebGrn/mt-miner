@@ -130,30 +130,8 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 		miner.init(hypergraph, toTraverse);
 
 		// compute minimal transversals		
-		minimalTransversals = miner.computeMinimalTransversals(toTraverse);
-		isEssentialDuration = miner.getIsEssentialDuration();
-		
-
-		Logger::close();
-
-		//Logger::setVerbose(true);
-		//duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
-		//Logger::log("\nminimal transversals done in ", duration, " ms\n");
-		//Logger::log("isEssential total duraton ", isEssentialDuration, " ms\n");
-
-		// sort transversals itemset
-		//minimalTransversals = sortVectorOfItemset(minimalTransversals);
-
-		// print minimal transversals	
-		Logger::log("minimal transversals count : ", minimalTransversals.size(), "\n");
-		if (minimalTransversals.size() > 6)
-		{
-			for_each(minimalTransversals.begin(), minimalTransversals.begin() + 5, [&](const Itemset& elt) { Logger::log("", Utils::itemsetToString(elt), "\n"); });
-			Logger::log("...\n");
-		}
-		else
-			for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { Logger::log("", Utils::itemsetToString(elt), "\n"); });
-		
+		miner.computeMinimalTransversals(toTraverse, minimalTransversals);
+				
 		// ----------------------------------------------------- //
 
 		// save minimal transversals into a file
@@ -169,6 +147,8 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 			outputStream.close();
 		}
 	}
+
+	Logger::close();
 }
 
 // ----------------------------------------------------------------------------------------------------------- //

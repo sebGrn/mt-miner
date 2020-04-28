@@ -54,7 +54,8 @@ namespace MTMinerUnitTests_test
 			miner.init(parser.getHypergraph(), toTraverse);
 
 			// compute minimal transversals
-			std::vector<Utils::Itemset> minimalTransversals = miner.computeMinimalTransversals(toTraverse);
+			std::vector<Utils::Itemset> minimalTransversals;
+			miner.computeMinimalTransversals(toTraverse, minimalTransversals);
 			//minimalTransversals = Utils::sortVectorOfItemset(minimalTransversals);
 			Assert::AreEqual(6, static_cast<int>(minimalTransversals.size()));
 		}
