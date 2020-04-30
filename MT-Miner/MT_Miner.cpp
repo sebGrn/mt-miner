@@ -84,8 +84,8 @@ void MT_Miner::computeMinimalTransversals(const std::vector<Utils::Itemset>& toT
 	auto beginTime = std::chrono::system_clock::now();
 
 	// create a graph, then compute minimal transversal from the binary representation
-	TreeNode rootNode(this->useCloneOptimization, toTraverse, binaryRepresentation, graph_mt);
-	rootNode.computeMinimalTransversals(graph_mt);
+	TreeNode rootNode(this->useCloneOptimization, this->binaryRepresentation);
+	rootNode.computeMinimalTransversals(toTraverse, graph_mt);
 	rootNode.joinThead();
 
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
