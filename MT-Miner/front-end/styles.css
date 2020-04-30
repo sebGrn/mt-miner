@@ -1,0 +1,35 @@
+html, body {
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+svg {
+	height: auto;
+	max-width: 100%;
+}
+
+#tree {
+	position: fixed;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	overflow: auto;
+}
+
+.node circle {
+	fill: #fff;
+	stroke: steelblue;
+	stroke-width: 3px;
+  }
+  
+  .node text {
+	font: 12px sans-serif;
+  }
+  
+  .link {
+	fill: none;
+	stroke: #ccc;
+	stroke-width: 2px;
+  }
