@@ -1,14 +1,46 @@
 #include "TreeNode.h"
 #include "Logger.h"
 
-TreeNode::TreeNode(bool useCloneOptimization, const std::vector<Utils::Itemset>& toTraverse, const std::shared_ptr<BinaryRepresentation>& binaryRepresentation)
+std::atomic_int TreeNode::nbRunningThread = 0;
+std::atomic_int TreeNode::nbTotalChildren = 0;
+
+TreeNode::TreeNode(bool useCloneOptimization, const std::vector<Utils::Itemset>& toTraverse, const std::shared_ptr<BinaryRepresentation>& binaryRepresentation, std::vector<Utils::Itemset>& graph_mt)
 {
 	this->binaryRepresentation = binaryRepresentation;
 	this->useCloneOptimization = useCloneOptimization;
 	this->toTraverse = toTraverse;
+	recursionLevel = 0;
+
+	//this->thread = std::make_unique<std::thread>(&TreeNode::computeMinimalTransversals, this, std::ref(graph_mt));
+	//this->thread->join();
+
+	//threadList.push_back(std::thread(&TreeNode::computeMinimalTransversals, this, std::ref(graph_mt)));
 }
 
-void TreeNode::buildClonedCombinason(const Utils::Itemset& currentItem, std::vector<Utils::Itemset>& clonedCombination, const std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes)
+TreeNode::~TreeNode()
+{
+	//this->thread->join();
+	//for (std::unique_ptr<std::thread> thread : this->childrenThread)
+	//{
+	//	thread->join();
+	//}
+
+	// Now wait for all the worker thread to finish i.e.
+	// Call join() function on each of the std::thread object
+	//std::cout << "wait for all the worker thread to finish" << std::endl;
+	//std::for_each(children.begin(), children.end(), std::mem_fn(&std::thread::join));
+}
+
+void TreeNode::joinThead()
+{
+	for (auto it = this->children.begin(); it != this->children.end(); it++)
+	{
+		(*it)->joinThead();
+	}
+	std::for_each(this->threadList.begin(), this->threadList.end(), std::mem_fn(&std::thread::join));
+}
+
+void TreeNode::buildClonedCombinaison(const Utils::Itemset& currentItem, std::vector<Utils::Itemset>& clonedCombination, const std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes)
 {
 	for (auto it = originalClonedIndexes.begin(); it != originalClonedIndexes.end(); it++)
 	{
@@ -23,7 +55,7 @@ void TreeNode::buildClonedCombinason(const Utils::Itemset& currentItem, std::vec
 			{
 				clonedCombination.push_back(clonedCurrentItem);
 				// recurse on new combination
-				buildClonedCombinason(clonedCurrentItem, clonedCombination, originalClonedIndexes);
+				buildClonedCombinaison(clonedCurrentItem, clonedCombination, originalClonedIndexes);
 			}
 		}
 	}
@@ -36,7 +68,7 @@ void TreeNode::computeLists(std::vector<Utils::Itemset>& graph_mt)
 
 	// results of cumulated combined items / must be declared outside of the loop
 	Utils::Itemset previousItem;
-	// build maxClique, toExplore lists
+	// loop on toTraverse list and build maxClique and toExplore lists
 	for_each(toTraverse.begin(), toTraverse.end(), [&](const Utils::Itemset& currentItem) {
 	
 		unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(currentItem);
@@ -44,22 +76,19 @@ void TreeNode::computeLists(std::vector<Utils::Itemset>& graph_mt)
 		{
 			// we have a minimal transversal
 			graph_mt.push_back(currentItem);
-			std::string tmp = Utils::itemsetToString(currentItem);
-			//Logger::log("--> minimalTraversal list, add : ", Utils::itemsetToString(currentItem), ", size : ", std::to_string(graph_mt.size()), "\n");
 
-			// if this itemset contains an original, add the same minimal transverals list with the clone
 			if (this->useCloneOptimization)
 			{
+				// if this itemset contains an original, add the same minimal transverals list for all the clones
 				std::vector<std::pair<unsigned int, unsigned int>> originalClonedIndexes;
 				if (this->binaryRepresentation->containsOriginals(currentItem, originalClonedIndexes))
 				{
 					std::vector<Utils::Itemset> clonedCombination;
-					buildClonedCombinason(currentItem, clonedCombination, originalClonedIndexes);
+					buildClonedCombinaison(currentItem, clonedCombination, originalClonedIndexes);
 
 					for (auto it = clonedCombination.begin(); it != clonedCombination.end(); it++)
 					{
 						graph_mt.push_back(*it);
-						//Logger::log("--> minimalTraversal list (clone), add : ", Utils::itemsetToString(*it), ", size : ", std::to_string(graph_mt.size()), "\n");
 					}
 				}
 			}
@@ -71,34 +100,92 @@ void TreeNode::computeLists(std::vector<Utils::Itemset>& graph_mt)
 				// must be the 1st element with only one element
 				previousItem = currentItem;
 				maxClique.push_back(currentItem);
-				//Logger::log("--> maxClique list : ", Utils::itemsetListToString(maxClique), "\n");
 			}
 			else
 			{
-				// here, we can combine with previous element / make a union on 2 elements
+				// we can combine with previous element / make a union on 2 elements
 				Utils::Itemset combinedItem = Utils::combineItemset(previousItem, currentItem);
-				// compute disjonctif support of the concatenation
 				unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(combinedItem);
-				//Logger::log("disjonctive support for element ", Utils::itemsetToString(combinedItem), " : ", std::to_string(disjSup), "\n");
-
 				if (disjSup != this->binaryRepresentation->getObjectCount())
 				{
 					previousItem = combinedItem;
 					maxClique.push_back(currentItem);
-					//Logger::log("--> maxClique list : ", Utils::itemsetListToString(maxClique), "\n");
 				}
 				else
 				{
 					toExplore.push_back(currentItem);
-					//Logger::log("--> toExplore list : ", Utils::itemsetListToString(toExplore), "\n");
 				}
 			}
 		}
 	});
 }
 
+std::recursive_mutex m1;
+
+void TreeNode::computeMinimalTransversalsCb(int nb, std::vector<Utils::Itemset>& graph_mt)
+{
+	//std::cout << "Worker Thread " << std::this_thread::get_id() << " is Executing" << std::endl;
+	if (nb < 0)
+		return;
+
+
+	m1.lock();
+
+	graph_mt.push_back(Utils::Itemset(1, nb));
+	//std::cout << "graph_mt size " << graph_mt.size() << std::endl;
+
+	computeMinimalTransversalsCb(--nb, graph_mt);
+
+	m1.unlock();
+	
+	//
+	////std::lock_guard<std::mutex> guard1(myMutex);
+	//{
+	//	nbRunningThread++;
+	//	std::cout << "computeMinimalTransversals in thread " << TreeNode::nbRunningThread << std::endl;
+	//}
+
+	////if (TreeNode::nbRunningThread <= 10)
+	//{
+	//	for (int i = 0; i < 1; i++)
+	//	{
+	//		std::shared_ptr<TreeNode> node = std::make_shared<TreeNode>(this->useCloneOptimization, toTraverse, this->binaryRepresentation, graph_mt);
+	//		this->children.push_back(node);
+
+	//		//graph_mt.push_back(Utils::Itemset(1, nbRunningThread));
+	//		this->threadList.push_back(std::thread(&TreeNode::computeMinimalTransversalsCb, node, std::ref(graph_mt)));
+	//	}
+	//}
+}
+
 void TreeNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt)
 {
+	//nbRunningThread++;
+	//this->toTraverse.clear();
+	//this->toTraverse.push_back(Utils::Itemset(1, nbRunningThread));
+	//std::cout << "computeMinimalTransversals in thread " << TreeNode::nbRunningThread << std::endl;
+	
+	/*this->threadList.push_back(std::thread(&TreeNode::computeMinimalTransversalsCb, this, 1000, std::ref(graph_mt)));
+	this->threadList.push_back(std::thread(&TreeNode::computeMinimalTransversalsCb, this, 1000, std::ref(graph_mt)));
+	this->threadList.push_back(std::thread(&TreeNode::computeMinimalTransversalsCb, this, 1000, std::ref(graph_mt)));
+
+	std::for_each(this->threadList.begin(), this->threadList.end(), std::mem_fn(&std::thread::join));*/
+
+
+
+	/*if (nbRunningThread <= 2)
+	{
+		//std::vector<std::thread> threadList;
+		for (int i = 0; i < 2; i++)
+		{
+			std::shared_ptr<TreeNode> node = std::make_shared<TreeNode>(this->useCloneOptimization, toTraverse, this->binaryRepresentation, graph_mt);
+			this->children.push_back(node);
+			
+			//graph_mt.push_back(Utils::Itemset(1, nbRunningThread));
+			this->threadList.push_back(std::thread(&TreeNode::computeMinimalTransversals, node, std::ref(graph_mt)));
+		}
+	}*/		
+	
 	// compute toExplore : contains list of itemsets that are candidates
 	// compute maxClique : contains list of itemsets that will be combined to the candidates
 	// update graph_mt : contains the final minimal transverals
@@ -106,12 +193,13 @@ void TreeNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt)
 
 	if (toExplore.empty())
 	{
+		// trivial case of the recursion
 		//Logger::log("toExplore list is empty, end of the branch", "\n");
+		recursionLevel--;
 	}
 	else
 	{
-		//Logger::log("----------------------------------------------------------", "\n");
-		//Logger::log("toExplore list", Utils::itemsetListToString(toExplore), "\n");
+		//Logger::log("toExplore list", Utils::itemsetListToString(toExplore), " - recursion level ", recursionLevel, "\n");
 		//Logger::log("maxClique list", Utils::itemsetListToString(maxClique), "\n");
 
 		// store toExploreList max index
@@ -124,52 +212,38 @@ void TreeNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt)
 		//#pragma omp parallel for
 		for (int i = 0; i < lastIndexToTest; i++)
 		{
+			// build newTraverse list
 			std::vector<Utils::Itemset> newToTraverse;
 			Utils::Itemset toCombinedLeft = combinedItemsetList[i];			
-			//std::string tmp = Utils::itemsetToString(toCombinedLeft);
-			
-			// if this itemset is a clone, do not compute the minimal transverals
-			if (!this->binaryRepresentation->containsAClone(toCombinedLeft))
+			// combine each element between [0, lastIndexToTest] with the entire combined itemset list
+			for (unsigned int j = i + 1; j < combinedItemsetList.size(); j++)
 			{
-				// combine each element between [0, lastIndexToTest] with the entire combined itemset list
-				for (unsigned int j = i + 1; j < combinedItemsetList.size(); j++)
-				{
-					assert(j < combinedItemsetList.size());
-					Utils::Itemset toCombinedRight = combinedItemsetList[j];
-					Utils::Itemset combinedItemset = Utils::combineItemset(toCombinedLeft, toCombinedRight);
+				assert(j < combinedItemsetList.size());
+				Utils::Itemset toCombinedRight = combinedItemsetList[j];
+				Utils::Itemset combinedItemset = Utils::combineItemset(toCombinedLeft, toCombinedRight);
 					
-					// check if combined item is containing a clone
-					if (!this->binaryRepresentation->containsAClone(combinedItemset))
-					{
-						// test if combined itemset is essential
-						if (binaryRepresentation->isEssential(combinedItemset))
-							newToTraverse.push_back(combinedItemset);
-						else
-						{
-							//Logger::log("", Utils::itemsetToString(combinedItemset), " is not essential", "\n");
-						}
-					}
-					else
-					{
-						//Logger::log("", Utils::itemsetToString(combinedItemset), " contains a clone, do not compute mt", "\n");
-					}
-				}
+				// check if combined item is containing a clone (if true, do not compute the minimal transverals) and if combined itemset is essential
+				if (!this->binaryRepresentation->containsAClone(combinedItemset) && binaryRepresentation->isEssential(combinedItemset))
+					newToTraverse.push_back(combinedItemset);					
+			}
 
-				//Logger::log("new toTraverse list", Utils::itemsetListToString(newToTraverse), "\n");
-				//Logger::log("----------------------------------------------------------", "\n");
+			// create a new child node for this newToTraverse list
+			std::shared_ptr<TreeNode> node = std::make_shared<TreeNode>(this->useCloneOptimization, newToTraverse, this->binaryRepresentation, graph_mt);
+			// add this node as a child
+			this->children.push_back(node);
+			node->recursionLevel = this->recursionLevel + 1;
 
-				// create a new child node for this newToTraverse list
-				std::shared_ptr<TreeNode> node = std::make_shared<TreeNode>(this->useCloneOptimization, newToTraverse, this->binaryRepresentation);
-				// add this node as a child
-				this->children.push_back(node);
-				// compute minimal transversals for the branch
-				node->computeMinimalTransversals(graph_mt);
+			if (this->recursionLevel == 0)
+			{
+				// create thread for 1st branch 
+				threadList.push_back(std::thread(&TreeNode::computeMinimalTransversals, node, std::ref(graph_mt)));
 			}
 			else
 			{
-				//Logger::log("", Utils::itemsetListToString(combinedItemsetList), " contains a clone, do not compute mt", "\n");
+				// compute minimal transversals for the branch
+				node->computeMinimalTransversals(graph_mt);
 			}
 		}
-	}
+	}	
 }
 

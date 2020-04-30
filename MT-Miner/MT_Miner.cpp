@@ -81,11 +81,12 @@ void MT_Miner::computeMinimalTransversals(const std::vector<Utils::Itemset>& toT
 	// instanciate new thead for regular log
 	std::thread thread(callback, std::ref(this->computeMtDone), std::ref(graph_mt));
 
-	// create a graph, then compute minimal transversal from the binary representation
-	TreeNode rootNode(this->useCloneOptimization, toTraverse, binaryRepresentation);
 	auto beginTime = std::chrono::system_clock::now();
-	
+
+	// create a graph, then compute minimal transversal from the binary representation
+	TreeNode rootNode(this->useCloneOptimization, toTraverse, binaryRepresentation, graph_mt);
 	rootNode.computeMinimalTransversals(graph_mt);
+	rootNode.joinThead();
 
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
 	Logger::log("computing minimal transversals done in ", duration, " ms\n");
