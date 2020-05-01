@@ -122,7 +122,7 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 
 		// minimal transversals computing
 		int64_t isEssentialDuration = 0;
-		std::vector<Itemset> minimalTransversals;
+		
 		//beginTime = std::chrono::system_clock::now();
 		
 		MT_Miner miner(useCloneOptimization);
@@ -130,7 +130,7 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 		miner.init(hypergraph, toTraverse);
 
 		// compute minimal transversals		
-		miner.computeMinimalTransversals(toTraverse, minimalTransversals);
+		std::vector<Itemset>&& minimalTransversals = miner.computeMinimalTransversals(std::move(toTraverse));
 				
 		// ----------------------------------------------------- //
 

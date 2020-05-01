@@ -28,7 +28,7 @@ BinaryRepresentation::BinaryRepresentation(const FormalContext& context)
 // return true if element is essential
 bool BinaryRepresentation::isEssential(const Utils::Itemset& itemset)
 {
-	auto beginTime = std::chrono::system_clock::now();
+	//auto beginTime = std::chrono::system_clock::now();
 
 	if (itemset.size() == 1)
 		return true;
@@ -82,7 +82,7 @@ bool BinaryRepresentation::isEssential(const Utils::Itemset& itemset)
 		}
 	}
 	
-	this->isEssentialDuration += std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
+	//this->isEssentialDuration += std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
 	
 	return isEssential;
 }

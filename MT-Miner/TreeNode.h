@@ -7,14 +7,15 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include <future>
 
 #include "utils.h"
 #include "BinaryRepresentation.h"
 
 class TreeNode
 {
-private:	
-	int recursionLevel;
+private:
+	static std::atomic_int processorCount;
 	static std::atomic_int nbTotalChildren;
 	static std::atomic_int nbRunningThread;
 
@@ -24,7 +25,10 @@ private:
 	std::vector<std::shared_ptr<TreeNode>> children;
 	//std::vector<std::unique_ptr<std::thread>> childrenThread;
 	//std::unique_ptr<std::thread> thread;
-	std::vector<std::thread> threadList;
+	//std::vector<std::thread> threadList;
+
+	// https://www.youtube.com/watch?v=2Xad9bCYbJE&list=PL1835A90FC78FF8BE&index=6
+	std::vector<std::future<std::vector<Utils::Itemset>>> futures;
 
 	std::shared_ptr<BinaryRepresentation> binaryRepresentation;
 
@@ -47,10 +51,10 @@ public:
 	TreeNode(bool useCloneOptimization, const std::shared_ptr<BinaryRepresentation>& binaryRepresentation);
 	~TreeNode();
 
-	void joinThead();
+	//void joinThead();
 
 	/// recursive function, trasvere treen node to compute minimal transversals for binary representation
 	/// @param graph_mt minimal transversal itemset list, updated at each branch trasversal
-	void computeMinimalTransversals(const std::vector<Utils::Itemset>& toTraverse, std::vector<Utils::Itemset>& graph_mt);
+	std::vector<Utils::Itemset> computeMinimalTransversals(const std::vector<Utils::Itemset> & toTraverse);
 };
 

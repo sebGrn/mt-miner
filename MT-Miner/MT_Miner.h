@@ -34,7 +34,7 @@ public:
 	void init(const std::shared_ptr<HyperGraph>& hypergraph, std::vector<Utils::Itemset>& toTraverse);
 
 	///
-	void computeMinimalTransversals(const std::vector<Utils::Itemset>& toTraverse, std::vector<Utils::Itemset>& graph_mt);
+	std::vector<Utils::Itemset> computeMinimalTransversals(const std::vector<Utils::Itemset>&& toTraverse);
 
 	///
 	int64_t getIsEssentialDuration() const

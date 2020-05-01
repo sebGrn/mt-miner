@@ -21,8 +21,7 @@ namespace MTMinerUnitTests_ac_no_clone
 			miner.init(parser.getHypergraph(), toTraverse);
 
 			// compute minimal transversals
-			std::vector<Utils::Itemset> minimalTransversals;
-			miner.computeMinimalTransversals(toTraverse, minimalTransversals);
+			std::vector<Utils::Itemset>&& minimalTransversals = miner.computeMinimalTransversals(std::move(toTraverse));
 			Assert::AreEqual(1916, static_cast<int>(minimalTransversals.size()));
 		}
 
@@ -39,8 +38,7 @@ namespace MTMinerUnitTests_ac_no_clone
 			miner.init(parser.getHypergraph(), toTraverse);
 
 			// compute minimal transversals
-			std::vector<Utils::Itemset> minimalTransversals;
-			miner.computeMinimalTransversals(toTraverse, minimalTransversals);
+			std::vector<Utils::Itemset>&& minimalTransversals = miner.computeMinimalTransversals(std::move(toTraverse));
 			Assert::AreEqual(1039, static_cast<int>(minimalTransversals.size()));
 		}
 
@@ -57,8 +55,7 @@ namespace MTMinerUnitTests_ac_no_clone
 			miner.init(parser.getHypergraph(), toTraverse);
 
 			// compute minimal transversals
-			std::vector<Utils::Itemset> minimalTransversals;
-			miner.computeMinimalTransversals(toTraverse, minimalTransversals);
+			std::vector<Utils::Itemset>&& minimalTransversals = miner.computeMinimalTransversals(std::move(toTraverse));
 			Assert::AreEqual(253, static_cast<int>(minimalTransversals.size()));
 		}
 	};

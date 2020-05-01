@@ -62,38 +62,37 @@ void MT_Miner::init(const std::shared_ptr<HyperGraph>& hypergraph, std::vector<U
 }
 
 
-void MT_Miner::computeMinimalTransversals(const std::vector<Utils::Itemset>& toTraverse, std::vector<Utils::Itemset>& graph_mt)
+std::vector<Utils::Itemset> MT_Miner::computeMinimalTransversals(const std::vector<Utils::Itemset> && toTraverse)
 {
 	// lambda function called during parsing every minutes
-	auto callback = [](bool& done, std::vector<Utils::Itemset>& graph_mt) {
+	auto callback = [](bool& done) {
 		int n = 0;
 		while (!done)
 		{
 			if (n)
-				std::cout << "computing minimal transversals in progress : " << graph_mt.size() << " minimal transversals found after " << 30 * n << " seconds" << std::endl;
+				std::cout << "computing minimal transversals in progress : " << 30 * n << " seconds" << std::endl;
+				//std::cout << "computing minimal transversals in progress : " << graph_mt.size() << " minimal transversals found after " << 30 * n << " seconds" << std::endl;
+				
 			std::this_thread::sleep_for(std::chrono::seconds(30));
 			n++;
 		}
 	};
 
-	graph_mt.clear();
-	
 	// instanciate new thead for regular log
-	std::thread thread(callback, std::ref(this->computeMtDone), std::ref(graph_mt));
+	std::thread thread(callback, std::ref(this->computeMtDone));
 
 	auto beginTime = std::chrono::system_clock::now();
 
 	// create a graph, then compute minimal transversal from the binary representation
 	TreeNode rootNode(this->useCloneOptimization, this->binaryRepresentation);
-	rootNode.computeMinimalTransversals(toTraverse, graph_mt);
-	rootNode.joinThead();
+	std::vector<Utils::Itemset>&& graph_mt = rootNode.computeMinimalTransversals(toTraverse);
+	//rootNode.joinThead();
 
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
 	Logger::log("computing minimal transversals done in ", duration, " ms\n");
 	Logger::log("isEssential total duration computation ", this->getIsEssentialDuration(), " ms\n\n");
 
 	this->computeMtDone = true;
-
 	thread.detach();
 
 	// sort transversals itemset
@@ -108,5 +107,7 @@ void MT_Miner::computeMinimalTransversals(const std::vector<Utils::Itemset>& toT
 	}
 	else
 		for_each(graph_mt.begin(), graph_mt.end(), [&](const Utils::Itemset& elt) { Logger::log("", Utils::itemsetToString(elt), "\n"); });
+
+	return graph_mt;
 }
 
