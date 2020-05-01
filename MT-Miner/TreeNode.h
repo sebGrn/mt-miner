@@ -19,25 +19,17 @@ private:
 	static std::atomic_int nbTotalChildren;
 	static std::atomic_int nbRunningThread;
 
+	std::shared_ptr<BinaryRepresentation> binaryRepresentation;
+
 	/// true if we want to use clone optimization
 	/// a clone is a item from binary representation 
 	bool useCloneOptimization;
+
 	std::vector<std::shared_ptr<TreeNode>> children;
-	//std::vector<std::unique_ptr<std::thread>> childrenThread;
-	//std::unique_ptr<std::thread> thread;
-	//std::vector<std::thread> threadList;
 
 	// https://www.youtube.com/watch?v=2Xad9bCYbJE&list=PL1835A90FC78FF8BE&index=6
 	std::vector<std::future<std::vector<Utils::Itemset>>> futures;
 
-	std::shared_ptr<BinaryRepresentation> binaryRepresentation;
-
-	//std::vector<Utils::Itemset> toTraverse;
-	//std::vector<Utils::Itemset> maxClique;
-	//std::vector<Utils::Itemset> toExplore;
-
-	//std::mutex myMutex;
-		
 private:
 	void buildClonedCombinaison(const Utils::Itemset& currentItem, std::vector<Utils::Itemset>& clonedCombination, const std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes);
 
@@ -54,7 +46,12 @@ public:
 	//void joinThead();
 
 	/// recursive function, trasvere treen node to compute minimal transversals for binary representation
-	/// @param graph_mt minimal transversal itemset list, updated at each branch trasversal
+	/// @param toTraverse transversal itemset list
 	std::vector<Utils::Itemset> computeMinimalTransversals(const std::vector<Utils::Itemset> & toTraverse);
+
+	int getTotalChildren() const
+	{
+		return nbTotalChildren;
+	};
 };
 

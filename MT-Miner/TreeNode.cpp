@@ -144,6 +144,7 @@ std::vector<Utils::Itemset> TreeNode::computeMinimalTransversals(const std::vect
 			// create a new child node for this newToTraverse list and add the node as a child
 			std::shared_ptr<TreeNode> node = std::make_shared<TreeNode>(this->useCloneOptimization, this->binaryRepresentation);
 			this->children.push_back(node);
+			nbTotalChildren++;
 
 			// recurse
 			if (nbRunningThread < processorCount)

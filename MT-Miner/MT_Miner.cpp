@@ -65,33 +65,36 @@ void MT_Miner::init(const std::shared_ptr<HyperGraph>& hypergraph, std::vector<U
 std::vector<Utils::Itemset> MT_Miner::computeMinimalTransversals(const std::vector<Utils::Itemset> && toTraverse)
 {
 	// lambda function called during parsing every minutes
-	auto callback = [](bool& done) {
+	auto callback = [](bool& done, const TreeNode& treeNode) {
+		
+		const int secondsToWait = 2;
 		int n = 0;
 		while (!done)
 		{
 			if (n)
-				std::cout << "computing minimal transversals in progress : " << 30 * n << " seconds" << std::endl;
-				//std::cout << "computing minimal transversals in progress : " << graph_mt.size() << " minimal transversals found after " << 30 * n << " seconds" << std::endl;
+				std::cout << "computing minimal transversals in progress : " << secondsToWait * n << " seconds, " << treeNode.getTotalChildren() << " nodes created" << std::endl;
 				
-			std::this_thread::sleep_for(std::chrono::seconds(30));
+			std::this_thread::sleep_for(std::chrono::seconds(secondsToWait));
 			n++;
 		}
 	};
-
-	// instanciate new thead for regular log
-	std::thread thread(callback, std::ref(this->computeMtDone));
 
 	auto beginTime = std::chrono::system_clock::now();
 
 	// create a graph, then compute minimal transversal from the binary representation
 	TreeNode rootNode(this->useCloneOptimization, this->binaryRepresentation);
-	std::vector<Utils::Itemset>&& graph_mt = rootNode.computeMinimalTransversals(toTraverse);
-	//rootNode.joinThead();
 
+	// instanciate new thead for regular log
+	std::thread thread(callback, std::ref(this->computeMtDone), std::ref(rootNode));
+
+	// compute all minimal transversal from the root node
+	std::vector<Utils::Itemset>&& graph_mt = rootNode.computeMinimalTransversals(toTraverse);
+	
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
 	Logger::log("computing minimal transversals done in ", duration, " ms\n");
 	Logger::log("isEssential total duration computation ", this->getIsEssentialDuration(), " ms\n\n");
 
+	// stop the thread and detach it (dont not wait next n seconds)
 	this->computeMtDone = true;
 	thread.detach();
 
