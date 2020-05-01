@@ -1,14 +1,16 @@
 #include "TreeNode.h"
 #include "Logger.h"
+#include "Profiler.h"
 
 std::atomic_int TreeNode::nbRunningThread = 0;
-std::atomic_int TreeNode::nbTotalChildren = 0;
+std::atomic_ullong TreeNode::nbTotalChildren = 0;
 std::atomic_int TreeNode::processorCount = std::thread::hardware_concurrency();
 
 TreeNode::TreeNode(bool useCloneOptimization, const std::shared_ptr<BinaryRepresentation>& binaryRepresentation)
 {
 	this->binaryRepresentation = binaryRepresentation;
 	this->useCloneOptimization = useCloneOptimization;
+	this->useMultitheadOptimization = true;
 }
 
 TreeNode::~TreeNode()
@@ -17,6 +19,7 @@ TreeNode::~TreeNode()
 
 void TreeNode::buildClonedCombinaison(const Utils::Itemset& currentItem, std::vector<Utils::Itemset>& clonedCombination, const std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes)
 {
+	START_PROFILING(__func__)
 	for (auto it = originalClonedIndexes.begin(); it != originalClonedIndexes.end(); it++)
 	{
 		unsigned int originalIndex = it->first;
@@ -34,10 +37,13 @@ void TreeNode::buildClonedCombinaison(const Utils::Itemset& currentItem, std::ve
 			}
 		}
 	}
+	END_PROFILING(__func__)
 }
 
-void TreeNode::computeListsFromToTraverse(const std::vector<Utils::Itemset>& toTraverse, std::vector<Utils::Itemset>& maxClique, std::vector<Utils::Itemset>& toExplore, std::vector<Utils::Itemset>& graph_mt)
+void TreeNode::updateListsFromToTraverse(const std::vector<Utils::Itemset>& toTraverse, std::vector<Utils::Itemset>& maxClique, std::vector<Utils::Itemset>& toExplore, std::vector<Utils::Itemset>& graph_mt)
 {
+	START_PROFILING(__func__)
+
 	maxClique.clear();
 	toExplore.clear();
 
@@ -95,74 +101,84 @@ void TreeNode::computeListsFromToTraverse(const std::vector<Utils::Itemset>& toT
 			}
 		}
 	}
+	END_PROFILING(__func__)
 }
 
-std::vector<Utils::Itemset> TreeNode::computeMinimalTransversals(const std::vector<Utils::Itemset> & toTraverse)
+void TreeNode::exploreNextBranch(const std::vector<Utils::Itemset>& toTraverse, const std::vector<Utils::Itemset>& maxClique, const std::vector<Utils::Itemset>& toExplore, std::vector<Utils::Itemset>& graph_mt)
 {
-	// compute toExplore : contains list of itemsets that are candidates
-	// compute maxClique : contains list of itemsets that will be combined to the candidates
-	// update graph_mt : contains the final minimal transverals
-	
+	START_PROFILING(__func__)
+	// store toExploreList max index
+	unsigned int lastIndexToTest = toExplore.size();
+	// combine toExplore (left part) with maxClique list (right part) into a combined list
+	std::vector<Utils::Itemset> combinedItemsetList = toExplore;
+	combinedItemsetList.insert(combinedItemsetList.end(), maxClique.begin(), maxClique.end());
+
+	// loop on candidates from toExplore list only
+	for (int i = 0; i < lastIndexToTest; i++)
+	{
+		// build newTraverse list
+		std::vector<Utils::Itemset> newToTraverse;
+		Utils::Itemset toCombinedLeft = combinedItemsetList[i];
+		// combine each element between [0, lastIndexToTest] with the entire combined itemset list
+		for (unsigned int j = i + 1; j < combinedItemsetList.size(); j++)
+		{
+			assert(j < combinedItemsetList.size());
+			Utils::Itemset toCombinedRight = combinedItemsetList[j];
+			Utils::Itemset combinedItemset = Utils::combineItemset(toCombinedLeft, toCombinedRight);
+
+			// check if combined item is containing a clone (if true, do not compute the minimal transverals) and if combined itemset is essential
+			if (!this->binaryRepresentation->containsAClone(combinedItemset) && binaryRepresentation->isEssential(combinedItemset))
+				newToTraverse.push_back(combinedItemset);
+		}
+
+		// create a new child node for this newToTraverse list and add the node as a child
+		std::shared_ptr<TreeNode> node = std::make_shared<TreeNode>(this->useCloneOptimization, this->binaryRepresentation);
+		this->children.push_back(node);
+		nbTotalChildren++;
+
+		// recurse
+		if (this->useMultitheadOptimization && nbRunningThread < processorCount)
+		{
+			// create thread for 1st branch 
+			nbRunningThread++;
+			//std::cout << "launch thead " << nbRunningThread << std::endl;
+			futures.push_back(std::async(&TreeNode::computeMinimalTransversals, node, std::move(newToTraverse)));
+		}
+		else
+		{
+			// compute minimal transversals for the branch
+			std::vector<Utils::Itemset>&& graph_mt_child = node->computeMinimalTransversals(std::move(newToTraverse));
+			std::copy(graph_mt_child.begin(), graph_mt_child.end(), std::back_inserter(graph_mt));
+		}
+	}
+	END_PROFILING(__func__)
+}
+
+std::vector<Utils::Itemset> TreeNode::computeMinimalTransversals(const std::vector<Utils::Itemset>& toTraverse)
+{
+	START_PROFILING(__func__)
+
+	// test trivial case
 	if (toTraverse.empty())
 		return std::vector<Utils::Itemset>();
 
+	// contains list of itemsets that will be combined to the candidates
 	std::vector<Utils::Itemset> maxClique;
+	// contains list of itemsets that are candidates
 	std::vector<Utils::Itemset> toExplore;
+	// contains the final minimal transverals for this node
 	std::vector<Utils::Itemset> graph_mt;
-	this->computeListsFromToTraverse(toTraverse, maxClique, toExplore, graph_mt);
+	// update lists from toTraverse
+	this->updateListsFromToTraverse(toTraverse, maxClique, toExplore, graph_mt);
 
+	//Logger::log("toExplore list", Utils::itemsetListToString(toExplore), " - recursion level ", recursionLevel, "\n");
+	//Logger::log("maxClique list", Utils::itemsetListToString(maxClique), "\n");
+
+	// build new toTraverse list and explore next branch
 	if (!toExplore.empty())
-	{
-		//Logger::log("toExplore list", Utils::itemsetListToString(toExplore), " - recursion level ", recursionLevel, "\n");
-		//Logger::log("maxClique list", Utils::itemsetListToString(maxClique), "\n");
+		this->exploreNextBranch(toTraverse, maxClique, toExplore, graph_mt);
 
-		// store toExploreList max index
-		unsigned int lastIndexToTest = toExplore.size();
-		// combine toExplore (left part) with maxClique list (right part) into a combined list
-		std::vector<Utils::Itemset> combinedItemsetList = toExplore;
-		combinedItemsetList.insert(combinedItemsetList.end(), maxClique.begin(), maxClique.end());
-
-		// loop on candidates from toExplore list only
-		//#pragma omp parallel for
-		for (int i = 0; i < lastIndexToTest; i++)
-		{
-			// build newTraverse list
-			std::vector<Utils::Itemset> newToTraverse;
-			Utils::Itemset toCombinedLeft = combinedItemsetList[i];
-			// combine each element between [0, lastIndexToTest] with the entire combined itemset list
-			for (unsigned int j = i + 1; j < combinedItemsetList.size(); j++)
-			{
-				assert(j < combinedItemsetList.size());
-				Utils::Itemset toCombinedRight = combinedItemsetList[j];
-				Utils::Itemset combinedItemset = Utils::combineItemset(toCombinedLeft, toCombinedRight);
-
-				// check if combined item is containing a clone (if true, do not compute the minimal transverals) and if combined itemset is essential
-				if (!this->binaryRepresentation->containsAClone(combinedItemset) && binaryRepresentation->isEssential(combinedItemset))
-					newToTraverse.push_back(combinedItemset);
-			}
-
-			// create a new child node for this newToTraverse list and add the node as a child
-			std::shared_ptr<TreeNode> node = std::make_shared<TreeNode>(this->useCloneOptimization, this->binaryRepresentation);
-			this->children.push_back(node);
-			nbTotalChildren++;
-
-			// recurse
-			if (nbRunningThread < processorCount)
-			{
-				// create thread for 1st branch 
-				nbRunningThread++;
-				//std::cout << "launch thead " << nbRunningThread << std::endl;
-				futures.push_back(std::async(&TreeNode::computeMinimalTransversals, node, std::move(newToTraverse)));
-			}
-			else
-			{
-				// compute minimal transversals for the branch
-				std::vector<Utils::Itemset>&& graph_mt_child = node->computeMinimalTransversals(std::move(newToTraverse));
-				std::copy(graph_mt_child.begin(), graph_mt_child.end(), std::back_inserter(graph_mt));
-			}
-		}
-	}
-
+	// manage futures
 	try
 	{
 		while (!futures.empty())
@@ -192,5 +208,8 @@ std::vector<Utils::Itemset> TreeNode::computeMinimalTransversals(const std::vect
 	{
 		std::cout << "unknown exception" << std::endl;
 	}
+
+	END_PROFILING(__func__)
+
 	return graph_mt;
 }

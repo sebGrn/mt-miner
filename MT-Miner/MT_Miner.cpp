@@ -1,5 +1,6 @@
 #include "MT_Miner.h"
 #include "utils.h"
+#include "Profiler.h"
 
 MT_Miner::MT_Miner(bool useCloneOptimization)
 {
@@ -67,7 +68,7 @@ std::vector<Utils::Itemset> MT_Miner::computeMinimalTransversals(const std::vect
 	// lambda function called during parsing every minutes
 	auto callback = [](bool& done, const TreeNode& treeNode) {
 		
-		const int secondsToWait = 2;
+		const int secondsToWait = 20;
 		int n = 0;
 		while (!done)
 		{
@@ -91,8 +92,9 @@ std::vector<Utils::Itemset> MT_Miner::computeMinimalTransversals(const std::vect
 	std::vector<Utils::Itemset>&& graph_mt = rootNode.computeMinimalTransversals(toTraverse);
 	
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
-	Logger::log("computing minimal transversals done in ", duration, " ms\n");
-	Logger::log("isEssential total duration computation ", this->getIsEssentialDuration(), " ms\n\n");
+	Logger::log("--> computing minimal transversals done in ", duration, " ms\n");
+	for(auto it = Profiler::functionDurationMap.begin(); it != Profiler::functionDurationMap.end(); it++)
+		std::cout << "--> function name " << it->first << " : " << it->second.count() << " ms" << std::endl;
 
 	// stop the thread and detach it (dont not wait next n seconds)
 	this->computeMtDone = true;
@@ -102,7 +104,7 @@ std::vector<Utils::Itemset> MT_Miner::computeMinimalTransversals(const std::vect
 	//graph_mt = sortVectorOfItemset(graph_mt);
 
 	// print minimal transversals
-	Logger::log("minimal transversals count : ", graph_mt.size(), "\n");
+	Logger::log("\nminimal transversals count : ", graph_mt.size(), "\n");
 	if (graph_mt.size() > 6)
 	{
 		for_each(graph_mt.begin(), graph_mt.begin() + 5, [&](const Utils::Itemset& elt) { Logger::log("", Utils::itemsetToString(elt), "\n"); });

@@ -37,12 +37,6 @@ public:
 	std::vector<Utils::Itemset> computeMinimalTransversals(const std::vector<Utils::Itemset>&& toTraverse);
 
 	///
-	int64_t getIsEssentialDuration() const
-	{
-		return binaryRepresentation->getIsEssentialDuration();
-	}
-
-	///
 	unsigned int computeDisjonctifSupport(const Utils::Itemset& pattern) const
 	{
 		return binaryRepresentation->computeDisjonctifSupport(pattern);

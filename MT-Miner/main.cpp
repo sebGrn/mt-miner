@@ -156,6 +156,8 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 
 int main(int argc, char* argv[])
 {
+	// http://research.nii.ac.jp/~uno/dualization.html
+
 	if (argc <= 1)
 	{
 		std::cout << "Usage " << argv[0] << "<filename> <option><outputfile>" << std::endl;

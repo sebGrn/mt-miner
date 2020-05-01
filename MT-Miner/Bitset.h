@@ -4,8 +4,8 @@
 
 #ifdef _DEBUG
 // use vector of bool to allow vector debugging
-using Bitset = std::vector<bool>;
+typedef std::vector<bool> Bitset;
 #else
 // use dynamic bitset for speedup
-using Bitset = boost::dynamic_bitset<>;
+typedef boost::dynamic_bitset<> Bitset;
 #endif

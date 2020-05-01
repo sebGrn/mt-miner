@@ -16,7 +16,7 @@ class TreeNode
 {
 private:
 	static std::atomic_int processorCount;
-	static std::atomic_int nbTotalChildren;
+	static std::atomic_ullong nbTotalChildren;
 	static std::atomic_int nbRunningThread;
 
 	std::shared_ptr<BinaryRepresentation> binaryRepresentation;
@@ -24,6 +24,8 @@ private:
 	/// true if we want to use clone optimization
 	/// a clone is a item from binary representation 
 	bool useCloneOptimization;
+
+	bool useMultitheadOptimization;
 
 	std::vector<std::shared_ptr<TreeNode>> children;
 
@@ -35,21 +37,19 @@ private:
 
 	/// compute maxClique list, toExplore list and mt list
 	/// update graph_mt with new minimal transversal itemset
-	void computeListsFromToTraverse(const std::vector<Utils::Itemset>& toTraverse, std::vector<Utils::Itemset>& maxClique, std::vector<Utils::Itemset>& toExplore, std::vector<Utils::Itemset>& graph_mt);
+	void updateListsFromToTraverse(const std::vector<Utils::Itemset>& toTraverse, std::vector<Utils::Itemset>& maxClique, std::vector<Utils::Itemset>& toExplore, std::vector<Utils::Itemset>& graph_mt);
 
-	//void computeMinimalTransversalsCb(int nb, std::vector<Utils::Itemset>& graph_mt);
+	void exploreNextBranch(const std::vector<Utils::Itemset>& toTraverse, const std::vector<Utils::Itemset>& maxClique, const std::vector<Utils::Itemset>& toExplore, std::vector<Utils::Itemset>& graph_mt);
 	
 public:
 	TreeNode(bool useCloneOptimization, const std::shared_ptr<BinaryRepresentation>& binaryRepresentation);
 	~TreeNode();
 
-	//void joinThead();
-
 	/// recursive function, trasvere treen node to compute minimal transversals for binary representation
 	/// @param toTraverse transversal itemset list
 	std::vector<Utils::Itemset> computeMinimalTransversals(const std::vector<Utils::Itemset> & toTraverse);
 
-	int getTotalChildren() const
+	unsigned long long getTotalChildren() const
 	{
 		return nbTotalChildren;
 	};

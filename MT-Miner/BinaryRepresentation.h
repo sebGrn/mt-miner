@@ -33,10 +33,7 @@ private:
 	/// pair of original index, clone index
 	std::vector<std::pair<unsigned int, unsigned int>> clonedBitsetIndexes;
 
-	int64_t isEssentialDuration;
-
 private:
-	//bool checkOneItem(int itemBar, const Utils::Itemset& itemsOfpattern) const;
 	bool compareItemsets(const Utils::Itemset& itemset1, const Utils::Itemset& itemset2) const;
 
 public:
@@ -83,10 +80,5 @@ public:
 	{
 		assert(binaryRepresentation.find(key) != binaryRepresentation.end());
 		return binaryRepresentation.at(key);
-	}
-
-	int64_t getIsEssentialDuration() const
-	{
-		return this->isEssentialDuration;
 	}
 };

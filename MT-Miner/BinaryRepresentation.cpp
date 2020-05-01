@@ -1,10 +1,10 @@
 #include "BinaryRepresentation.h"
 #include "Logger.h"
+#include "Profiler.h"
 
 /// build binary representation from formal context
 BinaryRepresentation::BinaryRepresentation(const FormalContext& context)
 {
-	this->isEssentialDuration = 0;
 	this->objectCount = context.getObjectCount();
 	this->itemCount = context.getItemCount();
 
@@ -13,7 +13,7 @@ BinaryRepresentation::BinaryRepresentation(const FormalContext& context)
 	{
 		Bitset bitset(this->objectCount);
 		
-		for (int i = 0; i < this->objectCount; i++)	// 6 on test.txt
+		for (int i = 0; i < this->objectCount; i++)		// 6 on test.txt
 		{
 			bitset[i] = context.getElement(i, j);
 		}
@@ -28,7 +28,7 @@ BinaryRepresentation::BinaryRepresentation(const FormalContext& context)
 // return true if element is essential
 bool BinaryRepresentation::isEssential(const Utils::Itemset& itemset)
 {
-	//auto beginTime = std::chrono::system_clock::now();
+	START_PROFILING(__func__)
 
 	if (itemset.size() == 1)
 		return true;
@@ -82,13 +82,15 @@ bool BinaryRepresentation::isEssential(const Utils::Itemset& itemset)
 		}
 	}
 	
-	//this->isEssentialDuration += std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
+	END_PROFILING(__func__)
 	
 	return isEssential;
 }
 
 unsigned int BinaryRepresentation::computeDisjonctifSupport(const Utils::Itemset& pattern) const
 {
+	START_PROFILING(__func__)
+
 	Bitset SumOfN_1Items(this->objectCount);
 
 	//#pragma omp parallel for
@@ -118,11 +120,16 @@ unsigned int BinaryRepresentation::computeDisjonctifSupport(const Utils::Itemset
 #else
 	disSupp = SumOfN_1Items.count();
 #endif
+	
+	END_PROFILING(__func__)
+
 	return disSupp;
 };
 
 bool BinaryRepresentation::compareItemsets(const Utils::Itemset& itemset1, const Utils::Itemset& itemset2) const
 {
+	START_PROFILING(__func__)
+
 	bool sameItemset = true;
 	unsigned int supp1 = computeDisjonctifSupport(itemset1);
 	unsigned int supp2 = computeDisjonctifSupport(itemset2);
@@ -151,12 +158,15 @@ bool BinaryRepresentation::compareItemsets(const Utils::Itemset& itemset1, const
 #endif			
 		}
 	}
+	END_PROFILING(__func__)
+
 	return sameItemset;
 }
 
 
 unsigned int BinaryRepresentation::buildCloneList()
 {
+	START_PROFILING(__func__)
 	for (auto it1 = this->binaryRepresentation.begin(); it1 != this->binaryRepresentation.end(); it1++)
 	{
 		for (auto it2 = it1; it2 != this->binaryRepresentation.end(); it2++)
@@ -179,25 +189,31 @@ unsigned int BinaryRepresentation::buildCloneList()
 			}
 		}
 	}
+	END_PROFILING(__func__)
+
 	return clonedBitsetIndexes.size();
 };
 
 bool BinaryRepresentation::containsAClone(const Utils::Itemset& itemset) const
 {
+	START_PROFILING(__func__)
 	for (auto it = clonedBitsetIndexes.begin(); it != clonedBitsetIndexes.end(); it++)
 	{
 		// check if 
 		if (std::find(itemset.begin(), itemset.end(), it->second) != itemset.end())
 		{
+			END_PROFILING(__func__)
 			return true;
 		}
 	}
+	END_PROFILING(__func__)
 	return false;
 }
 
 // 
 bool BinaryRepresentation::containsOriginals(const Utils::Itemset& itemset, std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes) const
 {
+	START_PROFILING(__func__)
 	originalClonedIndexes.clear();
 	for (auto it = clonedBitsetIndexes.begin(); it != clonedBitsetIndexes.end(); it++)
 	{
@@ -206,6 +222,7 @@ bool BinaryRepresentation::containsOriginals(const Utils::Itemset& itemset, std:
 		{
 			originalClonedIndexes.push_back(std::pair<unsigned int, unsigned int>(it->first, it->second));
 		}
-	}	
+	}
+	END_PROFILING(__func__)
 	return !originalClonedIndexes.empty();
 }
