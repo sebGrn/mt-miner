@@ -41,6 +41,7 @@ void MT_Miner::init(const std::shared_ptr<HyperGraph>& hypergraph, std::vector<U
 		// if we have, memorize the indexes of the original and the cloned
 		// if the cloned bitset index is into a toExplore list, dont compute the mt for the clone but use those from the original
 		unsigned int cloneListSize = binaryRepresentation->buildCloneList();
+		Logger::log(GREEN, "found ", cloneListSize, " clones\n", RESET);
 	}
 
 	toTraverse.clear();
