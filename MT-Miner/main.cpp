@@ -50,14 +50,14 @@ public:
 
 	void showUsage(const std::string& name)
 	{
-		std::cout << "Usage: " << name << " intput <option(s)>"
+		std::cout << RED << "Usage: " << name << " intput <option(s)>"
 			<< "Options:\n"
 			<< "\t-h,--help\t\tShow this help message\n"
 			<< "\t--verbose\t\ttrue/false\n"
 			<< "\t--log\t\ttrue/false\n"
 			<< "\t--output\t\ttrue/false\n" 
 			<< "\t--use-clone\t\ttrue/false\n"
-			<< std::endl;
+			<< RESET << std::endl;
 	}
 
 	std::map<ParameterType, std::string> extractArguments(int argc, char* argv[])
@@ -101,7 +101,7 @@ public:
 
 void runMinimalTransversals(const std::string& file, bool useCloneOptimization, bool verbose, bool useOutputFile, bool useOutputLogFile)
 {
-	std::cout << "***** Running MT Miner *****" << std::endl << std::endl;
+	std::cout << BOLDYELLOW << "\n***** Running MT Miner *****" << RESET << std::endl << std::endl;
 
 	unsigned int objectCount = 0;
 	unsigned int itemCount = 0;
@@ -140,7 +140,7 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 			std::string outFile = file;
 			outFile += ".out";
 
-			Logger::log("saving minimal transversals into file : ", outFile);
+			Logger::log(GREEN, "saving minimal transversals into file : ", outFile, "\n", RESET);
 			std::ofstream outputStream;
 			outputStream.open(outFile);
 			for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { outputStream << Utils::itemsetToString(elt) << std::endl; });

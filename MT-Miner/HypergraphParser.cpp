@@ -21,7 +21,7 @@ bool HypergraphParser::parse(const std::string& file)
 	inputStream.open(file);
 	if (inputStream.fail())
 	{ 
-		std::cout << "couldn't load file " << file << std::endl;
+		std::cout << RED << "couldn't load file " << file << RESET << std::endl;
 		return false;
 	}
 
@@ -32,16 +32,17 @@ bool HypergraphParser::parse(const std::string& file)
 	// lambda function called during parsing every minutes
 	auto callback = [](bool& done, unsigned int& objectCount) {
 		int n = 0;
+		const int secondsToWait = 20;
 		while (!done)
 		{
 			if (n)
-				std::cout << "parsing in progress : " << objectCount << " objects found after " << 10*n << " seconds" << std::endl;
-			std::this_thread::sleep_for(std::chrono::seconds(10));
+				std::cout << CYAN << "parsing in progress : " << objectCount << " objects found after " << secondsToWait * n << " seconds" << RESET << std::endl;
+			std::this_thread::sleep_for(std::chrono::seconds(secondsToWait));
 			n++;
 		}
 	};
 
-	Logger::log("parsing ", file, "\n");
+	Logger::log(GREEN, "parsing ", file, "\n", RESET);
 	auto beginTime = std::chrono::system_clock::now();
 
 	this->parsingDone = false;
@@ -72,7 +73,7 @@ bool HypergraphParser::parse(const std::string& file)
 	thread.detach();
 
 	int64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
-	Logger::log("parsing hypergraph done in ", duration, " ms, found ", maxItemCount, " items (columns) and ", objectCount, " objects (lines)\n\n");
+	Logger::log(GREEN, "parsing hypergraph done in ", duration, " ms, found ", maxItemCount, " items (columns) and ", objectCount, " objects (lines)\n\n", RESET);
 	
 	return true;
 }

@@ -15,4 +15,5 @@
 #include "../MT-Miner/HypergraphParser.h"
 #include "../MT-Miner/MT_Miner.h"
 #include "../MT-Miner/TreeNode.h"
+#include "../MT-Miner/Logger.h"
 #endif //PCH_H
