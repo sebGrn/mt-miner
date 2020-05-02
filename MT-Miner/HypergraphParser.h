@@ -7,7 +7,6 @@
 #include <map>
 #include <sstream>
 #include <chrono>
-#include <thread>
 
 #include "Logger.h"
 #include "HyperGraph.h"

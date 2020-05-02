@@ -10,13 +10,13 @@ class Profiler
 {
 public:
 	static bool useProfiling;
-	static std::map<std::string, std::chrono::duration<__int64, std::milli>> functionDurationMap;
+	static std::map<std::string, std::chrono::duration<long long, std::milli>> functionDurationMap;
 
-	static void addDuration(const std::string& functionName, const std::chrono::duration<__int64, std::milli>& duration)
+	static void addDuration(const std::string& functionName, const std::chrono::duration<long long, std::milli>& duration)
 	{
 		if (functionDurationMap.find(functionName) != functionDurationMap.end())
 		{
-			std::chrono::duration<__int64, std::milli> lastDuration = functionDurationMap[functionName];
+			std::chrono::duration<long long, std::milli> lastDuration = functionDurationMap[functionName];
 			lastDuration += duration;
 			functionDurationMap[functionName] = lastDuration;
 		}

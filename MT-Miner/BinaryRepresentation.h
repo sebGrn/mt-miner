@@ -4,7 +4,6 @@
 #include <map>
 #include <list>
 #include <chrono>
-#include <thread>
 
 #ifndef _DEBUG
 #include <boost/dynamic_bitset.hpp>
