@@ -23,19 +23,32 @@ public:
 		this->itemCount = hypergraph->getItemCount();
 		this->objectCount = hypergraph->getObjectCount();
 
+		unsigned int bitsetSize = this->itemCount;
+		if (!hypergraph->getOneBasedIndex())
+			bitsetSize += 1;
+
+		unsigned int index = 0;
+
 		// build formal context
 		for (unsigned int i = 0; i < hypergraph->getObjectCount(); i++)
 		{
 			// init bitset, all 0's by default
-			Bitset bitset(hypergraph->getItemCount());
+			Bitset bitset(bitsetSize);
 
 			// loop on hyper graph and build formal context
 			std::vector<unsigned int> line = hypergraph->getLine(i);
 			for (unsigned int j = 0; j < line.size(); j++)
 			{
-				assert(line[j] >= 1);
-				unsigned int index = line[j] - 1;
-				//unsigned int index = line[j];
+				if (hypergraph->getOneBasedIndex())
+				{
+					assert(line[j] >= 1);
+					index = line[j] - 1;
+				}
+				else
+				{
+					index = line[j];
+				}
+				assert(index >= 0);
 				assert(index < bitset.size());
 				bitset[index] = true;
 			}

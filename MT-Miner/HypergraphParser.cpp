@@ -49,6 +49,8 @@ bool HypergraphParser::parse(const std::string& file)
 	// instanciate new thead for regular log
 	std::thread thread(callback, std::ref(this->parsingDone), std::ref(objectCount));
 
+	bool oneIndexedBase = true;
+
 	std::string line;
 	while (std::getline(inputStream, line))
 	{
@@ -56,10 +58,13 @@ bool HypergraphParser::parse(const std::string& file)
 		{
 			line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
 			line = Utils::trim(line);
-			Itemset data = Utils::splitToVectorOfInt(line, ' ');
+			Utils::Itemset data = Utils::splitToVectorOfInt(line, ' ');
 			maxItemCount = std::max(*std::max_element(data.begin(), data.end()), maxItemCount);
 
 			hypergraph->addLine(data);
+
+			if (oneIndexedBase && Utils::containsZero(data))
+				oneIndexedBase = false;
 
 			// as many items as lines in the file
 			objectCount++;
@@ -67,6 +72,11 @@ bool HypergraphParser::parse(const std::string& file)
 	}
 	hypergraph->setItemCount(maxItemCount);
 	hypergraph->setObjectCount(objectCount);
+	hypergraph->setOneBasedIndex(oneIndexedBase);
+
+	if(!oneIndexedBase)
+		Logger::log(RED, "hypergraph has a zero based index mode\n", RESET);
+
 	this->parsingDone = true;
 	inputStream.close();
 	

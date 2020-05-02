@@ -31,7 +31,7 @@ public:
 
 	/// initialize the minimal transversals miner
 	/// this function build a format context from the hypergraph, then build the binary representation
-	void init(const std::shared_ptr<HyperGraph>& hypergraph, std::vector<Utils::Itemset>& toTraverse);
+	void init(const std::shared_ptr<HyperGraph>& hypergraph, std::vector<Utils::Itemset>& toTraverse, bool oneIndexedBase = true);
 
 	///
 	std::vector<Utils::Itemset> computeMinimalTransversals(const std::vector<Utils::Itemset>&& toTraverse);

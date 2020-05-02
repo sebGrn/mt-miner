@@ -1,6 +1,8 @@
 #pragma once
 #include <vector>
 #include <cassert>
+#include <algorithm>
+#include "utils.h"
 
 class HyperGraph
 {
@@ -14,11 +16,14 @@ private:
 	/// number of items/attributes/columns
 	unsigned int itemCount;
 
+	bool oneBasedIndex;
+
 public:
 	HyperGraph()
 	{
 		this->objectCount = 0;
 		this->itemCount = 0;
+		this->oneBasedIndex = true;
 	};
 
 	~HyperGraph()
@@ -53,5 +58,15 @@ public:
 	{
 		assert(i < getObjectCount());
 		return this->hypergraph[i];
+	};	
+
+	void setOneBasedIndex(bool value)
+	{
+		this->oneBasedIndex = value;
+	};
+
+	bool getOneBasedIndex() const
+	{
+		return this->oneBasedIndex;
 	};
 };

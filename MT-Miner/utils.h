@@ -132,6 +132,11 @@ public:
 		return combinedElt;
 	};
 	
+	static bool containsZero(const Utils::Itemset& data)
+	{
+		return (std::find(data.begin(), data.end(), 0) != data.end());
+	}
+
 	// ------------------------------------------------------------------------------------------------------------------------- //
 
 	/// <summary>

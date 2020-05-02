@@ -54,7 +54,7 @@ void TreeNode::updateListsFromToTraverse(const std::vector<Utils::Itemset>& toTr
 	for (auto it = toTraverse.begin(); it != toTraverse.end(); it++)
 	{
 		Utils::Itemset currentItem = *it;
-		unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(currentItem);
+		unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(currentItem);		
 		if (disjSup == this->binaryRepresentation->getObjectCount())
 		{
 			// we have a minimal transversal
@@ -101,10 +101,11 @@ void TreeNode::updateListsFromToTraverse(const std::vector<Utils::Itemset>& toTr
 			}
 		}
 	}
+
 	END_PROFILING(__func__)
 }
 
-void TreeNode::exploreNextBranch(const std::vector<Utils::Itemset>& toTraverse, const std::vector<Utils::Itemset>& maxClique, const std::vector<Utils::Itemset>& toExplore, std::vector<Utils::Itemset>& graph_mt)
+void TreeNode::exploreNextBranch(const std::vector<Utils::Itemset>& maxClique, const std::vector<Utils::Itemset>& toExplore, std::vector<Utils::Itemset>& graph_mt)
 {
 	START_PROFILING(__func__)
 	// store toExploreList max index
@@ -131,24 +132,27 @@ void TreeNode::exploreNextBranch(const std::vector<Utils::Itemset>& toTraverse, 
 				newToTraverse.push_back(combinedItemset);
 		}
 
-		// create a new child node for this newToTraverse list and add the node as a child
-		std::shared_ptr<TreeNode> node = std::make_shared<TreeNode>(this->useCloneOptimization, this->binaryRepresentation);
-		this->children.push_back(node);
-		nbTotalChildren++;
+		if (!newToTraverse.empty())
+		{
+			// create a new child node for this newToTraverse list and add the node as a child
+			std::shared_ptr<TreeNode> node = std::make_shared<TreeNode>(this->useCloneOptimization, this->binaryRepresentation);
+			this->children.push_back(node);
+			nbTotalChildren++;
 
-		// recurse
-		if (this->useMultitheadOptimization && nbRunningThread < processorCount)
-		{
-			// create thread for 1st branch 
-			nbRunningThread++;
-			//std::cout << "launch thead " << nbRunningThread << std::endl;
-			futures.push_back(std::async(&TreeNode::computeMinimalTransversals, node, std::move(newToTraverse)));
-		}
-		else
-		{
-			// compute minimal transversals for the branch
-			std::vector<Utils::Itemset>&& graph_mt_child = node->computeMinimalTransversals(std::move(newToTraverse));
-			std::copy(graph_mt_child.begin(), graph_mt_child.end(), std::back_inserter(graph_mt));
+			// recurse
+			if (this->useMultitheadOptimization && nbRunningThread < processorCount)
+			{
+				// create thread for 1st branch 
+				nbRunningThread++;
+				std::cout << BLUE << "launch thead " << nbRunningThread << RESET << std::endl;
+				futures.push_back(std::async(&TreeNode::computeMinimalTransversals, node, std::move(newToTraverse)));
+			}
+			else
+			{
+				// compute minimal transversals for the branch
+				std::vector<Utils::Itemset>&& graph_mt_child = node->computeMinimalTransversals(std::move(newToTraverse));
+				std::copy(graph_mt_child.begin(), graph_mt_child.end(), std::back_inserter(graph_mt));
+			}
 		}
 	}
 	END_PROFILING(__func__)
@@ -171,12 +175,12 @@ std::vector<Utils::Itemset> TreeNode::computeMinimalTransversals(const std::vect
 	// update lists from toTraverse
 	this->updateListsFromToTraverse(toTraverse, maxClique, toExplore, graph_mt);
 
-	//Logger::log("toExplore list", Utils::itemsetListToString(toExplore), " - recursion level ", recursionLevel, "\n");
+	//Logger::log("toExplore list", Utils::itemsetListToString(toExplore), "\n");
 	//Logger::log("maxClique list", Utils::itemsetListToString(maxClique), "\n");
 
 	// build new toTraverse list and explore next branch
 	if (!toExplore.empty())
-		this->exploreNextBranch(toTraverse, maxClique, toExplore, graph_mt);
+		this->exploreNextBranch(maxClique, toExplore, graph_mt);
 
 	// manage futures
 	try

@@ -13,7 +13,7 @@ MT_Miner::~MT_Miner()
 
 }
 
-void MT_Miner::init(const std::shared_ptr<HyperGraph>& hypergraph, std::vector<Utils::Itemset>& toTraverse)
+void MT_Miner::init(const std::shared_ptr<HyperGraph>& hypergraph, std::vector<Utils::Itemset>& toTraverse, bool oneIndexedBase)
 {
 	START_PROFILING(__func__)
 	// build formal context from hypergraph
@@ -42,6 +42,9 @@ void MT_Miner::init(const std::shared_ptr<HyperGraph>& hypergraph, std::vector<U
 		// if the cloned bitset index is into a toExplore list, dont compute the mt for the clone but use those from the original
 		unsigned int cloneListSize = binaryRepresentation->buildCloneList();
 		Logger::log(GREEN, "found ", cloneListSize, " clones\n", RESET);
+
+		if (cloneListSize == 0)
+			this->useCloneOptimization = false;
 	}
 
 	toTraverse.clear();

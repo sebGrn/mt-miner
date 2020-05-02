@@ -17,8 +17,6 @@
 /// object count 
 class HypergraphParser
 {
-	using Itemset = std::vector<unsigned int>;
-
 private:
 	/// hypergraph ie matrix of int
 	std::shared_ptr<HyperGraph> hypergraph;

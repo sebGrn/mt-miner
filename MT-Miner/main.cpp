@@ -15,7 +15,7 @@
 #include <chrono>
 #include <omp.h>
 
-using Itemset = std::vector<unsigned int>;
+//using Itemset = std::vector<unsigned int>;
 
 #include "utils.h"
 #include "HypergraphParser.h"
@@ -56,7 +56,6 @@ public:
 			<< "\t--verbose\t\ttrue/false\n"
 			<< "\t--log\t\ttrue/false\n"
 			<< "\t--output\t\ttrue/false\n" 
-			<< "\t--use-clone\t\ttrue/false\n"
 			<< RESET << std::endl;
 	}
 
@@ -126,11 +125,11 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 		//beginTime = std::chrono::system_clock::now();
 		
 		MT_Miner miner(useCloneOptimization);
-		std::vector<Itemset> toTraverse;
+		std::vector<Utils::Itemset> toTraverse;
 		miner.init(hypergraph, toTraverse);
 
 		// compute minimal transversals		
-		std::vector<Itemset>&& minimalTransversals = miner.computeMinimalTransversals(std::move(toTraverse));
+		std::vector<Utils::Itemset>&& minimalTransversals = miner.computeMinimalTransversals(std::move(toTraverse));
 				
 		// ----------------------------------------------------- //
 
@@ -143,7 +142,7 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 			Logger::log(GREEN, "saving minimal transversals into file : ", outFile, "\n", RESET);
 			std::ofstream outputStream;
 			outputStream.open(outFile);
-			for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { outputStream << Utils::itemsetToString(elt) << std::endl; });
+			for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Utils::Itemset& elt) { outputStream << Utils::itemsetToString(elt) << std::endl; });
 			outputStream.close();
 		}
 	}
