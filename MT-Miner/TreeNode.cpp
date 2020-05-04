@@ -2,9 +2,9 @@
 #include "Logger.h"
 #include "Profiler.h"
 
-std::atomic_int TreeNode::nbRunningThread = 0;
-std::atomic_ullong TreeNode::nbTotalChildren = 0;
-std::atomic_int TreeNode::processorCount = std::thread::hardware_concurrency();
+std::atomic_int TreeNode::nbRunningThread(0);
+std::atomic_ullong TreeNode::nbTotalChildren(0);
+std::atomic_int TreeNode::processorCount(std::thread::hardware_concurrency());
 
 TreeNode::TreeNode(bool useCloneOptimization, const std::shared_ptr<BinaryRepresentation>& binaryRepresentation)
 {
