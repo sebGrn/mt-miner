@@ -1,77 +1,43 @@
 {
-  "name": "Top Level",
+  "name": "7",
   "children": [
-    { 
-      "name": "Level 2: A",
+    {
+      "name": "7,4",
       "children": [
-        { "name": "Son of A","children": [
-          { "name": "Son of A","children": [
-            { "name": "Son of A" },
-            { "name": "Daughter of A","children": [
-              { "name": "Son of A","children": [
-                { "name": "Son of A","children": [
-                  { "name": "Son of A","children": [
-                    { "name": "Son of A","children": [
-                      { "name": "Son of A" },
-                      { "name": "Daughter of A","children": [
-                        { "name": "Son of A","children": [
-                          { "name": "Son of A" },
-                          { "name": "Daughter of A" }
-                        ] },
-                        { "name": "Daughter of A" }
-                      ] }
-                    ] },
-                    { "name": "Daughter of A" }
-                  ] },
-                  { "name": "Daughter of A" }
-                ] },
-                { "name": "Daughter of A" }
-              ] },
-              { "name": "Daughter of A" }
-            ] }
-          ] },
-          { "name": "Daughter of A" }
-        ] },
-        { "name": "Daughter of A" }
+        {
+          "name": "7,4,1"
+        },
+        {
+          "name": "7,4,2"
+        }
       ]
     },
-    { "name": "Level 2: B",
+    {
+      "name": "7,6",
       "children": [
-        { 
-          "name": "Level 2: A",
+        {
+          "name": "7,6,3",
           "children": [
-            { "name": "Son of A","children": [
-              { "name": "Son of A","children": [
-                { "name": "Son of A" },
-                { "name": "Daughter of A","children": [
-                  { "name": "Son of A","children": [
-                    { "name": "Son of A","children": [
-                      { "name": "Son of A","children": [
-                        { "name": "Son of A","children": [
-                          { "name": "Son of A" },
-                          { "name": "Daughter of A","children": [
-                            { "name": "Son of A","children": [
-                              { "name": "Son of A" },
-                              { "name": "Daughter of A" }
-                            ] },
-                            { "name": "Daughter of A" }
-                          ] }
-                        ] },
-                        { "name": "Daughter of A" }
-                      ] },
-                      { "name": "Daughter of A" }
-                    ] },
-                    { "name": "Daughter of A" }
-                  ] },
-                  { "name": "Daughter of A" }
-                ] }
-              ] },
-              { "name": "Daughter of A" }
-            ] },
-            { "name": "Daughter of A" }
+            {
+              "name": "7,6,3,1"
+            },
+            {
+              "name": "7,6,3,2"
+            }
           ]
         },
-        { "name": "Level 2: B"}
-      ]}
+        {
+          "name": "7,6,5",
+          "children": [
+            {
+              "name": "7,6,5,1"
+            },
+            {
+              "name": "7,6,5,2"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }

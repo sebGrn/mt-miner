@@ -20,6 +20,8 @@ using Itemset = std::vector<unsigned int>;
 #include "HypergraphParser.h"
 #include "MT_Miner.h"
 #include "Logger.h"
+#include "Tree.h"
+#include "TreeNode.h"
 
 ///
 ///
@@ -183,7 +185,19 @@ int main(int argc, char* argv[])
 		std::cout << "saving minimal transversals into file : " << outputFilename << std::endl;
 		std::ofstream outputStream;
 		outputStream.open(outputFilename);
-		for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { outputStream << Utils::itemsetToString(elt) << std::endl; });
+		Tree* tree = Tree::getTree();
+		for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) 
+		{ 
+			outputStream << Utils::itemsetToString(elt) << std::endl; 
+			// add front-end tree leaves  
+			std::string name = Utils::itemsetToString(elt);
+			name = name.substr(1, name.length() - 2);
+			TreeNode* node = new TreeNode(name);
+			tree->addChild(*node);
+		});
+		// save front-end tree
+		std::string _filename = "front-end/tree-data.json";
+		tree->saveJSONTree(_filename);
 		outputStream.close();
 	}
 }

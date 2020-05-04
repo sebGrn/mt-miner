@@ -1,5 +1,7 @@
 #include "Graph.h"
 #include "Logger.h"
+#include "Tree.h"
+#include "TreeNode.h"
 
 GraphNode::GraphNode(bool useCloneOptimization, const std::vector<Utils::Itemset>& toTraverse, const std::shared_ptr<BinaryRepresentation>& binaryRepresentation)
 {
@@ -113,6 +115,24 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 		Logger::log("----------------------------------------------------------", "\n");
 		Logger::log("toExplore list", Utils::itemsetListToString(toExplore), "\n");
 		Logger::log("maxClique list", Utils::itemsetListToString(maxClique), "\n");
+		
+		// build front-end tree
+		Tree* tree = Tree::getTree();
+		for_each(toExplore.begin(), toExplore.end(), [&](Utils::Itemset& _item) 
+		{ 
+			std::string name = Utils::itemsetToString(_item);
+			// remove {}
+			name = name.substr(1, name.length() - 2);
+			TreeNode* node = new TreeNode(name);
+			if (toExplore.size() == 1)
+			{
+				tree->setRoot(node);
+			}
+			else
+			{
+				tree->addChild(*node);
+			}
+		});
 
 		// store toExploreList max index
 		unsigned int lastIndexToTest = toExplore.size();
