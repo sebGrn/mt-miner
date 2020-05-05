@@ -5,9 +5,9 @@ $.getJSON('tree-data.json', function(treeData) {
     // set the margin of the tree
     var margin = {
         top: 50, 
-        right: 90, 
+        right: 50, 
         bottom: 50, 
-        left: 90
+        left: 50
     };
 
     // variables
@@ -37,7 +37,7 @@ $.getJSON('tree-data.json', function(treeData) {
 
     // set the dimensions of the tree
     var width = treeDiv.clientWidth - margin.left - margin.right;
-    var height = depth*80 - margin.top;
+    var height = depth*180 - margin.top;
 
     // append the svg object to the tree-container of the page
     // appends a 'group' element to 'svg'
@@ -63,7 +63,7 @@ $.getJSON('tree-data.json', function(treeData) {
     
     // resize the window width
     function resize(d) {
-        width = treeDiv.clientWidth - margin.left - margin.right;
+        width = (treeDiv.clientWidth - margin.left - margin.right);
         d3.select("svg")
         .attr("width", (width + margin.right + margin.left))
         .attr("height", (height + margin.top + margin.bottom))
@@ -94,7 +94,7 @@ $.getJSON('tree-data.json', function(treeData) {
 
         // normalize for fixed-depth.
         nodes.forEach(function(d) { 
-            d.y = d.depth * 80
+            d.y = d.depth * 180;
         });
 
         // ****************** Nodes section ***************************
@@ -134,6 +134,7 @@ $.getJSON('tree-data.json', function(treeData) {
             return d.data.name; 
         });
 
+
         // UPDATE
         var nodeUpdate = nodeEnter.merge(node);
 
@@ -160,7 +161,16 @@ $.getJSON('tree-data.json', function(treeData) {
             }
             return color;
         })
-        .attr('cursor', 'pointer');
+        .attr('cursor', function(d) {
+            var cursor;
+            if(!d.children && !d._children) {
+                cursor = "default";
+            }
+            else {
+                cursor = "pointer";
+            }
+            return cursor;
+        });
 
 
         // remove any exiting nodes

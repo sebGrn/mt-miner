@@ -10,6 +10,7 @@ private:
 public:
 	TreeNode(const std::string& _name);
 	~TreeNode();
+	void addRoot(TreeNode& _child);
 	void addChild(TreeNode& _child);
 	std::string getName();
 	std::string getTreeStructure();

@@ -10,6 +10,11 @@ TreeNode::~TreeNode()
 {
 }
 
+void TreeNode::addRoot(TreeNode& _child)
+{
+	children.push_back(_child);
+}
+
 void TreeNode::addChild(TreeNode& _child)
 {
 	std::string _name = _child.getName();

@@ -22,14 +22,23 @@ svg {
 	fill: #fff;
 	stroke: steelblue;
 	stroke-width: 3px;
-  }
+}
   
-  .node text {
+.node text {
 	font: 12px sans-serif;
-  }
+	font-size: small;
+	opacity: 30%;
+}
   
+.node text:hover {
+	font-weight: bold;
+	font-size: medium;
+	opacity: 100%;
+}
+
   .link {
 	fill: none;
 	stroke: #ccc;
 	stroke-width: 2px;
-  }
+	opacity: 50%;
+}

@@ -10,7 +10,7 @@ private:
 public:
 	~Tree();
 	static Tree* getTree();
-	void setRoot(TreeNode* _root);
+	void addRoot(TreeNode& _root);
 	void addChild(TreeNode& _child);
 	void saveJSONTree(std::string& _filename);
 };

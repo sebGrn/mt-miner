@@ -185,6 +185,7 @@ int main(int argc, char* argv[])
 		std::cout << "saving minimal transversals into file : " << outputFilename << std::endl;
 		std::ofstream outputStream;
 		outputStream.open(outputFilename);
+		
 		Tree* tree = Tree::getTree();
 		for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) 
 		{ 
@@ -198,6 +199,7 @@ int main(int argc, char* argv[])
 		// save front-end tree
 		std::string _filename = "front-end/tree-data.json";
 		tree->saveJSONTree(_filename);
+		
 		outputStream.close();
 	}
 }

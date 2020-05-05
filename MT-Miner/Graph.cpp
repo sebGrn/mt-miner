@@ -124,16 +124,16 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 			// remove {}
 			name = name.substr(1, name.length() - 2);
 			TreeNode* node = new TreeNode(name);
-			if (toExplore.size() == 1)
+			if (_item.size() == 1)
 			{
-				tree->setRoot(node);
+				tree->addRoot(*node);
 			}
 			else
 			{
 				tree->addChild(*node);
 			}
 		});
-
+		tree = Tree::getTree();
 		// store toExploreList max index
 		unsigned int lastIndexToTest = toExplore.size();
 		// combine toExplore (left part) with maxClique list (right part) into a combined list

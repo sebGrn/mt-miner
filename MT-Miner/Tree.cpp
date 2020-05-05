@@ -6,7 +6,7 @@ Tree* Tree::tree = nullptr;
 
 Tree::Tree()
 {
-    root = nullptr;
+    root = new TreeNode("");
 }
 
 Tree::~Tree()
@@ -22,9 +22,9 @@ Tree* Tree::getTree()
     return tree;
 }
 
-void Tree::setRoot(TreeNode* _root)
+void Tree::addRoot(TreeNode& _root)
 {
-    root = _root;
+    root->addRoot(_root);
 }
 
 void Tree::addChild(TreeNode& _child)
