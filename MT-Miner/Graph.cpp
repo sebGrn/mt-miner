@@ -117,13 +117,13 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 		Logger::log("maxClique list", Utils::itemsetListToString(maxClique), "\n");
 		
 		// build front-end tree
-		Tree* tree = Tree::getTree();
+		std::shared_ptr<Tree> tree = Tree::getTree();
 		for_each(toExplore.begin(), toExplore.end(), [&](Utils::Itemset& _item) 
 		{ 
 			std::string name = Utils::itemsetToString(_item);
 			// remove {}
 			name = name.substr(1, name.length() - 2);
-			TreeNode* node = new TreeNode(name);
+			std::shared_ptr<TreeNode> node = std::make_shared<TreeNode>(name);
 			if (_item.size() == 1)
 			{
 				tree->addRoot(*node);
@@ -133,7 +133,7 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 				tree->addChild(*node);
 			}
 		});
-		tree = Tree::getTree();
+		
 		// store toExploreList max index
 		unsigned int lastIndexToTest = toExplore.size();
 		// combine toExplore (left part) with maxClique list (right part) into a combined list

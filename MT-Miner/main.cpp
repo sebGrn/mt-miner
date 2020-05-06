@@ -186,14 +186,15 @@ int main(int argc, char* argv[])
 		std::ofstream outputStream;
 		outputStream.open(outputFilename);
 		
-		Tree* tree = Tree::getTree();
+		std::shared_ptr<Tree> tree = Tree::getTree();
+		
 		for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) 
 		{ 
 			outputStream << Utils::itemsetToString(elt) << std::endl; 
 			// add front-end tree leaves  
 			std::string name = Utils::itemsetToString(elt);
 			name = name.substr(1, name.length() - 2);
-			TreeNode* node = new TreeNode(name);
+			std::shared_ptr<TreeNode> node = std::make_shared<TreeNode>(name);
 			tree->addChild(*node);
 		});
 		// save front-end tree

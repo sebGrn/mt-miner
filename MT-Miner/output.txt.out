@@ -1,2054 +1,343 @@
-** add clone at index <1, 3>
-** add clone at index <1, 4>
-** add clone at index <1, 5>
-** add clone at index <1, 6>
-** add clone at index <1, 7>
-** add clone at index <1, 8>
-** add clone at index <1, 10>
-** add clone at index <1, 11>
-** add clone at index <1, 12>
-** add clone at index <1, 14>
-** add clone at index <1, 20>
-** add clone at index <1, 21>
-** add clone at index <1, 24>
-** add clone at index <1, 27>
-** add clone at index <1, 31>
-** add clone at index <1, 33>
-** add clone at index <1, 34>
-** add clone at index <1, 35>
-** add clone at index <1, 36>
-** add clone at index <1, 37>
-** add clone at index <1, 38>
-** add clone at index <1, 40>
-** add clone at index <1, 41>
-** add clone at index <1, 43>
-** add clone at index <1, 45>
-** add clone at index <1, 46>
-** add clone at index <1, 47>
-** add clone at index <1, 48>
-** add clone at index <1, 49>
-** add clone at index <1, 50>
-** add clone at index <1, 51>
-** add clone at index <1, 52>
-** add clone at index <1, 53>
-** add clone at index <1, 54>
-** add clone at index <1, 55>
-** add clone at index <1, 56>
-** add clone at index <1, 57>
-** add clone at index <1, 58>
-** add clone at index <1, 59>
-** add clone at index <1, 61>
-** add clone at index <1, 62>
-** add clone at index <1, 63>
-** add clone at index <3, 4>
-** add clone at index <3, 5>
-** add clone at index <3, 6>
-** add clone at index <3, 7>
-** add clone at index <3, 8>
-** add clone at index <3, 10>
-** add clone at index <3, 11>
-** add clone at index <3, 12>
-** add clone at index <3, 14>
-** add clone at index <3, 20>
-** add clone at index <3, 21>
-** add clone at index <3, 24>
-** add clone at index <3, 27>
-** add clone at index <3, 31>
-** add clone at index <3, 33>
-** add clone at index <3, 34>
-** add clone at index <3, 35>
-** add clone at index <3, 36>
-** add clone at index <3, 37>
-** add clone at index <3, 38>
-** add clone at index <3, 40>
-** add clone at index <3, 41>
-** add clone at index <3, 43>
-** add clone at index <3, 45>
-** add clone at index <3, 46>
-** add clone at index <3, 47>
-** add clone at index <3, 48>
-** add clone at index <3, 49>
-** add clone at index <3, 50>
-** add clone at index <3, 51>
-** add clone at index <3, 52>
-** add clone at index <3, 53>
-** add clone at index <3, 54>
-** add clone at index <3, 55>
-** add clone at index <3, 56>
-** add clone at index <3, 57>
-** add clone at index <3, 58>
-** add clone at index <3, 59>
-** add clone at index <3, 61>
-** add clone at index <3, 62>
-** add clone at index <3, 63>
-** add clone at index <4, 5>
-** add clone at index <4, 6>
-** add clone at index <4, 7>
-** add clone at index <4, 8>
-** add clone at index <4, 10>
-** add clone at index <4, 11>
-** add clone at index <4, 12>
-** add clone at index <4, 14>
-** add clone at index <4, 20>
-** add clone at index <4, 21>
-** add clone at index <4, 24>
-** add clone at index <4, 27>
-** add clone at index <4, 31>
-** add clone at index <4, 33>
-** add clone at index <4, 34>
-** add clone at index <4, 35>
-** add clone at index <4, 36>
-** add clone at index <4, 37>
-** add clone at index <4, 38>
-** add clone at index <4, 40>
-** add clone at index <4, 41>
-** add clone at index <4, 43>
-** add clone at index <4, 45>
-** add clone at index <4, 46>
-** add clone at index <4, 47>
-** add clone at index <4, 48>
-** add clone at index <4, 49>
-** add clone at index <4, 50>
-** add clone at index <4, 51>
-** add clone at index <4, 52>
-** add clone at index <4, 53>
-** add clone at index <4, 54>
-** add clone at index <4, 55>
-** add clone at index <4, 56>
-** add clone at index <4, 57>
-** add clone at index <4, 58>
-** add clone at index <4, 59>
-** add clone at index <4, 61>
-** add clone at index <4, 62>
-** add clone at index <4, 63>
-** add clone at index <5, 6>
-** add clone at index <5, 7>
-** add clone at index <5, 8>
-** add clone at index <5, 10>
-** add clone at index <5, 11>
-** add clone at index <5, 12>
-** add clone at index <5, 14>
-** add clone at index <5, 20>
-** add clone at index <5, 21>
-** add clone at index <5, 24>
-** add clone at index <5, 27>
-** add clone at index <5, 31>
-** add clone at index <5, 33>
-** add clone at index <5, 34>
-** add clone at index <5, 35>
-** add clone at index <5, 36>
-** add clone at index <5, 37>
-** add clone at index <5, 38>
-** add clone at index <5, 40>
-** add clone at index <5, 41>
-** add clone at index <5, 43>
-** add clone at index <5, 45>
-** add clone at index <5, 46>
-** add clone at index <5, 47>
-** add clone at index <5, 48>
-** add clone at index <5, 49>
-** add clone at index <5, 50>
-** add clone at index <5, 51>
-** add clone at index <5, 52>
-** add clone at index <5, 53>
-** add clone at index <5, 54>
-** add clone at index <5, 55>
-** add clone at index <5, 56>
-** add clone at index <5, 57>
-** add clone at index <5, 58>
-** add clone at index <5, 59>
-** add clone at index <5, 61>
-** add clone at index <5, 62>
-** add clone at index <5, 63>
-** add clone at index <6, 7>
-** add clone at index <6, 8>
-** add clone at index <6, 10>
-** add clone at index <6, 11>
-** add clone at index <6, 12>
-** add clone at index <6, 14>
-** add clone at index <6, 20>
-** add clone at index <6, 21>
-** add clone at index <6, 24>
-** add clone at index <6, 27>
-** add clone at index <6, 31>
-** add clone at index <6, 33>
-** add clone at index <6, 34>
-** add clone at index <6, 35>
-** add clone at index <6, 36>
-** add clone at index <6, 37>
-** add clone at index <6, 38>
-** add clone at index <6, 40>
-** add clone at index <6, 41>
-** add clone at index <6, 43>
-** add clone at index <6, 45>
-** add clone at index <6, 46>
-** add clone at index <6, 47>
-** add clone at index <6, 48>
-** add clone at index <6, 49>
-** add clone at index <6, 50>
-** add clone at index <6, 51>
-** add clone at index <6, 52>
-** add clone at index <6, 53>
-** add clone at index <6, 54>
-** add clone at index <6, 55>
-** add clone at index <6, 56>
-** add clone at index <6, 57>
-** add clone at index <6, 58>
-** add clone at index <6, 59>
-** add clone at index <6, 61>
-** add clone at index <6, 62>
-** add clone at index <6, 63>
-** add clone at index <7, 8>
-** add clone at index <7, 10>
-** add clone at index <7, 11>
-** add clone at index <7, 12>
-** add clone at index <7, 14>
-** add clone at index <7, 20>
-** add clone at index <7, 21>
-** add clone at index <7, 24>
-** add clone at index <7, 27>
-** add clone at index <7, 31>
-** add clone at index <7, 33>
-** add clone at index <7, 34>
-** add clone at index <7, 35>
-** add clone at index <7, 36>
-** add clone at index <7, 37>
-** add clone at index <7, 38>
-** add clone at index <7, 40>
-** add clone at index <7, 41>
-** add clone at index <7, 43>
-** add clone at index <7, 45>
-** add clone at index <7, 46>
-** add clone at index <7, 47>
-** add clone at index <7, 48>
-** add clone at index <7, 49>
-** add clone at index <7, 50>
-** add clone at index <7, 51>
-** add clone at index <7, 52>
-** add clone at index <7, 53>
-** add clone at index <7, 54>
-** add clone at index <7, 55>
-** add clone at index <7, 56>
-** add clone at index <7, 57>
-** add clone at index <7, 58>
-** add clone at index <7, 59>
-** add clone at index <7, 61>
-** add clone at index <7, 62>
-** add clone at index <7, 63>
-** add clone at index <8, 10>
-** add clone at index <8, 11>
-** add clone at index <8, 12>
-** add clone at index <8, 14>
-** add clone at index <8, 20>
-** add clone at index <8, 21>
-** add clone at index <8, 24>
-** add clone at index <8, 27>
-** add clone at index <8, 31>
-** add clone at index <8, 33>
-** add clone at index <8, 34>
-** add clone at index <8, 35>
-** add clone at index <8, 36>
-** add clone at index <8, 37>
-** add clone at index <8, 38>
-** add clone at index <8, 40>
-** add clone at index <8, 41>
-** add clone at index <8, 43>
-** add clone at index <8, 45>
-** add clone at index <8, 46>
-** add clone at index <8, 47>
-** add clone at index <8, 48>
-** add clone at index <8, 49>
-** add clone at index <8, 50>
-** add clone at index <8, 51>
-** add clone at index <8, 52>
-** add clone at index <8, 53>
-** add clone at index <8, 54>
-** add clone at index <8, 55>
-** add clone at index <8, 56>
-** add clone at index <8, 57>
-** add clone at index <8, 58>
-** add clone at index <8, 59>
-** add clone at index <8, 61>
-** add clone at index <8, 62>
-** add clone at index <8, 63>
-** add clone at index <10, 11>
-** add clone at index <10, 12>
-** add clone at index <10, 14>
-** add clone at index <10, 20>
-** add clone at index <10, 21>
-** add clone at index <10, 24>
-** add clone at index <10, 27>
-** add clone at index <10, 31>
-** add clone at index <10, 33>
-** add clone at index <10, 34>
-** add clone at index <10, 35>
-** add clone at index <10, 36>
-** add clone at index <10, 37>
-** add clone at index <10, 38>
-** add clone at index <10, 40>
-** add clone at index <10, 41>
-** add clone at index <10, 43>
-** add clone at index <10, 45>
-** add clone at index <10, 46>
-** add clone at index <10, 47>
-** add clone at index <10, 48>
-** add clone at index <10, 49>
-** add clone at index <10, 50>
-** add clone at index <10, 51>
-** add clone at index <10, 52>
-** add clone at index <10, 53>
-** add clone at index <10, 54>
-** add clone at index <10, 55>
-** add clone at index <10, 56>
-** add clone at index <10, 57>
-** add clone at index <10, 58>
-** add clone at index <10, 59>
-** add clone at index <10, 61>
-** add clone at index <10, 62>
-** add clone at index <10, 63>
-** add clone at index <11, 12>
-** add clone at index <11, 14>
-** add clone at index <11, 20>
-** add clone at index <11, 21>
-** add clone at index <11, 24>
-** add clone at index <11, 27>
-** add clone at index <11, 31>
-** add clone at index <11, 33>
-** add clone at index <11, 34>
-** add clone at index <11, 35>
-** add clone at index <11, 36>
-** add clone at index <11, 37>
-** add clone at index <11, 38>
-** add clone at index <11, 40>
-** add clone at index <11, 41>
-** add clone at index <11, 43>
-** add clone at index <11, 45>
-** add clone at index <11, 46>
-** add clone at index <11, 47>
-** add clone at index <11, 48>
-** add clone at index <11, 49>
-** add clone at index <11, 50>
-** add clone at index <11, 51>
-** add clone at index <11, 52>
-** add clone at index <11, 53>
-** add clone at index <11, 54>
-** add clone at index <11, 55>
-** add clone at index <11, 56>
-** add clone at index <11, 57>
-** add clone at index <11, 58>
-** add clone at index <11, 59>
-** add clone at index <11, 61>
-** add clone at index <11, 62>
-** add clone at index <11, 63>
-** add clone at index <12, 14>
-** add clone at index <12, 20>
-** add clone at index <12, 21>
-** add clone at index <12, 24>
-** add clone at index <12, 27>
-** add clone at index <12, 31>
-** add clone at index <12, 33>
-** add clone at index <12, 34>
-** add clone at index <12, 35>
-** add clone at index <12, 36>
-** add clone at index <12, 37>
-** add clone at index <12, 38>
-** add clone at index <12, 40>
-** add clone at index <12, 41>
-** add clone at index <12, 43>
-** add clone at index <12, 45>
-** add clone at index <12, 46>
-** add clone at index <12, 47>
-** add clone at index <12, 48>
-** add clone at index <12, 49>
-** add clone at index <12, 50>
-** add clone at index <12, 51>
-** add clone at index <12, 52>
-** add clone at index <12, 53>
-** add clone at index <12, 54>
-** add clone at index <12, 55>
-** add clone at index <12, 56>
-** add clone at index <12, 57>
-** add clone at index <12, 58>
-** add clone at index <12, 59>
-** add clone at index <12, 61>
-** add clone at index <12, 62>
-** add clone at index <12, 63>
-** add clone at index <14, 20>
-** add clone at index <14, 21>
-** add clone at index <14, 24>
-** add clone at index <14, 27>
-** add clone at index <14, 31>
-** add clone at index <14, 33>
-** add clone at index <14, 34>
-** add clone at index <14, 35>
-** add clone at index <14, 36>
-** add clone at index <14, 37>
-** add clone at index <14, 38>
-** add clone at index <14, 40>
-** add clone at index <14, 41>
-** add clone at index <14, 43>
-** add clone at index <14, 45>
-** add clone at index <14, 46>
-** add clone at index <14, 47>
-** add clone at index <14, 48>
-** add clone at index <14, 49>
-** add clone at index <14, 50>
-** add clone at index <14, 51>
-** add clone at index <14, 52>
-** add clone at index <14, 53>
-** add clone at index <14, 54>
-** add clone at index <14, 55>
-** add clone at index <14, 56>
-** add clone at index <14, 57>
-** add clone at index <14, 58>
-** add clone at index <14, 59>
-** add clone at index <14, 61>
-** add clone at index <14, 62>
-** add clone at index <14, 63>
-** add clone at index <20, 21>
-** add clone at index <20, 24>
-** add clone at index <20, 27>
-** add clone at index <20, 31>
-** add clone at index <20, 33>
-** add clone at index <20, 34>
-** add clone at index <20, 35>
-** add clone at index <20, 36>
-** add clone at index <20, 37>
-** add clone at index <20, 38>
-** add clone at index <20, 40>
-** add clone at index <20, 41>
-** add clone at index <20, 43>
-** add clone at index <20, 45>
-** add clone at index <20, 46>
-** add clone at index <20, 47>
-** add clone at index <20, 48>
-** add clone at index <20, 49>
-** add clone at index <20, 50>
-** add clone at index <20, 51>
-** add clone at index <20, 52>
-** add clone at index <20, 53>
-** add clone at index <20, 54>
-** add clone at index <20, 55>
-** add clone at index <20, 56>
-** add clone at index <20, 57>
-** add clone at index <20, 58>
-** add clone at index <20, 59>
-** add clone at index <20, 61>
-** add clone at index <20, 62>
-** add clone at index <20, 63>
-** add clone at index <21, 24>
-** add clone at index <21, 27>
-** add clone at index <21, 31>
-** add clone at index <21, 33>
-** add clone at index <21, 34>
-** add clone at index <21, 35>
-** add clone at index <21, 36>
-** add clone at index <21, 37>
-** add clone at index <21, 38>
-** add clone at index <21, 40>
-** add clone at index <21, 41>
-** add clone at index <21, 43>
-** add clone at index <21, 45>
-** add clone at index <21, 46>
-** add clone at index <21, 47>
-** add clone at index <21, 48>
-** add clone at index <21, 49>
-** add clone at index <21, 50>
-** add clone at index <21, 51>
-** add clone at index <21, 52>
-** add clone at index <21, 53>
-** add clone at index <21, 54>
-** add clone at index <21, 55>
-** add clone at index <21, 56>
-** add clone at index <21, 57>
-** add clone at index <21, 58>
-** add clone at index <21, 59>
-** add clone at index <21, 61>
-** add clone at index <21, 62>
-** add clone at index <21, 63>
-** add clone at index <24, 27>
-** add clone at index <24, 31>
-** add clone at index <24, 33>
-** add clone at index <24, 34>
-** add clone at index <24, 35>
-** add clone at index <24, 36>
-** add clone at index <24, 37>
-** add clone at index <24, 38>
-** add clone at index <24, 40>
-** add clone at index <24, 41>
-** add clone at index <24, 43>
-** add clone at index <24, 45>
-** add clone at index <24, 46>
-** add clone at index <24, 47>
-** add clone at index <24, 48>
-** add clone at index <24, 49>
-** add clone at index <24, 50>
-** add clone at index <24, 51>
-** add clone at index <24, 52>
-** add clone at index <24, 53>
-** add clone at index <24, 54>
-** add clone at index <24, 55>
-** add clone at index <24, 56>
-** add clone at index <24, 57>
-** add clone at index <24, 58>
-** add clone at index <24, 59>
-** add clone at index <24, 61>
-** add clone at index <24, 62>
-** add clone at index <24, 63>
-** add clone at index <27, 31>
-** add clone at index <27, 33>
-** add clone at index <27, 34>
-** add clone at index <27, 35>
-** add clone at index <27, 36>
-** add clone at index <27, 37>
-** add clone at index <27, 38>
-** add clone at index <27, 40>
-** add clone at index <27, 41>
-** add clone at index <27, 43>
-** add clone at index <27, 45>
-** add clone at index <27, 46>
-** add clone at index <27, 47>
-** add clone at index <27, 48>
-** add clone at index <27, 49>
-** add clone at index <27, 50>
-** add clone at index <27, 51>
-** add clone at index <27, 52>
-** add clone at index <27, 53>
-** add clone at index <27, 54>
-** add clone at index <27, 55>
-** add clone at index <27, 56>
-** add clone at index <27, 57>
-** add clone at index <27, 58>
-** add clone at index <27, 59>
-** add clone at index <27, 61>
-** add clone at index <27, 62>
-** add clone at index <27, 63>
-** add clone at index <31, 33>
-** add clone at index <31, 34>
-** add clone at index <31, 35>
-** add clone at index <31, 36>
-** add clone at index <31, 37>
-** add clone at index <31, 38>
-** add clone at index <31, 40>
-** add clone at index <31, 41>
-** add clone at index <31, 43>
-** add clone at index <31, 45>
-** add clone at index <31, 46>
-** add clone at index <31, 47>
-** add clone at index <31, 48>
-** add clone at index <31, 49>
-** add clone at index <31, 50>
-** add clone at index <31, 51>
-** add clone at index <31, 52>
-** add clone at index <31, 53>
-** add clone at index <31, 54>
-** add clone at index <31, 55>
-** add clone at index <31, 56>
-** add clone at index <31, 57>
-** add clone at index <31, 58>
-** add clone at index <31, 59>
-** add clone at index <31, 61>
-** add clone at index <31, 62>
-** add clone at index <31, 63>
-** add clone at index <33, 34>
-** add clone at index <33, 35>
-** add clone at index <33, 36>
-** add clone at index <33, 37>
-** add clone at index <33, 38>
-** add clone at index <33, 40>
-** add clone at index <33, 41>
-** add clone at index <33, 43>
-** add clone at index <33, 45>
-** add clone at index <33, 46>
-** add clone at index <33, 47>
-** add clone at index <33, 48>
-** add clone at index <33, 49>
-** add clone at index <33, 50>
-** add clone at index <33, 51>
-** add clone at index <33, 52>
-** add clone at index <33, 53>
-** add clone at index <33, 54>
-** add clone at index <33, 55>
-** add clone at index <33, 56>
-** add clone at index <33, 57>
-** add clone at index <33, 58>
-** add clone at index <33, 59>
-** add clone at index <33, 61>
-** add clone at index <33, 62>
-** add clone at index <33, 63>
-** add clone at index <34, 35>
-** add clone at index <34, 36>
-** add clone at index <34, 37>
-** add clone at index <34, 38>
-** add clone at index <34, 40>
-** add clone at index <34, 41>
-** add clone at index <34, 43>
-** add clone at index <34, 45>
-** add clone at index <34, 46>
-** add clone at index <34, 47>
-** add clone at index <34, 48>
-** add clone at index <34, 49>
-** add clone at index <34, 50>
-** add clone at index <34, 51>
-** add clone at index <34, 52>
-** add clone at index <34, 53>
-** add clone at index <34, 54>
-** add clone at index <34, 55>
-** add clone at index <34, 56>
-** add clone at index <34, 57>
-** add clone at index <34, 58>
-** add clone at index <34, 59>
-** add clone at index <34, 61>
-** add clone at index <34, 62>
-** add clone at index <34, 63>
-** add clone at index <35, 36>
-** add clone at index <35, 37>
-** add clone at index <35, 38>
-** add clone at index <35, 40>
-** add clone at index <35, 41>
-** add clone at index <35, 43>
-** add clone at index <35, 45>
-** add clone at index <35, 46>
-** add clone at index <35, 47>
-** add clone at index <35, 48>
-** add clone at index <35, 49>
-** add clone at index <35, 50>
-** add clone at index <35, 51>
-** add clone at index <35, 52>
-** add clone at index <35, 53>
-** add clone at index <35, 54>
-** add clone at index <35, 55>
-** add clone at index <35, 56>
-** add clone at index <35, 57>
-** add clone at index <35, 58>
-** add clone at index <35, 59>
-** add clone at index <35, 61>
-** add clone at index <35, 62>
-** add clone at index <35, 63>
-** add clone at index <36, 37>
-** add clone at index <36, 38>
-** add clone at index <36, 40>
-** add clone at index <36, 41>
-** add clone at index <36, 43>
-** add clone at index <36, 45>
-** add clone at index <36, 46>
-** add clone at index <36, 47>
-** add clone at index <36, 48>
-** add clone at index <36, 49>
-** add clone at index <36, 50>
-** add clone at index <36, 51>
-** add clone at index <36, 52>
-** add clone at index <36, 53>
-** add clone at index <36, 54>
-** add clone at index <36, 55>
-** add clone at index <36, 56>
-** add clone at index <36, 57>
-** add clone at index <36, 58>
-** add clone at index <36, 59>
-** add clone at index <36, 61>
-** add clone at index <36, 62>
-** add clone at index <36, 63>
-** add clone at index <37, 38>
-** add clone at index <37, 40>
-** add clone at index <37, 41>
-** add clone at index <37, 43>
-** add clone at index <37, 45>
-** add clone at index <37, 46>
-** add clone at index <37, 47>
-** add clone at index <37, 48>
-** add clone at index <37, 49>
-** add clone at index <37, 50>
-** add clone at index <37, 51>
-** add clone at index <37, 52>
-** add clone at index <37, 53>
-** add clone at index <37, 54>
-** add clone at index <37, 55>
-** add clone at index <37, 56>
-** add clone at index <37, 57>
-** add clone at index <37, 58>
-** add clone at index <37, 59>
-** add clone at index <37, 61>
-** add clone at index <37, 62>
-** add clone at index <37, 63>
-** add clone at index <38, 40>
-** add clone at index <38, 41>
-** add clone at index <38, 43>
-** add clone at index <38, 45>
-** add clone at index <38, 46>
-** add clone at index <38, 47>
-** add clone at index <38, 48>
-** add clone at index <38, 49>
-** add clone at index <38, 50>
-** add clone at index <38, 51>
-** add clone at index <38, 52>
-** add clone at index <38, 53>
-** add clone at index <38, 54>
-** add clone at index <38, 55>
-** add clone at index <38, 56>
-** add clone at index <38, 57>
-** add clone at index <38, 58>
-** add clone at index <38, 59>
-** add clone at index <38, 61>
-** add clone at index <38, 62>
-** add clone at index <38, 63>
-** add clone at index <40, 41>
-** add clone at index <40, 43>
-** add clone at index <40, 45>
-** add clone at index <40, 46>
-** add clone at index <40, 47>
-** add clone at index <40, 48>
-** add clone at index <40, 49>
-** add clone at index <40, 50>
-** add clone at index <40, 51>
-** add clone at index <40, 52>
-** add clone at index <40, 53>
-** add clone at index <40, 54>
-** add clone at index <40, 55>
-** add clone at index <40, 56>
-** add clone at index <40, 57>
-** add clone at index <40, 58>
-** add clone at index <40, 59>
-** add clone at index <40, 61>
-** add clone at index <40, 62>
-** add clone at index <40, 63>
-** add clone at index <41, 43>
-** add clone at index <41, 45>
-** add clone at index <41, 46>
-** add clone at index <41, 47>
-** add clone at index <41, 48>
-** add clone at index <41, 49>
-** add clone at index <41, 50>
-** add clone at index <41, 51>
-** add clone at index <41, 52>
-** add clone at index <41, 53>
-** add clone at index <41, 54>
-** add clone at index <41, 55>
-** add clone at index <41, 56>
-** add clone at index <41, 57>
-** add clone at index <41, 58>
-** add clone at index <41, 59>
-** add clone at index <41, 61>
-** add clone at index <41, 62>
-** add clone at index <41, 63>
-** add clone at index <43, 45>
-** add clone at index <43, 46>
-** add clone at index <43, 47>
-** add clone at index <43, 48>
-** add clone at index <43, 49>
-** add clone at index <43, 50>
-** add clone at index <43, 51>
-** add clone at index <43, 52>
-** add clone at index <43, 53>
-** add clone at index <43, 54>
-** add clone at index <43, 55>
-** add clone at index <43, 56>
-** add clone at index <43, 57>
-** add clone at index <43, 58>
-** add clone at index <43, 59>
-** add clone at index <43, 61>
-** add clone at index <43, 62>
-** add clone at index <43, 63>
-** add clone at index <45, 46>
-** add clone at index <45, 47>
-** add clone at index <45, 48>
-** add clone at index <45, 49>
-** add clone at index <45, 50>
-** add clone at index <45, 51>
-** add clone at index <45, 52>
-** add clone at index <45, 53>
-** add clone at index <45, 54>
-** add clone at index <45, 55>
-** add clone at index <45, 56>
-** add clone at index <45, 57>
-** add clone at index <45, 58>
-** add clone at index <45, 59>
-** add clone at index <45, 61>
-** add clone at index <45, 62>
-** add clone at index <45, 63>
-** add clone at index <46, 47>
-** add clone at index <46, 48>
-** add clone at index <46, 49>
-** add clone at index <46, 50>
-** add clone at index <46, 51>
-** add clone at index <46, 52>
-** add clone at index <46, 53>
-** add clone at index <46, 54>
-** add clone at index <46, 55>
-** add clone at index <46, 56>
-** add clone at index <46, 57>
-** add clone at index <46, 58>
-** add clone at index <46, 59>
-** add clone at index <46, 61>
-** add clone at index <46, 62>
-** add clone at index <46, 63>
-** add clone at index <47, 48>
-** add clone at index <47, 49>
-** add clone at index <47, 50>
-** add clone at index <47, 51>
-** add clone at index <47, 52>
-** add clone at index <47, 53>
-** add clone at index <47, 54>
-** add clone at index <47, 55>
-** add clone at index <47, 56>
-** add clone at index <47, 57>
-** add clone at index <47, 58>
-** add clone at index <47, 59>
-** add clone at index <47, 61>
-** add clone at index <47, 62>
-** add clone at index <47, 63>
-** add clone at index <48, 49>
-** add clone at index <48, 50>
-** add clone at index <48, 51>
-** add clone at index <48, 52>
-** add clone at index <48, 53>
-** add clone at index <48, 54>
-** add clone at index <48, 55>
-** add clone at index <48, 56>
-** add clone at index <48, 57>
-** add clone at index <48, 58>
-** add clone at index <48, 59>
-** add clone at index <48, 61>
-** add clone at index <48, 62>
-** add clone at index <48, 63>
-** add clone at index <49, 50>
-** add clone at index <49, 51>
-** add clone at index <49, 52>
-** add clone at index <49, 53>
-** add clone at index <49, 54>
-** add clone at index <49, 55>
-** add clone at index <49, 56>
-** add clone at index <49, 57>
-** add clone at index <49, 58>
-** add clone at index <49, 59>
-** add clone at index <49, 61>
-** add clone at index <49, 62>
-** add clone at index <49, 63>
-** add clone at index <50, 51>
-** add clone at index <50, 52>
-** add clone at index <50, 53>
-** add clone at index <50, 54>
-** add clone at index <50, 55>
-** add clone at index <50, 56>
-** add clone at index <50, 57>
-** add clone at index <50, 58>
-** add clone at index <50, 59>
-** add clone at index <50, 61>
-** add clone at index <50, 62>
-** add clone at index <50, 63>
-** add clone at index <51, 52>
-** add clone at index <51, 53>
-** add clone at index <51, 54>
-** add clone at index <51, 55>
-** add clone at index <51, 56>
-** add clone at index <51, 57>
-** add clone at index <51, 58>
-** add clone at index <51, 59>
-** add clone at index <51, 61>
-** add clone at index <51, 62>
-** add clone at index <51, 63>
-** add clone at index <52, 53>
-** add clone at index <52, 54>
-** add clone at index <52, 55>
-** add clone at index <52, 56>
-** add clone at index <52, 57>
-** add clone at index <52, 58>
-** add clone at index <52, 59>
-** add clone at index <52, 61>
-** add clone at index <52, 62>
-** add clone at index <52, 63>
-** add clone at index <53, 54>
-** add clone at index <53, 55>
-** add clone at index <53, 56>
-** add clone at index <53, 57>
-** add clone at index <53, 58>
-** add clone at index <53, 59>
-** add clone at index <53, 61>
-** add clone at index <53, 62>
-** add clone at index <53, 63>
-** add clone at index <54, 55>
-** add clone at index <54, 56>
-** add clone at index <54, 57>
-** add clone at index <54, 58>
-** add clone at index <54, 59>
-** add clone at index <54, 61>
-** add clone at index <54, 62>
-** add clone at index <54, 63>
-** add clone at index <55, 56>
-** add clone at index <55, 57>
-** add clone at index <55, 58>
-** add clone at index <55, 59>
-** add clone at index <55, 61>
-** add clone at index <55, 62>
-** add clone at index <55, 63>
-** add clone at index <56, 57>
-** add clone at index <56, 58>
-** add clone at index <56, 59>
-** add clone at index <56, 61>
-** add clone at index <56, 62>
-** add clone at index <56, 63>
-** add clone at index <57, 58>
-** add clone at index <57, 59>
-** add clone at index <57, 61>
-** add clone at index <57, 62>
-** add clone at index <57, 63>
-** add clone at index <58, 59>
-** add clone at index <58, 61>
-** add clone at index <58, 62>
-** add clone at index <58, 63>
-** add clone at index <59, 61>
-** add clone at index <59, 62>
-** add clone at index <59, 63>
-** add clone at index <61, 62>
-** add clone at index <61, 63>
-** add clone at index <62, 63>
---> minimalTraversal list, add : {1}, size : 1
-disjonctive support for element {2} : 75
---> maxClique list : {{2}}
---> minimalTraversal list, add : {3}, size : 2
---> minimalTraversal list, add : {4}, size : 3
---> minimalTraversal list, add : {5}, size : 4
---> minimalTraversal list, add : {6}, size : 5
---> minimalTraversal list, add : {7}, size : 6
---> minimalTraversal list, add : {8}, size : 7
-disjonctive support for element {2,9} : 81
+** add clone at index <9, 10>
+** add clone at index <12, 13>
+--> maxClique list : {{1}}
+disjonctive support for element {1,2} : 2
+--> maxClique list : {{1},{2}}
+disjonctive support for element {1,2,3} : 4
+--> maxClique list : {{1},{2},{3}}
+disjonctive support for element {1,2,3,4} : 5
+--> maxClique list : {{1},{2},{3},{4}}
+disjonctive support for element {1,2,3,4,5} : 6
+--> maxClique list : {{1},{2},{3},{4},{5}}
+disjonctive support for element {1,2,3,4,5,6} : 6
+--> maxClique list : {{1},{2},{3},{4},{5},{6}}
+disjonctive support for element {1,2,3,4,5,6,7} : 6
+--> maxClique list : {{1},{2},{3},{4},{5},{6},{7}}
+disjonctive support for element {1,2,3,4,5,6,7,8} : 6
+--> maxClique list : {{1},{2},{3},{4},{5},{6},{7},{8}}
+disjonctive support for element {1,2,3,4,5,6,7,8,9} : 7
 --> toExplore list : {{9}}
---> minimalTraversal list, add : {10}, size : 8
---> minimalTraversal list, add : {11}, size : 9
---> minimalTraversal list, add : {12}, size : 10
-disjonctive support for element {2,13} : 75
---> maxClique list : {{2},{13}}
---> minimalTraversal list, add : {14}, size : 11
-disjonctive support for element {2,13,15} : 81
---> toExplore list : {{9},{15}}
-disjonctive support for element {2,13,16} : 81
---> toExplore list : {{9},{15},{16}}
-disjonctive support for element {2,13,17} : 77
---> maxClique list : {{2},{13},{17}}
-disjonctive support for element {2,13,17,18} : 77
---> maxClique list : {{2},{13},{17},{18}}
-disjonctive support for element {2,13,17,18,19} : 78
---> maxClique list : {{2},{13},{17},{18},{19}}
---> minimalTraversal list, add : {20}, size : 12
---> minimalTraversal list, add : {21}, size : 13
-disjonctive support for element {2,13,17,18,19,22} : 80
---> maxClique list : {{2},{13},{17},{18},{19},{22}}
-disjonctive support for element {2,13,17,18,19,22,23} : 81
---> toExplore list : {{9},{15},{16},{23}}
---> minimalTraversal list, add : {24}, size : 14
-disjonctive support for element {2,13,17,18,19,22,25} : 81
---> toExplore list : {{9},{15},{16},{23},{25}}
-disjonctive support for element {2,13,17,18,19,22,26} : 81
---> toExplore list : {{9},{15},{16},{23},{25},{26}}
---> minimalTraversal list, add : {27}, size : 15
-disjonctive support for element {2,13,17,18,19,22,28} : 81
---> toExplore list : {{9},{15},{16},{23},{25},{26},{28}}
-disjonctive support for element {2,13,17,18,19,22,29} : 81
---> toExplore list : {{9},{15},{16},{23},{25},{26},{28},{29}}
-disjonctive support for element {2,13,17,18,19,22,30} : 81
---> toExplore list : {{9},{15},{16},{23},{25},{26},{28},{29},{30}}
---> minimalTraversal list, add : {31}, size : 16
-disjonctive support for element {2,13,17,18,19,22,32} : 81
---> toExplore list : {{9},{15},{16},{23},{25},{26},{28},{29},{30},{32}}
---> minimalTraversal list, add : {33}, size : 17
---> minimalTraversal list, add : {34}, size : 18
---> minimalTraversal list, add : {35}, size : 19
---> minimalTraversal list, add : {36}, size : 20
---> minimalTraversal list, add : {37}, size : 21
---> minimalTraversal list, add : {38}, size : 22
-disjonctive support for element {2,13,17,18,19,22,39} : 81
---> toExplore list : {{9},{15},{16},{23},{25},{26},{28},{29},{30},{32},{39}}
---> minimalTraversal list, add : {40}, size : 23
---> minimalTraversal list, add : {41}, size : 24
-disjonctive support for element {2,13,17,18,19,22,42} : 81
---> toExplore list : {{9},{15},{16},{23},{25},{26},{28},{29},{30},{32},{39},{42}}
---> minimalTraversal list, add : {43}, size : 25
-disjonctive support for element {2,13,17,18,19,22,44} : 81
---> toExplore list : {{9},{15},{16},{23},{25},{26},{28},{29},{30},{32},{39},{42},{44}}
---> minimalTraversal list, add : {45}, size : 26
---> minimalTraversal list, add : {46}, size : 27
---> minimalTraversal list, add : {47}, size : 28
---> minimalTraversal list, add : {48}, size : 29
---> minimalTraversal list, add : {49}, size : 30
---> minimalTraversal list, add : {50}, size : 31
---> minimalTraversal list, add : {51}, size : 32
---> minimalTraversal list, add : {52}, size : 33
---> minimalTraversal list, add : {53}, size : 34
---> minimalTraversal list, add : {54}, size : 35
---> minimalTraversal list, add : {55}, size : 36
---> minimalTraversal list, add : {56}, size : 37
---> minimalTraversal list, add : {57}, size : 38
---> minimalTraversal list, add : {58}, size : 39
---> minimalTraversal list, add : {59}, size : 40
-disjonctive support for element {2,13,17,18,19,22,60} : 81
---> toExplore list : {{9},{15},{16},{23},{25},{26},{28},{29},{30},{32},{39},{42},{44},{60}}
---> minimalTraversal list, add : {61}, size : 41
---> minimalTraversal list, add : {62}, size : 42
---> minimalTraversal list, add : {63}, size : 43
-disjonctive support for element {2,13,17,18,19,22,64} : 81
---> toExplore list : {{9},{15},{16},{23},{25},{26},{28},{29},{30},{32},{39},{42},{44},{60},{64}}
+disjonctive support for element {1,2,3,4,5,6,7,8,10} : 7
+--> toExplore list : {{9},{10}}
+disjonctive support for element {1,2,3,4,5,6,7,8,11} : 7
+--> toExplore list : {{9},{10},{11}}
+disjonctive support for element {1,2,3,4,5,6,7,8,12} : 6
+--> maxClique list : {{1},{2},{3},{4},{5},{6},{7},{8},{12}}
+disjonctive support for element {1,2,3,4,5,6,7,8,12,13} : 6
+--> maxClique list : {{1},{2},{3},{4},{5},{6},{7},{8},{12},{13}}
 ----------------------------------------------------------
-toExplore list{{9},{15},{16},{23},{25},{26},{28},{29},{30},{32},{39},{42},{44},{60},{64}}
-maxClique list{{2},{13},{17},{18},{19},{22}}
-{9,13} is not essential
-{9,18} is not essential
-{9,19} is not essential
-new toTraverse list{{9,15},{9,16},{9,23},{9,25},{9,26},{9,28},{9,29},{9,30},{9,32},{9,39},{9,42},{9,44},{9,60},{9,64},{9,2},{9,17},{9,22}}
+toExplore list{{9},{10},{11}}
+maxClique list{{1},{2},{3},{4},{5},{6},{7},{8},{12},{13}}
+{9,10} contains a clone, do not compute mt
+{9,11} is not essential
+{9,13} contains a clone, do not compute mt
+new toTraverse list{{9,1},{9,2},{9,3},{9,4},{9,5},{9,6},{9,7},{9,8},{9,12}}
 ----------------------------------------------------------
---> minimalTraversal list, add : {9,15}, size : 44
---> minimalTraversal list, add : {9,16}, size : 45
---> minimalTraversal list, add : {9,23}, size : 46
-disjonctive support for element {9,25} : 77
---> maxClique list : {{9,25}}
---> minimalTraversal list, add : {9,26}, size : 47
---> minimalTraversal list, add : {9,28}, size : 48
---> minimalTraversal list, add : {9,29}, size : 49
-disjonctive support for element {9,25,30} : 80
---> maxClique list : {{9,25},{9,30}}
-disjonctive support for element {9,25,30,32} : 81
---> toExplore list : {{9,32}}
---> minimalTraversal list, add : {9,39}, size : 50
---> minimalTraversal list, add : {9,42}, size : 51
-disjonctive support for element {9,25,30,44} : 81
---> toExplore list : {{9,32},{9,44}}
---> minimalTraversal list, add : {9,60}, size : 52
---> minimalTraversal list, add : {9,64}, size : 53
---> minimalTraversal list, add : {9,2}, size : 54
-disjonctive support for element {9,25,30,17} : 80
---> maxClique list : {{9,25},{9,30},{9,17}}
-disjonctive support for element {9,25,30,17,22} : 81
---> toExplore list : {{9,32},{9,44},{9,22}}
+disjonctive support for element {9,1} : 2
+--> maxClique list : {{9,1}}
+disjonctive support for element {9,1,2} : 3
+--> maxClique list : {{9,1},{9,2}}
+disjonctive support for element {9,1,2,3} : 5
+--> maxClique list : {{9,1},{9,2},{9,3}}
+disjonctive support for element {9,1,2,3,4} : 6
+--> maxClique list : {{9,1},{9,2},{9,3},{9,4}}
+disjonctive support for element {9,1,2,3,4,5} : 7
+--> toExplore list : {{9,5}}
+disjonctive support for element {9,1,2,3,4,6} : 6
+--> maxClique list : {{9,1},{9,2},{9,3},{9,4},{9,6}}
+disjonctive support for element {9,1,2,3,4,6,7} : 6
+--> maxClique list : {{9,1},{9,2},{9,3},{9,4},{9,6},{9,7}}
+disjonctive support for element {9,1,2,3,4,6,7,8} : 7
+--> toExplore list : {{9,5},{9,8}}
+disjonctive support for element {9,1,2,3,4,6,7,12} : 6
+--> maxClique list : {{9,1},{9,2},{9,3},{9,4},{9,6},{9,7},{9,12}}
 ----------------------------------------------------------
-toExplore list{{9,32},{9,44},{9,22}}
-maxClique list{{9,25},{9,30},{9,17}}
-{9,32,25} is not essential
-{9,32,17} is not essential
-new toTraverse list{{9,32,44},{9,32,22},{9,32,30}}
+toExplore list{{9,5},{9,8}}
+maxClique list{{9,1},{9,2},{9,3},{9,4},{9,6},{9,7},{9,12}}
+new toTraverse list{{9,5,8},{9,5,1},{9,5,2},{9,5,3},{9,5,4},{9,5,6},{9,5,7},{9,5,12}}
 ----------------------------------------------------------
---> minimalTraversal list, add : {9,32,44}, size : 55
---> minimalTraversal list, add : {9,32,22}, size : 56
---> minimalTraversal list, add : {9,32,30}, size : 57
+disjonctive support for element {9,5,8} : 5
+--> maxClique list : {{9,5,8}}
+disjonctive support for element {9,5,8,1} : 6
+--> maxClique list : {{9,5,8},{9,5,1}}
+disjonctive support for element {9,5,8,1,2} : 7
+--> toExplore list : {{9,5,2}}
+disjonctive support for element {9,5,8,1,3} : 6
+--> maxClique list : {{9,5,8},{9,5,1},{9,5,3}}
+disjonctive support for element {9,5,8,1,3,4} : 6
+--> maxClique list : {{9,5,8},{9,5,1},{9,5,3},{9,5,4}}
+disjonctive support for element {9,5,8,1,3,4,6} : 6
+--> maxClique list : {{9,5,8},{9,5,1},{9,5,3},{9,5,4},{9,5,6}}
+disjonctive support for element {9,5,8,1,3,4,6,7} : 6
+--> maxClique list : {{9,5,8},{9,5,1},{9,5,3},{9,5,4},{9,5,6},{9,5,7}}
+disjonctive support for element {9,5,8,1,3,4,6,7,12} : 7
+--> toExplore list : {{9,5,2},{9,5,12}}
+----------------------------------------------------------
+toExplore list{{9,5,2},{9,5,12}}
+maxClique list{{9,5,8},{9,5,1},{9,5,3},{9,5,4},{9,5,6},{9,5,7}}
+{9,5,2,12} is not essential
+{9,5,2,1} is not essential
+new toTraverse list{{9,5,2,8},{9,5,2,3},{9,5,2,4},{9,5,2,6},{9,5,2,7}}
+----------------------------------------------------------
+--> minimalTraversal list, add : {9,5,2,8}, size : 1
+--> minimalTraversal list, add : {9,5,2,3}, size : 2
+disjonctive support for element {9,5,2,4} : 6
+--> maxClique list : {{9,5,2,4}}
+disjonctive support for element {9,5,2,4,6} : 7
+--> toExplore list : {{9,5,2,6}}
+disjonctive support for element {9,5,2,4,7} : 7
+--> toExplore list : {{9,5,2,6},{9,5,2,7}}
+----------------------------------------------------------
+toExplore list{{9,5,2,6},{9,5,2,7}}
+maxClique list{{9,5,2,4}}
+{9,5,2,6,7} is not essential
+new toTraverse list{{9,5,2,6,4}}
+----------------------------------------------------------
+--> minimalTraversal list, add : {9,5,2,6,4}, size : 3
 toExplore list is empty, end of the branch
-new toTraverse list{{9,44,22},{9,44,25},{9,44,30},{9,44,17}}
+new toTraverse list{{9,5,2,7,4}}
 ----------------------------------------------------------
---> minimalTraversal list, add : {9,44,22}, size : 58
-disjonctive support for element {9,44,25} : 80
---> maxClique list : {{9,44,25}}
---> minimalTraversal list, add : {9,44,30}, size : 59
-disjonctive support for element {9,44,25,17} : 81
---> toExplore list : {{9,44,17}}
-----------------------------------------------------------
-toExplore list{{9,44,17}}
-maxClique list{{9,44,25}}
-new toTraverse list{{9,44,17,25}}
-----------------------------------------------------------
---> minimalTraversal list, add : {9,44,17,25}, size : 60
+--> minimalTraversal list, add : {9,5,2,7,4}, size : 4
 toExplore list is empty, end of the branch
-{9,22,25} is not essential
-{9,22,17} is not essential
-new toTraverse list{{9,22,30}}
+new toTraverse list{{9,5,12,8},{9,5,12,1},{9,5,12,3},{9,5,12,4},{9,5,12,6},{9,5,12,7}}
 ----------------------------------------------------------
---> minimalTraversal list, add : {9,22,30}, size : 61
+disjonctive support for element {9,5,12,8} : 6
+--> maxClique list : {{9,5,12,8}}
+disjonctive support for element {9,5,12,8,1} : 7
+--> toExplore list : {{9,5,12,1}}
+--> minimalTraversal list, add : {9,5,12,3}, size : 5
+disjonctive support for element {9,5,12,8,4} : 6
+--> maxClique list : {{9,5,12,8},{9,5,12,4}}
+disjonctive support for element {9,5,12,8,4,6} : 6
+--> maxClique list : {{9,5,12,8},{9,5,12,4},{9,5,12,6}}
+disjonctive support for element {9,5,12,8,4,6,7} : 6
+--> maxClique list : {{9,5,12,8},{9,5,12,4},{9,5,12,6},{9,5,12,7}}
+----------------------------------------------------------
+toExplore list{{9,5,12,1}}
+maxClique list{{9,5,12,8},{9,5,12,4},{9,5,12,6},{9,5,12,7}}
+new toTraverse list{{9,5,12,1,8},{9,5,12,1,4},{9,5,12,1,6},{9,5,12,1,7}}
+----------------------------------------------------------
+--> minimalTraversal list, add : {9,5,12,1,8}, size : 6
+disjonctive support for element {9,5,12,1,4} : 6
+--> maxClique list : {{9,5,12,1,4}}
+disjonctive support for element {9,5,12,1,4,6} : 7
+--> toExplore list : {{9,5,12,1,6}}
+disjonctive support for element {9,5,12,1,4,7} : 7
+--> toExplore list : {{9,5,12,1,6},{9,5,12,1,7}}
+----------------------------------------------------------
+toExplore list{{9,5,12,1,6},{9,5,12,1,7}}
+maxClique list{{9,5,12,1,4}}
+{9,5,12,1,6,7} is not essential
+new toTraverse list{{9,5,12,1,6,4}}
+----------------------------------------------------------
+--> minimalTraversal list, add : {9,5,12,1,6,4}, size : 7
 toExplore list is empty, end of the branch
-{15,13} is not essential
-{15,17} is not essential
-{15,18} is not essential
-{15,19} is not essential
-new toTraverse list{{15,16},{15,23},{15,25},{15,26},{15,28},{15,29},{15,30},{15,32},{15,39},{15,42},{15,44},{15,60},{15,64},{15,2},{15,22}}
+new toTraverse list{{9,5,12,1,7,4}}
 ----------------------------------------------------------
-disjonctive support for element {15,16} : 80
---> maxClique list : {{15,16}}
---> minimalTraversal list, add : {15,23}, size : 62
---> minimalTraversal list, add : {15,25}, size : 63
---> minimalTraversal list, add : {15,26}, size : 64
---> minimalTraversal list, add : {15,28}, size : 65
---> minimalTraversal list, add : {15,29}, size : 66
---> minimalTraversal list, add : {15,30}, size : 67
-disjonctive support for element {15,16,32} : 81
---> toExplore list : {{15,32}}
---> minimalTraversal list, add : {15,39}, size : 68
---> minimalTraversal list, add : {15,42}, size : 69
---> minimalTraversal list, add : {15,44}, size : 70
---> minimalTraversal list, add : {15,60}, size : 71
---> minimalTraversal list, add : {15,64}, size : 72
---> minimalTraversal list, add : {15,2}, size : 73
---> minimalTraversal list, add : {15,22}, size : 74
-----------------------------------------------------------
-toExplore list{{15,32}}
-maxClique list{{15,16}}
-new toTraverse list{{15,32,16}}
-----------------------------------------------------------
---> minimalTraversal list, add : {15,32,16}, size : 75
+--> minimalTraversal list, add : {9,5,12,1,7,4}, size : 8
 toExplore list is empty, end of the branch
-{16,13} is not essential
-{16,18} is not essential
-new toTraverse list{{16,23},{16,25},{16,26},{16,28},{16,29},{16,30},{16,32},{16,39},{16,42},{16,44},{16,60},{16,64},{16,2},{16,17},{16,19},{16,22}}
+{9,8,7} is not essential
+new toTraverse list{{9,8,1},{9,8,2},{9,8,3},{9,8,4},{9,8,6},{9,8,12}}
 ----------------------------------------------------------
---> minimalTraversal list, add : {16,23}, size : 76
-disjonctive support for element {16,25} : 80
---> maxClique list : {{16,25}}
-disjonctive support for element {16,25,26} : 81
---> toExplore list : {{16,26}}
-disjonctive support for element {16,25,28} : 81
---> toExplore list : {{16,26},{16,28}}
-disjonctive support for element {16,25,29} : 81
---> toExplore list : {{16,26},{16,28},{16,29}}
-disjonctive support for element {16,25,30} : 81
---> toExplore list : {{16,26},{16,28},{16,29},{16,30}}
-disjonctive support for element {16,25,32} : 80
---> maxClique list : {{16,25},{16,32}}
---> minimalTraversal list, add : {16,39}, size : 77
-disjonctive support for element {16,25,32,42} : 81
---> toExplore list : {{16,26},{16,28},{16,29},{16,30},{16,42}}
-disjonctive support for element {16,25,32,44} : 81
---> toExplore list : {{16,26},{16,28},{16,29},{16,30},{16,42},{16,44}}
-disjonctive support for element {16,25,32,60} : 81
---> toExplore list : {{16,26},{16,28},{16,29},{16,30},{16,42},{16,44},{16,60}}
---> minimalTraversal list, add : {16,64}, size : 78
---> minimalTraversal list, add : {16,2}, size : 79
-disjonctive support for element {16,25,32,17} : 80
---> maxClique list : {{16,25},{16,32},{16,17}}
-disjonctive support for element {16,25,32,17,19} : 80
---> maxClique list : {{16,25},{16,32},{16,17},{16,19}}
-disjonctive support for element {16,25,32,17,19,22} : 81
---> toExplore list : {{16,26},{16,28},{16,29},{16,30},{16,42},{16,44},{16,60},{16,22}}
+disjonctive support for element {9,8,1} : 5
+--> maxClique list : {{9,8,1}}
+disjonctive support for element {9,8,1,2} : 6
+--> maxClique list : {{9,8,1},{9,8,2}}
+disjonctive support for element {9,8,1,2,3} : 6
+--> maxClique list : {{9,8,1},{9,8,2},{9,8,3}}
+disjonctive support for element {9,8,1,2,3,4} : 7
+--> toExplore list : {{9,8,4}}
+disjonctive support for element {9,8,1,2,3,6} : 7
+--> toExplore list : {{9,8,4},{9,8,6}}
+disjonctive support for element {9,8,1,2,3,12} : 6
+--> maxClique list : {{9,8,1},{9,8,2},{9,8,3},{9,8,12}}
 ----------------------------------------------------------
-toExplore list{{16,26},{16,28},{16,29},{16,30},{16,42},{16,44},{16,60},{16,22}}
-maxClique list{{16,25},{16,32},{16,17},{16,19}}
-{16,26,42} is not essential
-{16,26,60} is not essential
-{16,26,17} is not essential
-{16,26,19} is not essential
-new toTraverse list{{16,26,28},{16,26,29},{16,26,30},{16,26,44},{16,26,22},{16,26,25},{16,26,32}}
+toExplore list{{9,8,4},{9,8,6}}
+maxClique list{{9,8,1},{9,8,2},{9,8,3},{9,8,12}}
+{9,8,4,6} is not essential
+new toTraverse list{{9,8,4,1},{9,8,4,2},{9,8,4,3},{9,8,4,12}}
 ----------------------------------------------------------
---> minimalTraversal list, add : {16,26,28}, size : 80
---> minimalTraversal list, add : {16,26,29}, size : 81
---> minimalTraversal list, add : {16,26,30}, size : 82
---> minimalTraversal list, add : {16,26,44}, size : 83
---> minimalTraversal list, add : {16,26,22}, size : 84
---> minimalTraversal list, add : {16,26,25}, size : 85
---> minimalTraversal list, add : {16,26,32}, size : 86
+disjonctive support for element {9,8,4,1} : 6
+--> maxClique list : {{9,8,4,1}}
+--> minimalTraversal list, add : {9,8,4,2}, size : 9
+disjonctive support for element {9,8,4,1,3} : 6
+--> maxClique list : {{9,8,4,1},{9,8,4,3}}
+disjonctive support for element {9,8,4,1,3,12} : 7
+--> toExplore list : {{9,8,4,12}}
+----------------------------------------------------------
+toExplore list{{9,8,4,12}}
+maxClique list{{9,8,4,1},{9,8,4,3}}
+new toTraverse list{{9,8,4,12,1},{9,8,4,12,3}}
+----------------------------------------------------------
+--> minimalTraversal list, add : {9,8,4,12,1}, size : 10
+--> minimalTraversal list, add : {9,8,4,12,3}, size : 11
 toExplore list is empty, end of the branch
-{16,28,19} is not essential
-new toTraverse list{{16,28,29},{16,28,30},{16,28,42},{16,28,44},{16,28,60},{16,28,22},{16,28,25},{16,28,32},{16,28,17}}
+new toTraverse list{{9,8,6,1},{9,8,6,2},{9,8,6,3},{9,8,6,12}}
 ----------------------------------------------------------
---> minimalTraversal list, add : {16,28,29}, size : 87
-disjonctive support for element {16,28,30} : 80
---> maxClique list : {{16,28,30}}
---> minimalTraversal list, add : {16,28,42}, size : 88
---> minimalTraversal list, add : {16,28,44}, size : 89
---> minimalTraversal list, add : {16,28,60}, size : 90
-disjonctive support for element {16,28,30,22} : 81
---> toExplore list : {{16,28,22}}
---> minimalTraversal list, add : {16,28,25}, size : 91
-disjonctive support for element {16,28,30,32} : 81
---> toExplore list : {{16,28,22},{16,28,32}}
-disjonctive support for element {16,28,30,17} : 81
---> toExplore list : {{16,28,22},{16,28,32},{16,28,17}}
+disjonctive support for element {9,8,6,1} : 6
+--> maxClique list : {{9,8,6,1}}
+--> minimalTraversal list, add : {9,8,6,2}, size : 12
+disjonctive support for element {9,8,6,1,3} : 6
+--> maxClique list : {{9,8,6,1},{9,8,6,3}}
+disjonctive support for element {9,8,6,1,3,12} : 7
+--> toExplore list : {{9,8,6,12}}
 ----------------------------------------------------------
-toExplore list{{16,28,22},{16,28,32},{16,28,17}}
-maxClique list{{16,28,30}}
-{16,28,22,32} is not essential
-{16,28,22,17} is not essential
-new toTraverse list{{16,28,22,30}}
+toExplore list{{9,8,6,12}}
+maxClique list{{9,8,6,1},{9,8,6,3}}
+new toTraverse list{{9,8,6,12,1},{9,8,6,12,3}}
 ----------------------------------------------------------
---> minimalTraversal list, add : {16,28,22,30}, size : 92
+--> minimalTraversal list, add : {9,8,6,12,1}, size : 13
+--> minimalTraversal list, add : {9,8,6,12,3}, size : 14
 toExplore list is empty, end of the branch
-{16,28,32,17} is not essential
-new toTraverse list{{16,28,32,30}}
+{{9},{10},{11},{1},{2},{3},{4},{5},{6},{7},{8},{12},{13}} contains a clone, do not compute mt
+{11,13} contains a clone, do not compute mt
+new toTraverse list{{11,1},{11,2},{11,3},{11,4},{11,5},{11,6},{11,7},{11,8},{11,12}}
 ----------------------------------------------------------
---> minimalTraversal list, add : {16,28,32,30}, size : 93
+disjonctive support for element {11,1} : 3
+--> maxClique list : {{11,1}}
+disjonctive support for element {11,1,2} : 4
+--> maxClique list : {{11,1},{11,2}}
+disjonctive support for element {11,1,2,3} : 6
+--> maxClique list : {{11,1},{11,2},{11,3}}
+disjonctive support for element {11,1,2,3,4} : 7
+--> toExplore list : {{11,4}}
+disjonctive support for element {11,1,2,3,5} : 7
+--> toExplore list : {{11,4},{11,5}}
+disjonctive support for element {11,1,2,3,6} : 7
+--> toExplore list : {{11,4},{11,5},{11,6}}
+disjonctive support for element {11,1,2,3,7} : 6
+--> maxClique list : {{11,1},{11,2},{11,3},{11,7}}
+disjonctive support for element {11,1,2,3,7,8} : 6
+--> maxClique list : {{11,1},{11,2},{11,3},{11,7},{11,8}}
+disjonctive support for element {11,1,2,3,7,8,12} : 6
+--> maxClique list : {{11,1},{11,2},{11,3},{11,7},{11,8},{11,12}}
+----------------------------------------------------------
+toExplore list{{11,4},{11,5},{11,6}}
+maxClique list{{11,1},{11,2},{11,3},{11,7},{11,8},{11,12}}
+{11,4,5} is not essential
+new toTraverse list{{11,4,6},{11,4,1},{11,4,2},{11,4,3},{11,4,7},{11,4,8},{11,4,12}}
+----------------------------------------------------------
+disjonctive support for element {11,4,6} : 5
+--> maxClique list : {{11,4,6}}
+disjonctive support for element {11,4,6,1} : 6
+--> maxClique list : {{11,4,6},{11,4,1}}
+disjonctive support for element {11,4,6,1,2} : 7
+--> toExplore list : {{11,4,2}}
+disjonctive support for element {11,4,6,1,3} : 6
+--> maxClique list : {{11,4,6},{11,4,1},{11,4,3}}
+disjonctive support for element {11,4,6,1,3,7} : 6
+--> maxClique list : {{11,4,6},{11,4,1},{11,4,3},{11,4,7}}
+disjonctive support for element {11,4,6,1,3,7,8} : 6
+--> maxClique list : {{11,4,6},{11,4,1},{11,4,3},{11,4,7},{11,4,8}}
+disjonctive support for element {11,4,6,1,3,7,8,12} : 7
+--> toExplore list : {{11,4,2},{11,4,12}}
+----------------------------------------------------------
+toExplore list{{11,4,2},{11,4,12}}
+maxClique list{{11,4,6},{11,4,1},{11,4,3},{11,4,7},{11,4,8}}
+{11,4,2,12} is not essential
+{11,4,2,1} is not essential
+new toTraverse list{{11,4,2,6},{11,4,2,3},{11,4,2,7},{11,4,2,8}}
+----------------------------------------------------------
+--> minimalTraversal list, add : {11,4,2,6}, size : 15
+--> minimalTraversal list, add : {11,4,2,3}, size : 16
+--> minimalTraversal list, add : {11,4,2,7}, size : 17
+--> minimalTraversal list, add : {11,4,2,8}, size : 18
 toExplore list is empty, end of the branch
-new toTraverse list{{16,28,17,30}}
+new toTraverse list{{11,4,12,6},{11,4,12,1},{11,4,12,3},{11,4,12,7},{11,4,12,8}}
 ----------------------------------------------------------
---> minimalTraversal list, add : {16,28,17,30}, size : 94
+disjonctive support for element {11,4,12,6} : 6
+--> maxClique list : {{11,4,12,6}}
+disjonctive support for element {11,4,12,6,1} : 7
+--> toExplore list : {{11,4,12,1}}
+--> minimalTraversal list, add : {11,4,12,3}, size : 19
+disjonctive support for element {11,4,12,6,7} : 6
+--> maxClique list : {{11,4,12,6},{11,4,12,7}}
+disjonctive support for element {11,4,12,6,7,8} : 6
+--> maxClique list : {{11,4,12,6},{11,4,12,7},{11,4,12,8}}
+----------------------------------------------------------
+toExplore list{{11,4,12,1}}
+maxClique list{{11,4,12,6},{11,4,12,7},{11,4,12,8}}
+new toTraverse list{{11,4,12,1,6},{11,4,12,1,7},{11,4,12,1,8}}
+----------------------------------------------------------
+--> minimalTraversal list, add : {11,4,12,1,6}, size : 20
+--> minimalTraversal list, add : {11,4,12,1,7}, size : 21
+--> minimalTraversal list, add : {11,4,12,1,8}, size : 22
 toExplore list is empty, end of the branch
-{16,29,32} is not essential
-{16,29,17} is not essential
-{16,29,19} is not essential
-new toTraverse list{{16,29,30},{16,29,42},{16,29,44},{16,29,60},{16,29,22},{16,29,25}}
+{11,5,6} is not essential
+new toTraverse list{{11,5,1},{11,5,2},{11,5,3},{11,5,7},{11,5,8},{11,5,12}}
 ----------------------------------------------------------
---> minimalTraversal list, add : {16,29,30}, size : 95
---> minimalTraversal list, add : {16,29,42}, size : 96
---> minimalTraversal list, add : {16,29,44}, size : 97
---> minimalTraversal list, add : {16,29,60}, size : 98
---> minimalTraversal list, add : {16,29,22}, size : 99
---> minimalTraversal list, add : {16,29,25}, size : 100
+disjonctive support for element {11,5,1} : 4
+--> maxClique list : {{11,5,1}}
+disjonctive support for element {11,5,1,2} : 5
+--> maxClique list : {{11,5,1},{11,5,2}}
+disjonctive support for element {11,5,1,2,3} : 7
+--> toExplore list : {{11,5,3}}
+disjonctive support for element {11,5,1,2,7} : 6
+--> maxClique list : {{11,5,1},{11,5,2},{11,5,7}}
+disjonctive support for element {11,5,1,2,7,8} : 7
+--> toExplore list : {{11,5,3},{11,5,8}}
+disjonctive support for element {11,5,1,2,7,12} : 6
+--> maxClique list : {{11,5,1},{11,5,2},{11,5,7},{11,5,12}}
+----------------------------------------------------------
+toExplore list{{11,5,3},{11,5,8}}
+maxClique list{{11,5,1},{11,5,2},{11,5,7},{11,5,12}}
+{11,5,3,8} is not essential
+{11,5,3,1} is not essential
+{11,5,3,7} is not essential
+new toTraverse list{{11,5,3,2},{11,5,3,12}}
+----------------------------------------------------------
+--> minimalTraversal list, add : {11,5,3,2}, size : 23
+--> minimalTraversal list, add : {11,5,3,12}, size : 24
 toExplore list is empty, end of the branch
-new toTraverse list{{16,30,42},{16,30,44},{16,30,60},{16,30,22},{16,30,25},{16,30,32},{16,30,17},{16,30,19}}
+{11,5,8,7} is not essential
+new toTraverse list{{11,5,8,1},{11,5,8,2},{11,5,8,12}}
 ----------------------------------------------------------
---> minimalTraversal list, add : {16,30,42}, size : 101
-disjonctive support for element {16,30,44} : 79
---> maxClique list : {{16,30,44}}
---> minimalTraversal list, add : {16,30,60}, size : 102
-disjonctive support for element {16,30,44,22} : 81
---> toExplore list : {{16,30,22}}
---> minimalTraversal list, add : {16,30,25}, size : 103
-disjonctive support for element {16,30,44,32} : 81
---> toExplore list : {{16,30,22},{16,30,32}}
-disjonctive support for element {16,30,44,17} : 80
---> maxClique list : {{16,30,44},{16,30,17}}
-disjonctive support for element {16,30,44,17,19} : 81
---> toExplore list : {{16,30,22},{16,30,32},{16,30,19}}
+disjonctive support for element {11,5,8,1} : 6
+--> maxClique list : {{11,5,8,1}}
+--> minimalTraversal list, add : {11,5,8,2}, size : 25
+disjonctive support for element {11,5,8,1,12} : 7
+--> toExplore list : {{11,5,8,12}}
 ----------------------------------------------------------
-toExplore list{{16,30,22},{16,30,32},{16,30,19}}
-maxClique list{{16,30,44},{16,30,17}}
-new toTraverse list{{16,30,22,32},{16,30,22,19},{16,30,22,44},{16,30,22,17}}
+toExplore list{{11,5,8,12}}
+maxClique list{{11,5,8,1}}
+new toTraverse list{{11,5,8,12,1}}
 ----------------------------------------------------------
-disjonctive support for element {16,30,22,32} : 79
---> maxClique list : {{16,30,22,32}}
-disjonctive support for element {16,30,22,32,19} : 80
---> maxClique list : {{16,30,22,32},{16,30,22,19}}
---> minimalTraversal list, add : {16,30,22,44}, size : 104
-disjonctive support for element {16,30,22,32,19,17} : 81
---> toExplore list : {{16,30,22,17}}
-----------------------------------------------------------
-toExplore list{{16,30,22,17}}
-maxClique list{{16,30,22,32},{16,30,22,19}}
-new toTraverse list{{16,30,22,17,32},{16,30,22,17,19}}
-----------------------------------------------------------
-disjonctive support for element {16,30,22,17,32} : 80
---> maxClique list : {{16,30,22,17,32}}
-disjonctive support for element {16,30,22,17,32,19} : 81
---> toExplore list : {{16,30,22,17,19}}
-----------------------------------------------------------
-toExplore list{{16,30,22,17,19}}
-maxClique list{{16,30,22,17,32}}
-new toTraverse list{{16,30,22,17,19,32}}
-----------------------------------------------------------
---> minimalTraversal list, add : {16,30,22,17,19,32}, size : 105
+--> minimalTraversal list, add : {11,5,8,12,1}, size : 26
 toExplore list is empty, end of the branch
-new toTraverse list{{16,30,32,19},{16,30,32,44},{16,30,32,17}}
+{11,6,7} is not essential
+new toTraverse list{{11,6,1},{11,6,2},{11,6,3},{11,6,8},{11,6,12}}
 ----------------------------------------------------------
-disjonctive support for element {16,30,32,19} : 79
---> maxClique list : {{16,30,32,19}}
---> minimalTraversal list, add : {16,30,32,44}, size : 106
-disjonctive support for element {16,30,32,19,17} : 80
---> maxClique list : {{16,30,32,19},{16,30,32,17}}
+disjonctive support for element {11,6,1} : 5
+--> maxClique list : {{11,6,1}}
+disjonctive support for element {11,6,1,2} : 6
+--> maxClique list : {{11,6,1},{11,6,2}}
+disjonctive support for element {11,6,1,2,3} : 7
+--> toExplore list : {{11,6,3}}
+disjonctive support for element {11,6,1,2,8} : 7
+--> toExplore list : {{11,6,3},{11,6,8}}
+disjonctive support for element {11,6,1,2,12} : 6
+--> maxClique list : {{11,6,1},{11,6,2},{11,6,12}}
+----------------------------------------------------------
+toExplore list{{11,6,3},{11,6,8}}
+maxClique list{{11,6,1},{11,6,2},{11,6,12}}
+{11,6,3,8} is not essential
+{11,6,3,1} is not essential
+new toTraverse list{{11,6,3,2},{11,6,3,12}}
+----------------------------------------------------------
+--> minimalTraversal list, add : {11,6,3,2}, size : 27
+--> minimalTraversal list, add : {11,6,3,12}, size : 28
 toExplore list is empty, end of the branch
-new toTraverse list{{16,30,19,44},{16,30,19,17}}
-----------------------------------------------------------
-disjonctive support for element {16,30,19,44} : 80
---> maxClique list : {{16,30,19,44}}
-disjonctive support for element {16,30,19,44,17} : 81
---> toExplore list : {{16,30,19,17}}
-----------------------------------------------------------
-toExplore list{{16,30,19,17}}
-maxClique list{{16,30,19,44}}
-new toTraverse list{{16,30,19,17,44}}
-----------------------------------------------------------
---> minimalTraversal list, add : {16,30,19,17,44}, size : 107
-toExplore list is empty, end of the branch
-{16,42,32} is not essential
-{16,42,17} is not essential
-{16,42,19} is not essential
-new toTraverse list{{16,42,44},{16,42,60},{16,42,22},{16,42,25}}
-----------------------------------------------------------
---> minimalTraversal list, add : {16,42,44}, size : 108
---> minimalTraversal list, add : {16,42,60}, size : 109
---> minimalTraversal list, add : {16,42,22}, size : 110
---> minimalTraversal list, add : {16,42,25}, size : 111
-toExplore list is empty, end of the branch
-new toTraverse list{{16,44,60},{16,44,22},{16,44,25},{16,44,32},{16,44,17},{16,44,19}}
-----------------------------------------------------------
---> minimalTraversal list, add : {16,44,60}, size : 112
-disjonctive support for element {16,44,22} : 80
---> maxClique list : {{16,44,22}}
---> minimalTraversal list, add : {16,44,25}, size : 113
-disjonctive support for element {16,44,22,32} : 81
---> toExplore list : {{16,44,32}}
-disjonctive support for element {16,44,22,17} : 80
---> maxClique list : {{16,44,22},{16,44,17}}
-disjonctive support for element {16,44,22,17,19} : 80
---> maxClique list : {{16,44,22},{16,44,17},{16,44,19}}
-----------------------------------------------------------
-toExplore list{{16,44,32}}
-maxClique list{{16,44,22},{16,44,17},{16,44,19}}
-{16,44,32,17} is not essential
-{16,44,32,19} is not essential
-new toTraverse list{{16,44,32,22}}
-----------------------------------------------------------
---> minimalTraversal list, add : {16,44,32,22}, size : 114
-toExplore list is empty, end of the branch
-{16,60,19} is not essential
-new toTraverse list{{16,60,22},{16,60,25},{16,60,32},{16,60,17}}
-----------------------------------------------------------
---> minimalTraversal list, add : {16,60,22}, size : 115
---> minimalTraversal list, add : {16,60,25}, size : 116
---> minimalTraversal list, add : {16,60,32}, size : 117
---> minimalTraversal list, add : {16,60,17}, size : 118
-toExplore list is empty, end of the branch
-new toTraverse list{{16,22,25},{16,22,32},{16,22,17},{16,22,19}}
-----------------------------------------------------------
---> minimalTraversal list, add : {16,22,25}, size : 119
-disjonctive support for element {16,22,32} : 78
---> maxClique list : {{16,22,32}}
-disjonctive support for element {16,22,32,17} : 79
---> maxClique list : {{16,22,32},{16,22,17}}
-disjonctive support for element {16,22,32,17,19} : 80
---> maxClique list : {{16,22,32},{16,22,17},{16,22,19}}
-toExplore list is empty, end of the branch
-new toTraverse list{{23,25},{23,26},{23,28},{23,29},{23,30},{23,32},{23,39},{23,42},{23,44},{23,60},{23,64},{23,2},{23,13},{23,17},{23,18},{23,19},{23,22}}
-----------------------------------------------------------
---> minimalTraversal list, add : {23,25}, size : 120
---> minimalTraversal list, add : {23,26}, size : 121
---> minimalTraversal list, add : {23,28}, size : 122
---> minimalTraversal list, add : {23,29}, size : 123
---> minimalTraversal list, add : {23,30}, size : 124
-disjonctive support for element {23,32} : 80
---> maxClique list : {{23,32}}
---> minimalTraversal list, add : {23,39}, size : 125
---> minimalTraversal list, add : {23,42}, size : 126
---> minimalTraversal list, add : {23,44}, size : 127
---> minimalTraversal list, add : {23,60}, size : 128
---> minimalTraversal list, add : {23,64}, size : 129
---> minimalTraversal list, add : {23,2}, size : 130
-disjonctive support for element {23,32,13} : 80
---> maxClique list : {{23,32},{23,13}}
-disjonctive support for element {23,32,13,17} : 80
---> maxClique list : {{23,32},{23,13},{23,17}}
-disjonctive support for element {23,32,13,17,18} : 80
---> maxClique list : {{23,32},{23,13},{23,17},{23,18}}
-disjonctive support for element {23,32,13,17,18,19} : 80
---> maxClique list : {{23,32},{23,13},{23,17},{23,18},{23,19}}
-disjonctive support for element {23,32,13,17,18,19,22} : 81
---> toExplore list : {{23,22}}
-----------------------------------------------------------
-toExplore list{{23,22}}
-maxClique list{{23,32},{23,13},{23,17},{23,18},{23,19}}
-new toTraverse list{{23,22,32},{23,22,13},{23,22,17},{23,22,18},{23,22,19}}
-----------------------------------------------------------
---> minimalTraversal list, add : {23,22,32}, size : 131
-disjonctive support for element {23,22,13} : 79
---> maxClique list : {{23,22,13}}
-disjonctive support for element {23,22,13,17} : 80
---> maxClique list : {{23,22,13},{23,22,17}}
-disjonctive support for element {23,22,13,17,18} : 81
---> toExplore list : {{23,22,18}}
-disjonctive support for element {23,22,13,17,19} : 81
---> toExplore list : {{23,22,18},{23,22,19}}
-----------------------------------------------------------
-toExplore list{{23,22,18},{23,22,19}}
-maxClique list{{23,22,13},{23,22,17}}
-{23,22,18,19} is not essential
-new toTraverse list{{23,22,18,13},{23,22,18,17}}
-----------------------------------------------------------
-disjonctive support for element {23,22,18,13} : 80
---> maxClique list : {{23,22,18,13}}
-disjonctive support for element {23,22,18,13,17} : 81
---> toExplore list : {{23,22,18,17}}
-----------------------------------------------------------
-toExplore list{{23,22,18,17}}
-maxClique list{{23,22,18,13}}
-new toTraverse list{{23,22,18,17,13}}
-----------------------------------------------------------
---> minimalTraversal list, add : {23,22,18,17,13}, size : 132
-toExplore list is empty, end of the branch
-{23,22,19,13} is not essential
-new toTraverse list{{23,22,19,17}}
-----------------------------------------------------------
---> minimalTraversal list, add : {23,22,19,17}, size : 133
-toExplore list is empty, end of the branch
-{25,13} is not essential
-{25,18} is not essential
-{25,19} is not essential
-new toTraverse list{{25,26},{25,28},{25,29},{25,30},{25,32},{25,39},{25,42},{25,44},{25,60},{25,64},{25,2},{25,17},{25,22}}
-----------------------------------------------------------
-disjonctive support for element {25,26} : 80
---> maxClique list : {{25,26}}
-disjonctive support for element {25,26,28} : 81
---> toExplore list : {{25,28}}
-disjonctive support for element {25,26,29} : 81
---> toExplore list : {{25,28},{25,29}}
-disjonctive support for element {25,26,30} : 81
---> toExplore list : {{25,28},{25,29},{25,30}}
-disjonctive support for element {25,26,32} : 81
---> toExplore list : {{25,28},{25,29},{25,30},{25,32}}
---> minimalTraversal list, add : {25,39}, size : 134
-disjonctive support for element {25,26,42} : 81
---> toExplore list : {{25,28},{25,29},{25,30},{25,32},{25,42}}
-disjonctive support for element {25,26,44} : 81
---> toExplore list : {{25,28},{25,29},{25,30},{25,32},{25,42},{25,44}}
-disjonctive support for element {25,26,60} : 81
---> toExplore list : {{25,28},{25,29},{25,30},{25,32},{25,42},{25,44},{25,60}}
---> minimalTraversal list, add : {25,64}, size : 135
---> minimalTraversal list, add : {25,2}, size : 136
-disjonctive support for element {25,26,17} : 80
---> maxClique list : {{25,26},{25,17}}
-disjonctive support for element {25,26,17,22} : 81
---> toExplore list : {{25,28},{25,29},{25,30},{25,32},{25,42},{25,44},{25,60},{25,22}}
-----------------------------------------------------------
-toExplore list{{25,28},{25,29},{25,30},{25,32},{25,42},{25,44},{25,60},{25,22}}
-maxClique list{{25,26},{25,17}}
-{25,28,32} is not essential
-{25,28,22} is not essential
-{25,28,17} is not essential
-new toTraverse list{{25,28,29},{25,28,30},{25,28,42},{25,28,44},{25,28,60},{25,28,26}}
-----------------------------------------------------------
---> minimalTraversal list, add : {25,28,29}, size : 137
---> minimalTraversal list, add : {25,28,30}, size : 138
---> minimalTraversal list, add : {25,28,42}, size : 139
---> minimalTraversal list, add : {25,28,44}, size : 140
---> minimalTraversal list, add : {25,28,60}, size : 141
---> minimalTraversal list, add : {25,28,26}, size : 142
-toExplore list is empty, end of the branch
-{25,29,32} is not essential
-{25,29,17} is not essential
-new toTraverse list{{25,29,30},{25,29,42},{25,29,44},{25,29,60},{25,29,22},{25,29,26}}
-----------------------------------------------------------
---> minimalTraversal list, add : {25,29,30}, size : 143
---> minimalTraversal list, add : {25,29,42}, size : 144
---> minimalTraversal list, add : {25,29,44}, size : 145
---> minimalTraversal list, add : {25,29,60}, size : 146
---> minimalTraversal list, add : {25,29,22}, size : 147
---> minimalTraversal list, add : {25,29,26}, size : 148
-toExplore list is empty, end of the branch
-new toTraverse list{{25,30,32},{25,30,42},{25,30,44},{25,30,60},{25,30,22},{25,30,26},{25,30,17}}
-----------------------------------------------------------
-disjonctive support for element {25,30,32} : 79
---> maxClique list : {{25,30,32}}
---> minimalTraversal list, add : {25,30,42}, size : 149
-disjonctive support for element {25,30,32,44} : 81
---> toExplore list : {{25,30,44}}
---> minimalTraversal list, add : {25,30,60}, size : 150
-disjonctive support for element {25,30,32,22} : 80
---> maxClique list : {{25,30,32},{25,30,22}}
---> minimalTraversal list, add : {25,30,26}, size : 151
-disjonctive support for element {25,30,32,22,17} : 81
---> toExplore list : {{25,30,44},{25,30,17}}
-----------------------------------------------------------
-toExplore list{{25,30,44},{25,30,17}}
-maxClique list{{25,30,32},{25,30,22}}
-{25,30,44,17} is not essential
-new toTraverse list{{25,30,44,32},{25,30,44,22}}
-----------------------------------------------------------
---> minimalTraversal list, add : {25,30,44,32}, size : 152
---> minimalTraversal list, add : {25,30,44,22}, size : 153
-toExplore list is empty, end of the branch
-new toTraverse list{{25,30,17,32},{25,30,17,22}}
-----------------------------------------------------------
-disjonctive support for element {25,30,17,32} : 80
---> maxClique list : {{25,30,17,32}}
-disjonctive support for element {25,30,17,32,22} : 81
---> toExplore list : {{25,30,17,22}}
-----------------------------------------------------------
-toExplore list{{25,30,17,22}}
-maxClique list{{25,30,17,32}}
-new toTraverse list{{25,30,17,22,32}}
-----------------------------------------------------------
---> minimalTraversal list, add : {25,30,17,22,32}, size : 154
-toExplore list is empty, end of the branch
-{25,32,42} is not essential
-new toTraverse list{{25,32,44},{25,32,60},{25,32,22},{25,32,26},{25,32,17}}
-----------------------------------------------------------
-disjonctive support for element {25,32,44} : 80
---> maxClique list : {{25,32,44}}
---> minimalTraversal list, add : {25,32,60}, size : 155
-disjonctive support for element {25,32,44,22} : 81
---> toExplore list : {{25,32,22}}
---> minimalTraversal list, add : {25,32,26}, size : 156
-disjonctive support for element {25,32,44,17} : 80
---> maxClique list : {{25,32,44},{25,32,17}}
-----------------------------------------------------------
-toExplore list{{25,32,22}}
-maxClique list{{25,32,44},{25,32,17}}
-new toTraverse list{{25,32,22,44},{25,32,22,17}}
-----------------------------------------------------------
---> minimalTraversal list, add : {25,32,22,44}, size : 157
-disjonctive support for element {25,32,22,17} : 80
---> maxClique list : {{25,32,22,17}}
-toExplore list is empty, end of the branch
-{25,42,26} is not essential
-{25,42,17} is not essential
-new toTraverse list{{25,42,44},{25,42,60},{25,42,22}}
-----------------------------------------------------------
---> minimalTraversal list, add : {25,42,44}, size : 158
---> minimalTraversal list, add : {25,42,60}, size : 159
---> minimalTraversal list, add : {25,42,22}, size : 160
-toExplore list is empty, end of the branch
-new toTraverse list{{25,44,60},{25,44,22},{25,44,26},{25,44,17}}
-----------------------------------------------------------
---> minimalTraversal list, add : {25,44,60}, size : 161
-disjonctive support for element {25,44,22} : 80
---> maxClique list : {{25,44,22}}
---> minimalTraversal list, add : {25,44,26}, size : 162
-disjonctive support for element {25,44,22,17} : 80
---> maxClique list : {{25,44,22},{25,44,17}}
-toExplore list is empty, end of the branch
-{25,60,26} is not essential
-new toTraverse list{{25,60,22},{25,60,17}}
-----------------------------------------------------------
---> minimalTraversal list, add : {25,60,22}, size : 163
---> minimalTraversal list, add : {25,60,17}, size : 164
-toExplore list is empty, end of the branch
-new toTraverse list{{25,22,26},{25,22,17}}
-----------------------------------------------------------
---> minimalTraversal list, add : {25,22,26}, size : 165
-disjonctive support for element {25,22,17} : 77
---> maxClique list : {{25,22,17}}
-toExplore list is empty, end of the branch
-{26,13} is not essential
-{26,18} is not essential
-{26,19} is not essential
-new toTraverse list{{26,28},{26,29},{26,30},{26,32},{26,39},{26,42},{26,44},{26,60},{26,64},{26,2},{26,17},{26,22}}
-----------------------------------------------------------
-disjonctive support for element {26,28} : 80
---> maxClique list : {{26,28}}
-disjonctive support for element {26,28,29} : 81
---> toExplore list : {{26,29}}
-disjonctive support for element {26,28,30} : 81
---> toExplore list : {{26,29},{26,30}}
-disjonctive support for element {26,28,32} : 81
---> toExplore list : {{26,29},{26,30},{26,32}}
---> minimalTraversal list, add : {26,39}, size : 166
---> minimalTraversal list, add : {26,42}, size : 167
-disjonctive support for element {26,28,44} : 81
---> toExplore list : {{26,29},{26,30},{26,32},{26,44}}
---> minimalTraversal list, add : {26,60}, size : 168
---> minimalTraversal list, add : {26,64}, size : 169
---> minimalTraversal list, add : {26,2}, size : 170
-disjonctive support for element {26,28,17} : 80
---> maxClique list : {{26,28},{26,17}}
-disjonctive support for element {26,28,17,22} : 81
---> toExplore list : {{26,29},{26,30},{26,32},{26,44},{26,22}}
-----------------------------------------------------------
-toExplore list{{26,29},{26,30},{26,32},{26,44},{26,22}}
-maxClique list{{26,28},{26,17}}
-new toTraverse list{{26,29,30},{26,29,32},{26,29,44},{26,29,22},{26,29,28},{26,29,17}}
-----------------------------------------------------------
---> minimalTraversal list, add : {26,29,30}, size : 171
-disjonctive support for element {26,29,32} : 80
---> maxClique list : {{26,29,32}}
---> minimalTraversal list, add : {26,29,44}, size : 172
---> minimalTraversal list, add : {26,29,22}, size : 173
---> minimalTraversal list, add : {26,29,28}, size : 174
-disjonctive support for element {26,29,32,17} : 81
---> toExplore list : {{26,29,17}}
-----------------------------------------------------------
-toExplore list{{26,29,17}}
-maxClique list{{26,29,32}}
-new toTraverse list{{26,29,17,32}}
-----------------------------------------------------------
---> minimalTraversal list, add : {26,29,17,32}, size : 175
-toExplore list is empty, end of the branch
-{26,30,32} is not essential
-{26,30,17} is not essential
-new toTraverse list{{26,30,44},{26,30,22},{26,30,28}}
-----------------------------------------------------------
---> minimalTraversal list, add : {26,30,44}, size : 176
---> minimalTraversal list, add : {26,30,22}, size : 177
---> minimalTraversal list, add : {26,30,28}, size : 178
-toExplore list is empty, end of the branch
-{26,32,44} is not essential
-{26,32,22} is not essential
-new toTraverse list{{26,32,28},{26,32,17}}
-----------------------------------------------------------
---> minimalTraversal list, add : {26,32,28}, size : 179
-disjonctive support for element {26,32,17} : 78
---> maxClique list : {{26,32,17}}
-toExplore list is empty, end of the branch
-{26,44,17} is not essential
-new toTraverse list{{26,44,22},{26,44,28}}
-----------------------------------------------------------
---> minimalTraversal list, add : {26,44,22}, size : 180
---> minimalTraversal list, add : {26,44,28}, size : 181
-toExplore list is empty, end of the branch
-{26,22,17} is not essential
-new toTraverse list{{26,22,28}}
-----------------------------------------------------------
---> minimalTraversal list, add : {26,22,28}, size : 182
-toExplore list is empty, end of the branch
-{28,13} is not essential
-{28,18} is not essential
-{28,19} is not essential
-new toTraverse list{{28,29},{28,30},{28,32},{28,39},{28,42},{28,44},{28,60},{28,64},{28,2},{28,17},{28,22}}
-----------------------------------------------------------
-disjonctive support for element {28,29} : 78
---> maxClique list : {{28,29}}
-disjonctive support for element {28,29,30} : 81
---> toExplore list : {{28,30}}
-disjonctive support for element {28,29,32} : 79
---> maxClique list : {{28,29},{28,32}}
---> minimalTraversal list, add : {28,39}, size : 183
-disjonctive support for element {28,29,32,42} : 81
---> toExplore list : {{28,30},{28,42}}
-disjonctive support for element {28,29,32,44} : 81
---> toExplore list : {{28,30},{28,42},{28,44}}
-disjonctive support for element {28,29,32,60} : 81
---> toExplore list : {{28,30},{28,42},{28,44},{28,60}}
---> minimalTraversal list, add : {28,64}, size : 184
---> minimalTraversal list, add : {28,2}, size : 185
-disjonctive support for element {28,29,32,17} : 80
---> maxClique list : {{28,29},{28,32},{28,17}}
-disjonctive support for element {28,29,32,17,22} : 81
---> toExplore list : {{28,30},{28,42},{28,44},{28,60},{28,22}}
-----------------------------------------------------------
-toExplore list{{28,30},{28,42},{28,44},{28,60},{28,22}}
-maxClique list{{28,29},{28,32},{28,17}}
-new toTraverse list{{28,30,42},{28,30,44},{28,30,60},{28,30,22},{28,30,29},{28,30,32},{28,30,17}}
-----------------------------------------------------------
---> minimalTraversal list, add : {28,30,42}, size : 186
-disjonctive support for element {28,30,44} : 79
---> maxClique list : {{28,30,44}}
---> minimalTraversal list, add : {28,30,60}, size : 187
-disjonctive support for element {28,30,44,22} : 80
---> maxClique list : {{28,30,44},{28,30,22}}
---> minimalTraversal list, add : {28,30,29}, size : 188
-disjonctive support for element {28,30,44,22,32} : 81
---> toExplore list : {{28,30,32}}
-disjonctive support for element {28,30,44,22,17} : 80
---> maxClique list : {{28,30,44},{28,30,22},{28,30,17}}
-----------------------------------------------------------
-toExplore list{{28,30,32}}
-maxClique list{{28,30,44},{28,30,22},{28,30,17}}
-new toTraverse list{{28,30,32,44},{28,30,32,22},{28,30,32,17}}
-----------------------------------------------------------
-disjonctive support for element {28,30,32,44} : 80
---> maxClique list : {{28,30,32,44}}
-disjonctive support for element {28,30,32,44,22} : 81
---> toExplore list : {{28,30,32,22}}
-disjonctive support for element {28,30,32,44,17} : 81
---> toExplore list : {{28,30,32,22},{28,30,32,17}}
-----------------------------------------------------------
-toExplore list{{28,30,32,22},{28,30,32,17}}
-maxClique list{{28,30,32,44}}
-{28,30,32,22,17} is not essential
-new toTraverse list{{28,30,32,22,44}}
-----------------------------------------------------------
---> minimalTraversal list, add : {28,30,32,22,44}, size : 189
-toExplore list is empty, end of the branch
-new toTraverse list{{28,30,32,17,44}}
-----------------------------------------------------------
---> minimalTraversal list, add : {28,30,32,17,44}, size : 190
-toExplore list is empty, end of the branch
-{28,42,22} is not essential
-{28,42,32} is not essential
-{28,42,17} is not essential
-new toTraverse list{{28,42,44},{28,42,60},{28,42,29}}
-----------------------------------------------------------
---> minimalTraversal list, add : {28,42,44}, size : 191
---> minimalTraversal list, add : {28,42,60}, size : 192
---> minimalTraversal list, add : {28,42,29}, size : 193
-toExplore list is empty, end of the branch
-new toTraverse list{{28,44,60},{28,44,22},{28,44,29},{28,44,32},{28,44,17}}
-----------------------------------------------------------
---> minimalTraversal list, add : {28,44,60}, size : 194
-disjonctive support for element {28,44,22} : 79
---> maxClique list : {{28,44,22}}
---> minimalTraversal list, add : {28,44,29}, size : 195
-disjonctive support for element {28,44,22,32} : 80
---> maxClique list : {{28,44,22},{28,44,32}}
-disjonctive support for element {28,44,22,32,17} : 80
---> maxClique list : {{28,44,22},{28,44,32},{28,44,17}}
-toExplore list is empty, end of the branch
-new toTraverse list{{28,60,22},{28,60,29},{28,60,32},{28,60,17}}
-----------------------------------------------------------
-disjonctive support for element {28,60,22} : 80
---> maxClique list : {{28,60,22}}
---> minimalTraversal list, add : {28,60,29}, size : 196
-disjonctive support for element {28,60,22,32} : 81
---> toExplore list : {{28,60,32}}
-disjonctive support for element {28,60,22,17} : 81
---> toExplore list : {{28,60,32},{28,60,17}}
-----------------------------------------------------------
-toExplore list{{28,60,32},{28,60,17}}
-maxClique list{{28,60,22}}
-{28,60,32,17} is not essential
-new toTraverse list{{28,60,32,22}}
-----------------------------------------------------------
---> minimalTraversal list, add : {28,60,32,22}, size : 197
-toExplore list is empty, end of the branch
-new toTraverse list{{28,60,17,22}}
-----------------------------------------------------------
---> minimalTraversal list, add : {28,60,17,22}, size : 198
-toExplore list is empty, end of the branch
-new toTraverse list{{28,22,29},{28,22,32},{28,22,17}}
-----------------------------------------------------------
-disjonctive support for element {28,22,29} : 79
---> maxClique list : {{28,22,29}}
-disjonctive support for element {28,22,29,32} : 80
---> maxClique list : {{28,22,29},{28,22,32}}
-disjonctive support for element {28,22,29,32,17} : 81
---> toExplore list : {{28,22,17}}
-----------------------------------------------------------
-toExplore list{{28,22,17}}
-maxClique list{{28,22,29},{28,22,32}}
-new toTraverse list{{28,22,17,29},{28,22,17,32}}
-----------------------------------------------------------
-disjonctive support for element {28,22,17,29} : 80
---> maxClique list : {{28,22,17,29}}
-disjonctive support for element {28,22,17,29,32} : 81
---> toExplore list : {{28,22,17,32}}
-----------------------------------------------------------
-toExplore list{{28,22,17,32}}
-maxClique list{{28,22,17,29}}
-new toTraverse list{{28,22,17,32,29}}
-----------------------------------------------------------
---> minimalTraversal list, add : {28,22,17,32,29}, size : 199
-toExplore list is empty, end of the branch
-{29,13} is not essential
-{29,18} is not essential
-{29,19} is not essential
-new toTraverse list{{29,30},{29,32},{29,39},{29,42},{29,44},{29,60},{29,64},{29,2},{29,17},{29,22}}
-----------------------------------------------------------
-disjonctive support for element {29,30} : 78
---> maxClique list : {{29,30}}
-disjonctive support for element {29,30,32} : 80
---> maxClique list : {{29,30},{29,32}}
---> minimalTraversal list, add : {29,39}, size : 200
-disjonctive support for element {29,30,32,42} : 81
---> toExplore list : {{29,42}}
-disjonctive support for element {29,30,32,44} : 81
---> toExplore list : {{29,42},{29,44}}
-disjonctive support for element {29,30,32,60} : 81
---> toExplore list : {{29,42},{29,44},{29,60}}
---> minimalTraversal list, add : {29,64}, size : 201
---> minimalTraversal list, add : {29,2}, size : 202
-disjonctive support for element {29,30,32,17} : 80
---> maxClique list : {{29,30},{29,32},{29,17}}
-disjonctive support for element {29,30,32,17,22} : 81
---> toExplore list : {{29,42},{29,44},{29,60},{29,22}}
-----------------------------------------------------------
-toExplore list{{29,42},{29,44},{29,60},{29,22}}
-maxClique list{{29,30},{29,32},{29,17}}
-{29,42,32} is not essential
-{29,42,17} is not essential
-new toTraverse list{{29,42,44},{29,42,60},{29,42,22},{29,42,30}}
-----------------------------------------------------------
---> minimalTraversal list, add : {29,42,44}, size : 203
---> minimalTraversal list, add : {29,42,60}, size : 204
---> minimalTraversal list, add : {29,42,22}, size : 205
---> minimalTraversal list, add : {29,42,30}, size : 206
-toExplore list is empty, end of the branch
-new toTraverse list{{29,44,60},{29,44,22},{29,44,30},{29,44,32},{29,44,17}}
-----------------------------------------------------------
---> minimalTraversal list, add : {29,44,60}, size : 207
-disjonctive support for element {29,44,22} : 80
---> maxClique list : {{29,44,22}}
-disjonctive support for element {29,44,22,30} : 81
---> toExplore list : {{29,44,30}}
-disjonctive support for element {29,44,22,32} : 81
---> toExplore list : {{29,44,30},{29,44,32}}
-disjonctive support for element {29,44,22,17} : 81
---> toExplore list : {{29,44,30},{29,44,32},{29,44,17}}
-----------------------------------------------------------
-toExplore list{{29,44,30},{29,44,32},{29,44,17}}
-maxClique list{{29,44,22}}
-new toTraverse list{{29,44,30,32},{29,44,30,17},{29,44,30,22}}
-----------------------------------------------------------
---> minimalTraversal list, add : {29,44,30,32}, size : 208
---> minimalTraversal list, add : {29,44,30,17}, size : 209
---> minimalTraversal list, add : {29,44,30,22}, size : 210
-toExplore list is empty, end of the branch
-{29,44,32,17} is not essential
-new toTraverse list{{29,44,32,22}}
-----------------------------------------------------------
---> minimalTraversal list, add : {29,44,32,22}, size : 211
-toExplore list is empty, end of the branch
-new toTraverse list{{29,44,17,22}}
-----------------------------------------------------------
---> minimalTraversal list, add : {29,44,17,22}, size : 212
-toExplore list is empty, end of the branch
-new toTraverse list{{29,60,22},{29,60,30},{29,60,32},{29,60,17}}
-----------------------------------------------------------
---> minimalTraversal list, add : {29,60,22}, size : 213
---> minimalTraversal list, add : {29,60,30}, size : 214
---> minimalTraversal list, add : {29,60,32}, size : 215
---> minimalTraversal list, add : {29,60,17}, size : 216
-toExplore list is empty, end of the branch
-new toTraverse list{{29,22,30},{29,22,32},{29,22,17}}
-----------------------------------------------------------
-disjonctive support for element {29,22,30} : 80
---> maxClique list : {{29,22,30}}
-disjonctive support for element {29,22,30,32} : 81
---> toExplore list : {{29,22,32}}
-disjonctive support for element {29,22,30,17} : 80
---> maxClique list : {{29,22,30},{29,22,17}}
-----------------------------------------------------------
-toExplore list{{29,22,32}}
-maxClique list{{29,22,30},{29,22,17}}
-new toTraverse list{{29,22,32,30},{29,22,32,17}}
-----------------------------------------------------------
---> minimalTraversal list, add : {29,22,32,30}, size : 217
-disjonctive support for element {29,22,32,17} : 80
---> maxClique list : {{29,22,32,17}}
-toExplore list is empty, end of the branch
-{30,13} is not essential
-{30,18} is not essential
-new toTraverse list{{30,32},{30,39},{30,42},{30,44},{30,60},{30,64},{30,2},{30,17},{30,19},{30,22}}
-----------------------------------------------------------
-disjonctive support for element {30,32} : 69
---> maxClique list : {{30,32}}
---> minimalTraversal list, add : {30,39}, size : 218
-disjonctive support for element {30,32,42} : 80
---> maxClique list : {{30,32},{30,42}}
-disjonctive support for element {30,32,42,44} : 81
---> toExplore list : {{30,44}}
-disjonctive support for element {30,32,42,60} : 81
---> toExplore list : {{30,44},{30,60}}
---> minimalTraversal list, add : {30,64}, size : 219
-disjonctive support for element {30,32,42,2} : 81
---> toExplore list : {{30,44},{30,60},{30,2}}
-disjonctive support for element {30,32,42,17} : 80
---> maxClique list : {{30,32},{30,42},{30,17}}
-disjonctive support for element {30,32,42,17,19} : 80
---> maxClique list : {{30,32},{30,42},{30,17},{30,19}}
-disjonctive support for element {30,32,42,17,19,22} : 80
---> maxClique list : {{30,32},{30,42},{30,17},{30,19},{30,22}}
-----------------------------------------------------------
-toExplore list{{30,44},{30,60},{30,2}}
-maxClique list{{30,32},{30,42},{30,17},{30,19},{30,22}}
-new toTraverse list{{30,44,60},{30,44,2},{30,44,32},{30,44,42},{30,44,17},{30,44,19},{30,44,22}}
-----------------------------------------------------------
---> minimalTraversal list, add : {30,44,60}, size : 220
---> minimalTraversal list, add : {30,44,2}, size : 221
-disjonctive support for element {30,44,32} : 79
---> maxClique list : {{30,44,32}}
-disjonctive support for element {30,44,32,42} : 81
---> toExplore list : {{30,44,42}}
-disjonctive support for element {30,44,32,17} : 80
---> maxClique list : {{30,44,32},{30,44,17}}
-disjonctive support for element {30,44,32,17,19} : 80
---> maxClique list : {{30,44,32},{30,44,17},{30,44,19}}
-disjonctive support for element {30,44,32,17,19,22} : 80
---> maxClique list : {{30,44,32},{30,44,17},{30,44,19},{30,44,22}}
-----------------------------------------------------------
-toExplore list{{30,44,42}}
-maxClique list{{30,44,32},{30,44,17},{30,44,19},{30,44,22}}
-new toTraverse list{{30,44,42,32},{30,44,42,17},{30,44,42,19},{30,44,42,22}}
-----------------------------------------------------------
---> minimalTraversal list, add : {30,44,42,32}, size : 222
-disjonctive support for element {30,44,42,17} : 80
---> maxClique list : {{30,44,42,17}}
-disjonctive support for element {30,44,42,17,19} : 81
---> toExplore list : {{30,44,42,19}}
---> minimalTraversal list, add : {30,44,42,22}, size : 223
-----------------------------------------------------------
-toExplore list{{30,44,42,19}}
-maxClique list{{30,44,42,17}}
-new toTraverse list{{30,44,42,19,17}}
-----------------------------------------------------------
---> minimalTraversal list, add : {30,44,42,19,17}, size : 224
-toExplore list is empty, end of the branch
-{30,60,2} is not essential
-new toTraverse list{{30,60,32},{30,60,42},{30,60,17},{30,60,19},{30,60,22}}
-----------------------------------------------------------
-disjonctive support for element {30,60,32} : 80
---> maxClique list : {{30,60,32}}
---> minimalTraversal list, add : {30,60,42}, size : 225
-disjonctive support for element {30,60,32,17} : 80
---> maxClique list : {{30,60,32},{30,60,17}}
-disjonctive support for element {30,60,32,17,19} : 80
---> maxClique list : {{30,60,32},{30,60,17},{30,60,19}}
-disjonctive support for element {30,60,32,17,19,22} : 81
---> toExplore list : {{30,60,22}}
-----------------------------------------------------------
-toExplore list{{30,60,22}}
-maxClique list{{30,60,32},{30,60,17},{30,60,19}}
-new toTraverse list{{30,60,22,32},{30,60,22,17},{30,60,22,19}}
-----------------------------------------------------------
---> minimalTraversal list, add : {30,60,22,32}, size : 226
---> minimalTraversal list, add : {30,60,22,17}, size : 227
---> minimalTraversal list, add : {30,60,22,19}, size : 228
-toExplore list is empty, end of the branch
-{30,2,42} is not essential
-new toTraverse list{{30,2,32},{30,2,17},{30,2,19},{30,2,22}}
-----------------------------------------------------------
---> minimalTraversal list, add : {30,2,32}, size : 229
-disjonctive support for element {30,2,17} : 80
---> maxClique list : {{30,2,17}}
-disjonctive support for element {30,2,17,19} : 81
---> toExplore list : {{30,2,19}}
---> minimalTraversal list, add : {30,2,22}, size : 230
-----------------------------------------------------------
-toExplore list{{30,2,19}}
-maxClique list{{30,2,17}}
-new toTraverse list{{30,2,19,17}}
-----------------------------------------------------------
---> minimalTraversal list, add : {30,2,19,17}, size : 231
-toExplore list is empty, end of the branch
-{32,64} is not essential
-{32,13} is not essential
-{32,18} is not essential
-new toTraverse list{{32,39},{32,42},{32,44},{32,60},{32,2},{32,17},{32,19},{32,22}}
-----------------------------------------------------------
---> minimalTraversal list, add : {32,39}, size : 232
-disjonctive support for element {32,42} : 74
---> maxClique list : {{32,42}}
-disjonctive support for element {32,42,44} : 80
---> maxClique list : {{32,42},{32,44}}
-disjonctive support for element {32,42,44,60} : 81
---> toExplore list : {{32,60}}
-disjonctive support for element {32,42,44,2} : 81
---> toExplore list : {{32,60},{32,2}}
-disjonctive support for element {32,42,44,17} : 80
---> maxClique list : {{32,42},{32,44},{32,17}}
-disjonctive support for element {32,42,44,17,19} : 80
---> maxClique list : {{32,42},{32,44},{32,17},{32,19}}
-disjonctive support for element {32,42,44,17,19,22} : 81
---> toExplore list : {{32,60},{32,2},{32,22}}
-----------------------------------------------------------
-toExplore list{{32,60},{32,2},{32,22}}
-maxClique list{{32,42},{32,44},{32,17},{32,19}}
-{32,60,2} is not essential
-{32,60,42} is not essential
-{32,60,44} is not essential
-{32,60,17} is not essential
-{32,60,19} is not essential
-new toTraverse list{{32,60,22}}
-----------------------------------------------------------
-disjonctive support for element {32,60,22} : 80
---> maxClique list : {{32,60,22}}
-toExplore list is empty, end of the branch
-{32,2,42} is not essential
-{32,2,19} is not essential
-new toTraverse list{{32,2,22},{32,2,44},{32,2,17}}
-----------------------------------------------------------
-disjonctive support for element {32,2,22} : 80
---> maxClique list : {{32,2,22}}
---> minimalTraversal list, add : {32,2,44}, size : 233
-disjonctive support for element {32,2,22,17} : 81
---> toExplore list : {{32,2,17}}
-----------------------------------------------------------
-toExplore list{{32,2,17}}
-maxClique list{{32,2,22}}
-new toTraverse list{{32,2,17,22}}
-----------------------------------------------------------
---> minimalTraversal list, add : {32,2,17,22}, size : 234
-toExplore list is empty, end of the branch
-new toTraverse list{{32,22,42},{32,22,44},{32,22,17},{32,22,19}}
-----------------------------------------------------------
-disjonctive support for element {32,22,42} : 79
---> maxClique list : {{32,22,42}}
-disjonctive support for element {32,22,42,44} : 81
---> toExplore list : {{32,22,44}}
-disjonctive support for element {32,22,42,17} : 79
---> maxClique list : {{32,22,42},{32,22,17}}
-disjonctive support for element {32,22,42,17,19} : 79
---> maxClique list : {{32,22,42},{32,22,17},{32,22,19}}
-----------------------------------------------------------
-toExplore list{{32,22,44}}
-maxClique list{{32,22,42},{32,22,17},{32,22,19}}
-{32,22,44,17} is not essential
-{32,22,44,19} is not essential
-new toTraverse list{{32,22,44,42}}
-----------------------------------------------------------
---> minimalTraversal list, add : {32,22,44,42}, size : 235
-toExplore list is empty, end of the branch
-{39,13} is not essential
-{39,17} is not essential
-{39,18} is not essential
-{39,19} is not essential
-new toTraverse list{{39,42},{39,44},{39,60},{39,64},{39,2},{39,22}}
-----------------------------------------------------------
---> minimalTraversal list, add : {39,42}, size : 236
---> minimalTraversal list, add : {39,44}, size : 237
---> minimalTraversal list, add : {39,60}, size : 238
---> minimalTraversal list, add : {39,64}, size : 239
---> minimalTraversal list, add : {39,2}, size : 240
---> minimalTraversal list, add : {39,22}, size : 241
-toExplore list is empty, end of the branch
-{42,13} is not essential
-{42,18} is not essential
-new toTraverse list{{42,44},{42,60},{42,64},{42,2},{42,17},{42,19},{42,22}}
-----------------------------------------------------------
-disjonctive support for element {42,44} : 76
---> maxClique list : {{42,44}}
-disjonctive support for element {42,44,60} : 81
---> toExplore list : {{42,60}}
---> minimalTraversal list, add : {42,64}, size : 242
---> minimalTraversal list, add : {42,2}, size : 243
-disjonctive support for element {42,44,17} : 78
---> maxClique list : {{42,44},{42,17}}
-disjonctive support for element {42,44,17,19} : 80
---> maxClique list : {{42,44},{42,17},{42,19}}
-disjonctive support for element {42,44,17,19,22} : 81
---> toExplore list : {{42,60},{42,22}}
-----------------------------------------------------------
-toExplore list{{42,60},{42,22}}
-maxClique list{{42,44},{42,17},{42,19}}
-{42,60,17} is not essential
-{42,60,19} is not essential
-new toTraverse list{{42,60,22},{42,60,44}}
-----------------------------------------------------------
---> minimalTraversal list, add : {42,60,22}, size : 244
---> minimalTraversal list, add : {42,60,44}, size : 245
-toExplore list is empty, end of the branch
-new toTraverse list{{42,22,44},{42,22,17},{42,22,19}}
-----------------------------------------------------------
-disjonctive support for element {42,22,44} : 79
---> maxClique list : {{42,22,44}}
-disjonctive support for element {42,22,44,17} : 80
---> maxClique list : {{42,22,44},{42,22,17}}
-disjonctive support for element {42,22,44,17,19} : 81
---> toExplore list : {{42,22,19}}
-----------------------------------------------------------
-toExplore list{{42,22,19}}
-maxClique list{{42,22,44},{42,22,17}}
-new toTraverse list{{42,22,19,44},{42,22,19,17}}
-----------------------------------------------------------
-disjonctive support for element {42,22,19,44} : 80
---> maxClique list : {{42,22,19,44}}
-disjonctive support for element {42,22,19,44,17} : 81
---> toExplore list : {{42,22,19,17}}
-----------------------------------------------------------
-toExplore list{{42,22,19,17}}
-maxClique list{{42,22,19,44}}
-new toTraverse list{{42,22,19,17,44}}
-----------------------------------------------------------
---> minimalTraversal list, add : {42,22,19,17,44}, size : 246
-toExplore list is empty, end of the branch
-{44,13} is not essential
-{44,18} is not essential
-new toTraverse list{{44,60},{44,64},{44,2},{44,17},{44,19},{44,22}}
-----------------------------------------------------------
-disjonctive support for element {44,60} : 80
---> maxClique list : {{44,60}}
---> minimalTraversal list, add : {44,64}, size : 247
-disjonctive support for element {44,60,2} : 81
---> toExplore list : {{44,2}}
-disjonctive support for element {44,60,17} : 80
---> maxClique list : {{44,60},{44,17}}
-disjonctive support for element {44,60,17,19} : 80
---> maxClique list : {{44,60},{44,17},{44,19}}
-disjonctive support for element {44,60,17,19,22} : 81
---> toExplore list : {{44,2},{44,22}}
-----------------------------------------------------------
-toExplore list{{44,2},{44,22}}
-maxClique list{{44,60},{44,17},{44,19}}
-{44,2,60} is not essential
-{44,2,17} is not essential
-{44,2,19} is not essential
-new toTraverse list{{44,2,22}}
-----------------------------------------------------------
---> minimalTraversal list, add : {44,2,22}, size : 248
-toExplore list is empty, end of the branch
-new toTraverse list{{44,22,60},{44,22,17},{44,22,19}}
-----------------------------------------------------------
---> minimalTraversal list, add : {44,22,60}, size : 249
-disjonctive support for element {44,22,17} : 75
---> maxClique list : {{44,22,17}}
-disjonctive support for element {44,22,17,19} : 76
---> maxClique list : {{44,22,17},{44,22,19}}
-toExplore list is empty, end of the branch
-{60,13} is not essential
-{60,18} is not essential
-new toTraverse list{{60,64},{60,2},{60,17},{60,19},{60,22}}
-----------------------------------------------------------
---> minimalTraversal list, add : {60,64}, size : 250
---> minimalTraversal list, add : {60,2}, size : 251
-disjonctive support for element {60,17} : 76
---> maxClique list : {{60,17}}
-disjonctive support for element {60,17,19} : 76
---> maxClique list : {{60,17},{60,19}}
-disjonctive support for element {60,17,19,22} : 80
---> maxClique list : {{60,17},{60,19},{60,22}}
-toExplore list is empty, end of the branch
-{64,13} is not essential
-{64,17} is not essential
-{64,18} is not essential
-{64,19} is not essential
-new toTraverse list{{64,2},{64,22}}
-----------------------------------------------------------
---> minimalTraversal list, add : {64,2}, size : 252
---> minimalTraversal list, add : {64,22}, size : 253
+new toTraverse list{{11,6,8,1},{11,6,8,2},{11,6,8,12}}
+----------------------------------------------------------
+disjonctive support for element {11,6,8,1} : 6
+--> maxClique list : {{11,6,8,1}}
+--> minimalTraversal list, add : {11,6,8,2}, size : 29
+disjonctive support for element {11,6,8,1,12} : 7
+--> toExplore list : {{11,6,8,12}}
+----------------------------------------------------------
+toExplore list{{11,6,8,12}}
+maxClique list{{11,6,8,1}}
+new toTraverse list{{11,6,8,12,1}}
+----------------------------------------------------------
+--> minimalTraversal list, add : {11,6,8,12,1}, size : 30
 toExplore list is empty, end of the branch

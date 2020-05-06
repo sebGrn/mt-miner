@@ -1,23 +1,21 @@
 #include "Tree.h"
-#include <iostream>
-#include <fstream>
 
-Tree* Tree::tree = nullptr;
+std::shared_ptr<Tree> Tree::tree(nullptr);
 
 Tree::Tree()
 {
-    root = new TreeNode("");
+    root = std::make_shared<TreeNode>("");
 }
 
 Tree::~Tree()
 {
 }
 
-Tree* Tree::getTree()
+std::shared_ptr<Tree> Tree::getTree()
 {
     if (tree == nullptr)
     {
-        tree = new Tree();
+        tree = std::shared_ptr<Tree>(new Tree());
     }
     return tree;
 }
@@ -34,12 +32,9 @@ void Tree::addChild(TreeNode& _child)
 
 void Tree::saveJSONTree(std::string& _filename)
 {
-    if (!_filename.empty())
-    {
-        std::cout << "saving JSON tree in : " << _filename << std::endl;
-        std::ofstream outputStream;
-        outputStream.open(_filename);
-        outputStream << root->getTreeStructure();
-        outputStream.close();
-    }
+    std::cout << "saving JSON tree in : " << _filename << std::endl;
+    std::ofstream outputStream;
+    outputStream.open(_filename);
+    outputStream << root->getTreeStructure();
+    outputStream.close();
 }
