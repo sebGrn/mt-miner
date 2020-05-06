@@ -33,21 +33,21 @@ private:
 	std::vector<std::pair<unsigned int, unsigned int>> clonedBitsetIndexes;
 
 private:
-	bool compareItemsets(const Utils::Itemset& itemset1, const Utils::Itemset& itemset2) const;
+	bool compareItemsets(const Itemset& itemset1, const Itemset& itemset2) const;
 
 public:
 	/// build binary representation from formal context
 	BinaryRepresentation(const FormalContext& context);
 	///
-	unsigned int computeDisjonctifSupport(const Utils::Itemset& pattern) const;
+	unsigned int computeDisjonctifSupport(const Itemset& pattern) const;
 	/// return true if element is essential
-	bool isEssential(const Utils::Itemset& itemsOfPattern);
+	bool isEssential(const Itemset& itemsOfPattern);
 	///
 	unsigned int buildCloneList();
 	///
-	bool containsAClone(const Utils::Itemset& itemset) const;
+	bool containsAClone(const Itemset& itemset) const;
 	///
-	bool containsOriginals(const Utils::Itemset& itemset, std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes) const;
+	bool containsOriginals(const Itemset& itemset, std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes) const;
 
 	//
 	void serialize(const std::string& outputile) const

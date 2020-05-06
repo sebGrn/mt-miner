@@ -8,10 +8,12 @@
 #include <algorithm>
 #include "Profiler.h"
 
+typedef std::vector<unsigned int> Itemset;
+typedef std::vector<Itemset> ItemsetList;
+
 class Utils
 {
 public:
-	typedef std::vector<unsigned int> Itemset;
 
 public:
 	struct compare_int
@@ -74,7 +76,7 @@ public:
 		return res;
 	}
 
-	static std::string itemsetListToString(const std::vector<Itemset>& v)
+	static std::string itemsetListToString(const ItemsetList& v)
 	{
 		std::string res = "{";
 		for_each(v.begin(), v.end(), [&](const Itemset& elt) {
@@ -89,9 +91,9 @@ public:
 	// ------------------------------------------------------------------------------------------------------------------------- //
 
 	// sort each element of minimalTransversals
-	static std::vector<Itemset> sortVectorOfItemset(const std::vector<Itemset>& strVector)
+	static ItemsetList sortVectorOfItemset(const ItemsetList& strVector)
 	{
-		std::vector<Itemset> sortedList = strVector;
+		ItemsetList sortedList = strVector;
 		transform(strVector.begin(), strVector.end(), sortedList.begin(), [&](const Itemset& elt) {
 			//Itemset v = splitToVectorOfInt(elt, ' ');	
 			Itemset v = elt;
@@ -106,15 +108,15 @@ public:
 		return sortedList;
 	}
 
-	static Utils::Itemset combineItemset(const Utils::Itemset& str1, const Utils::Itemset& str2)
+	static Itemset combineItemset(const Itemset& str1, const Itemset& str2)
 	{
 		START_PROFILING(__func__)
 
 		// "1" + "2" => "12"
 		// "71" + "72" => "712"
-		Utils::Itemset left = str1;
-		Utils::Itemset right = str2;
-		std::vector<Utils::Itemset> combinedListElt;
+		Itemset left = str1;
+		Itemset right = str2;
+		ItemsetList combinedListElt;
 		for_each(str1.begin(), str1.end(), [&](unsigned int i) {
 			auto it = std::find_if(right.begin(), right.end(), Utils::compare_int(i));
 			if (it != right.end())
@@ -126,13 +128,13 @@ public:
 		// merge 2 lists into intList1
 		left.insert(left.end(), right.begin(), right.end());
 		// transform int list into string list seperated by ' '
-		Utils::Itemset combinedElt;
+		Itemset combinedElt;
 		for_each(left.begin(), left.end(), [&combinedElt](unsigned int i) { combinedElt.push_back(i); });
 		END_PROFILING(__func__)
 		return combinedElt;
 	};
 	
-	static bool containsZero(const Utils::Itemset& data)
+	static bool containsZero(const Itemset& data)
 	{
 		return (std::find(data.begin(), data.end(), 0) != data.end());
 	}

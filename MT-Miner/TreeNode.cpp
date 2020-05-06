@@ -17,14 +17,14 @@ TreeNode::~TreeNode()
 {
 }
 
-void TreeNode::buildClonedCombinaison(const Utils::Itemset& currentItem, std::vector<Utils::Itemset>& clonedCombination, const std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes)
+void TreeNode::buildClonedCombinaison(const Itemset& currentItem, ItemsetList& clonedCombination, const std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes)
 {
 	START_PROFILING(__func__)
 	for (auto it = originalClonedIndexes.begin(); it != originalClonedIndexes.end(); it++)
 	{
 		unsigned int originalIndex = it->first;
 		unsigned int clonedIndex = it->second;
-		Utils::Itemset clonedCurrentItem = currentItem;
+		Itemset clonedCurrentItem = currentItem;
 		replace(clonedCurrentItem.begin(), clonedCurrentItem.end(), originalIndex, clonedIndex);
 		if (clonedCurrentItem != currentItem)
 		{
@@ -40,7 +40,7 @@ void TreeNode::buildClonedCombinaison(const Utils::Itemset& currentItem, std::ve
 	END_PROFILING(__func__)
 }
 
-void TreeNode::updateListsFromToTraverse(const std::vector<Utils::Itemset>& toTraverse, std::vector<Utils::Itemset>& maxClique, std::vector<Utils::Itemset>& toExplore, std::vector<Utils::Itemset>& graph_mt)
+void TreeNode::updateListsFromToTraverse(const ItemsetList& toTraverse, ItemsetList& maxClique, ItemsetList& toExplore, ItemsetList& graph_mt)
 {
 	START_PROFILING(__func__)
 
@@ -48,12 +48,12 @@ void TreeNode::updateListsFromToTraverse(const std::vector<Utils::Itemset>& toTr
 	toExplore.clear();
 
 	// results of cumulated combined items / must be declared outside of the loop
-	Utils::Itemset previousItem;
+	Itemset previousItem;
 	// loop on toTraverse list and build maxClique and toExplore lists
-	//for_each(toTraverse.begin(), toTraverse.end(), [&](const Utils::Itemset& currentItem) {
+	//for_each(toTraverse.begin(), toTraverse.end(), [&](const Itemset& currentItem) {
 	for (auto it = toTraverse.begin(); it != toTraverse.end(); it++)
 	{
-		Utils::Itemset currentItem = *it;
+		Itemset currentItem = *it;
 		unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(currentItem);		
 		if (disjSup == this->binaryRepresentation->getObjectCount())
 		{
@@ -66,7 +66,7 @@ void TreeNode::updateListsFromToTraverse(const std::vector<Utils::Itemset>& toTr
 				std::vector<std::pair<unsigned int, unsigned int>> originalClonedIndexes;
 				if (this->binaryRepresentation->containsOriginals(currentItem, originalClonedIndexes))
 				{
-					std::vector<Utils::Itemset> clonedCombination;
+					ItemsetList clonedCombination;
 					buildClonedCombinaison(currentItem, clonedCombination, originalClonedIndexes);
 
 					for (auto it = clonedCombination.begin(); it != clonedCombination.end(); it++)
@@ -87,7 +87,7 @@ void TreeNode::updateListsFromToTraverse(const std::vector<Utils::Itemset>& toTr
 			else
 			{
 				// we can combine with previous element / make a union on 2 elements
-				Utils::Itemset combinedItem = Utils::combineItemset(previousItem, currentItem);
+				Itemset combinedItem = Utils::combineItemset(previousItem, currentItem);
 				unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(combinedItem);
 				if (disjSup != this->binaryRepresentation->getObjectCount())
 				{
@@ -105,27 +105,112 @@ void TreeNode::updateListsFromToTraverse(const std::vector<Utils::Itemset>& toTr
 	END_PROFILING(__func__)
 }
 
-void TreeNode::exploreNextBranch(const std::vector<Utils::Itemset>& maxClique, const std::vector<Utils::Itemset>& toExplore, std::vector<Utils::Itemset>& graph_mt)
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+ItemsetList TreeNode::computeMinimalTransversals_iterative(const ItemsetList& toTraverse)
+{
+	START_PROFILING(__func__)
+
+	// test trivial case
+	if (toTraverse.empty())
+		return ItemsetList();
+
+	// structure to queue and synchronize toExplore and maxClique lists
+	struct TailList
+	{
+		std::vector<ItemsetList> toExploreTailList;
+		std::vector<ItemsetList> maxCliqueTailList;
+	};
+	TailList iterativeTailList;
+
+	// contains the final minimal transverals for this node
+	ItemsetList graph_mt;
+	{
+		// contains list of itemsets that are candidates
+		ItemsetList toExplore;
+		// contains list of itemsets that will be combined to the candidates
+		ItemsetList maxClique;
+		// update lists from toTraverse
+		this->updateListsFromToTraverse(toTraverse, maxClique, toExplore, graph_mt);
+
+		//Logger::log("toExplore list", ItemsetListToString(toExplore), "\n");
+		//Logger::log("maxClique list", ItemsetListToString(maxClique), "\n");
+
+		iterativeTailList.toExploreTailList.push_back(toExplore);
+		iterativeTailList.maxCliqueTailList.push_back(maxClique);
+	}
+
+	while (!iterativeTailList.toExploreTailList.empty())
+	{
+		ItemsetList toExplore = iterativeTailList.toExploreTailList.back();
+		iterativeTailList.toExploreTailList.pop_back();
+
+		ItemsetList maxClique = iterativeTailList.maxCliqueTailList.back();
+		iterativeTailList.maxCliqueTailList.pop_back();
+
+		unsigned int lastIndexToTest = toExplore.size();
+		// combine toExplore (left part) with maxClique list (right part) into a combined list
+		ItemsetList combinedItemsetList = toExplore;
+		combinedItemsetList.insert(combinedItemsetList.end(), maxClique.begin(), maxClique.end());
+
+		// loop on candidates from toExplore list only
+		for (int i = 0; i < lastIndexToTest; i++)
+		{
+			// build newTraverse list
+			ItemsetList newToTraverse;
+			Itemset toCombinedLeft = combinedItemsetList[i];
+			// combine each element between [0, lastIndexToTest] with the entire combined itemset list
+			for (unsigned int j = i + 1; j < combinedItemsetList.size(); j++)
+			{
+				assert(j < combinedItemsetList.size());
+				Itemset toCombinedRight = combinedItemsetList[j];
+				Itemset&& combinedItemset = Utils::combineItemset(toCombinedLeft, toCombinedRight);
+
+				// check if combined item is containing a clone (if true, do not compute the minimal transverals) and if combined itemset is essential
+				if (!this->binaryRepresentation->containsAClone(combinedItemset) && binaryRepresentation->isEssential(combinedItemset))
+					newToTraverse.push_back(combinedItemset);
+			}
+
+			if (!newToTraverse.empty())
+			{
+				// compute minimal transversals for the branch
+				this->updateListsFromToTraverse(newToTraverse, maxClique, toExplore, graph_mt);
+
+				if (!toExplore.empty())
+				{
+					iterativeTailList.toExploreTailList.push_back(toExplore);
+					iterativeTailList.maxCliqueTailList.push_back(maxClique);
+				}
+			}
+		}
+	}
+	END_PROFILING(__func__)
+	return graph_mt;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+void TreeNode::exploreNextBranch(const ItemsetList& maxClique, const ItemsetList& toExplore, ItemsetList& graph_mt)
 {
 	START_PROFILING(__func__)
 	// store toExploreList max index
 	unsigned int lastIndexToTest = toExplore.size();
 	// combine toExplore (left part) with maxClique list (right part) into a combined list
-	std::vector<Utils::Itemset> combinedItemsetList = toExplore;
+	ItemsetList combinedItemsetList = toExplore;
 	combinedItemsetList.insert(combinedItemsetList.end(), maxClique.begin(), maxClique.end());
 
 	// loop on candidates from toExplore list only
 	for (int i = 0; i < lastIndexToTest; i++)
 	{
 		// build newTraverse list
-		std::vector<Utils::Itemset> newToTraverse;
-		Utils::Itemset toCombinedLeft = combinedItemsetList[i];
+		ItemsetList newToTraverse;
+		Itemset toCombinedLeft = combinedItemsetList[i];
 		// combine each element between [0, lastIndexToTest] with the entire combined itemset list
 		for (unsigned int j = i + 1; j < combinedItemsetList.size(); j++)
 		{
 			assert(j < combinedItemsetList.size());
-			Utils::Itemset toCombinedRight = combinedItemsetList[j];
-			Utils::Itemset combinedItemset = Utils::combineItemset(toCombinedLeft, toCombinedRight);
+			Itemset toCombinedRight = combinedItemsetList[j];
+			Itemset combinedItemset = Utils::combineItemset(toCombinedLeft, toCombinedRight);
 
 			// check if combined item is containing a clone (if true, do not compute the minimal transverals) and if combined itemset is essential
 			if (!this->binaryRepresentation->containsAClone(combinedItemset) && binaryRepresentation->isEssential(combinedItemset))
@@ -145,12 +230,12 @@ void TreeNode::exploreNextBranch(const std::vector<Utils::Itemset>& maxClique, c
 				// create thread for 1st branch 
 				nbRunningThread++;
 				std::cout << BLUE << "launch thead " << nbRunningThread << RESET << std::endl;
-				futures.push_back(std::async(&TreeNode::computeMinimalTransversals, node, std::move(newToTraverse)));
+				futures.push_back(std::async(&TreeNode::computeMinimalTransversals_recursive, node, std::move(newToTraverse)));
 			}
 			else
 			{
 				// compute minimal transversals for the branch
-				std::vector<Utils::Itemset>&& graph_mt_child = node->computeMinimalTransversals(std::move(newToTraverse));
+				ItemsetList&& graph_mt_child = node->computeMinimalTransversals_recursive(std::move(newToTraverse));
 				std::copy(graph_mt_child.begin(), graph_mt_child.end(), std::back_inserter(graph_mt));
 			}
 		}
@@ -158,25 +243,25 @@ void TreeNode::exploreNextBranch(const std::vector<Utils::Itemset>& maxClique, c
 	END_PROFILING(__func__)
 }
 
-std::vector<Utils::Itemset> TreeNode::computeMinimalTransversals(const std::vector<Utils::Itemset>& toTraverse)
+ItemsetList TreeNode::computeMinimalTransversals_recursive(const ItemsetList& toTraverse)
 {
 	START_PROFILING(__func__)
 
 	// test trivial case
 	if (toTraverse.empty())
-		return std::vector<Utils::Itemset>();
+		return ItemsetList();
 
 	// contains list of itemsets that will be combined to the candidates
-	std::vector<Utils::Itemset> maxClique;
+	ItemsetList maxClique;
 	// contains list of itemsets that are candidates
-	std::vector<Utils::Itemset> toExplore;
+	ItemsetList toExplore;
 	// contains the final minimal transverals for this node
-	std::vector<Utils::Itemset> graph_mt;
+	ItemsetList graph_mt;
 	// update lists from toTraverse
 	this->updateListsFromToTraverse(toTraverse, maxClique, toExplore, graph_mt);
 
-	//Logger::log("toExplore list", Utils::itemsetListToString(toExplore), "\n");
-	//Logger::log("maxClique list", Utils::itemsetListToString(maxClique), "\n");
+	//Logger::log("toExplore list", ItemsetListToString(toExplore), "\n");
+	//Logger::log("maxClique list", ItemsetListToString(maxClique), "\n");
 
 	// build new toTraverse list and explore next branch
 	if (!toExplore.empty())
@@ -190,13 +275,13 @@ std::vector<Utils::Itemset> TreeNode::computeMinimalTransversals(const std::vect
 			auto ftr = std::move(futures.back());
 			futures.pop_back();
 			// wait here all tasks to finish (barrier), corresponding to all the children tasks executed in parallel
-			std::vector<Utils::Itemset>&& child_mt = ftr.get();
+			ItemsetList&& child_mt = ftr.get();
 			std::copy(child_mt.begin(), child_mt.end(), std::back_inserter(graph_mt));
 		}
 
-		//std::for_each(futures.begin(), futures.end(), [&graph_mt](std::future<std::vector<Utils::Itemset>>& future) {
+		//std::for_each(futures.begin(), futures.end(), [&graph_mt](std::future<ItemsetList>& future) {
 		//	// wait here all tasks to finish (barrier), corresponding to all the children tasks executed in parallel
-		//	std::vector<Utils::Itemset> child_mt = future.get();
+		//	ItemsetList child_mt = future.get();
 		//	std::copy(child_mt.begin(), child_mt.end(), std::back_inserter(graph_mt));
 		//});
 	}
@@ -217,3 +302,5 @@ std::vector<Utils::Itemset> TreeNode::computeMinimalTransversals(const std::vect
 
 	return graph_mt;
 }
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------- //

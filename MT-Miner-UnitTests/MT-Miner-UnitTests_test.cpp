@@ -23,22 +23,22 @@ namespace MTMinerUnitTests_test
 
 			// allocate miner
 			MT_Miner miner(true);
-			std::vector<Utils::Itemset> toTraverse;
+			std::vector<Itemset> toTraverse;
 			miner.init(hypergraph, toTraverse);
 
-			Utils::Itemset item1{ 1 };
+			Itemset item1{ 1 };
 			int disjonctifSupport = miner.computeDisjonctifSupport(item1);
 			Assert::AreEqual(1, disjonctifSupport);
 
-			Utils::Itemset item2{ 1, 2 };
+			Itemset item2{ 1, 2 };
 			disjonctifSupport = miner.computeDisjonctifSupport(item2);
 			Assert::AreEqual(2, disjonctifSupport);
 
-			Utils::Itemset item3{ 1, 2, 3 };
+			Itemset item3{ 1, 2, 3 };
 			disjonctifSupport = miner.computeDisjonctifSupport(item3);
 			Assert::AreEqual(3, disjonctifSupport);
 
-			Utils::Itemset item4{ 1, 2, 3, 4 };
+			Itemset item4{ 1, 2, 3, 4 };
 			disjonctifSupport = miner.computeDisjonctifSupport(item4);
 			Assert::AreEqual(4, disjonctifSupport);
 		}
@@ -50,11 +50,11 @@ namespace MTMinerUnitTests_test
 			Assert::AreEqual(true, parserResult);
 
 			MT_Miner miner(true);
-			std::vector<Utils::Itemset> toTraverse;
+			std::vector<Itemset> toTraverse;
 			miner.init(parser.getHypergraph(), toTraverse);
 
 			// compute minimal transversals
-			std::vector<Utils::Itemset>&& minimalTransversals = miner.computeMinimalTransversals(std::move(toTraverse));
+			std::vector<Itemset>&& minimalTransversals = miner.computeMinimalTransversals(std::move(toTraverse));
 			//minimalTransversals = Utils::sortVectorOfItemset(minimalTransversals);
 			Assert::AreEqual(6, static_cast<int>(minimalTransversals.size()));
 		}

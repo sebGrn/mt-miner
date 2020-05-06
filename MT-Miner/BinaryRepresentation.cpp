@@ -26,7 +26,7 @@ BinaryRepresentation::BinaryRepresentation(const FormalContext& context)
 };
 
 // return true if element is essential
-bool BinaryRepresentation::isEssential(const Utils::Itemset& itemset)
+bool BinaryRepresentation::isEssential(const Itemset& itemset)
 {
 	START_PROFILING(__func__)
 
@@ -87,7 +87,7 @@ bool BinaryRepresentation::isEssential(const Utils::Itemset& itemset)
 	return isEssential;
 }
 
-unsigned int BinaryRepresentation::computeDisjonctifSupport(const Utils::Itemset& pattern) const
+unsigned int BinaryRepresentation::computeDisjonctifSupport(const Itemset& pattern) const
 {
 	START_PROFILING(__func__)
 
@@ -126,7 +126,7 @@ unsigned int BinaryRepresentation::computeDisjonctifSupport(const Utils::Itemset
 	return disSupp;
 };
 
-bool BinaryRepresentation::compareItemsets(const Utils::Itemset& itemset1, const Utils::Itemset& itemset2) const
+bool BinaryRepresentation::compareItemsets(const Itemset& itemset1, const Itemset& itemset2) const
 {
 	START_PROFILING(__func__)
 
@@ -194,7 +194,7 @@ unsigned int BinaryRepresentation::buildCloneList()
 	return clonedBitsetIndexes.size();
 };
 
-bool BinaryRepresentation::containsAClone(const Utils::Itemset& itemset) const
+bool BinaryRepresentation::containsAClone(const Itemset& itemset) const
 {
 	START_PROFILING(__func__)
 	for (auto it = clonedBitsetIndexes.begin(); it != clonedBitsetIndexes.end(); it++)
@@ -211,7 +211,7 @@ bool BinaryRepresentation::containsAClone(const Utils::Itemset& itemset) const
 }
 
 // 
-bool BinaryRepresentation::containsOriginals(const Utils::Itemset& itemset, std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes) const
+bool BinaryRepresentation::containsOriginals(const Itemset& itemset, std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes) const
 {
 	START_PROFILING(__func__)
 	originalClonedIndexes.clear();

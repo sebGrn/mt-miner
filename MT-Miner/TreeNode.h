@@ -30,16 +30,16 @@ private:
 	std::vector<std::shared_ptr<TreeNode>> children;
 
 	// https://www.youtube.com/watch?v=2Xad9bCYbJE&list=PL1835A90FC78FF8BE&index=6
-	std::vector<std::future<std::vector<Utils::Itemset>>> futures;
+	std::vector<std::future<ItemsetList>> futures;
 
 private:
-	void buildClonedCombinaison(const Utils::Itemset& currentItem, std::vector<Utils::Itemset>& clonedCombination, const std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes);
+	void buildClonedCombinaison(const Itemset& currentItem, ItemsetList& clonedCombination, const std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes);
 
 	/// compute maxClique list, toExplore list and mt list
 	/// update graph_mt with new minimal transversal itemset
-	void updateListsFromToTraverse(const std::vector<Utils::Itemset>& toTraverse, std::vector<Utils::Itemset>& maxClique, std::vector<Utils::Itemset>& toExplore, std::vector<Utils::Itemset>& graph_mt);
+	void updateListsFromToTraverse(const ItemsetList& toTraverse, ItemsetList& maxClique, ItemsetList& toExplore, ItemsetList& graph_mt);
 
-	void exploreNextBranch(const std::vector<Utils::Itemset>& maxClique, const std::vector<Utils::Itemset>& toExplore, std::vector<Utils::Itemset>& graph_mt);
+	void exploreNextBranch(const ItemsetList& maxClique, const ItemsetList& toExplore, ItemsetList& graph_mt);
 	
 public:
 	TreeNode(bool useCloneOptimization, const std::shared_ptr<BinaryRepresentation>& binaryRepresentation);
@@ -47,7 +47,9 @@ public:
 
 	/// recursive function, trasvere treen node to compute minimal transversals for binary representation
 	/// @param toTraverse transversal itemset list
-	std::vector<Utils::Itemset> computeMinimalTransversals(const std::vector<Utils::Itemset> & toTraverse);
+	ItemsetList computeMinimalTransversals_recursive(const ItemsetList & toTraverse);
+
+	ItemsetList computeMinimalTransversals_iterative(const ItemsetList& toTraverse);
 
 	unsigned long long getTotalChildren() const
 	{
