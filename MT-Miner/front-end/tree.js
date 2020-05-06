@@ -4,9 +4,9 @@ $.getJSON('tree-data.json', function(treeData) {
 
     // set the margin of the tree
     var margin = {
-        top: 50, 
+        top: 20, 
         right: 50, 
-        bottom: 50, 
+        bottom: 20, 
         left: 50
     };
 
@@ -82,6 +82,29 @@ $.getJSON('tree-data.json', function(treeData) {
             d._children.forEach(collapse);
             d.children = null;
         }
+    }
+
+    function uncollapse(d) {
+        if(d._children) {
+            d.children = d._children;
+            d.children.forEach(uncollapse);
+            d._children = null;
+        }
+        else {
+            if(d.children) {
+                d.children.forEach(uncollapse);
+            }
+        }
+    }
+
+    function collapseAll() {
+        collapse(root);
+        update(root);
+    }
+
+    function uncollapseAll() {
+        uncollapse(root);
+        update(root);
     }
 
     function update(source) {
@@ -259,5 +282,7 @@ $.getJSON('tree-data.json', function(treeData) {
     }
     // resize tree on window resize
     window.addEventListener("resize", resize);
+    document.getElementById("collapse").addEventListener("click", collapseAll);
+    document.getElementById("uncollapse").addEventListener("click", uncollapseAll);
     
 });
