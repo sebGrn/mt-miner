@@ -194,6 +194,7 @@ int main(int argc, char* argv[])
 			// add front-end tree leaves  
 			std::string name = Utils::itemsetToString(elt);
 			name = name.substr(1, name.length() - 2);
+			name = "*" + name + +"*";
 			std::shared_ptr<TreeNode> node = std::make_shared<TreeNode>(name);
 			tree->addChild(*node);
 		});

@@ -18,6 +18,11 @@ void TreeNode::addRoot(TreeNode& _child)
 void TreeNode::addChild(TreeNode& _child)
 {
 	std::string _name = _child.getName();
+	if (_name.at(0) == '*')
+	{
+		_name = _name.substr(1, _name.length() - 2);
+		_name = _name;
+	}
 	if (_name.substr(0, _name.find_last_of(",")) == this->getName())
 	{
 		children.push_back(_child);

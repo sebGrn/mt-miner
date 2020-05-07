@@ -172,7 +172,19 @@ $.getJSON('tree-data.json', function(treeData) {
         nodeUpdate.select('circle.node')
         .attr('r', 10)
         .style("fill", function(d) {
-            return d._children ? color = "lightsteelblue" : color = "#fff";
+            var color;
+            if(d._children) {
+                color = "lightsteelblue";
+            }
+            else {
+                if(d.data.name[0] == '*') {
+                    color = "DarkSeaGreen";
+                }
+                else {
+                    color = "#fff"
+                }
+            }
+            return color;
         })
         .style("stroke", function(d) {
             var color;
