@@ -105,6 +105,10 @@ void TreeNode::updateListsFromToTraverse(const std::vector<Utils::Itemset>& toTr
 	END_PROFILING(__func__)
 }
 
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
 void TreeNode::exploreNextBranch(const std::vector<Utils::Itemset>& maxClique, const std::vector<Utils::Itemset>& toExplore, std::vector<Utils::Itemset>& graph_mt)
 {
 	START_PROFILING(__func__)
@@ -145,12 +149,12 @@ void TreeNode::exploreNextBranch(const std::vector<Utils::Itemset>& maxClique, c
 				// create thread for 1st branch 
 				nbRunningThread++;
 				std::cout << BLUE << "launch thead " << nbRunningThread << RESET << std::endl;
-				futures.push_back(std::async(&TreeNode::computeMinimalTransversals, node, std::move(newToTraverse)));
+				futures.push_back(std::async(&TreeNode::computeMinimalTransversals_recursive, node, std::move(newToTraverse)));
 			}
 			else
 			{
 				// compute minimal transversals for the branch
-				std::vector<Utils::Itemset>&& graph_mt_child = node->computeMinimalTransversals(std::move(newToTraverse));
+				std::vector<Utils::Itemset>&& graph_mt_child = node->computeMinimalTransversals_recursive(std::move(newToTraverse));
 				std::copy(graph_mt_child.begin(), graph_mt_child.end(), std::back_inserter(graph_mt));
 			}
 		}
@@ -158,7 +162,7 @@ void TreeNode::exploreNextBranch(const std::vector<Utils::Itemset>& maxClique, c
 	END_PROFILING(__func__)
 }
 
-std::vector<Utils::Itemset> TreeNode::computeMinimalTransversals(const std::vector<Utils::Itemset>& toTraverse)
+std::vector<Utils::Itemset> TreeNode::computeMinimalTransversals_recursive(const std::vector<Utils::Itemset>& toTraverse)
 {
 	START_PROFILING(__func__)
 
@@ -217,3 +221,5 @@ std::vector<Utils::Itemset> TreeNode::computeMinimalTransversals(const std::vect
 
 	return graph_mt;
 }
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
