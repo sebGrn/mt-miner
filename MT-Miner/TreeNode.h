@@ -49,6 +49,8 @@ public:
 	/// @param toTraverse transversal itemset list
 	std::vector<Utils::Itemset> computeMinimalTransversals_recursive(const std::vector<Utils::Itemset> & toTraverse);
 
+	std::vector<Utils::Itemset> computeMinimalTransversals_iterative(const std::vector<Utils::Itemset>& toTraverse);
+
 	unsigned long long getTotalChildren() const
 	{
 		return nbTotalChildren;

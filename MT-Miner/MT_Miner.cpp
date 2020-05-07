@@ -85,6 +85,7 @@ std::vector<Utils::Itemset> MT_Miner::computeMinimalTransversals(const std::vect
 
 	// compute all minimal transversal from the root node
 	std::vector<Utils::Itemset>&& graph_mt = rootNode.computeMinimalTransversals_recursive(toTraverse);
+	//std::vector<Utils::Itemset>&& graph_mt = rootNode.computeMinimalTransversals_iterative(toTraverse);
 	
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
 	Logger::log(YELLOW, "computing minimal transversals done in ", duration, " ms\n", RESET);
