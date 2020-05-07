@@ -47,9 +47,9 @@ public:
 
 	/// recursive function, trasvere treen node to compute minimal transversals for binary representation
 	/// @param toTraverse transversal itemset list
-	ItemsetList computeMinimalTransversals_recursive(const ItemsetList & toTraverse);
+	std::vector<Itemset> computeMinimalTransversals_recursive(const std::vector<Itemset> & toTraverse);
 
-	ItemsetList computeMinimalTransversals_iterative(const ItemsetList& toTraverse);
+	std::vector<Itemset> computeMinimalTransversals_iterative(const std::vector<Itemset>& toTraverse);
 
 	unsigned long long getTotalChildren() const
 	{

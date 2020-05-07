@@ -13,7 +13,7 @@ MT_Miner::~MT_Miner()
 
 }
 
-void MT_Miner::init(const std::shared_ptr<HyperGraph>& hypergraph, ItemsetList& toTraverse, bool oneIndexedBase)
+void MT_Miner::init(const std::shared_ptr<HyperGraph>& hypergraph, std::vector<Itemset>& toTraverse, bool oneIndexedBase)
 {
 	START_PROFILING(__func__)
 	// build formal context from hypergraph
@@ -58,7 +58,7 @@ void MT_Miner::init(const std::shared_ptr<HyperGraph>& hypergraph, ItemsetList& 
 }
 
 
-ItemsetList MT_Miner::computeMinimalTransversals(const ItemsetList && toTraverse)
+std::vector<Itemset> MT_Miner::computeMinimalTransversals(const std::vector<Itemset> && toTraverse)
 {
 	// lambda function called during parsing every minutes
 	auto callback = [](bool& done, const TreeNode& treeNode) {
@@ -78,15 +78,14 @@ ItemsetList MT_Miner::computeMinimalTransversals(const ItemsetList && toTraverse
 	auto beginTime = std::chrono::system_clock::now();
 
 	// create a graph, then compute minimal transversal from the binary representation
-	this->useCloneOptimization = false;
 	TreeNode rootNode(this->useCloneOptimization, this->binaryRepresentation);
 
 	// instanciate new thead for regular log
 	std::thread thread(callback, std::ref(this->computeMtDone), std::ref(rootNode));
 
 	// compute all minimal transversal from the root node
-	//ItemsetList&& graph_mt = rootNode.computeMinimalTransversals_recursive(toTraverse);
-	ItemsetList&& graph_mt = rootNode.computeMinimalTransversals_iterative(toTraverse);
+	//std::vector<Itemset>&& graph_mt = rootNode.computeMinimalTransversals_recursive(toTraverse);
+	std::vector<Itemset>&& graph_mt = rootNode.computeMinimalTransversals_iterative(toTraverse);
 	
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
 	Logger::log(YELLOW, "computing minimal transversals done in ", duration, " ms\n", RESET);

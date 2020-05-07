@@ -17,7 +17,7 @@ TreeNode::~TreeNode()
 {
 }
 
-void TreeNode::buildClonedCombinaison(const Itemset& currentItem, ItemsetList& clonedCombination, const std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes)
+void TreeNode::buildClonedCombinaison(const Itemset& currentItem, std::vector<Itemset>& clonedCombination, const std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes)
 {
 	START_PROFILING(__func__)
 	for (auto it = originalClonedIndexes.begin(); it != originalClonedIndexes.end(); it++)
@@ -105,10 +105,12 @@ void TreeNode::updateListsFromToTraverse(const ItemsetList& toTraverse, ItemsetL
 	END_PROFILING(__func__)
 }
 
-// ---------------------------------------------------------------------------------------------------------------------------------------------------------- //
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
-ItemsetList TreeNode::computeMinimalTransversals_iterative(const ItemsetList& toTraverse)
+std::vector<Itemset> TreeNode::computeMinimalTransversals_iterative(const std::vector<Itemset>& toTraverse)
 {
+	typedef std::vector<Itemset> ItemsetList;
+
 	START_PROFILING(__func__)
 
 	// test trivial case
@@ -185,10 +187,10 @@ ItemsetList TreeNode::computeMinimalTransversals_iterative(const ItemsetList& to
 		}
 	}
 	END_PROFILING(__func__)
-	return graph_mt;
+		return graph_mt;
 }
 
-// ---------------------------------------------------------------------------------------------------------------------------------------------------------- //
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
 void TreeNode::exploreNextBranch(const ItemsetList& maxClique, const ItemsetList& toExplore, ItemsetList& graph_mt)
 {
@@ -235,7 +237,7 @@ void TreeNode::exploreNextBranch(const ItemsetList& maxClique, const ItemsetList
 			else
 			{
 				// compute minimal transversals for the branch
-				ItemsetList&& graph_mt_child = node->computeMinimalTransversals_recursive(std::move(newToTraverse));
+				std::vector<Itemset>&& graph_mt_child = node->computeMinimalTransversals_recursive(std::move(newToTraverse));
 				std::copy(graph_mt_child.begin(), graph_mt_child.end(), std::back_inserter(graph_mt));
 			}
 		}
@@ -243,7 +245,7 @@ void TreeNode::exploreNextBranch(const ItemsetList& maxClique, const ItemsetList
 	END_PROFILING(__func__)
 }
 
-ItemsetList TreeNode::computeMinimalTransversals_recursive(const ItemsetList& toTraverse)
+std::vector<Itemset> TreeNode::computeMinimalTransversals_recursive(const std::vector<Itemset>& toTraverse)
 {
 	START_PROFILING(__func__)
 
@@ -303,4 +305,4 @@ ItemsetList TreeNode::computeMinimalTransversals_recursive(const ItemsetList& to
 	return graph_mt;
 }
 
-// ---------------------------------------------------------------------------------------------------------------------------------------------------------- //
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
