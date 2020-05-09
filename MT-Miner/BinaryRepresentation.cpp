@@ -7,6 +7,7 @@ BinaryRepresentation::BinaryRepresentation(const FormalContext& context)
 {
 	this->objectCount = context.getObjectCount();
 	this->itemCount = context.getItemCount();
+	this->nbItemsetNotAddedFromClone = 0;
 
 	//#pragma omp parallel for
 	for (int j = 0; j < this->itemCount; j++)			// 8 on test.txt
@@ -24,6 +25,12 @@ BinaryRepresentation::BinaryRepresentation(const FormalContext& context)
 		this->binaryRepresentation[currentKey] = bitset;		
 	}
 };
+
+BinaryRepresentation::~BinaryRepresentation()
+{
+	//std::cout << "nb out " << this->nbItemsetNotAddedFromClone << std::endl;
+}
+
 
 // return true if element is essential
 bool BinaryRepresentation::isEssential(const Itemset& itemset)
@@ -194,7 +201,7 @@ unsigned int BinaryRepresentation::buildCloneList()
 	return clonedBitsetIndexes.size();
 };
 
-bool BinaryRepresentation::containsAClone(const Itemset& itemset) const
+bool BinaryRepresentation::containsAClone(const Itemset& itemset)
 {
 	START_PROFILING(__func__)
 	for (auto it = clonedBitsetIndexes.begin(); it != clonedBitsetIndexes.end(); it++)
@@ -203,6 +210,7 @@ bool BinaryRepresentation::containsAClone(const Itemset& itemset) const
 		if (std::find(itemset.begin(), itemset.end(), it->second) != itemset.end())
 		{
 			END_PROFILING(__func__)
+			this->nbItemsetNotAddedFromClone++;
 			return true;
 		}
 	}

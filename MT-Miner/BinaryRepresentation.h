@@ -13,14 +13,16 @@
 #include "Bitset.h"
 #include "FormalContext.h"
 
+/** 
+ * a binary representation is a formal context representation in columns
+ * each vector contains the attributes/items boolean values
+ * the index of the map is the item number
+ * this representation is usefull to compute disjonctif support easyly (with a OR operator)
+ */
 class BinaryRepresentation
 {
 private:
-	/// a binary representation is a formal context representation in columns
-	/// each vector contains the attributes/items boolean values
-	/// the index of the map is the item number
-	/// this representation is usefull to compute disjonctif support easyly (with a OR operator)
-	///  - TODO: not sure if a map is usefull here
+	///  key/value definition of a binary represention (key as the attribute id, value as the bitset)
 	std::map<unsigned int, Bitset> binaryRepresentation;
 
 	/// number of objects/lines
@@ -28,6 +30,9 @@ private:
 
 	/// number of items/attributes/columns
 	unsigned int itemCount;
+
+	/// count number of cloned itemsets has beend removed from mt computation
+	unsigned int nbItemsetNotAddedFromClone;
 
 	/// pair of original index, clone index
 	std::vector<std::pair<unsigned int, unsigned int>> clonedBitsetIndexes;
@@ -39,13 +44,15 @@ public:
 	/// build binary representation from formal context
 	BinaryRepresentation(const FormalContext& context);
 	///
+	~BinaryRepresentation();
+	///
 	unsigned int computeDisjonctifSupport(const Itemset& pattern) const;
 	/// return true if element is essential
 	bool isEssential(const Itemset& itemsOfPattern);
 	///
 	unsigned int buildCloneList();
 	///
-	bool containsAClone(const Itemset& itemset) const;
+	bool containsAClone(const Itemset& itemset);
 	///
 	bool containsOriginals(const Itemset& itemset, std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes) const;
 

@@ -57,10 +57,9 @@ void MT_Miner::init(const std::shared_ptr<HyperGraph>& hypergraph, std::vector<I
 	END_PROFILING(__func__)
 }
 
-
-std::vector<Itemset> MT_Miner::computeMinimalTransversals(const std::vector<Itemset> && toTraverse)
+ItemsetList MT_Miner::computeMinimalTransversals(const std::vector<Itemset>& toTraverse)
 {
-	// lambda function called during parsing every minutes
+	// lambda function called during parsing every 20 seconds
 	auto callback = [](bool& done, const TreeNode& treeNode) {
 		
 		const int secondsToWait = 20;
@@ -68,8 +67,10 @@ std::vector<Itemset> MT_Miner::computeMinimalTransversals(const std::vector<Item
 		while (!done)
 		{
 			if (n)
-				std::cout << CYAN << "computing minimal transversals in progress : " << secondsToWait * n << " seconds, " << treeNode.getTotalChildren() << " nodes created" << RESET << std::endl;
-				
+				std::cout << CYAN << "computing minimal transversals in progress : " << secondsToWait * n << " seconds, "
+				<< treeNode.getTotalChildren() << " nodes created, "
+				<< treeNode.getTotalThread() << " threads created"
+				<< RESET << std::endl;
 			std::this_thread::sleep_for(std::chrono::seconds(secondsToWait));
 			n++;
 		}
@@ -84,9 +85,10 @@ std::vector<Itemset> MT_Miner::computeMinimalTransversals(const std::vector<Item
 	std::thread thread(callback, std::ref(this->computeMtDone), std::ref(rootNode));
 
 	// compute all minimal transversal from the root node
-	//std::vector<Itemset>&& graph_mt = rootNode.computeMinimalTransversals_recursive(toTraverse);
-	std::vector<Itemset>&& graph_mt = rootNode.computeMinimalTransversals_iterative(toTraverse);
+	std::vector<Itemset>&& graph_mt = rootNode.computeMinimalTransversals_recursive(toTraverse);
+	//std::vector<Itemset>&& graph_mt = rootNode.computeMinimalTransversals_iterative(toTraverse);
 	
+	// print timer
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
 	Logger::log(YELLOW, "computing minimal transversals done in ", duration, " ms\n", RESET);
 	for(auto it = Profiler::functionDurationMap.begin(); it != Profiler::functionDurationMap.end(); it++)

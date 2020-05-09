@@ -15,6 +15,11 @@
 #include "TreeNode.h"
 #include "Logger.h"
 
+/**
+ * Minimal transversals miner
+ * owns the binary represention
+ * create the graphnode that will explore the hypergrapho 
+ */
 class MT_Miner
 {
 private:
@@ -34,7 +39,7 @@ public:
 	void init(const std::shared_ptr<HyperGraph>& hypergraph, ItemsetList& toTraverse, bool oneIndexedBase = true);
 
 	///
-	ItemsetList computeMinimalTransversals(const ItemsetList&& toTraverse);
+	ItemsetList computeMinimalTransversals(const ItemsetList& toTraverse);
 
 	///
 	unsigned int computeDisjonctifSupport(const Itemset& pattern) const

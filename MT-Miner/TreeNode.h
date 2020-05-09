@@ -8,10 +8,14 @@
 #include <mutex>
 #include <atomic>
 #include <future>
+#include <numeric>
 
 #include "utils.h"
 #include "BinaryRepresentation.h"
 
+/**
+ * Minimal tranversals are found while running through a tree which is dynamically build
+ */
 class TreeNode
 {
 private:
@@ -33,7 +37,7 @@ private:
 	std::vector<std::future<ItemsetList>> futures;
 
 private:
-	void buildClonedCombinaison(const Itemset& currentItem, ItemsetList& clonedCombination, const std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes);
+	void buildClonedCombination(const Itemset& currentItem, ItemsetList& clonedCombination, const std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes);
 
 	/// compute maxClique list, toExplore list and mt list
 	/// update graph_mt with new minimal transversal itemset
@@ -45,15 +49,23 @@ public:
 	TreeNode(bool useCloneOptimization, const std::shared_ptr<BinaryRepresentation>& binaryRepresentation);
 	~TreeNode();
 
-	/// recursive function, trasvere treen node to compute minimal transversals for binary representation
-	/// @param toTraverse transversal itemset list
+	/// recursive method, going through tree representation 
+	/// computes minimal transversals for binary representation
 	std::vector<Itemset> computeMinimalTransversals_recursive(const std::vector<Itemset> & toTraverse);
 
+	/// iterative method, for debug purpose only
+	/// computes minimal transversals for binary representation
 	std::vector<Itemset> computeMinimalTransversals_iterative(const std::vector<Itemset>& toTraverse);
 
 	unsigned long long getTotalChildren() const
 	{
 		return nbTotalChildren;
 	};
+
+	unsigned int getTotalThread() const
+	{
+		return nbRunningThread;
+	};
+	
 };
 

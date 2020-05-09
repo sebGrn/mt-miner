@@ -17,7 +17,7 @@ TreeNode::~TreeNode()
 {
 }
 
-void TreeNode::buildClonedCombinaison(const Itemset& currentItem, std::vector<Itemset>& clonedCombination, const std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes)
+void TreeNode::buildClonedCombination(const Itemset& currentItem, std::vector<Itemset>& clonedCombination, const std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes)
 {
 	START_PROFILING(__func__)
 	for (auto it = originalClonedIndexes.begin(); it != originalClonedIndexes.end(); it++)
@@ -33,7 +33,7 @@ void TreeNode::buildClonedCombinaison(const Itemset& currentItem, std::vector<It
 			{
 				clonedCombination.push_back(clonedCurrentItem);
 				// recurse on new combination
-				buildClonedCombinaison(clonedCurrentItem, clonedCombination, originalClonedIndexes);
+				buildClonedCombination(clonedCurrentItem, clonedCombination, originalClonedIndexes);
 			}
 		}
 	}
@@ -68,11 +68,7 @@ void TreeNode::updateListsFromToTraverse(const ItemsetList& toTraverse, ItemsetL
 				{
 					ItemsetList clonedCombination;
 					buildClonedCombinaison(currentItem, clonedCombination, originalClonedIndexes);
-
-					for (auto it = clonedCombination.begin(); it != clonedCombination.end(); it++)
-					{
-						graph_mt.push_back(*it);
-					}
+					std::copy(clonedCombination.begin(), clonedCombination.end(), std::back_inserter(graph_mt));
 				}
 			}
 		}
@@ -142,8 +138,25 @@ std::vector<Itemset> TreeNode::computeMinimalTransversals_iterative(const std::v
 		iterativeTailList.maxCliqueTailList.push_back(maxClique);
 	}
 
+	auto timer1 = std::chrono::system_clock::now();
+	//auto timer2 = std::chrono::system_clock::now();
+	//auto timer3 = std::chrono::system_clock::now();
+	//auto duration2 = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timer2).count();
+	//auto duration3 = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timer3).count();
+
+	unsigned int nbIter = 0;
+
+	std::vector<long long> durationList1;
+	std::vector<long long> durationList2;
+	std::vector<long long> durationList3;
+
 	while (!iterativeTailList.toExploreTailList.empty())
 	{
+		//auto timer2 = std::chrono::system_clock::now();
+		//auto timer3 = std::chrono::system_clock::now();
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
 		ItemsetList toExplore = iterativeTailList.toExploreTailList.back();
 		iterativeTailList.toExploreTailList.pop_back();
 
@@ -154,6 +167,11 @@ std::vector<Itemset> TreeNode::computeMinimalTransversals_iterative(const std::v
 		// combine toExplore (left part) with maxClique list (right part) into a combined list
 		ItemsetList combinedItemsetList = toExplore;
 		combinedItemsetList.insert(combinedItemsetList.end(), maxClique.begin(), maxClique.end());
+
+		//durationList2.push_back(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timer2).count());
+
+		
+		//std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
 		// loop on candidates from toExplore list only
 		for (int i = 0; i < lastIndexToTest; i++)
@@ -166,7 +184,7 @@ std::vector<Itemset> TreeNode::computeMinimalTransversals_iterative(const std::v
 			{
 				assert(j < combinedItemsetList.size());
 				Itemset toCombinedRight = combinedItemsetList[j];
-				Itemset&& combinedItemset = Utils::combineItemset(toCombinedLeft, toCombinedRight);
+				Itemset && combinedItemset = Utils::combineItemset(toCombinedLeft, toCombinedRight);
 
 				// check if combined item is containing a clone (if true, do not compute the minimal transverals) and if combined itemset is essential
 				if (!this->binaryRepresentation->containsAClone(combinedItemset) && binaryRepresentation->isEssential(combinedItemset))
@@ -178,16 +196,33 @@ std::vector<Itemset> TreeNode::computeMinimalTransversals_iterative(const std::v
 				// compute minimal transversals for the branch
 				this->updateListsFromToTraverse(newToTraverse, maxClique, toExplore, graph_mt);
 
+				//std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
 				if (!toExplore.empty())
 				{
 					iterativeTailList.toExploreTailList.push_back(toExplore);
 					iterativeTailList.maxCliqueTailList.push_back(maxClique);
 				}
 			}
-		}
+		}		
+		//durationList3.push_back(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timer3).count());
+	
+		nbIter++;
 	}
+
+	//int duration1 = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timer1).count();
+	//int duration2 = std::accumulate(durationList2.begin(), durationList2.end(), 0);
+	//int duration3 = std::accumulate(durationList3.begin(), durationList3.end(), 0);
+	//double avg = duration3 / (double)durationList3.size();
+
+	//Logger::log(RED, "duration1 ", duration1, " ms\n", RESET);
+	//Logger::log(RED, "duration2 ", duration2, " ms\n", RESET);
+	//Logger::log(RED, "duration3 ", duration3, " ms\n", RESET);
+	//Logger::log(RED, "avg ", avg, " ms\n", RESET);
+	Logger::log(RED, "nbIter ", nbIter, "\n", RESET);
+	
 	END_PROFILING(__func__)
-		return graph_mt;
+	return graph_mt;
 }
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
@@ -229,14 +264,14 @@ void TreeNode::exploreNextBranch(const ItemsetList& maxClique, const ItemsetList
 			// recurse
 			if (this->useMultitheadOptimization && nbRunningThread < processorCount)
 			{
-				// create thread for 1st branch 
+				// create thread for the top nodes only
 				nbRunningThread++;
-				std::cout << BLUE << "launch thead " << nbRunningThread << RESET << std::endl;
+				//std::cout << BLUE << "launch thead " << nbRunningThread << RESET << std::endl;
 				futures.push_back(std::async(&TreeNode::computeMinimalTransversals_recursive, node, std::move(newToTraverse)));
 			}
 			else
 			{
-				// compute minimal transversals for the branch
+				// do not create a thread for each node, compute minimal transversals for the branch
 				std::vector<Itemset>&& graph_mt_child = node->computeMinimalTransversals_recursive(std::move(newToTraverse));
 				std::copy(graph_mt_child.begin(), graph_mt_child.end(), std::back_inserter(graph_mt));
 			}
