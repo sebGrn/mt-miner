@@ -30,7 +30,12 @@ void Tree::addChild(TreeNode& _child)
     root->addChild(_child);
 }
 
-void Tree::saveJSONTree(std::string& _filename)
+void Tree::addLeaf(TreeNode& _leaf)
+{
+    root->addLeaf(_leaf);
+}
+
+void Tree::saveJSONTree(std::string _filename)
 {
     std::cout << "saving JSON tree in : " << _filename << std::endl;
     std::ofstream outputStream;

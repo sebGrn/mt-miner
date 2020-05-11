@@ -16,6 +16,7 @@ public:
 	static std::shared_ptr<Tree> getTree();
 	void addRoot(TreeNode& _root);
 	void addChild(TreeNode& _child);
-	void saveJSONTree(std::string& _filename);
+	void addLeaf(TreeNode& _leaf);
+	void saveJSONTree(std::string _filename);
 };
 

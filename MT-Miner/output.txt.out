@@ -80,7 +80,9 @@ maxClique list{{9,5,8},{9,5,1},{9,5,3},{9,5,4},{9,5,6},{9,5,7}}
 new toTraverse list{{9,5,2,8},{9,5,2,3},{9,5,2,4},{9,5,2,6},{9,5,2,7}}
 ----------------------------------------------------------
 --> minimalTraversal list, add : {9,5,2,8}, size : 1
---> minimalTraversal list, add : {9,5,2,3}, size : 2
+--> minimalTraversal list (clone), add : {10,5,2,8}, size : 2
+--> minimalTraversal list, add : {9,5,2,3}, size : 3
+--> minimalTraversal list (clone), add : {10,5,2,3}, size : 4
 disjonctive support for element {9,5,2,4} : 6
 --> maxClique list : {{9,5,2,4}}
 disjonctive support for element {9,5,2,4,6} : 7
@@ -93,11 +95,13 @@ maxClique list{{9,5,2,4}}
 {9,5,2,6,7} is not essential
 new toTraverse list{{9,5,2,6,4}}
 ----------------------------------------------------------
---> minimalTraversal list, add : {9,5,2,6,4}, size : 3
+--> minimalTraversal list, add : {9,5,2,6,4}, size : 5
+--> minimalTraversal list (clone), add : {10,5,2,6,4}, size : 6
 toExplore list is empty, end of the branch
 new toTraverse list{{9,5,2,7,4}}
 ----------------------------------------------------------
---> minimalTraversal list, add : {9,5,2,7,4}, size : 4
+--> minimalTraversal list, add : {9,5,2,7,4}, size : 7
+--> minimalTraversal list (clone), add : {10,5,2,7,4}, size : 8
 toExplore list is empty, end of the branch
 new toTraverse list{{9,5,12,8},{9,5,12,1},{9,5,12,3},{9,5,12,4},{9,5,12,6},{9,5,12,7}}
 ----------------------------------------------------------
@@ -105,7 +109,10 @@ disjonctive support for element {9,5,12,8} : 6
 --> maxClique list : {{9,5,12,8}}
 disjonctive support for element {9,5,12,8,1} : 7
 --> toExplore list : {{9,5,12,1}}
---> minimalTraversal list, add : {9,5,12,3}, size : 5
+--> minimalTraversal list, add : {9,5,12,3}, size : 9
+--> minimalTraversal list (clone), add : {10,5,12,3}, size : 10
+--> minimalTraversal list (clone), add : {10,5,13,3}, size : 11
+--> minimalTraversal list (clone), add : {9,5,13,3}, size : 12
 disjonctive support for element {9,5,12,8,4} : 6
 --> maxClique list : {{9,5,12,8},{9,5,12,4}}
 disjonctive support for element {9,5,12,8,4,6} : 6
@@ -117,7 +124,10 @@ toExplore list{{9,5,12,1}}
 maxClique list{{9,5,12,8},{9,5,12,4},{9,5,12,6},{9,5,12,7}}
 new toTraverse list{{9,5,12,1,8},{9,5,12,1,4},{9,5,12,1,6},{9,5,12,1,7}}
 ----------------------------------------------------------
---> minimalTraversal list, add : {9,5,12,1,8}, size : 6
+--> minimalTraversal list, add : {9,5,12,1,8}, size : 13
+--> minimalTraversal list (clone), add : {10,5,12,1,8}, size : 14
+--> minimalTraversal list (clone), add : {10,5,13,1,8}, size : 15
+--> minimalTraversal list (clone), add : {9,5,13,1,8}, size : 16
 disjonctive support for element {9,5,12,1,4} : 6
 --> maxClique list : {{9,5,12,1,4}}
 disjonctive support for element {9,5,12,1,4,6} : 7
@@ -130,11 +140,17 @@ maxClique list{{9,5,12,1,4}}
 {9,5,12,1,6,7} is not essential
 new toTraverse list{{9,5,12,1,6,4}}
 ----------------------------------------------------------
---> minimalTraversal list, add : {9,5,12,1,6,4}, size : 7
+--> minimalTraversal list, add : {9,5,12,1,6,4}, size : 17
+--> minimalTraversal list (clone), add : {10,5,12,1,6,4}, size : 18
+--> minimalTraversal list (clone), add : {10,5,13,1,6,4}, size : 19
+--> minimalTraversal list (clone), add : {9,5,13,1,6,4}, size : 20
 toExplore list is empty, end of the branch
 new toTraverse list{{9,5,12,1,7,4}}
 ----------------------------------------------------------
---> minimalTraversal list, add : {9,5,12,1,7,4}, size : 8
+--> minimalTraversal list, add : {9,5,12,1,7,4}, size : 21
+--> minimalTraversal list (clone), add : {10,5,12,1,7,4}, size : 22
+--> minimalTraversal list (clone), add : {10,5,13,1,7,4}, size : 23
+--> minimalTraversal list (clone), add : {9,5,13,1,7,4}, size : 24
 toExplore list is empty, end of the branch
 {9,8,7} is not essential
 new toTraverse list{{9,8,1},{9,8,2},{9,8,3},{9,8,4},{9,8,6},{9,8,12}}
@@ -159,7 +175,8 @@ new toTraverse list{{9,8,4,1},{9,8,4,2},{9,8,4,3},{9,8,4,12}}
 ----------------------------------------------------------
 disjonctive support for element {9,8,4,1} : 6
 --> maxClique list : {{9,8,4,1}}
---> minimalTraversal list, add : {9,8,4,2}, size : 9
+--> minimalTraversal list, add : {9,8,4,2}, size : 25
+--> minimalTraversal list (clone), add : {10,8,4,2}, size : 26
 disjonctive support for element {9,8,4,1,3} : 6
 --> maxClique list : {{9,8,4,1},{9,8,4,3}}
 disjonctive support for element {9,8,4,1,3,12} : 7
@@ -169,14 +186,21 @@ toExplore list{{9,8,4,12}}
 maxClique list{{9,8,4,1},{9,8,4,3}}
 new toTraverse list{{9,8,4,12,1},{9,8,4,12,3}}
 ----------------------------------------------------------
---> minimalTraversal list, add : {9,8,4,12,1}, size : 10
---> minimalTraversal list, add : {9,8,4,12,3}, size : 11
+--> minimalTraversal list, add : {9,8,4,12,1}, size : 27
+--> minimalTraversal list (clone), add : {10,8,4,12,1}, size : 28
+--> minimalTraversal list (clone), add : {10,8,4,13,1}, size : 29
+--> minimalTraversal list (clone), add : {9,8,4,13,1}, size : 30
+--> minimalTraversal list, add : {9,8,4,12,3}, size : 31
+--> minimalTraversal list (clone), add : {10,8,4,12,3}, size : 32
+--> minimalTraversal list (clone), add : {10,8,4,13,3}, size : 33
+--> minimalTraversal list (clone), add : {9,8,4,13,3}, size : 34
 toExplore list is empty, end of the branch
 new toTraverse list{{9,8,6,1},{9,8,6,2},{9,8,6,3},{9,8,6,12}}
 ----------------------------------------------------------
 disjonctive support for element {9,8,6,1} : 6
 --> maxClique list : {{9,8,6,1}}
---> minimalTraversal list, add : {9,8,6,2}, size : 12
+--> minimalTraversal list, add : {9,8,6,2}, size : 35
+--> minimalTraversal list (clone), add : {10,8,6,2}, size : 36
 disjonctive support for element {9,8,6,1,3} : 6
 --> maxClique list : {{9,8,6,1},{9,8,6,3}}
 disjonctive support for element {9,8,6,1,3,12} : 7
@@ -186,8 +210,14 @@ toExplore list{{9,8,6,12}}
 maxClique list{{9,8,6,1},{9,8,6,3}}
 new toTraverse list{{9,8,6,12,1},{9,8,6,12,3}}
 ----------------------------------------------------------
---> minimalTraversal list, add : {9,8,6,12,1}, size : 13
---> minimalTraversal list, add : {9,8,6,12,3}, size : 14
+--> minimalTraversal list, add : {9,8,6,12,1}, size : 37
+--> minimalTraversal list (clone), add : {10,8,6,12,1}, size : 38
+--> minimalTraversal list (clone), add : {10,8,6,13,1}, size : 39
+--> minimalTraversal list (clone), add : {9,8,6,13,1}, size : 40
+--> minimalTraversal list, add : {9,8,6,12,3}, size : 41
+--> minimalTraversal list (clone), add : {10,8,6,12,3}, size : 42
+--> minimalTraversal list (clone), add : {10,8,6,13,3}, size : 43
+--> minimalTraversal list (clone), add : {9,8,6,13,3}, size : 44
 toExplore list is empty, end of the branch
 {{9},{10},{11},{1},{2},{3},{4},{5},{6},{7},{8},{12},{13}} contains a clone, do not compute mt
 {11,13} contains a clone, do not compute mt
@@ -238,10 +268,10 @@ maxClique list{{11,4,6},{11,4,1},{11,4,3},{11,4,7},{11,4,8}}
 {11,4,2,1} is not essential
 new toTraverse list{{11,4,2,6},{11,4,2,3},{11,4,2,7},{11,4,2,8}}
 ----------------------------------------------------------
---> minimalTraversal list, add : {11,4,2,6}, size : 15
---> minimalTraversal list, add : {11,4,2,3}, size : 16
---> minimalTraversal list, add : {11,4,2,7}, size : 17
---> minimalTraversal list, add : {11,4,2,8}, size : 18
+--> minimalTraversal list, add : {11,4,2,6}, size : 45
+--> minimalTraversal list, add : {11,4,2,3}, size : 46
+--> minimalTraversal list, add : {11,4,2,7}, size : 47
+--> minimalTraversal list, add : {11,4,2,8}, size : 48
 toExplore list is empty, end of the branch
 new toTraverse list{{11,4,12,6},{11,4,12,1},{11,4,12,3},{11,4,12,7},{11,4,12,8}}
 ----------------------------------------------------------
@@ -249,7 +279,8 @@ disjonctive support for element {11,4,12,6} : 6
 --> maxClique list : {{11,4,12,6}}
 disjonctive support for element {11,4,12,6,1} : 7
 --> toExplore list : {{11,4,12,1}}
---> minimalTraversal list, add : {11,4,12,3}, size : 19
+--> minimalTraversal list, add : {11,4,12,3}, size : 49
+--> minimalTraversal list (clone), add : {11,4,13,3}, size : 50
 disjonctive support for element {11,4,12,6,7} : 6
 --> maxClique list : {{11,4,12,6},{11,4,12,7}}
 disjonctive support for element {11,4,12,6,7,8} : 6
@@ -259,9 +290,12 @@ toExplore list{{11,4,12,1}}
 maxClique list{{11,4,12,6},{11,4,12,7},{11,4,12,8}}
 new toTraverse list{{11,4,12,1,6},{11,4,12,1,7},{11,4,12,1,8}}
 ----------------------------------------------------------
---> minimalTraversal list, add : {11,4,12,1,6}, size : 20
---> minimalTraversal list, add : {11,4,12,1,7}, size : 21
---> minimalTraversal list, add : {11,4,12,1,8}, size : 22
+--> minimalTraversal list, add : {11,4,12,1,6}, size : 51
+--> minimalTraversal list (clone), add : {11,4,13,1,6}, size : 52
+--> minimalTraversal list, add : {11,4,12,1,7}, size : 53
+--> minimalTraversal list (clone), add : {11,4,13,1,7}, size : 54
+--> minimalTraversal list, add : {11,4,12,1,8}, size : 55
+--> minimalTraversal list (clone), add : {11,4,13,1,8}, size : 56
 toExplore list is empty, end of the branch
 {11,5,6} is not essential
 new toTraverse list{{11,5,1},{11,5,2},{11,5,3},{11,5,7},{11,5,8},{11,5,12}}
@@ -286,15 +320,16 @@ maxClique list{{11,5,1},{11,5,2},{11,5,7},{11,5,12}}
 {11,5,3,7} is not essential
 new toTraverse list{{11,5,3,2},{11,5,3,12}}
 ----------------------------------------------------------
---> minimalTraversal list, add : {11,5,3,2}, size : 23
---> minimalTraversal list, add : {11,5,3,12}, size : 24
+--> minimalTraversal list, add : {11,5,3,2}, size : 57
+--> minimalTraversal list, add : {11,5,3,12}, size : 58
+--> minimalTraversal list (clone), add : {11,5,3,13}, size : 59
 toExplore list is empty, end of the branch
 {11,5,8,7} is not essential
 new toTraverse list{{11,5,8,1},{11,5,8,2},{11,5,8,12}}
 ----------------------------------------------------------
 disjonctive support for element {11,5,8,1} : 6
 --> maxClique list : {{11,5,8,1}}
---> minimalTraversal list, add : {11,5,8,2}, size : 25
+--> minimalTraversal list, add : {11,5,8,2}, size : 60
 disjonctive support for element {11,5,8,1,12} : 7
 --> toExplore list : {{11,5,8,12}}
 ----------------------------------------------------------
@@ -302,7 +337,8 @@ toExplore list{{11,5,8,12}}
 maxClique list{{11,5,8,1}}
 new toTraverse list{{11,5,8,12,1}}
 ----------------------------------------------------------
---> minimalTraversal list, add : {11,5,8,12,1}, size : 26
+--> minimalTraversal list, add : {11,5,8,12,1}, size : 61
+--> minimalTraversal list (clone), add : {11,5,8,13,1}, size : 62
 toExplore list is empty, end of the branch
 {11,6,7} is not essential
 new toTraverse list{{11,6,1},{11,6,2},{11,6,3},{11,6,8},{11,6,12}}
@@ -324,14 +360,15 @@ maxClique list{{11,6,1},{11,6,2},{11,6,12}}
 {11,6,3,1} is not essential
 new toTraverse list{{11,6,3,2},{11,6,3,12}}
 ----------------------------------------------------------
---> minimalTraversal list, add : {11,6,3,2}, size : 27
---> minimalTraversal list, add : {11,6,3,12}, size : 28
+--> minimalTraversal list, add : {11,6,3,2}, size : 63
+--> minimalTraversal list, add : {11,6,3,12}, size : 64
+--> minimalTraversal list (clone), add : {11,6,3,13}, size : 65
 toExplore list is empty, end of the branch
 new toTraverse list{{11,6,8,1},{11,6,8,2},{11,6,8,12}}
 ----------------------------------------------------------
 disjonctive support for element {11,6,8,1} : 6
 --> maxClique list : {{11,6,8,1}}
---> minimalTraversal list, add : {11,6,8,2}, size : 29
+--> minimalTraversal list, add : {11,6,8,2}, size : 66
 disjonctive support for element {11,6,8,1,12} : 7
 --> toExplore list : {{11,6,8,12}}
 ----------------------------------------------------------
@@ -339,5 +376,6 @@ toExplore list{{11,6,8,12}}
 maxClique list{{11,6,8,1}}
 new toTraverse list{{11,6,8,12,1}}
 ----------------------------------------------------------
---> minimalTraversal list, add : {11,6,8,12,1}, size : 30
+--> minimalTraversal list, add : {11,6,8,12,1}, size : 67
+--> minimalTraversal list (clone), add : {11,6,8,13,1}, size : 68
 toExplore list is empty, end of the branch

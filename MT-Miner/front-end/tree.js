@@ -172,23 +172,11 @@ $.getJSON('tree-data.json', function(treeData) {
         nodeUpdate.select('circle.node')
         .attr('r', 10)
         .style("fill", function(d) {
-            var color;
-            if(d._children) {
-                color = "lightsteelblue";
-            }
-            else {
-                if(d.data.name[0] == '*') {
-                    color = "DarkSeaGreen";
-                }
-                else {
-                    color = "#fff"
-                }
-            }
-            return color;
+            return d._children ? "lightsteelblue" : "#fff";
         })
         .style("stroke", function(d) {
             var color;
-            if(!d.children && !d._children) {
+            if(d.data.name[0] == '*') {
                 color = "green";
             }
             else {
