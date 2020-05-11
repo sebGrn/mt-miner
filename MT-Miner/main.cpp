@@ -191,11 +191,16 @@ int main(int argc, char* argv[])
 		for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) 
 		{ 
 			outputStream << Utils::itemsetToString(elt) << std::endl; 
-			// add front-end tree leaves  
+
+			// add front-end tree leaves
 			std::string name = Utils::itemsetToString(elt);
+			// remove {}
 			name = name.substr(1, name.length() - 2);
+			// indicate leaf
 			name = '*' + name + '*';
+			// create node with name
 			std::shared_ptr<TreeNode> node = std::make_shared<TreeNode>(name);
+			// create or add to branch tree
 			tree->addLeaf(*node);
 		});
 		// save front-end tree

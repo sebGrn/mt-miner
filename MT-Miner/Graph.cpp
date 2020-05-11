@@ -123,7 +123,9 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 			std::string name = Utils::itemsetToString(_item);
 			// remove {}
 			name = name.substr(1, name.length() - 2);
+			// create node with name
 			std::shared_ptr<TreeNode> node = std::make_shared<TreeNode>(name);
+			// add to the tree root if there is only one element
 			if (_item.size() == 1)
 			{
 				tree->addRoot(*node);
