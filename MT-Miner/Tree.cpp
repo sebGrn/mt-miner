@@ -42,7 +42,7 @@ void Tree::addLeaf(TreeNode& _leaf)
 void Tree::saveJSONTree(std::string _filename)
 {
     // display 
-    std::cout << "saving JSON tree in : " << _filename << std::endl;
+    std::cout << "saving json tree in : " << _filename << std::endl;
     std::ofstream outputStream;
     outputStream.open(_filename);
     // save the structure of the tree

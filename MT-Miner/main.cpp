@@ -187,7 +187,7 @@ int main(int argc, char* argv[])
 		outputStream.open(outputFilename);
 		
 		std::shared_ptr<Tree> tree = Tree::getTree();
-		
+		std::cout << "create front-end json tree" << std::endl;
 		for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) 
 		{ 
 			outputStream << Utils::itemsetToString(elt) << std::endl; 
