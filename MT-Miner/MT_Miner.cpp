@@ -1,11 +1,14 @@
 #include "MT_Miner.h"
 #include "utils.h"
 #include "Profiler.h"
+#include "JsonTree.h"
 
-MT_Miner::MT_Miner(bool useCloneOptimization)
+MT_Miner::MT_Miner(const std::shared_ptr<HyperGraph>& hypergraph, bool useCloneOptimization)
 {
 	this->useCloneOptimization = useCloneOptimization;
 	this->computeMtDone = false;
+	
+	createBinaryRepresentation(hypergraph);
 }
 
 MT_Miner::~MT_Miner()
@@ -13,7 +16,7 @@ MT_Miner::~MT_Miner()
 
 }
 
-void MT_Miner::init(const std::shared_ptr<HyperGraph>& hypergraph, std::vector<Itemset>& toTraverse, bool oneIndexedBase)
+void MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hypergraph)
 {
 	START_PROFILING(__func__)
 	// build formal context from hypergraph
@@ -46,18 +49,24 @@ void MT_Miner::init(const std::shared_ptr<HyperGraph>& hypergraph, std::vector<I
 		if (cloneListSize == 0)
 			this->useCloneOptimization = false;
 	}
+	END_PROFILING(__func__)
+}
 
-	toTraverse.clear();
-	for (unsigned int i = 1; i <= formalContext.getItemCount(); i++)
+ItemsetList MT_Miner::computeInitalToTraverseList()
+{
+	START_PROFILING(__func__)
+	ItemsetList toTraverse;
+	for (unsigned int i = 1; i <= this->binaryRepresentation->getItemCount(); i++)
 	{
 		Itemset itemset(1, i);
 		if (!this->binaryRepresentation->containsAClone(itemset))	
 			toTraverse.push_back(itemset);
 	}
 	END_PROFILING(__func__)
+	return toTraverse;
 }
 
-ItemsetList MT_Miner::computeMinimalTransversals(const std::vector<Itemset>& toTraverse)
+ItemsetList MT_Miner::computeMinimalTransversals()
 {
 	// lambda function called during parsing every 20 seconds
 	auto callback = [](bool& done, const TreeNode& treeNode) {
@@ -77,6 +86,8 @@ ItemsetList MT_Miner::computeMinimalTransversals(const std::vector<Itemset>& toT
 	};
 
 	auto beginTime = std::chrono::system_clock::now();
+
+	ItemsetList toTraverse = computeInitalToTraverseList();
 
 	// create a graph, then compute minimal transversal from the binary representation
 	TreeNode rootNode(this->useCloneOptimization, this->binaryRepresentation);
@@ -110,6 +121,9 @@ ItemsetList MT_Miner::computeMinimalTransversals(const std::vector<Itemset>& toT
 	}
 	else
 		for_each(graph_mt.begin(), graph_mt.end(), [&](const Itemset& elt) { Logger::log(GREEN, Utils::itemsetToString(elt), "\n", RESET); });
+
+	// write tree into js
+	JsonTree::writeJsonNode(graph_mt);
 	
 	return graph_mt;
 }

@@ -22,9 +22,7 @@ namespace MTMinerUnitTests_test
 			Assert::AreEqual(8, itemCount);
 
 			// allocate miner
-			MT_Miner miner(true);
-			std::vector<Itemset> toTraverse;
-			miner.init(hypergraph, toTraverse);
+			MT_Miner miner(hypergraph, true);
 
 			Itemset item1{ 1 };
 			int disjonctifSupport = miner.computeDisjonctifSupport(item1);
@@ -49,12 +47,10 @@ namespace MTMinerUnitTests_test
 			bool parserResult = parser.parse("../../data/test.txt");
 			Assert::AreEqual(true, parserResult);
 
-			MT_Miner miner(true);
-			std::vector<Itemset> toTraverse;
-			miner.init(parser.getHypergraph(), toTraverse);
+			MT_Miner miner(parser.getHypergraph(), true);
 
 			// compute minimal transversals
-			std::vector<Itemset>&& minimalTransversals = miner.computeMinimalTransversals(std::move(toTraverse));
+			std::vector<Itemset>&& minimalTransversals = miner.computeMinimalTransversals();
 			//minimalTransversals = Utils::sortVectorOfItemset(minimalTransversals);
 			Assert::AreEqual(6, static_cast<int>(minimalTransversals.size()));
 		}

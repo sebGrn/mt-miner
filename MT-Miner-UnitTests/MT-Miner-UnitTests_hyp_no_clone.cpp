@@ -16,12 +16,10 @@ namespace MTMinerUnitTests_hyp_no_clone
 			Assert::IsNotNull(parser.getHypergraph().get());
 
 			bool useCloneOptimization = false;
-			MT_Miner miner(useCloneOptimization);
-			std::vector<Itemset> toTraverse;
-			miner.init(parser.getHypergraph(), toTraverse);
+			MT_Miner miner(parser.getHypergraph(), useCloneOptimization);
 
 			// compute minimal transversals
-			std::vector<Itemset>&& minimalTransversals = miner.computeMinimalTransversals(std::move(toTraverse));
+			std::vector<Itemset> minimalTransversals = miner.computeMinimalTransversals();
 			Assert::AreEqual(16, static_cast<int>(minimalTransversals.size()));
 		}
 
@@ -33,12 +31,10 @@ namespace MTMinerUnitTests_hyp_no_clone
 			Assert::IsNotNull(parser.getHypergraph().get());
 
 			bool useCloneOptimization = false;
-			MT_Miner miner(useCloneOptimization);
-			std::vector<Itemset> toTraverse;
-			miner.init(parser.getHypergraph(), toTraverse);
+			MT_Miner miner(parser.getHypergraph(), useCloneOptimization);
 
 			// compute minimal transversals
-			std::vector<Itemset>&& minimalTransversals = miner.computeMinimalTransversals(std::move(toTraverse));
+			std::vector<Itemset> minimalTransversals = miner.computeMinimalTransversals();
 			Assert::AreEqual(68, static_cast<int>(minimalTransversals.size()));
 		}
 
@@ -50,12 +46,10 @@ namespace MTMinerUnitTests_hyp_no_clone
 			Assert::IsNotNull(parser.getHypergraph().get());
 
 			bool useCloneOptimization = false;
-			MT_Miner miner(useCloneOptimization);
-			std::vector<Itemset> toTraverse;
-			miner.init(parser.getHypergraph(), toTraverse);
+			MT_Miner miner(parser.getHypergraph(), useCloneOptimization);
 
 			// compute minimal transversals
-			std::vector<Itemset>&& minimalTransversals = miner.computeMinimalTransversals(std::move(toTraverse));
+			std::vector<Itemset> minimalTransversals = miner.computeMinimalTransversals();
 			Assert::AreEqual(57, static_cast<int>(minimalTransversals.size()));
 		}
 	};

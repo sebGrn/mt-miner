@@ -29,17 +29,20 @@ private:
 	bool useCloneOptimization;
 	// binary representation 
 	std::shared_ptr<BinaryRepresentation> binaryRepresentation;
-		
+
+private:
+	/// this function build a format context from the hypergraph, then build the binary representation
+	void createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hypergraph);
+
+	/// return the minimal transversals miner
+	ItemsetList computeInitalToTraverseList();
+
 public:
-	MT_Miner(bool useCloneOptimization);
+	MT_Miner(const std::shared_ptr<HyperGraph>& hypergraph, bool useCloneOptimization = true);
 	~MT_Miner();
 
-	/// initialize the minimal transversals miner
-	/// this function build a format context from the hypergraph, then build the binary representation
-	void init(const std::shared_ptr<HyperGraph>& hypergraph, ItemsetList& toTraverse, bool oneIndexedBase = true);
-
 	///
-	ItemsetList computeMinimalTransversals(const ItemsetList& toTraverse);
+	ItemsetList computeMinimalTransversals();
 
 	///
 	unsigned int computeDisjonctifSupport(const Itemset& pattern) const

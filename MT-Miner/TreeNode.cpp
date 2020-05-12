@@ -1,6 +1,7 @@
 #include "TreeNode.h"
 #include "Logger.h"
 #include "Profiler.h"
+#include "JsonTree.h"
 
 std::atomic_int TreeNode::nbRunningThread(0);
 std::atomic_ullong TreeNode::nbTotalChildren(0);
@@ -67,7 +68,7 @@ void TreeNode::updateListsFromToTraverse(const ItemsetList& toTraverse, ItemsetL
 				if (this->binaryRepresentation->containsOriginals(currentItem, originalClonedIndexes))
 				{
 					ItemsetList clonedCombination;
-					buildClonedCombinaison(currentItem, clonedCombination, originalClonedIndexes);
+					buildClonedCombination(currentItem, clonedCombination, originalClonedIndexes);
 					std::copy(clonedCombination.begin(), clonedCombination.end(), std::back_inserter(graph_mt));
 				}
 			}
@@ -299,6 +300,9 @@ std::vector<Itemset> TreeNode::computeMinimalTransversals_recursive(const std::v
 
 	//Logger::log("toExplore list", ItemsetListToString(toExplore), "\n");
 	//Logger::log("maxClique list", ItemsetListToString(maxClique), "\n");
+
+	// add json node for js visualisation
+	JsonTree::addJsonNode(toExplore);
 
 	// build new toTraverse list and explore next branch
 	if (!toExplore.empty())

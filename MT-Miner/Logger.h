@@ -41,8 +41,7 @@ public:
 			fileStream = std::ofstream(filename, std::ofstream::out);
 		}
 	}
-
-	
+		
 	static void setVerbose(bool _verbose)
 	{
 		verbose = _verbose;

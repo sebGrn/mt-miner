@@ -14,8 +14,8 @@ find_package(Boost REQUIRED)
 #find_package(OpenMP)
 
 # set sources and headers
-set(SOURCES ${HEADERS} HypergraphParser.h MT_Miner.h utils.h BinaryRepresentation.h FormalContext.h HyperGraph.h bitset.h TreeNode.h Logger.h Profiler.h)
-set(SOURCES ${SOURCES} HypergraphParser.cpp MT_Miner.cpp BinaryRepresentation.cpp TreeNode.cpp Logger.cpp Profiler.cpp main.cpp)
+set(SOURCES ${HEADERS} HypergraphParser.h MT_Miner.h utils.h BinaryRepresentation.h FormalContext.h HyperGraph.h bitset.h TreeNode.h Logger.h Profiler.h JsonTree.h)
+set(SOURCES ${SOURCES} HypergraphParser.cpp MT_Miner.cpp BinaryRepresentation.cpp TreeNode.cpp Logger.cpp Profiler.cpp JsonTree.cpp main.cpp)
 
 # create static library .a
 add_executable(mt_miner ${SOURCES} ${HEADERS})

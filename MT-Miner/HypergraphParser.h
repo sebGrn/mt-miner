@@ -12,9 +12,9 @@
 #include "HyperGraph.h"
 #include "MT_Miner.h"
 
-/// this class parse a hypergraph and store it
-/// an hypergraph is a list of int
-/// object count 
+/**
+ * Load and parse a hypergraph and stores it
+ */
 class HypergraphParser
 {
 private:
