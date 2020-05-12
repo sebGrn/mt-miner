@@ -19,7 +19,16 @@ $.getJSON('tree-data.json', function(treeData) {
     root = d3.hierarchy(treeData, function(d) { 
         return d.children; 
     });
-
+    
+    getBreadth = function(root) {
+        var breadth = 0;
+        for (var d in root.children) {
+            if(!root.children[d].children && !root.children[d]._children) {
+                breadth = breadth + 1;
+            }
+        }
+        return breadth;
+    }
     // get the maximum depth of the tree 
     getDepth = function(node) {
         var depth = 0;
@@ -31,12 +40,16 @@ $.getJSON('tree-data.json', function(treeData) {
                 }
             })
         }
-        return 1 + depth
+        return 1 + depth;
     }
     var depth = getDepth(root);
-
+    var breadth = getBreadth(root)*80;
+    if (breadth < treeDiv.clientWidth)
+    {
+        breadth = treeDiv.clientWidth;
+    }
     // set the dimensions of the tree
-    var width = treeDiv.clientWidth - margin.left - margin.right;
+    var width = breadth - margin.left - margin.right;
     var height = depth*180 - margin.top;
 
     // append the svg object to the tree-container of the page
@@ -63,7 +76,13 @@ $.getJSON('tree-data.json', function(treeData) {
     
     // resize the window width
     function resize(d) {
-        width = (treeDiv.clientWidth - margin.left - margin.right);
+        // set the dimensions of the tree
+        var breadth = getBreadth(root)*80;
+        if (breadth < treeDiv.clientWidth)
+        {
+            breadth = treeDiv.clientWidth;
+        }
+        var width = breadth - margin.left - margin.right;
         d3.select("svg")
         .attr("width", (width + margin.right + margin.left))
         .attr("height", (height + margin.top + margin.bottom))
