@@ -1,10 +1,11 @@
 #pragma once
 
-
+#include <memory>
 #include <iostream>
 #include <fstream>
 #include <algorithm>
 
+#include "Logger.h"
 #include "JsonTreeNode.h"
 #include "utils.h"
 

@@ -302,7 +302,7 @@ std::vector<Itemset> TreeNode::computeMinimalTransversals_recursive(const std::v
 	//Logger::log("maxClique list", ItemsetListToString(maxClique), "\n");
 
 	// add json node for js visualisation
-	JsonTree::addJsonNode(toExplore);
+	//JsonTree::addJsonNode(toExplore);
 
 	// build new toTraverse list and explore next branch
 	if (!toExplore.empty())

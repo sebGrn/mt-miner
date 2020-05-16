@@ -55,5 +55,32 @@ namespace MTMinerUnitTests_test
 			Assert::AreEqual(6, static_cast<int>(minimalTransversals.size()));
 		}
 
+		TEST_METHOD(TestingCloneMinimalTransversalsSize_no_clone)
+		{
+			HypergraphParser parser;
+			bool parserResult = parser.parse("../../data/test_clone.txt");
+			Assert::AreEqual(true, parserResult);
+
+			MT_Miner miner(parser.getHypergraph(), false);
+
+			// compute minimal transversals
+			std::vector<Itemset>&& minimalTransversals = miner.computeMinimalTransversals();
+			//minimalTransversals = Utils::sortVectorOfItemset(minimalTransversals);
+			Assert::AreEqual(15, static_cast<int>(minimalTransversals.size()));
+		}
+
+		TEST_METHOD(TestingCloneMinimalTransversalsSize_clone)
+		{
+			HypergraphParser parser;
+			bool parserResult = parser.parse("../../data/test_clone.txt");
+			Assert::AreEqual(true, parserResult);
+
+			MT_Miner miner(parser.getHypergraph(), true);
+
+			// compute minimal transversals
+			std::vector<Itemset>&& minimalTransversals = miner.computeMinimalTransversals();
+			//minimalTransversals = Utils::sortVectorOfItemset(minimalTransversals);
+			Assert::AreEqual(15, static_cast<int>(minimalTransversals.size()));
+		}
 	};
 }

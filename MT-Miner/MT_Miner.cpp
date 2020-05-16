@@ -123,7 +123,7 @@ ItemsetList MT_Miner::computeMinimalTransversals()
 		for_each(graph_mt.begin(), graph_mt.end(), [&](const Itemset& elt) { Logger::log(GREEN, Utils::itemsetToString(elt), "\n", RESET); });
 
 	// write tree into js
-	JsonTree::writeJsonNode(graph_mt);
+	//JsonTree::writeJsonNode(graph_mt);
 	
 	return graph_mt;
 }
