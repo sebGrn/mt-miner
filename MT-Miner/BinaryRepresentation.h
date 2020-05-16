@@ -24,8 +24,8 @@ class BinaryRepresentation
 {
 private:
 	///  key/value definition of a binary represention (key as the attribute id, value as the bitset)
-	std::map<unsigned int, Bitset> binaryRepresentation;
-	//std::unordered_map<unsigned int, Bitset> binaryRepresentation;
+	//std::map<unsigned int, Bitset> binaryRepresentation;
+	std::unordered_map<unsigned int, Bitset> binaryRepresentation;
 
 	/// number of objects/lines
 	unsigned int objectCount;

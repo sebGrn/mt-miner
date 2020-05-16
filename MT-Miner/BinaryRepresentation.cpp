@@ -54,8 +54,8 @@ bool BinaryRepresentation::isEssential(const Itemset& itemset)
 			if (i1 != i2)
 			{
 				unsigned int key2 = itemset[i2];
-#ifdef _DEBUG				
 				Bitset bitset = this->getBitset(key2);
+#ifdef _DEBUG				
 				for (int j = 0; j < this->objectCount; j++)
 				{
 					//#pragma omp critical
@@ -63,7 +63,7 @@ bool BinaryRepresentation::isEssential(const Itemset& itemset)
 				}
 #else
 				//#pragma omp critical
-				SumOfN_1Items = SumOfN_1Items | this->getBitset(key2);
+				SumOfN_1Items = SumOfN_1Items | bitset;
 #endif
 			}
 		}
@@ -113,7 +113,7 @@ unsigned int BinaryRepresentation::computeDisjonctifSupport(const Itemset& patte
 		}
 #else
 		//#pragma omp critical
-		SumOfN_1Items = SumOfN_1Items | getBitset(columnKey);		
+		SumOfN_1Items = SumOfN_1Items | bitset;
 #endif
 	}
 

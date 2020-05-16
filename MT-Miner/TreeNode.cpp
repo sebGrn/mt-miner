@@ -318,6 +318,8 @@ std::vector<Itemset> TreeNode::computeMinimalTransversals_recursive(const std::v
 			// wait here all tasks to finish (barrier), corresponding to all the children tasks executed in parallel
 			ItemsetList&& child_mt = ftr.get();
 			std::copy(child_mt.begin(), child_mt.end(), std::back_inserter(graph_mt));
+
+			nbRunningThread--;
 		}
 
 		//std::for_each(futures.begin(), futures.end(), [&graph_mt](std::future<ItemsetList>& future) {
