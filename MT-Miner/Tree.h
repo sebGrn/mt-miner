@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <map>
 
 #include "TreeNode.h"
 
@@ -14,8 +15,8 @@ private:
 	/// unique tree
 	static std::shared_ptr<Tree> tree;
 
-	/// root of the tree to call TreeNode functions
-	std::shared_ptr<TreeNode> root;
+	/// tree structure <level, nodes>
+	std::map<int, std::vector<std::shared_ptr<TreeNode>>> structure;
 public:
 	~Tree();
 
@@ -25,15 +26,17 @@ public:
 
 	/// add child to the root
 	/// @params child node
-	void addRoot(TreeNode& _root);
+	void addRoot(std::shared_ptr<TreeNode>& _root);
 
 	/// add child to the tree 
 	/// @params child node
-	void addChild(TreeNode& _child);
+	void addChild(std::shared_ptr<TreeNode>& _child, int _level);
 
 	/// add or create branch or leaf to the tree
 	/// @params child node
-	void addLeaf(TreeNode& _leaf);
+	void addLeaf(std::shared_ptr<TreeNode>& _leaf, int _level);
+
+	void buildStructure(std::shared_ptr<TreeNode>& _node, int _level);
 
 	/// save JSON tree structure into a file
 	/// @params name of the file

@@ -9,23 +9,18 @@ TreeNode::~TreeNode()
 {
 }
 
-void TreeNode::addRoot(TreeNode& _root)
+void TreeNode::addRoot(std::shared_ptr<TreeNode>& _root)
 {
 	children.push_back(_root);
 }
 
-void TreeNode::addChild(TreeNode& _child)
+void TreeNode::addChild(std::shared_ptr<TreeNode>& _child)
 {
-	std::string _name = _child.getParentName();
+	std::string _name = _child->getParentName();
 	// add child if the parent name is the current node name
 	if (_name == name)
 	{
 		children.push_back(_child);
-	}
-	else
-	{
-		// try to add child for each child in children
-		for_each(children.begin(), children.end(), [&](TreeNode& node) { node.addChild(_child); });
 	}
 }
 
@@ -40,7 +35,7 @@ bool TreeNode::findTreeNode(std::string _name, TreeNode& _node)
 	bool result = false;
 	for (int i = 0; result == false && i < _node.getChildren().size(); i++) 
 	{
-		result = findTreeNode(_name, _node.getChildren().at(i));
+		result = findTreeNode(_name, *_node.getChildren().at(i));
 	}
 	return result;
 }
@@ -67,9 +62,9 @@ std::string TreeNode::getParentName()
 	return _name;
 }
 
-void TreeNode::addLeaf(TreeNode& _leaf)
+void TreeNode::addLeaf(std::shared_ptr<TreeNode>& _leaf)
 {
-	std::string _name = _leaf.getParentName();
+	std::string _name = _leaf->getParentName();
 	// add child if the parent node already exist
 	if (findTreeNode(_name, *this))
 	{
@@ -80,7 +75,7 @@ void TreeNode::addLeaf(TreeNode& _leaf)
 	{
 		std::shared_ptr<TreeNode> parent = std::make_shared<TreeNode>(_name);
 		parent->addRoot(_leaf);
-		addLeaf(*parent);
+		addLeaf(parent);
 	}
 }
 
@@ -89,7 +84,7 @@ std::string TreeNode::getName()
 	return name;
 }
 
-std::vector<TreeNode> TreeNode::getChildren()
+std::vector<std::shared_ptr<TreeNode>> TreeNode::getChildren()
 {
 	return children;
 }
@@ -106,9 +101,9 @@ std::string TreeNode::getTreeStructure()
 		structure.append(", \"children\": [");
 		// first child
 		auto it = children.begin();
-		for_each(children.begin(), children.end(), [&](TreeNode& _node)
+		for_each(children.begin(), children.end(), [&](std::shared_ptr<TreeNode>& _node)
 		{ 
-			structure.append(_node.getTreeStructure());
+			structure.append(_node->getTreeStructure());
 			// next child
 			it++;
 			// add , if there are others children behind
