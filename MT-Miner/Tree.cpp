@@ -5,9 +5,10 @@ std::shared_ptr<Tree> Tree::tree(nullptr);
 
 Tree::Tree()
 {
-    std::vector<std::shared_ptr<TreeNode>> v;
-    v.push_back(std::make_shared<TreeNode>(""));
-    structure.insert(std::pair<int, std::vector<std::shared_ptr<TreeNode>>>(0, v));
+    // create the root node
+    root = std::make_shared<TreeNode>("");
+    // initialize the tree structure
+    buildStructure(root);
 }
 
 Tree::~Tree()
@@ -24,55 +25,25 @@ std::shared_ptr<Tree> Tree::getTree()
     return tree;
 }
 
-void Tree::addRoot(std::shared_ptr<TreeNode>& _root)
+void Tree::buildStructure(std::shared_ptr<TreeNode>& _node)
 {
-    structure.at(0).at(0)->addRoot(_root);
+    structure.insert(std::pair<std::string, std::shared_ptr<TreeNode>>(_node->getName(), _node));
 }
 
-void Tree::buildStructure(std::shared_ptr<TreeNode>& _node, int _level)
+void Tree::addChild(std::shared_ptr<TreeNode>& _child)
 {
-    if (structure.size() - 1 < _level)
+    auto it = structure.find(_child->getParentName());
+    if (it != structure.end())
     {
-        std::vector<std::shared_ptr<TreeNode>> c;
-        c.push_back(_node);
-        structure.insert(std::pair<int, std::vector<std::shared_ptr<TreeNode>>>(_level, c));
+        it->second->addChild(_child);
     }
     else
     {
-        structure.at(_level).push_back(_node);
+        std::shared_ptr<TreeNode> parent = std::make_shared<TreeNode>(_child->getParentName());
+        parent->addChild(_child);
+        addChild(parent);
     }
-}
-
-void Tree::addChild(std::shared_ptr<TreeNode>& _child, int _level)
-{
-    std::vector<std::shared_ptr<TreeNode>> v = structure.at(_level - 1);
-    for_each(v.begin(), v.end(), [&](std::shared_ptr<TreeNode>& _node)
-        {
-            _node->addChild(_child);
-        });
-    buildStructure(_child, _level);
-}
-
-void Tree::addLeaf(std::shared_ptr<TreeNode>& _leaf, int _level)
-{
-    std::vector<std::shared_ptr<TreeNode>> v = structure.at(_level - 1);
-    bool added = false;
-    for_each(v.begin(), v.end(), [&](std::shared_ptr<TreeNode>& _node)
-        {
-            if (_node->getName() == _leaf->getParentName())
-            {
-                _node->addRoot(_leaf);
-                added = true;
-            }
-        });
-    if (!added)
-    {
-        std::shared_ptr<TreeNode> parent = std::make_shared<TreeNode>(_leaf->getParentName());
-        parent->addRoot(_leaf);
-        addLeaf(parent, _level - 1);
-        
-    }
-    buildStructure(_leaf, _level);
+    buildStructure(_child);
 }
 
 void Tree::saveJSONTree(std::string _filename)
@@ -82,7 +53,6 @@ void Tree::saveJSONTree(std::string _filename)
     std::ofstream outputStream;
     outputStream.open(_filename);
     // save the structure of the tree
-    structure.at(0).at(0) = structure.at(0).at(0);
-    outputStream << structure.at(0).at(0)->getTreeStructure();
+    outputStream << root->getTreeStructure();
     outputStream.close();
 }

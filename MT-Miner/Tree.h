@@ -15,8 +15,11 @@ private:
 	/// unique tree
 	static std::shared_ptr<Tree> tree;
 
-	/// tree structure <level, nodes>
-	std::map<int, std::vector<std::shared_ptr<TreeNode>>> structure;
+	/// root 
+	std::shared_ptr<TreeNode> root;
+
+	/// tree structure <name, node>
+	std::map<std::string, std::shared_ptr<TreeNode>> structure;
 public:
 	~Tree();
 
@@ -24,19 +27,13 @@ public:
 	/// @return tree
 	static std::shared_ptr<Tree> getTree();
 
-	/// add child to the root
+	/// add _child to the tree 
 	/// @params child node
-	void addRoot(std::shared_ptr<TreeNode>& _root);
+	void addChild(std::shared_ptr<TreeNode>& _child);
 
-	/// add child to the tree 
-	/// @params child node
-	void addChild(std::shared_ptr<TreeNode>& _child, int _level);
-
-	/// add or create branch or leaf to the tree
-	/// @params child node
-	void addLeaf(std::shared_ptr<TreeNode>& _leaf, int _level);
-
-	void buildStructure(std::shared_ptr<TreeNode>& _node, int _level);
+	/// add _node to the tree structure
+	/// @params tree node
+	void buildStructure(std::shared_ptr<TreeNode>& _node);
 
 	/// save JSON tree structure into a file
 	/// @params name of the file

@@ -9,35 +9,9 @@ TreeNode::~TreeNode()
 {
 }
 
-void TreeNode::addRoot(std::shared_ptr<TreeNode>& _root)
-{
-	children.push_back(_root);
-}
-
 void TreeNode::addChild(std::shared_ptr<TreeNode>& _child)
 {
-	std::string _name = _child->getParentName();
-	// add child if the parent name is the current node name
-	if (_name == name)
-	{
-		children.push_back(_child);
-	}
-}
-
-bool TreeNode::findTreeNode(std::string _name, TreeNode& _node)
-{
-	// return true when the names are corresponding
-	if (_node.getName() == _name)
-	{
-		return true;
-	}
-	// try to find node in the children 
-	bool result = false;
-	for (int i = 0; result == false && i < _node.getChildren().size(); i++) 
-	{
-		result = findTreeNode(_name, *_node.getChildren().at(i));
-	}
-	return result;
+	children.push_back(_child);
 }
 
 std::string TreeNode::getParentName()
@@ -62,31 +36,9 @@ std::string TreeNode::getParentName()
 	return _name;
 }
 
-void TreeNode::addLeaf(std::shared_ptr<TreeNode>& _leaf)
-{
-	std::string _name = _leaf->getParentName();
-	// add child if the parent node already exist
-	if (findTreeNode(_name, *this))
-	{
-		addChild(_leaf);
-	}
-	// create parent node, add _leaf to his children and try to add parent node as leaf
-	else
-	{
-		std::shared_ptr<TreeNode> parent = std::make_shared<TreeNode>(_name);
-		parent->addRoot(_leaf);
-		addLeaf(parent);
-	}
-}
-
 std::string TreeNode::getName()
 {
 	return name;
-}
-
-std::vector<std::shared_ptr<TreeNode>> TreeNode::getChildren()
-{
-	return children;
 }
 
 std::string TreeNode::getTreeStructure()

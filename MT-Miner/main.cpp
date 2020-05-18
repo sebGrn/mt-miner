@@ -201,7 +201,7 @@ int main(int argc, char* argv[])
 			// create node with name
 			std::shared_ptr<TreeNode> node = std::make_shared<TreeNode>(name);
 			// create or add to branch tree
-			tree->addLeaf(node, elt.size());
+			tree->addChild(node);
 		});
 		// save front-end tree
 		std::string _filename = "front-end/tree-data.json";

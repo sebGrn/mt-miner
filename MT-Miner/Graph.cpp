@@ -126,7 +126,7 @@ void GraphNode::computeMinimalTransversals(std::vector<Utils::Itemset>& graph_mt
 			// create node with name
 			std::shared_ptr<TreeNode> node = std::make_shared<TreeNode>(name);
 			// add to the tree root if there is only one element
-			tree->addChild(node, _item.size());
+			tree->addChild(node);
 		});
 		
 		// store toExploreList max index
