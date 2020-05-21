@@ -22,9 +22,11 @@ $.getJSON('tree-data.json', function(treeData) {
     
     getBreadth = function(root) {
         var breadth = 0;
-        for (var d in root.children) {
-            if(!root.children[d].children && !root.children[d]._children) {
-                breadth = breadth + 1;
+        if(root.children) {
+            for (var d in root.children) {
+                if(!root.children[d].children && !root.children[d]._children) {
+                    breadth = breadth + 1;
+                }
             }
         }
         return breadth;
@@ -41,6 +43,21 @@ $.getJSON('tree-data.json', function(treeData) {
             })
         }
         return 1 + depth;
+    }
+
+    getMaxBreadth = function(node) {
+        var breadth = 1;
+        if (node.children) {
+            breadth = node.children.length;
+            var tmpBreadth = 0;
+            node.children.forEach(function(d) {
+                 tmpBreadth += getMaxBreadth(d);
+            })
+            if(tmpBreadth > breadth) {
+                breadth = tmpBreadth;
+            }
+        }
+        return breadth;
     }
     var depth = getDepth(root);
     var breadth = getBreadth(root)*80;
@@ -75,9 +92,15 @@ $.getJSON('tree-data.json', function(treeData) {
     update(root);
     
     // resize the window width
-    function resize(d) {
+    function resize(d, max) {
         // set the dimensions of the tree
-        var breadth = getBreadth(root)*80;
+        var breadth;
+        if(max) {
+            breadth = getMaxBreadth(root)*80;
+        }
+        else {
+            breadth = getBreadth(root)*80;
+        }
         if (breadth < treeDiv.clientWidth)
         {
             breadth = treeDiv.clientWidth;
@@ -117,13 +140,15 @@ $.getJSON('tree-data.json', function(treeData) {
     }
 
     function collapseAll() {
-        collapse(root);
+        root.children.forEach(collapse);
         update(root);
+        resize(root, false);
     }
 
     function uncollapseAll() {
         uncollapse(root);
         update(root);
+        resize(root, true);
     }
 
     function update(source) {
@@ -299,7 +324,6 @@ $.getJSON('tree-data.json', function(treeData) {
             update(d);
         }
     }
-    // resize tree on window resize
     window.addEventListener("resize", resize);
     document.getElementById("collapse").addEventListener("click", collapseAll);
     document.getElementById("uncollapse").addEventListener("click", uncollapseAll);
