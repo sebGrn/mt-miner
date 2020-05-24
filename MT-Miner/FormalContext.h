@@ -1,8 +1,14 @@
 #pragma once
 #include <vector>
 #include <cassert>
-#include <boost/dynamic_bitset.hpp>
 #include <fstream>
+
+#ifndef _DEBUG
+#include <boost/dynamic_bitset.hpp>
+#include <bitset>
+#endif
+#include <any>
+#include <memory>
 
 #include "Bitset.h"
 #include "HyperGraph.h"
@@ -10,7 +16,10 @@
 class FormalContext
 {
 private:
+	//typedef std::bitset<ITEM_COUNT> FormalContextBitset;
 	// a formal context is a matrix of bool
+	//std::vector<FormalContextBitset> formalContext;
+	//std::vector<std::any> formalContext;
 	std::vector<Bitset> formalContext;
 	// number of columns / number of boolean values
 	unsigned int itemCount;
@@ -28,16 +37,15 @@ public:
 			bitsetSize += 1;
 
 		unsigned int index = 0;
-
 		// build formal context
-		for (unsigned int i = 0; i < hypergraph->getObjectCount(); i++)
+		for (unsigned int i = 0, n = hypergraph->getObjectCount(); i < n; i++)
 		{
 			// init bitset, all 0's by default
 			Bitset bitset(bitsetSize);
-
+			
 			// loop on hyper graph and build formal context
 			std::vector<unsigned int> line = hypergraph->getLine(i);
-			for (unsigned int j = 0; j < line.size(); j++)
+			for (unsigned int j = 0, k = line.size(); j < k; j++)
 			{
 				if (hypergraph->getOneBasedIndex())
 				{
@@ -49,10 +57,12 @@ public:
 					index = line[j];
 				}
 				assert(index >= 0);
-				assert(index < bitset.size());
-				bitset[index] = true;
+				assert(index < bitsetSize);
+				bitset.set(index);
 			}
+			// add bitset for this object (line)
 			this->formalContext.push_back(bitset);
+
 		}
 	};
 
@@ -61,9 +71,9 @@ public:
 		std::ofstream fileStream = std::ofstream(outputile, std::ofstream::out);
 		for (auto it = this->formalContext.begin(); it != this->formalContext.end(); it++)
 		{
-			for (int i = 0; i < it->size(); i++)
+			for (int i = 0, n = it->size(); i < n; i++)
 			{
-				fileStream << (*it)[i] ? "1" : "0";				
+				fileStream << it->get(i) ? "1" : "0";
 				fileStream << ";";
 			}
 			fileStream << std::endl;
@@ -81,10 +91,13 @@ public:
 		return this->objectCount;
 	};
 
-	unsigned int getElement(unsigned int i, unsigned int j) const
+	/// get boolean value from formal context
+	/// @param iObject object index (ie line number)
+	/// @param iAttribute attribute index (ie column number)
+	bool getBit(unsigned int iObject, unsigned int iAttribute) const
 	{
-		assert(i < this->formalContext.size());
-		assert(j < this->formalContext[i].size());
-		return this->formalContext[i][j];
+		assert(iObject < this->formalContext.size());
+		Bitset bitset = this->formalContext[iObject];
+		return bitset.get(iAttribute);
 	};
 };

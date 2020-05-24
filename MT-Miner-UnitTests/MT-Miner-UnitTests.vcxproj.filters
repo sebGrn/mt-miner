@@ -33,6 +33,9 @@
     <ClCompile Include="MT-Miner-UnitTests_ac_no_clone.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MT-Minter-UnitTests_bitset.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">

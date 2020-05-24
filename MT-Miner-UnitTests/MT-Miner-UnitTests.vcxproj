@@ -165,6 +165,7 @@
     <ClCompile Include="MT-Miner-UnitTests_hyp_clone.cpp" />
     <ClCompile Include="MT-Miner-UnitTests_hyp_no_clone.cpp" />
     <ClCompile Include="MT-Miner-UnitTests_test.cpp" />
+    <ClCompile Include="MT-Minter-UnitTests_bitset.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

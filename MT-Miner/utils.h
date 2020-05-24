@@ -110,8 +110,6 @@ public:
 
 	static Itemset combineItemset(const Itemset& str1, const Itemset& str2)
 	{
-		START_PROFILING(__func__)
-
 		// "1" + "2" => "12"
 		// "71" + "72" => "712"
 		Itemset left = str1;
@@ -130,7 +128,6 @@ public:
 		// transform int list into string list seperated by ' '
 		Itemset combinedElt;
 		for_each(left.begin(), left.end(), [&combinedElt](unsigned int i) { combinedElt.push_back(i); });
-		END_PROFILING(__func__)
 		return combinedElt;
 	};
 	

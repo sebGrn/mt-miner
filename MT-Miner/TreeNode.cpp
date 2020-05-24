@@ -20,7 +20,6 @@ TreeNode::~TreeNode()
 
 void TreeNode::buildClonedCombination(const Itemset& currentItem, std::vector<Itemset>& clonedCombination, const std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes)
 {
-	START_PROFILING(__func__)
 	for (auto it = originalClonedIndexes.begin(); it != originalClonedIndexes.end(); it++)
 	{
 		unsigned int originalIndex = it->first;
@@ -38,13 +37,10 @@ void TreeNode::buildClonedCombination(const Itemset& currentItem, std::vector<It
 			}
 		}
 	}
-	END_PROFILING(__func__)
 }
 
 void TreeNode::updateListsFromToTraverse(const ItemsetList& toTraverse, ItemsetList& maxClique, ItemsetList& toExplore, ItemsetList& graph_mt)
 {
-	START_PROFILING(__func__)
-
 	maxClique.clear();
 	toExplore.clear();
 
@@ -98,8 +94,6 @@ void TreeNode::updateListsFromToTraverse(const ItemsetList& toTraverse, ItemsetL
 			}
 		}
 	}
-
-	END_PROFILING(__func__)
 }
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
@@ -107,8 +101,6 @@ void TreeNode::updateListsFromToTraverse(const ItemsetList& toTraverse, ItemsetL
 std::vector<Itemset> TreeNode::computeMinimalTransversals_iterative(const std::vector<Itemset>& toTraverse)
 {
 	typedef std::vector<Itemset> ItemsetList;
-
-	START_PROFILING(__func__)
 
 	// test trivial case
 	if (toTraverse.empty())
@@ -222,7 +214,6 @@ std::vector<Itemset> TreeNode::computeMinimalTransversals_iterative(const std::v
 	//Logger::log(RED, "avg ", avg, " ms\n", RESET);
 	Logger::log(RED, "nbIter ", nbIter, "\n", RESET);
 	
-	END_PROFILING(__func__)
 	return graph_mt;
 }
 
@@ -230,7 +221,6 @@ std::vector<Itemset> TreeNode::computeMinimalTransversals_iterative(const std::v
 
 void TreeNode::exploreNextBranch(const ItemsetList& maxClique, const ItemsetList& toExplore, ItemsetList& graph_mt)
 {
-	START_PROFILING(__func__)
 	// store toExploreList max index
 	unsigned int lastIndexToTest = toExplore.size();
 	// combine toExplore (left part) with maxClique list (right part) into a combined list
@@ -278,13 +268,10 @@ void TreeNode::exploreNextBranch(const ItemsetList& maxClique, const ItemsetList
 			}
 		}
 	}
-	END_PROFILING(__func__)
 }
 
 std::vector<Itemset> TreeNode::computeMinimalTransversals_recursive(const std::vector<Itemset>& toTraverse)
 {
-	START_PROFILING(__func__)
-
 	// test trivial case
 	if (toTraverse.empty())
 		return ItemsetList();
@@ -340,8 +327,6 @@ std::vector<Itemset> TreeNode::computeMinimalTransversals_recursive(const std::v
 	{
 		std::cout << "unknown exception" << std::endl;
 	}
-
-	END_PROFILING(__func__)
 
 	return graph_mt;
 }

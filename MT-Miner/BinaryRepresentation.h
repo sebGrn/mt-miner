@@ -8,11 +8,13 @@
 
 #ifndef _DEBUG
 #include <boost/dynamic_bitset.hpp>
+#include <bitset>
 #endif
 
 #include "utils.h"
 #include "Bitset.h"
 #include "FormalContext.h"
+
 
 /** 
  * a binary representation is a formal context representation in columns
@@ -23,8 +25,9 @@
 class BinaryRepresentation
 {
 private:
+	//typedef std::bitset<OBJECT_COUNT> BinaryRepBitset;
+
 	///  key/value definition of a binary represention (key as the attribute id, value as the bitset)
-	//std::map<unsigned int, Bitset> binaryRepresentation;
 	std::unordered_map<unsigned int, Bitset> binaryRepresentation;
 
 	/// number of objects/lines
@@ -66,7 +69,8 @@ public:
 		{
 			for (int i = 0; i < it->second.size(); i++)
 			{
-				fileStream << (it->second)[i] ? "1" : "0";
+				//fileStream << (it->second)[i] ? "1" : "0";				
+				fileStream << (it->second).get(i) ? "1" : "0";
 				fileStream << ";";
 			}
 			fileStream << std::endl;
@@ -84,7 +88,7 @@ public:
 		return this->objectCount;
 	};
 
-	Bitset getBitset(unsigned int key) const
+	Bitset getBitsetFromKey(unsigned int key) const
 	{
 		assert(binaryRepresentation.find(key) != binaryRepresentation.end());
 		return binaryRepresentation.at(key);

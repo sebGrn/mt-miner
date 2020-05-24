@@ -18,15 +18,14 @@ MT_Miner::~MT_Miner()
 
 void MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hypergraph)
 {
-	START_PROFILING(__func__)
 	// build formal context from hypergraph
 	FormalContext formalContext(hypergraph);
-	//formalContext.serialize("format_context.csv");
+	formalContext.serialize("format_context.csv");
 
 	// build binary representation from formal context
 	binaryRepresentation.reset();
 	binaryRepresentation = std::make_shared<BinaryRepresentation>(formalContext);
-	//binaryRepresentation->serialize("binary_rep.csv");
+	binaryRepresentation->serialize("binary_rep.csv");
 
 	if (this->useCloneOptimization)
 	{
@@ -49,12 +48,10 @@ void MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hyp
 		if (cloneListSize == 0)
 			this->useCloneOptimization = false;
 	}
-	END_PROFILING(__func__)
 }
 
 ItemsetList MT_Miner::computeInitalToTraverseList()
 {
-	START_PROFILING(__func__)
 	ItemsetList toTraverse;
 	for (unsigned int i = 1; i <= this->binaryRepresentation->getItemCount(); i++)
 	{
@@ -62,7 +59,6 @@ ItemsetList MT_Miner::computeInitalToTraverseList()
 		if (!this->binaryRepresentation->containsAClone(itemset))	
 			toTraverse.push_back(itemset);
 	}
-	END_PROFILING(__func__)
 	return toTraverse;
 }
 

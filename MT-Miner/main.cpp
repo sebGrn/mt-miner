@@ -152,6 +152,19 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 
 int main(int argc, char* argv[])
 {
+
+	Bitset b(4);
+	unsigned int sum_set = 0;
+	srand(time(nullptr));
+	for (int i = 0; i < 4; i++)
+	{
+		bool v = rand() % 2;
+		b.set(i, v);
+		if (v)
+			sum_set++;
+	}
+	unsigned int n = b.count();
+
 	// http://research.nii.ac.jp/~uno/dualization.html
 
 	if (argc <= 1)
