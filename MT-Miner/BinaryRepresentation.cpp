@@ -16,23 +16,28 @@ BinaryRepresentation::BinaryRepresentation(const FormalContext& context)
 
 	std::vector<double> averageSet;
 
+	VariantBitset bitset(this->objectCount);
+
 	//#pragma omp parallel for
-	for (int j = 0; j < this->itemCount; j++)			// 8 on test.txt
+	for (unsigned int j = 0; j < this->itemCount; j++)			// 8 on test.txt
 	{
 		// allocate bitset with object count bit (formal context column size)
-		Bitset bitset(this->objectCount);
+		bitset.reset();
+
 		unsigned int sum = 0;
-		for (int i = 0; i < this->objectCount; i++)		// 6 on test.txt
+		for (unsigned int i = 0; i < this->objectCount; i++)		// 6 on test.txt
 		{
 			bool bit = context.getBit(i, j);
 			bitset.set(i, bit);
-			if (bit)
+			if (bit)				
 				sum++;
 		}
 		averageSet.push_back(sum);
 
 		// set a critical section to allow multiple thread to write in size_tuples vector
 		unsigned int currentKey = j + 1; 
+
+		
 		//#pragma omp critical
 		this->binaryRepresentation[currentKey] = bitset;
 	}
@@ -53,30 +58,30 @@ bool BinaryRepresentation::isEssential(const Itemset& itemset)
 		return true;
 
 	bool isEssential = false;
-	for (int i1 = 0; i1 != static_cast<int>(itemset.size()); i1++)
+	for (int i1 = 0, n = static_cast<int>(itemset.size()); i1 != n; i1++)
 	{
-		Bitset SumOfN_1Items(this->objectCount);
+		VariantBitset SumOfN_1Items(this->objectCount);
 		
 		// dont forget to initialize boolean
 		isEssential = false;
 	
 		//#pragma omp parallel for
-		for (int i2 = 0; i2 < static_cast<int>(itemset.size()); i2++)
+		for (int i2 = 0; i2 < n; i2++)
 		{			
 			if (i1 != i2)
 			{
 				unsigned int key2 = itemset[i2];
-				Bitset bitset = this->getBitsetFromKey(key2);
+				VariantBitset bitset = this->getBitsetFromKey(key2);
 				//#pragma omp critical
 				SumOfN_1Items = SumOfN_1Items | bitset;
 			}
 		}
 
 		unsigned int key1 = itemset[i1];
-		Bitset bitset = this->getBitsetFromKey(key1);
+		VariantBitset bitset = this->getBitsetFromKey(key1);
 
 		//#pragma omp parallel for
-		for (int i = 0; i < this->objectCount; i++)
+		for (unsigned int i = 0; i < this->objectCount; i++)
 		{
 			if (SumOfN_1Items.get(i) == false && bitset.get(i) == true)
 			{
@@ -97,19 +102,16 @@ bool BinaryRepresentation::isEssential(const Itemset& itemset)
 
 unsigned int BinaryRepresentation::computeDisjonctifSupport(const Itemset& pattern) const
 {
-	Bitset SumOfN_1Items(this->objectCount);
+	VariantBitset SumOfN_1Items(this->objectCount);
 
-	//#pragma omp parallel for
-	for (int i = 0, n = pattern.size(); i < n; i++)
+	for (size_t i = 0, n = pattern.size(); i < n; i++)
 	{
 		unsigned int columnKey = pattern[i];
-		Bitset bitset = this->getBitsetFromKey(columnKey);
-		//#pragma omp critical
+		VariantBitset bitset = this->getBitsetFromKey(columnKey);
 		SumOfN_1Items = SumOfN_1Items | bitset;
 	}
 
 	unsigned int disSupp = SumOfN_1Items.count();
-	
 	return disSupp;
 };
 
@@ -123,15 +125,15 @@ bool BinaryRepresentation::compareItemsets(const Itemset& itemset1, const Itemse
 	else
 	{
 		//#pragma omp parallel for
-		for (int i = 0, n = itemset1.size(); i< n; i++)
+		for (size_t i = 0, n = itemset1.size(); i< n; i++)
 		{
 			assert(i < itemset2.size());
 			unsigned int columnKey_itemset1 = itemset1[i];
 			unsigned int columnKey_itemset2 = itemset2[i];
 
-			Bitset bitset1 = this->getBitsetFromKey(columnKey_itemset1);
-			Bitset bitset2 = this->getBitsetFromKey(columnKey_itemset2);
-			Bitset result = bitset1 & bitset2;
+			VariantBitset bitset1 = this->getBitsetFromKey(columnKey_itemset1);
+			VariantBitset bitset2 = this->getBitsetFromKey(columnKey_itemset2);
+			VariantBitset result = bitset1 & bitset2;
 			sameItemset = ((result == bitset1) && (result == bitset2));
 		}
 	}
@@ -163,7 +165,7 @@ unsigned int BinaryRepresentation::buildCloneList()
 			}
 		}
 	}
-	return clonedBitsetIndexes.size();
+	return static_cast<unsigned int>(clonedBitsetIndexes.size());
 };
 
 bool BinaryRepresentation::containsAClone(const Itemset& itemset)

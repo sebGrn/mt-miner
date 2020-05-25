@@ -26,9 +26,10 @@ class BinaryRepresentation
 {
 private:
 	//typedef std::bitset<OBJECT_COUNT> BinaryRepBitset;
+	//typedef std::variant<std::bitset<100>, std::bitset<1000>, std::bitset<4000>> BinaryRepBitset;
 
 	///  key/value definition of a binary represention (key as the attribute id, value as the bitset)
-	std::unordered_map<unsigned int, Bitset> binaryRepresentation;
+	std::unordered_map<unsigned int, VariantBitset> binaryRepresentation;
 
 	/// number of objects/lines
 	unsigned int objectCount;
@@ -67,10 +68,9 @@ public:
 		std::ofstream fileStream = std::ofstream(outputile, std::ofstream::out);
 		for (auto it = this->binaryRepresentation.begin(); it != this->binaryRepresentation.end(); it++)
 		{
-			for (int i = 0; i < it->second.size(); i++)
+			for (int i = 0, n = it->second.size(); i < n; i++)
 			{
-				//fileStream << (it->second)[i] ? "1" : "0";				
-				fileStream << (it->second).get(i) ? "1" : "0";
+				fileStream << it->second.get(i) ? "1" : "0";
 				fileStream << ";";
 			}
 			fileStream << std::endl;
@@ -88,7 +88,7 @@ public:
 		return this->objectCount;
 	};
 
-	Bitset getBitsetFromKey(unsigned int key) const
+	VariantBitset getBitsetFromKey(unsigned int key) const
 	{
 		assert(binaryRepresentation.find(key) != binaryRepresentation.end());
 		return binaryRepresentation.at(key);

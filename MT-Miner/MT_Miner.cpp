@@ -20,12 +20,12 @@ void MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hyp
 {
 	// build formal context from hypergraph
 	FormalContext formalContext(hypergraph);
-	formalContext.serialize("format_context.csv");
+	//formalContext.serialize("format_context.csv");
 
 	// build binary representation from formal context
 	binaryRepresentation.reset();
 	binaryRepresentation = std::make_shared<BinaryRepresentation>(formalContext);
-	binaryRepresentation->serialize("binary_rep.csv");
+	//binaryRepresentation->serialize("binary_rep.csv");
 
 	if (this->useCloneOptimization)
 	{

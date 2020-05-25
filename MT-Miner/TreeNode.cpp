@@ -156,7 +156,7 @@ std::vector<Itemset> TreeNode::computeMinimalTransversals_iterative(const std::v
 		ItemsetList maxClique = iterativeTailList.maxCliqueTailList.back();
 		iterativeTailList.maxCliqueTailList.pop_back();
 
-		unsigned int lastIndexToTest = toExplore.size();
+		unsigned int lastIndexToTest = static_cast<unsigned int>(toExplore.size());
 		// combine toExplore (left part) with maxClique list (right part) into a combined list
 		ItemsetList combinedItemsetList = toExplore;
 		combinedItemsetList.insert(combinedItemsetList.end(), maxClique.begin(), maxClique.end());
@@ -167,7 +167,7 @@ std::vector<Itemset> TreeNode::computeMinimalTransversals_iterative(const std::v
 		//std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
 		// loop on candidates from toExplore list only
-		for (int i = 0; i < lastIndexToTest; i++)
+		for (unsigned int i = 0; i < lastIndexToTest; i++)
 		{
 			// build newTraverse list
 			ItemsetList newToTraverse;
@@ -222,13 +222,13 @@ std::vector<Itemset> TreeNode::computeMinimalTransversals_iterative(const std::v
 void TreeNode::exploreNextBranch(const ItemsetList& maxClique, const ItemsetList& toExplore, ItemsetList& graph_mt)
 {
 	// store toExploreList max index
-	unsigned int lastIndexToTest = toExplore.size();
+	unsigned int lastIndexToTest = static_cast<unsigned int>(toExplore.size());
 	// combine toExplore (left part) with maxClique list (right part) into a combined list
 	ItemsetList combinedItemsetList = toExplore;
 	combinedItemsetList.insert(combinedItemsetList.end(), maxClique.begin(), maxClique.end());
 
 	// loop on candidates from toExplore list only
-	for (int i = 0; i < lastIndexToTest; i++)
+	for (unsigned int i = 0; i < lastIndexToTest; i++)
 	{
 		// build newTraverse list
 		ItemsetList newToTraverse;

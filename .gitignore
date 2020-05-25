@@ -352,3 +352,18 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+/data
+/frontend
+/bitset-benchmark
+/MT-Miner/hyp2.txt.output
+/MT-Miner/format_context.csv
+/MT-Miner/log.txt
+/MT-Miner/binary_rep.csv
+/MT-Miner/shd
+/MT-Miner/output.txt.out
+/MT-Miner/output.txt
+/MT-Miner/no clone output.txt.out
+/MT-Miner/mt_miner.sh
+/MT-Miner/true.out
+/MT-Miner/true
+/shd

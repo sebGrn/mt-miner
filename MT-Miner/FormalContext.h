@@ -9,6 +9,7 @@
 #endif
 #include <any>
 #include <memory>
+#include <variant>
 
 #include "Bitset.h"
 #include "HyperGraph.h"
@@ -17,12 +18,17 @@ class FormalContext
 {
 private:
 	//typedef std::bitset<ITEM_COUNT> FormalContextBitset;
+	
 	// a formal context is a matrix of bool
 	//std::vector<FormalContextBitset> formalContext;
 	//std::vector<std::any> formalContext;
-	std::vector<Bitset> formalContext;
+	std::vector<VariantBitset> formalContext;
+
+	//std::vector<Bitset> formalContext;
+	
 	// number of columns / number of boolean values
 	unsigned int itemCount;
+	
 	// number of lines
 	unsigned int objectCount;
 
@@ -40,12 +46,11 @@ public:
 		// build formal context
 		for (unsigned int i = 0, n = hypergraph->getObjectCount(); i < n; i++)
 		{
-			// init bitset, all 0's by default
-			Bitset bitset(bitsetSize);
-			
+			VariantBitset bitset(bitsetSize);
+						
 			// loop on hyper graph and build formal context
 			std::vector<unsigned int> line = hypergraph->getLine(i);
-			for (unsigned int j = 0, k = line.size(); j < k; j++)
+			for (size_t j = 0, k = line.size(); j < k; j++)
 			{
 				if (hypergraph->getOneBasedIndex())
 				{
@@ -58,16 +63,15 @@ public:
 				}
 				assert(index >= 0);
 				assert(index < bitsetSize);
-				bitset.set(index);
+				bitset.set(index);				
 			}
 			// add bitset for this object (line)
 			this->formalContext.push_back(bitset);
-
 		}
 	};
 
 	void serialize(const std::string& outputile) const
-	{
+	{		
 		std::ofstream fileStream = std::ofstream(outputile, std::ofstream::out);
 		for (auto it = this->formalContext.begin(); it != this->formalContext.end(); it++)
 		{
@@ -97,7 +101,7 @@ public:
 	bool getBit(unsigned int iObject, unsigned int iAttribute) const
 	{
 		assert(iObject < this->formalContext.size());
-		Bitset bitset = this->formalContext[iObject];
+		auto& bitset = this->formalContext[iObject];
 		return bitset.get(iAttribute);
 	};
 };
