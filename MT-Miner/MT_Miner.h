@@ -23,13 +23,13 @@
 class MT_Miner
 {
 private:
-	///
+	/// TODO --> ATOMIC
 	bool computeMtDone;
 	///
 	bool useCloneOptimization;
 	// binary representation 
-	std::shared_ptr<BinaryRepresentation> binaryRepresentation;
-
+	std::shared_ptr<BinaryRepresentation_impl> binaryRepresentation;
+	
 private:
 	/// this function build a format context from the hypergraph, then build the binary representation
 	void createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hypergraph);

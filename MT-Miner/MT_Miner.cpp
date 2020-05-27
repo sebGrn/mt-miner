@@ -24,7 +24,7 @@ void MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hyp
 
 	// build binary representation from formal context
 	binaryRepresentation.reset();
-	binaryRepresentation = std::make_shared<BinaryRepresentation>(formalContext);
+	binaryRepresentation = std::make_shared<BinaryRepresentation_impl>(formalContext);
 	//binaryRepresentation->serialize("binary_rep.csv");
 
 	if (this->useCloneOptimization)
@@ -73,8 +73,7 @@ ItemsetList MT_Miner::computeMinimalTransversals()
 		{
 			if (n)
 				std::cout << CYAN << "computing minimal transversals in progress : " << secondsToWait * n << " seconds, "
-				<< treeNode.getTotalChildren() << " nodes created, "
-				<< treeNode.getTotalThread() << " threads created"
+				<< treeNode.getTotalChildren() << " nodes created"
 				<< RESET << std::endl;
 			std::this_thread::sleep_for(std::chrono::seconds(secondsToWait));
 			n++;

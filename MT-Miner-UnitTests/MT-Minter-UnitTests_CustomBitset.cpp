@@ -3,9 +3,9 @@
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
-namespace MTMinerUnitTests_bitset
+namespace MTMinerUnitTests_CustomBitset
 {
-	TEST_CLASS(MTMinerUnitTests_bitset)
+	TEST_CLASS(MTMinerUnitTests_CustomBitset)
 	{
 	public:
 		TEST_METHOD(TestingBitsets_equal)
@@ -21,7 +21,7 @@ namespace MTMinerUnitTests_bitset
 				b1.set(i, b);
 			}
 
-			bool equal = b0 == b1;
+			bool equal = b0.bitset_equal(b1);
 			Assert::AreEqual(true, equal);
 		}
 
@@ -41,7 +41,8 @@ namespace MTMinerUnitTests_bitset
 			b1.set(2, true);
 			b1.set(3, true);
 
-			b2 = b0 | b1;
+			b2 = b0;
+			b2.bitset_or(b1);
 
 			Assert::AreEqual(true, b2.get(0));
 			Assert::AreEqual(false, b2.get(1));
@@ -65,7 +66,8 @@ namespace MTMinerUnitTests_bitset
 			b1.set(2, true);
 			b1.set(3, true);
 
-			b2 = b0 & b1;
+			b2 = b0;
+			b2.bitset_and(b1);
 
 			Assert::AreEqual(false, b2.get(0));
 			Assert::AreEqual(false, b2.get(1));

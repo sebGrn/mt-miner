@@ -23,7 +23,7 @@ private:
 	static std::atomic_ullong nbTotalChildren;
 	static std::atomic_int nbRunningThread;
 
-	std::shared_ptr<BinaryRepresentation> binaryRepresentation;
+	std::shared_ptr<BinaryRepresentation_impl> binaryRepresentation;
 
 	/// true if we want to use clone optimization
 	/// a clone is a item from binary representation 
@@ -46,7 +46,7 @@ private:
 	void exploreNextBranch(const ItemsetList& maxClique, const ItemsetList& toExplore, ItemsetList& graph_mt);
 	
 public:
-	TreeNode(bool useCloneOptimization, const std::shared_ptr<BinaryRepresentation>& binaryRepresentation);
+	TreeNode(bool useCloneOptimization, const std::shared_ptr<BinaryRepresentation_impl>& binaryRepresentation);	
 	~TreeNode();
 
 	/// recursive method, going through tree representation 

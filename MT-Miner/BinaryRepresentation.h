@@ -15,13 +15,13 @@
 #include "Bitset.h"
 #include "FormalContext.h"
 
-
 /** 
  * a binary representation is a formal context representation in columns
  * each vector contains the attributes/items boolean values
  * the index of the map is the item number
  * this representation is usefull to compute disjonctif support easyly (with a OR operator)
  */
+template <class T>
 class BinaryRepresentation
 {
 private:
@@ -29,7 +29,7 @@ private:
 	//typedef std::variant<std::bitset<100>, std::bitset<1000>, std::bitset<4000>> BinaryRepBitset;
 
 	///  key/value definition of a binary represention (key as the attribute id, value as the bitset)
-	std::unordered_map<unsigned int, VariantBitset> binaryRepresentation;
+	std::unordered_map<unsigned int, T> binaryRepresentation;
 
 	/// number of objects/lines
 	unsigned int objectCount;
@@ -88,9 +88,16 @@ public:
 		return this->objectCount;
 	};
 
-	VariantBitset getBitsetFromKey(unsigned int key) const
+	T getBitsetFromKey(unsigned int key) const
 	{
 		assert(binaryRepresentation.find(key) != binaryRepresentation.end());
 		return binaryRepresentation.at(key);
 	}
 };
+
+// 
+
+typedef BinaryRepresentation<StaticBitset> BinaryRepresentation_impl;
+//typedef BinaryRepresentation<CustomBitset> BinaryRepresentation_impl;
+//typedef BinaryRepresentation<VariantBitset> BinaryRepresentation_impl;
+

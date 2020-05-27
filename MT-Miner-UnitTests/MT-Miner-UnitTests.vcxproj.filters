@@ -33,7 +33,13 @@
     <ClCompile Include="MT-Miner-UnitTests_ac_no_clone.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MT-Minter-UnitTests_bitset.cpp">
+    <ClCompile Include="MT-Minter-UnitTests_CustomBitset.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MT-Minter-UnitTests_StaticBitset.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MT-Minter-UnitTests_VarianBitset.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
