@@ -9,7 +9,7 @@
 
 /// build binary representation from formal context
 template <class T> 
-BinaryRepresentation<T>::BinaryRepresentation(const FormalContext& context)
+BinaryRepresentation<T>::BinaryRepresentation(const FormalContext_impl& context)
 {
 	this->objectCount = context.getObjectCount();	// 800
 	this->itemCount = context.getItemCount();		// 77
@@ -72,7 +72,7 @@ bool BinaryRepresentation<T>::isEssential(const Itemset& itemset)
 				unsigned int key2 = itemset[i2];
 				
 				T bitset = this->getBitsetFromKey(key2);
-				SumOfN_1Items.bitset_or(bitset);				
+				SumOfN_1Items.bitset_or(bitset);
 			}
 		}
 
@@ -126,7 +126,6 @@ bool BinaryRepresentation<T>::compareItemsets(const Itemset& itemset1, const Ite
 		sameItemset = false;
 	else
 	{
-		//#pragma omp parallel for
 		for (size_t i = 0, n = itemset1.size(); i< n; i++)
 		{
 			assert(i < itemset2.size());
@@ -135,10 +134,7 @@ bool BinaryRepresentation<T>::compareItemsets(const Itemset& itemset1, const Ite
 
 			T bitset1 = this->getBitsetFromKey(columnKey_itemset1);
 			T bitset2 = this->getBitsetFromKey(columnKey_itemset2);
-			T result;
-			result = bitset1;
-			result.bitset_and(bitset2);
-			sameItemset = ((result.bitset_equal(bitset1)) && (result.bitset_equal(bitset2)));
+			return bitset1.bitset_compare(bitset2);
 		}
 	}
 	return sameItemset;
@@ -155,7 +151,7 @@ unsigned int BinaryRepresentation<T>::buildCloneList()
 			if (it1 != it2)
 			{
 				// test if binary representation bitsets are equal (it2 is a clone of it1 ?)
-				if (it1->second.bitset_equal(it2->second))
+				if (it1->second.bitset_compare(it2->second))
 				{
 					// check that original (it1->first) is not already registered as a clone (second) in clonedBitsetIndexes
 					auto it_finder = find_if(clonedBitsetIndexes.begin(), clonedBitsetIndexes.end(), Utils::compare_second_value_of_pair(it1->first));
@@ -209,6 +205,7 @@ bool BinaryRepresentation<T>::containsOriginals(const Itemset& itemset, std::vec
 template class BinaryRepresentation<StaticBitset>;
 template class BinaryRepresentation<VariantBitset>;
 template class BinaryRepresentation<CustomBitset>;
+template class BinaryRepresentation<AnyBitset>;
 
 // --------------------------------------------------------------------------------------------------------------------------------- //
 // --------------------------------------------------------------------------------------------------------------------------------- //

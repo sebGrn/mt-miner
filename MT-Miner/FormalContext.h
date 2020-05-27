@@ -14,15 +14,12 @@
 #include "Bitset.h"
 #include "HyperGraph.h"
 
+template <class T>
 class FormalContext
 {
 private:
-	//typedef std::bitset<ITEM_COUNT> FormalContextBitset;
-	
 	// a formal context is a matrix of bool
-	//std::vector<FormalContextBitset> formalContext;
-	//std::vector<std::any> formalContext;
-	std::vector<VariantBitset> formalContext;
+	std::vector<T> formalContext;
 
 	//std::vector<Bitset> formalContext;
 	
@@ -46,7 +43,7 @@ public:
 		// build formal context
 		for (unsigned int i = 0, n = hypergraph->getObjectCount(); i < n; i++)
 		{
-			VariantBitset bitset(bitsetSize);
+			T bitset(bitsetSize);
 						
 			// loop on hyper graph and build formal context
 			std::vector<unsigned int> line = hypergraph->getLine(i);
@@ -105,3 +102,21 @@ public:
 		return bitset.get(iAttribute);
 	};
 };
+
+// --------------------------------------------------------------------------------------------------------------------------------- //
+// --------------------------------------------------------------------------------------------------------------------------------- //
+
+// template implementation
+template class FormalContext<StaticBitset>;
+template class FormalContext<VariantBitset>;
+template class FormalContext<CustomBitset>;
+template class FormalContext<AnyBitset>;
+
+// --------------------------------------------------------------------------------------------------------------------------------- //
+// --------------------------------------------------------------------------------------------------------------------------------- //
+
+//typedef FormalContext<AnyBitset> FormalContext_impl;
+//typedef FormalContext<StaticBitset> FormalContext_impl;
+typedef FormalContext<CustomBitset> FormalContext_impl;
+//typedef FormalContext<VariantBitset> FormalContext_impl;
+

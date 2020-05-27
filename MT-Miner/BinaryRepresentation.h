@@ -48,7 +48,7 @@ private:
 
 public:
 	/// build binary representation from formal context
-	BinaryRepresentation(const FormalContext& context);
+	BinaryRepresentation(const FormalContext_impl& context);
 	///
 	~BinaryRepresentation();
 	///
@@ -97,6 +97,7 @@ public:
 
 // 
 
+//typedef BinaryRepresentation<AnyBitset> BinaryRepresentation_impl;
 typedef BinaryRepresentation<StaticBitset> BinaryRepresentation_impl;
 //typedef BinaryRepresentation<CustomBitset> BinaryRepresentation_impl;
 //typedef BinaryRepresentation<VariantBitset> BinaryRepresentation_impl;
