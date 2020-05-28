@@ -21,7 +21,7 @@ namespace MTMinerUnitTests_VariantBitset
 				b1.set(i, b);
 			}
 
-			bool equal = b0.bitset_equal(b1);
+			bool equal = b0.bitset_compare(b1);
 			Assert::AreEqual(true, equal);
 		}
 

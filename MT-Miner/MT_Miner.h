@@ -23,8 +23,8 @@
 class MT_Miner
 {
 private:
-	/// TODO --> ATOMIC
-	bool computeMtDone;
+	/// 
+	static std::atomic_bool stop;
 	///
 	bool useCloneOptimization;
 	// binary representation 

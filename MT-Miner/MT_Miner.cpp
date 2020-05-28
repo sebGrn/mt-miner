@@ -3,10 +3,11 @@
 #include "Profiler.h"
 #include "JsonTree.h"
 
+std::atomic_bool MT_Miner::stop(false);
+
 MT_Miner::MT_Miner(const std::shared_ptr<HyperGraph>& hypergraph, bool useCloneOptimization)
 {
 	this->useCloneOptimization = useCloneOptimization;
-	this->computeMtDone = false;
 	
 	createBinaryRepresentation(hypergraph);
 }
@@ -65,22 +66,6 @@ ItemsetList MT_Miner::computeInitalToTraverseList()
 
 ItemsetList MT_Miner::computeMinimalTransversals()
 {
-	// lambda function called during parsing every 20 seconds
-	auto callback = [](bool& done, const TreeNode& treeNode) {
-		
-		const int secondsToWait = 20;
-		int n = 0;
-		while (!done)
-		{
-			if (n)
-				std::cout << CYAN << "computing minimal transversals in progress : " << secondsToWait * n << " seconds, "
-				<< treeNode.getTotalChildren() << " nodes created"
-				<< RESET << std::endl;
-			std::this_thread::sleep_for(std::chrono::seconds(secondsToWait));
-			n++;
-		}
-	};
-
 	auto beginTime = std::chrono::system_clock::now();
 
 	ItemsetList toTraverse = computeInitalToTraverseList();
@@ -88,22 +73,34 @@ ItemsetList MT_Miner::computeMinimalTransversals()
 	// create a graph, then compute minimal transversal from the binary representation
 	TreeNode rootNode(this->useCloneOptimization, this->binaryRepresentation);
 
-	// instanciate new thead for regular log
-	std::thread thread(callback, std::ref(this->computeMtDone), std::ref(rootNode));
+	// lambda function called during parsing every 20 seconds
+	auto ftr = std::async(std::launch::async, [&rootNode]() {
+		const int secondsToWait = 20;
+		int n = 0;
+		while (!stop)
+		{
+			if (n)
+				std::cout << CYAN << "computing minimal transversals in progress : " << secondsToWait * n << " seconds, " 
+				<< rootNode.getTotalChildren() << " nodes created"
+				<< RESET << std::endl;
+			std::this_thread::sleep_for(std::chrono::seconds(secondsToWait));
+			n++;
+		}
+	});
 
 	// compute all minimal transversal from the root node
 	std::vector<Itemset>&& graph_mt = rootNode.computeMinimalTransversals_recursive(toTraverse);
 	//std::vector<Itemset>&& graph_mt = rootNode.computeMinimalTransversals_iterative(toTraverse);
 	
+	// stop the thread and detach it (dont not wait next n seconds)
+	this->stop = true;
+	ftr.get();
+
 	// print timer
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
 	Logger::log(YELLOW, "computing minimal transversals done in ", duration, " ms\n", RESET);
 	for(auto it = Profiler::functionDurationMap.begin(); it != Profiler::functionDurationMap.end(); it++)
 		std::cout << CYAN << "total duration of " << it->first << " : " << it->second.count() << " ms" << RESET << std::endl;
-
-	// stop the thread and detach it (dont not wait next n seconds)
-	this->computeMtDone = true;
-	thread.detach();
 
 	// sort transversals itemset
 	//graph_mt = sortVectorOfItemset(graph_mt);
