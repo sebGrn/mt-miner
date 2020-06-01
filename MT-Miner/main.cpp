@@ -15,8 +15,6 @@
 #include <chrono>
 #include <omp.h>
 
-//using Itemset = std::vector<unsigned int>;
-
 #include "utils.h"
 #include "HypergraphParser.h"
 #include "MT_Miner.h"
@@ -124,7 +122,7 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 		
 		//beginTime = std::chrono::system_clock::now();
 		
-		MT_Miner miner(hypergraph, useCloneOptimization);
+		MT_Miner<CustomBitset> miner(hypergraph, useCloneOptimization);
 		// compute minimal transversals		
 		ItemsetList minimalTransversals = miner.computeMinimalTransversals();
 				
@@ -150,6 +148,7 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 // ----------------------------------------------------------------------------------------------------------- //
 // ----------------------------------------------------------------------------------------------------------- //
 
+
 int main(int argc, char* argv[])
 {
 	// http://research.nii.ac.jp/~uno/dualization.html
@@ -159,7 +158,6 @@ int main(int argc, char* argv[])
 		std::cout << "Usage " << argv[0] << "<filename> <option><outputfile>" << std::endl;
 		return 0;
 	}
-
 	std::string file = argv[1];
 
 	// get parameter list

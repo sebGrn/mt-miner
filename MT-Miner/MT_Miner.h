@@ -20,6 +20,7 @@
  * owns the binary represention
  * create the graphnode that will explore the hypergrapho 
  */
+template <class T>
 class MT_Miner
 {
 private:
@@ -28,7 +29,7 @@ private:
 	///
 	bool useCloneOptimization;
 	// binary representation 
-	std::shared_ptr<BinaryRepresentation_impl> binaryRepresentation;
+	std::shared_ptr<BinaryRepresentation<T>> binaryRepresentation;
 	
 private:
 	/// this function build a format context from the hypergraph, then build the binary representation

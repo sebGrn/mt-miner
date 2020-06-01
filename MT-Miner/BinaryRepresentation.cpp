@@ -17,8 +17,7 @@ BinaryRepresentation<T>::BinaryRepresentation(const FormalContext_impl& context)
 
 	std::vector<double> averageSet;
 
-	T bitset(this->objectCount);
-	
+	T bitset(this->objectCount);	
 	for (unsigned int j = 0; j < this->itemCount; j++)			// 8 on test.txt
 	{
 		// allocate bitset with object count bit (formal context column size)
@@ -43,11 +42,10 @@ BinaryRepresentation<T>::BinaryRepresentation(const FormalContext_impl& context)
 	std::cout << RED << "set bit " << std::accumulate(averageSet.begin(), averageSet.end(), 0.0, lambda) * 100.0 / static_cast<double>(this->objectCount) << "%" << std::endl;
 };
 
-template <class T> 
+template <class T>
 BinaryRepresentation<T>::~BinaryRepresentation()
 {
 }
-
 
 // return true if element is essential
 template <class T>
@@ -71,13 +69,13 @@ bool BinaryRepresentation<T>::isEssential(const Itemset& itemset)
 			{
 				unsigned int key2 = itemset[i2];
 				
-				T bitset = this->getBitsetFromKey(key2);
+				Bitset&& bitset = this->getBitsetFromKey(key2);
 				SumOfN_1Items.bitset_or(bitset);
 			}
 		}
 
 		unsigned int key1 = itemset[i1];
-		T bitset = this->getBitsetFromKey(key1);
+		Bitset&& bitset = this->getBitsetFromKey(key1);
 
 		//#pragma omp parallel for
 		for (unsigned int i = 0; i < this->objectCount; i++)
@@ -103,12 +101,11 @@ template <class T>
 unsigned int BinaryRepresentation<T>::computeDisjonctifSupport(const Itemset& pattern) const
 {
 	T SumOfN_1Items(this->objectCount);
-	std::bitset<800> SumOfN_1Items2(this->objectCount);	
 	for (size_t i = 0, n = pattern.size(); i < n; i++)
 	{
 		unsigned int columnKey = pattern[i];
 
-		T bitset = this->getBitsetFromKey(columnKey);
+		Bitset&& bitset = this->getBitsetFromKey(columnKey);
 		SumOfN_1Items.bitset_or(bitset);
 	}
 
@@ -132,8 +129,8 @@ bool BinaryRepresentation<T>::compareItemsets(const Itemset& itemset1, const Ite
 			unsigned int columnKey_itemset1 = itemset1[i];
 			unsigned int columnKey_itemset2 = itemset2[i];
 
-			T bitset1 = this->getBitsetFromKey(columnKey_itemset1);
-			T bitset2 = this->getBitsetFromKey(columnKey_itemset2);
+			Bitset&& bitset1 = this->getBitsetFromKey(columnKey_itemset1);
+			Bitset&& bitset2 = this->getBitsetFromKey(columnKey_itemset2);
 			return bitset1.bitset_compare(bitset2);
 		}
 	}
@@ -198,14 +195,15 @@ bool BinaryRepresentation<T>::containsOriginals(const Itemset& itemset, std::vec
 	return !originalClonedIndexes.empty();
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------- //
-// --------------------------------------------------------------------------------------------------------------------------------- //
-
-// template implementation
-template class BinaryRepresentation<StaticBitset>;
+// template class implementation
+template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_0>>>;
+template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_1>>>;
+template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_2>>>;
+template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_3>>>;
+template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_4>>>;
+template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_5>>>;
+template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_6>>>;
 template class BinaryRepresentation<VariantBitset>;
 template class BinaryRepresentation<CustomBitset>;
 template class BinaryRepresentation<AnyBitset>;
-
-// --------------------------------------------------------------------------------------------------------------------------------- //
-// --------------------------------------------------------------------------------------------------------------------------------- //
+template class BinaryRepresentation<DynamicBitset>;

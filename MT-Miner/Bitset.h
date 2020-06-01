@@ -5,17 +5,19 @@
 #include <any>
 #include <variant>
 #include <algorithm>
+#include <execution>
 
-#define STATIC_BITSET_SIZE 800
-
-#define SIZE_0	100
-#define SIZE_1	1000
-#define SIZE_2	2500
-#define SIZE_3	5000
-#define SIZE_4	10000
-#define SIZE_5	25000
-#define SIZE_6	50000
+#define SIZE_0	item_count<10>	// 1024
+#define SIZE_1	item_count<11>	// 2048
+#define SIZE_2	item_count<12>	// 4096
+#define SIZE_3	item_count<13>	// 8192
+#define SIZE_4	item_count<14>	// 16348
+#define SIZE_5	item_count<15>	// 32768
+#define SIZE_6	item_count<16>	// 65535
 //#define MAP_BITSET(i)  std::bitset<SIZE_#i#>
+
+template <unsigned N>
+inline constexpr std::uint32_t item_count = 1<<N;
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
@@ -33,16 +35,18 @@ public:
 	virtual void set(unsigned int iAttribute, bool b = true) = 0;
 	virtual Bitset& bitset_or(const Bitset & b) = 0;
 	virtual Bitset& bitset_and(const Bitset & b) = 0;
-	virtual bool bitset_compare(const Bitset& a) = 0;
+	virtual bool bitset_compare(const Bitset& a) const = 0;
 };
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
+template <class T>
 class StaticBitset : public Bitset
 {
-private:	
-	std::bitset<STATIC_BITSET_SIZE> bitset_value;
+private:
+	//std::bitset<SIZE_0> bitset_value;
+	T bitset_value;
 
 public:
 	StaticBitset() : bitset_value()
@@ -97,7 +101,7 @@ public:
 		return *this;
 	}
 
-	bool bitset_compare(const Bitset& a) override
+	bool bitset_compare(const Bitset& a) const override
 	{
 		const StaticBitset& b = dynamic_cast<const StaticBitset&>(a);
 		return b.bitset_value == this->bitset_value;
@@ -113,6 +117,8 @@ public:
 		return *this;
 	}
 };
+
+
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
@@ -225,7 +231,7 @@ public:
 		return *this;
 	};
 
-	bool bitset_compare(const Bitset& b)  override
+	bool bitset_compare(const Bitset& b)  const override
 	{
 		const AnyBitset& a = dynamic_cast<const AnyBitset&>(b);
 		if (this->bitset_size < variant_size[0]) { return std::any_cast<std::bitset<SIZE_0>>(a.bitset_value) == std::any_cast<std::bitset<SIZE_0>>(this->bitset_value); }
@@ -363,7 +369,7 @@ public:
 		return *this;
 	};
 
-	bool bitset_compare(const Bitset& b) override
+	bool bitset_compare(const Bitset& b) const override
 	{
 		return dynamic_cast<const VariantBitset&>(b).bitset_value == this->bitset_value;
 	};
@@ -447,7 +453,7 @@ public:
 	unsigned int count() const
 	{
 		unsigned int count(0);
-		std::for_each(this->bitset_value.begin(), this->bitset_value.end(), [&count, this](unsigned long long v) {
+		std::for_each(std::execution::seq, this->bitset_value.begin(), this->bitset_value.end(), [&count, this](unsigned long long v) {
 			// Brian Kernighan’s Algorithm
 			// https://www.geeksforgeeks.org/count-set-bits-in-an-integer/
 			unsigned long long n(v);
@@ -463,7 +469,7 @@ public:
 	Bitset& bitset_or(const Bitset& b) override
 	{
 		const CustomBitset& a = dynamic_cast<const CustomBitset&>(b);
-		std::transform(a.bitset_value.begin(), a.bitset_value.end(), this->bitset_value.begin(), this->bitset_value.begin(), [](unsigned long long v0, unsigned long long v1) {
+		std::transform(std::execution::seq, a.bitset_value.begin(), a.bitset_value.end(), this->bitset_value.begin(), this->bitset_value.begin(), [](unsigned long long v0, unsigned long long v1) {
 			unsigned long long v(v0);
 			v |= v1;
 			return v;
@@ -475,7 +481,7 @@ public:
 	{
 		const CustomBitset& a = dynamic_cast<const CustomBitset&>(b);
 		CustomBitset bitset(b.size());
-		std::transform(a.bitset_value.begin(), a.bitset_value.end(), this->bitset_value.begin(), this->bitset_value.begin(), [](unsigned long long v0, unsigned long long v1) {
+		std::transform(std::execution::seq, a.bitset_value.begin(), a.bitset_value.end(), this->bitset_value.begin(), this->bitset_value.begin(), [](unsigned long long v0, unsigned long long v1) {
 			unsigned long long v(v0);
 			v &= v1;
 			return v;
@@ -483,7 +489,7 @@ public:
 		return *this;
 	};
 
-	bool bitset_compare(const Bitset& b) override
+	bool bitset_compare(const Bitset& b) const override
 	{
 		if (b.size() != this->bitset_size)
 			return false;
@@ -491,12 +497,7 @@ public:
 		const CustomBitset& a = dynamic_cast<const CustomBitset&>(b);
 		unsigned int n = (this->bitset_size / memory_size) + 1;
 		bool equal = true;
-		for (unsigned int i = 0; i < n; i++)
-		{
-			if (a.bitset_value[i] != this->bitset_value[i])
-				return false;
-		}
-		return equal;
+		return std::equal(a.bitset_value.begin(), a.bitset_value.end(), this->bitset_value.begin());
 	};
 
 	// copy assignment
@@ -508,6 +509,92 @@ public:
 			this->bitset_value.clear();
 			this->bitset_size = a.size();
 			std::copy(a.bitset_value.begin(), a.bitset_value.end(), std::back_inserter(this->bitset_value));
+		}
+		return *this;
+	}
+};
+
+// -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+// -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+class DynamicBitset : public Bitset
+{
+private:
+	boost::dynamic_bitset<> bitset_value;
+
+public:
+	DynamicBitset()
+	{
+		this->bitset_size = 0;
+	};
+
+	DynamicBitset(unsigned int bitsetSize) : bitset_value(bitset_size)
+	{
+		this->bitset_size = bitsetSize;		
+	};
+
+	DynamicBitset(const DynamicBitset& bitset) 
+	{
+		this->bitset_size = bitset.size();
+		this->bitset_value = bitset.bitset_value;
+	};
+
+	void reset(bool b = false)
+	{
+		bitset_value.reset();
+	};
+
+	void set(unsigned int iAttribute, bool b = true)
+	{
+		this->bitset_value[iAttribute] = b;
+	};
+
+	bool get(unsigned int iAttribute) const
+	{
+		assert(iAttribute < size());
+		return this->bitset_value[iAttribute];
+	};
+
+	unsigned int size() const
+	{
+		return this->bitset_size;
+	};
+
+	unsigned int count() const
+	{
+		return static_cast<unsigned int>(this->bitset_value.count());
+	};
+
+	Bitset& bitset_or(const Bitset& b) override
+	{
+		const DynamicBitset& a = dynamic_cast<const DynamicBitset&>(b);
+		this->bitset_value = this->bitset_value | a.bitset_value;
+		return *this;
+	};
+
+	Bitset& bitset_and(const Bitset& b) override
+	{
+		const DynamicBitset& a = dynamic_cast<const DynamicBitset&>(b);
+		this->bitset_value = this->bitset_value & a.bitset_value;
+		return *this;
+	};
+
+	bool bitset_compare(const Bitset& b) const override
+	{
+		if (b.size() != this->bitset_size)
+			return false;
+
+		const DynamicBitset& a = dynamic_cast<const DynamicBitset&>(b);
+		return a.bitset_value == this->bitset_value;
+	};
+
+	// copy assignment
+	DynamicBitset& operator=(const DynamicBitset& other)
+	{
+		if (this != &other)
+		{
+			const DynamicBitset& a = dynamic_cast<const DynamicBitset&>(other);
+			this->bitset_value = a.bitset_value;
 		}
 		return *this;
 	}

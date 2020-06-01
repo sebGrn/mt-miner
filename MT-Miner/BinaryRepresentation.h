@@ -25,9 +25,6 @@ template <class T>
 class BinaryRepresentation
 {
 private:
-	//typedef std::bitset<OBJECT_COUNT> BinaryRepBitset;
-	//typedef std::variant<std::bitset<100>, std::bitset<1000>, std::bitset<4000>> BinaryRepBitset;
-
 	///  key/value definition of a binary represention (key as the attribute id, value as the bitset)
 	std::unordered_map<unsigned int, T> binaryRepresentation;
 
@@ -94,11 +91,3 @@ public:
 		return binaryRepresentation.at(key);
 	}
 };
-
-// 
-
-//typedef BinaryRepresentation<AnyBitset> BinaryRepresentation_impl;
-typedef BinaryRepresentation<StaticBitset> BinaryRepresentation_impl;
-//typedef BinaryRepresentation<CustomBitset> BinaryRepresentation_impl;
-//typedef BinaryRepresentation<VariantBitset> BinaryRepresentation_impl;
-

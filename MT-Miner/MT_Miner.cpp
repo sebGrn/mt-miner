@@ -3,30 +3,37 @@
 #include "Profiler.h"
 #include "JsonTree.h"
 
-std::atomic_bool MT_Miner::stop(false);
+template <class T>
+std::atomic_bool MT_Miner<T>::stop(false);
 
-MT_Miner::MT_Miner(const std::shared_ptr<HyperGraph>& hypergraph, bool useCloneOptimization)
+template <class T>
+MT_Miner<T>::MT_Miner(const std::shared_ptr<HyperGraph>& hypergraph, bool useCloneOptimization)
 {
-	this->useCloneOptimization = useCloneOptimization;
-	
+	this->useCloneOptimization = useCloneOptimization;	
 	createBinaryRepresentation(hypergraph);
 }
 
-MT_Miner::~MT_Miner()
+template <class T>
+MT_Miner<T>::~MT_Miner()
 {
-
 }
 
-void MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hypergraph)
+template <class T>
+void MT_Miner<T>::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hypergraph)
 {
+	//const unsigned int objectCount = hypergraph->getObjectCount();
+	//constexpr std::uint32_t n = objectCount;
+	//constexpr std::uint32_t a = item_count<objectCount>;
+	//std::bitset<a> b;
+
 	// build formal context from hypergraph
 	FormalContext_impl formalContext(hypergraph);
-	formalContext.serialize("format_context.csv");
+	//formalContext.serialize("format_context.csv");
 
 	// build binary representation from formal context
 	binaryRepresentation.reset();
-	binaryRepresentation = std::make_shared<BinaryRepresentation_impl>(formalContext);
-	binaryRepresentation->serialize("binary_rep.csv");
+	binaryRepresentation = std::make_shared<BinaryRepresentation<T>>(formalContext);
+	//binaryRepresentation->serialize("binary_rep.csv");
 
 	if (this->useCloneOptimization)
 	{
@@ -52,7 +59,8 @@ void MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hyp
 	}
 }
 
-ItemsetList MT_Miner::computeInitalToTraverseList()
+template <class T>
+ItemsetList MT_Miner<T>::computeInitalToTraverseList()
 {
 	ItemsetList toTraverse;
 	for (unsigned int i = 1; i <= this->binaryRepresentation->getItemCount(); i++)
@@ -64,7 +72,8 @@ ItemsetList MT_Miner::computeInitalToTraverseList()
 	return toTraverse;
 }
 
-ItemsetList MT_Miner::computeMinimalTransversals()
+template <class T>
+ItemsetList MT_Miner<T>::computeMinimalTransversals()
 {
 	auto beginTime = std::chrono::system_clock::now();
 
@@ -77,14 +86,18 @@ ItemsetList MT_Miner::computeMinimalTransversals()
 	auto ftr = std::async(std::launch::async, [&rootNode]() {
 		const int secondsToWait = 20;
 		int n = 0;
+		auto beginTime = std::chrono::system_clock::now();
 		while (!stop)
 		{
-			if (n)
-				std::cout << CYAN << "computing minimal transversals in progress : " << secondsToWait * n << " seconds, " 
+			auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
+			if(duration > secondsToWait * 1000)
+			{
+				std::cout << CYAN << "computing minimal transversals in progress : " << secondsToWait * n << " seconds, "
 				<< rootNode.getTotalChildren() << " nodes created"
 				<< RESET << std::endl;
-			std::this_thread::sleep_for(std::chrono::seconds(secondsToWait));
-			n++;
+				n++;
+				beginTime = std::chrono::system_clock::now();
+			}			
 		}
 	});
 
@@ -121,3 +134,42 @@ ItemsetList MT_Miner::computeMinimalTransversals()
 	return graph_mt;
 }
 
+// --------------------------------------------------------------------------------------------------------------------------------- //
+// --------------------------------------------------------------------------------------------------------------------------------- //
+
+// template implementation
+template class MT_Miner<StaticBitset<std::bitset<SIZE_0>>>;
+template class MT_Miner<StaticBitset<std::bitset<SIZE_1>>>;
+template class MT_Miner<StaticBitset<std::bitset<SIZE_2>>>;
+template class MT_Miner<StaticBitset<std::bitset<SIZE_3>>>;
+template class MT_Miner<StaticBitset<std::bitset<SIZE_4>>>;
+template class MT_Miner<StaticBitset<std::bitset<SIZE_5>>>;
+template class MT_Miner<StaticBitset<std::bitset<SIZE_6>>>;
+template class MT_Miner<VariantBitset>;
+template class MT_Miner<CustomBitset>;
+template class MT_Miner<AnyBitset>;
+template class MT_Miner<DynamicBitset>;
+
+
+// --------------------------------------------------------------------------------------------------------------------------------- //
+// --------------------------------------------------------------------------------------------------------------------------------- //
+/*
+// template implementation
+template class BinaryRepresentation<StaticBitset>;
+template class BinaryRepresentation<VariantBitset>;
+template class BinaryRepresentation<CustomBitset>;
+template class BinaryRepresentation<AnyBitset>;
+template class BinaryRepresentation<DynamicBitset>;
+
+// --------------------------------------------------------------------------------------------------------------------------------- //
+// --------------------------------------------------------------------------------------------------------------------------------- //
+
+// template implementation
+template class TreeNode<StaticBitset>;
+template class TreeNode<VariantBitset>;
+template class TreeNode<CustomBitset>;
+template class TreeNode<AnyBitset>;
+template class TreeNode<DynamicBitset>;
+*/
+// --------------------------------------------------------------------------------------------------------------------------------- //
+// --------------------------------------------------------------------------------------------------------------------------------- //

@@ -16,6 +16,7 @@
 /**
  * Minimal tranversals are found while running through a tree which is dynamically build
  */
+template <class T>
 class TreeNode
 {
 private:
@@ -23,10 +24,10 @@ private:
 	static std::atomic_ullong nbTotalChildren;
 	static std::atomic_int nbRunningThread;
 
-	std::shared_ptr<BinaryRepresentation_impl> binaryRepresentation;
+	std::shared_ptr<BinaryRepresentation<T>> binaryRepresentation;
 
 	/// true if we want to use clone optimization
-	/// a clone is a item from binary representation 
+	/// a clone is an item from binary representation 
 	bool useCloneOptimization;
 
 	bool useMultitheadOptimization;
@@ -46,7 +47,7 @@ private:
 	void exploreNextBranch(const ItemsetList& maxClique, const ItemsetList& toExplore, ItemsetList& graph_mt);
 	
 public:
-	TreeNode(bool useCloneOptimization, const std::shared_ptr<BinaryRepresentation_impl>& binaryRepresentation);	
+	TreeNode(bool useCloneOptimization, const std::shared_ptr<BinaryRepresentation<T>>& binaryRepresentation);	
 	~TreeNode();
 
 	/// recursive method, going through tree representation 

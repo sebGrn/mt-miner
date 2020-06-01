@@ -8,6 +8,8 @@
 #define PCH_H
 
 // add headers that you want to pre-compile here
+#include <iomanip>
+
 #include "../MT-Miner/FormalContext.h"
 #include "../MT-Miner/HyperGraph.h"
 #include "../MT-Miner/BinaryRepresentation.h"

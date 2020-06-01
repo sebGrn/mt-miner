@@ -22,7 +22,7 @@ namespace MTMinerUnitTests_test
 			Assert::AreEqual(8, itemCount);
 
 			// allocate miner
-			MT_Miner miner(hypergraph, true);
+			MT_Miner<StaticBitset<std::bitset<SIZE_0>>> miner(hypergraph, true);
 
 			Itemset item1{ 1 };
 			int disjonctifSupport = miner.computeDisjonctifSupport(item1);
@@ -47,7 +47,7 @@ namespace MTMinerUnitTests_test
 			bool parserResult = parser.parse("../../data/test.txt");
 			Assert::AreEqual(true, parserResult);
 
-			MT_Miner miner(parser.getHypergraph(), true);
+			MT_Miner<StaticBitset<std::bitset<SIZE_0>>> miner(parser.getHypergraph(), true);
 
 			// compute minimal transversals
 			std::vector<Itemset>&& minimalTransversals = miner.computeMinimalTransversals();
@@ -61,7 +61,7 @@ namespace MTMinerUnitTests_test
 			bool parserResult = parser.parse("../../data/test_clone.txt");
 			Assert::AreEqual(true, parserResult);
 
-			MT_Miner miner(parser.getHypergraph(), false);
+			MT_Miner<StaticBitset<std::bitset<SIZE_0>>> miner(parser.getHypergraph(), false);
 
 			// compute minimal transversals
 			std::vector<Itemset>&& minimalTransversals = miner.computeMinimalTransversals();
@@ -75,7 +75,7 @@ namespace MTMinerUnitTests_test
 			bool parserResult = parser.parse("../../data/test_clone.txt");
 			Assert::AreEqual(true, parserResult);
 
-			MT_Miner miner(parser.getHypergraph(), true);
+			MT_Miner<StaticBitset<std::bitset<SIZE_0>>> miner(parser.getHypergraph(), true);
 
 			// compute minimal transversals
 			std::vector<Itemset>&& minimalTransversals = miner.computeMinimalTransversals();

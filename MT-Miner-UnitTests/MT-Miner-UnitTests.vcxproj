@@ -167,6 +167,7 @@
     <ClCompile Include="MT-Miner-UnitTests_hyp_clone.cpp" />
     <ClCompile Include="MT-Miner-UnitTests_hyp_no_clone.cpp" />
     <ClCompile Include="MT-Miner-UnitTests_test.cpp" />
+    <ClCompile Include="MT-Minter-UnitTests_Bitset_benchmark.cpp" />
     <ClCompile Include="MT-Minter-UnitTests_CustomBitset.cpp" />
     <ClCompile Include="MT-Minter-UnitTests_StaticBitset.cpp" />
     <ClCompile Include="MT-Minter-UnitTests_VarianBitset.cpp" />

@@ -3,22 +3,25 @@
 #include "Profiler.h"
 #include "JsonTree.h"
 
-std::atomic_int TreeNode::nbRunningThread(0);
-std::atomic_ullong TreeNode::nbTotalChildren(0);
-std::atomic_int TreeNode::processorCount(std::thread::hardware_concurrency());
+template <class T> std::atomic_int TreeNode<T>::nbRunningThread(0);
+template <class T> std::atomic_ullong TreeNode<T>::nbTotalChildren(0);
+template <class T> std::atomic_int TreeNode<T>::processorCount(std::thread::hardware_concurrency());
 
-TreeNode::TreeNode(bool useCloneOptimization, const std::shared_ptr<BinaryRepresentation_impl>& binaryRepresentation)
+template <class T>
+TreeNode<T>::TreeNode(bool useCloneOptimization, const std::shared_ptr<BinaryRepresentation<T>>& binaryRepresentation)
 {
 	this->binaryRepresentation = binaryRepresentation;
 	this->useCloneOptimization = useCloneOptimization;
 	this->useMultitheadOptimization = true;
 }
 
-TreeNode::~TreeNode()
+template <class T>
+TreeNode<T>::~TreeNode()
 {
 }
 
-void TreeNode::buildClonedCombination(const Itemset& currentItem, std::vector<Itemset>& clonedCombination, const std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes)
+template <class T>
+void TreeNode<T>::buildClonedCombination(const Itemset& currentItem, std::vector<Itemset>& clonedCombination, const std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes)
 {
 	for (auto it = originalClonedIndexes.begin(); it != originalClonedIndexes.end(); it++)
 	{
@@ -39,7 +42,8 @@ void TreeNode::buildClonedCombination(const Itemset& currentItem, std::vector<It
 	}
 }
 
-void TreeNode::updateListsFromToTraverse(const ItemsetList& toTraverse, ItemsetList& maxClique, ItemsetList& toExplore, ItemsetList& graph_mt)
+template <class T>
+void TreeNode<T>::updateListsFromToTraverse(const ItemsetList& toTraverse, ItemsetList& maxClique, ItemsetList& toExplore, ItemsetList& graph_mt)
 {
 	maxClique.clear();
 	toExplore.clear();
@@ -98,7 +102,8 @@ void TreeNode::updateListsFromToTraverse(const ItemsetList& toTraverse, ItemsetL
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
-std::vector<Itemset> TreeNode::computeMinimalTransversals_iterative(const std::vector<Itemset>& toTraverse)
+template <class T>
+std::vector<Itemset> TreeNode<T>::computeMinimalTransversals_iterative(const std::vector<Itemset>& toTraverse)
 {
 	typedef std::vector<Itemset> ItemsetList;
 
@@ -219,7 +224,8 @@ std::vector<Itemset> TreeNode::computeMinimalTransversals_iterative(const std::v
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
-void TreeNode::exploreNextBranch(const ItemsetList& maxClique, const ItemsetList& toExplore, ItemsetList& graph_mt)
+template <class T>
+void TreeNode<T>::exploreNextBranch(const ItemsetList& maxClique, const ItemsetList& toExplore, ItemsetList& graph_mt)
 {
 	// store toExploreList max index
 	unsigned int lastIndexToTest = static_cast<unsigned int>(toExplore.size());
@@ -270,7 +276,8 @@ void TreeNode::exploreNextBranch(const ItemsetList& maxClique, const ItemsetList
 	}
 }
 
-std::vector<Itemset> TreeNode::computeMinimalTransversals_recursive(const std::vector<Itemset>& toTraverse)
+template <class T>
+std::vector<Itemset> TreeNode<T>::computeMinimalTransversals_recursive(const std::vector<Itemset>& toTraverse)
 {
 	// test trivial case
 	if (toTraverse.empty())
@@ -308,12 +315,6 @@ std::vector<Itemset> TreeNode::computeMinimalTransversals_recursive(const std::v
 
 			nbRunningThread--;
 		}
-
-		//std::for_each(futures.begin(), futures.end(), [&graph_mt](std::future<ItemsetList>& future) {
-		//	// wait here all tasks to finish (barrier), corresponding to all the children tasks executed in parallel
-		//	ItemsetList child_mt = future.get();
-		//	std::copy(child_mt.begin(), child_mt.end(), std::back_inserter(graph_mt));
-		//});
 	}
 	catch (std::system_error& e)
 	{
@@ -327,8 +328,24 @@ std::vector<Itemset> TreeNode::computeMinimalTransversals_recursive(const std::v
 	{
 		std::cout << "unknown exception" << std::endl;
 	}
-
 	return graph_mt;
 }
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+// --------------------------------------------------------------------------------------------------------------------------------- //
+// --------------------------------------------------------------------------------------------------------------------------------- //
+
+// template implementation
+template class TreeNode<StaticBitset<std::bitset<SIZE_0>>>;
+template class TreeNode<StaticBitset<std::bitset<SIZE_1>>>;
+template class TreeNode<StaticBitset<std::bitset<SIZE_2>>>;
+template class TreeNode<StaticBitset<std::bitset<SIZE_3>>>;
+template class TreeNode<StaticBitset<std::bitset<SIZE_4>>>;
+template class TreeNode<StaticBitset<std::bitset<SIZE_5>>>;
+template class TreeNode<StaticBitset<std::bitset<SIZE_6>>>;
+template class TreeNode<VariantBitset>;
+template class TreeNode<CustomBitset>;
+template class TreeNode<AnyBitset>;
+template class TreeNode<DynamicBitset>;
+
+// --------------------------------------------------------------------------------------------------------------------------------- //
+// --------------------------------------------------------------------------------------------------------------------------------- //

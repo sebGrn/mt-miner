@@ -3,7 +3,7 @@
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
-namespace MTMinerUnitTests_VariantBitset
+namespace MTMinerUnitTests_Bitset
 {
 	TEST_CLASS(MTMinerUnitTests_VariantBitset)
 	{

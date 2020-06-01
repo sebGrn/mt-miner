@@ -107,7 +107,13 @@ public:
 // --------------------------------------------------------------------------------------------------------------------------------- //
 
 // template implementation
-template class FormalContext<StaticBitset>;
+template class FormalContext<StaticBitset<std::bitset<SIZE_0>>>;
+template class FormalContext<StaticBitset<std::bitset<SIZE_1>>>;
+template class FormalContext<StaticBitset<std::bitset<SIZE_2>>>;
+template class FormalContext<StaticBitset<std::bitset<SIZE_3>>>;
+template class FormalContext<StaticBitset<std::bitset<SIZE_4>>>;
+template class FormalContext<StaticBitset<std::bitset<SIZE_5>>>;
+template class FormalContext<StaticBitset<std::bitset<SIZE_6>>>;
 template class FormalContext<VariantBitset>;
 template class FormalContext<CustomBitset>;
 template class FormalContext<AnyBitset>;
