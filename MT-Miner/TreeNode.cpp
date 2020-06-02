@@ -3,9 +3,18 @@
 #include "Profiler.h"
 #include "JsonTree.h"
 
-template <class T> std::atomic_int TreeNode<T>::nbRunningThread(0);
+//template <class T> std::atomic_int TreeNode<T>::nbRunningThread(0);
 template <class T> std::atomic_ullong TreeNode<T>::nbTotalChildren(0);
-template <class T> std::atomic_int TreeNode<T>::processorCount(std::thread::hardware_concurrency());
+//template <class T> std::atomic_int TreeNode<T>::processorCount(std::thread::hardware_concurrency());
+
+// to avoid interleaved outputs
+template <class T> std::mutex TreeNode<T>::output_guard;
+// synchro stuff
+template <class T> std::deque<std::future<void>> TreeNode<T>::task_queue;
+template <class T> std::mutex TreeNode<T>::task_guard;
+template <class T> std::condition_variable TreeNode<T>::task_signal;
+template <class T> std::atomic_int TreeNode<T>::pending_task_count(0);
+
 
 template <class T>
 TreeNode<T>::TreeNode(bool useCloneOptimization, const std::shared_ptr<BinaryRepresentation<T>>& binaryRepresentation)
@@ -101,7 +110,7 @@ void TreeNode<T>::updateListsFromToTraverse(const ItemsetList& toTraverse, Items
 }
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
-
+/*
 template <class T>
 std::vector<Itemset> TreeNode<T>::computeMinimalTransversals_iterative(const std::vector<Itemset>& toTraverse)
 {
@@ -258,7 +267,8 @@ void TreeNode<T>::exploreNextBranch(const ItemsetList& maxClique, const ItemsetL
 			this->children.push_back(node);
 			nbTotalChildren++;
 
-			// recurse
+			//
+			auto subtask = std::async(std::launch::deferred, node_function, k);
 			if (this->useMultitheadOptimization && nbRunningThread < processorCount)
 			{
 				// create thread for the top nodes only
@@ -329,6 +339,185 @@ std::vector<Itemset> TreeNode<T>::computeMinimalTransversals_recursive(const std
 		std::cout << "unknown exception" << std::endl;
 	}
 	return graph_mt;
+}
+*/
+// --------------------------------------------------------------------------------------------------------------------------------- //
+template <class T>
+void TreeNode<T>::computeMinimalTransversals_task(const std::vector<Itemset>& toTraverse)
+{
+	{// TRACE
+		const std::lock_guard<std::mutex> lock(output_guard);
+		std::cout << "\t\t\t\t\t[" << std::this_thread::get_id() << "]";
+	}
+
+	// test trivial case
+	if (toTraverse.empty())
+		return;
+	//return ItemsetList();
+
+	// contains list of itemsets that will be combined to the candidates
+	ItemsetList maxClique;
+	// contains list of itemsets that are candidates
+	ItemsetList toExplore;
+	// contains the final minimal transverals for this node
+	ItemsetList graph_mt;
+	// update lists from toTraverse
+	this->updateListsFromToTraverse(toTraverse, maxClique, toExplore, graph_mt);
+
+	//Logger::log("toExplore list", ItemsetListToString(toExplore), "\n");
+	//Logger::log("maxClique list", ItemsetListToString(maxClique), "\n");
+	// add json node for js visualisation
+	//JsonTree::addJsonNode(toExplore);
+
+	// build new toTraverse list and explore next branch
+	if (!toExplore.empty())
+	{
+		// store toExploreList max index
+		unsigned int lastIndexToTest = static_cast<unsigned int>(toExplore.size());
+		// combine toExplore (left part) with maxClique list (right part) into a combined list
+		ItemsetList combinedItemsetList = toExplore;
+		combinedItemsetList.insert(combinedItemsetList.end(), maxClique.begin(), maxClique.end());
+
+		// loop on candidates from toExplore list only
+		for (unsigned int i = 0; i < lastIndexToTest; i++)
+		{
+			// build newTraverse list
+			ItemsetList newToTraverse;
+			Itemset toCombinedLeft = combinedItemsetList[i];
+			// combine each element between [0, lastIndexToTest] with the entire combined itemset list
+			for (unsigned int j = i + 1; j < combinedItemsetList.size(); j++)
+			{
+				assert(j < combinedItemsetList.size());
+				Itemset toCombinedRight = combinedItemsetList[j];
+				Itemset combinedItemset = Utils::combineItemset(toCombinedLeft, toCombinedRight);
+
+				// check if combined item is containing a clone (if true, do not compute the minimal transverals) and if combined itemset is essential
+				if (!this->binaryRepresentation->containsAClone(combinedItemset) && binaryRepresentation->isEssential(combinedItemset))
+					newToTraverse.push_back(combinedItemset);
+			}
+
+			if (!newToTraverse.empty())
+			{
+				// create a new child node for this newToTraverse list and add the node as a child
+				std::shared_ptr<TreeNode> node = std::make_shared<TreeNode>(this->useCloneOptimization, this->binaryRepresentation);
+				this->children.push_back(node);
+				nbTotalChildren++;
+
+				// emit recursive task
+				auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, node, std::move(newToTraverse));
+				{// TRACE
+					const std::lock_guard<std::mutex> lock(output_guard);
+					std::cout << "\t\t\t\t\t[" << std::this_thread::get_id() << "]";
+				}
+				{
+					const std::lock_guard<std::mutex> lock(task_guard);
+					task_queue.emplace_back(std::move(subtask));
+					++pending_task_count;
+				}
+				task_signal.notify_one(); // be sure at least one unit is awaken
+			}
+		}
+
+		// terminate task
+		if (!--pending_task_count)
+		{
+			{// TRACE
+				std::cout << "\t\t\t\t\t[" << std::this_thread::get_id() << "]";
+				std::cout << "\tEMIT SHUTDOWN SIGNAL " << std::endl;
+			}
+
+			// awake all idle units for auto-shutdown
+			task_signal.notify_all();
+		}
+		{// TRACE
+			const std::lock_guard<std::mutex> lock(output_guard);
+			std::cout << "\t\t\t\t\t[" << std::this_thread::get_id() << "]";
+		}
+	}
+}
+
+template <class T>
+std::vector<Itemset> TreeNode<T>::computeMinimalTransversals(const std::vector<Itemset>& toTraverse)
+{
+	std::vector<Itemset> result_mt;
+
+	std::cout << "START system [" << std::this_thread::get_id() << "]" << std::endl;
+
+	// emit initial task
+	auto task = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(toTraverse));
+	{// TRACE
+		std::cout << "\t\t\t\t\t[" << std::this_thread::get_id() << "]";
+		std::cout << "\tSPAWN task " << 0 << std::endl;
+	}
+	{
+		const std::lock_guard<std::mutex> lock(task_guard);
+		this->task_queue.emplace_back(std::move(task));
+		++pending_task_count;
+	}
+	
+	// launch processing units
+	std::list<std::thread> units;
+	for (auto n = std::thread::hardware_concurrency(); --n;)
+	{
+		units.emplace_back(std::thread([n, result_mt]()
+		{
+			{// TRACE
+				const std::lock_guard<std::mutex> lock(output_guard);
+				std::cout << "Unit #" << n;
+				std::cout << "\tLAUNCH [" << std::this_thread::get_id() << "]" << std::endl;
+			}
+
+			std::unique_lock<std::mutex> lock(task_guard);
+			while (true)
+			{
+				if (!task_queue.empty())
+
+				{
+					// pick a task
+					auto task = std::move(task_queue.front());
+					task_queue.pop_front();
+					lock.unlock(); // unlock while processing task
+					{
+						// process task
+						task.get();
+						//std::copy(mt.begin(), mt.end(), std::back_inserter(result_mt));
+					}
+					lock.lock(); // reacquire lock
+				}
+				else if (!pending_task_count)
+					break;
+				else
+				{
+					{// TRACE
+						const std::lock_guard<std::mutex> lock(output_guard);
+						std::cout << "Unit #" << n;
+						std::cout << "\tPAUSE" << std::endl;
+					}
+					// IDLE
+					task_signal.wait(lock);
+					{// TRACE
+						const std::lock_guard<std::mutex> lock(output_guard);
+						std::cout << "Unit #" << n;
+						std::cout << "\tAWAKE" << std::endl;
+					}
+				}
+			}
+			{// TRACE
+				const std::lock_guard<std::mutex> lock(output_guard);
+				std::cout << "Unit #" << n;
+				std::cout << "\tTERMINATE {";
+			}
+
+		}));
+	}
+
+	// wait for shutdown
+	for (auto& unit : units)
+	{
+		unit.join();
+	}
+	
+	return result_mt;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------- //

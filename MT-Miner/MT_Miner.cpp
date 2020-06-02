@@ -85,7 +85,7 @@ ItemsetList MT_Miner<T>::computeMinimalTransversals()
 	// lambda function called during parsing every 20 seconds
 	auto ftr = std::async(std::launch::async, [&rootNode]() {
 		const int secondsToWait = 20;
-		int n = 0;
+		int n = 1;
 		auto beginTime = std::chrono::system_clock::now();
 		while (!stop)
 		{
@@ -102,7 +102,8 @@ ItemsetList MT_Miner<T>::computeMinimalTransversals()
 	});
 
 	// compute all minimal transversal from the root node
-	std::vector<Itemset>&& graph_mt = rootNode.computeMinimalTransversals_recursive(toTraverse);
+	std::vector<Itemset>&& graph_mt = rootNode.computeMinimalTransversals(toTraverse);
+	//std::vector<Itemset>&& graph_mt = rootNode.computeMinimalTransversals_recursive(toTraverse);
 	//std::vector<Itemset>&& graph_mt = rootNode.computeMinimalTransversals_iterative(toTraverse);
 	
 	// stop the thread and detach it (dont not wait next n seconds)
