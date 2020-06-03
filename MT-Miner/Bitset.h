@@ -2,10 +2,10 @@
 #include <boost/dynamic_bitset.hpp>
 #include <bitset>
 #include <cassert>
-#include <any>
-#include <variant>
+//#include <any>
+//#include <variant>
 #include <algorithm>
-#include <execution>
+//#include <execution>
 
 #define SIZE_0	item_count<10>	// 1024
 #define SIZE_1	item_count<11>	// 2048
@@ -122,7 +122,7 @@ public:
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
-
+/*
 class AnyBitset : public Bitset
 {
 private:
@@ -256,10 +256,10 @@ public:
 		return *this;
 	}
 };
-
+*/
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
-
+/*
 class VariantBitset : public Bitset
 {
 
@@ -386,7 +386,7 @@ public:
 		return *this;
 	}
 };
-
+*/
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
@@ -453,7 +453,7 @@ public:
 	unsigned int count() const
 	{
 		unsigned int count(0);
-		std::for_each(std::execution::seq, this->bitset_value.begin(), this->bitset_value.end(), [&count, this](unsigned long long v) {
+		std::for_each(this->bitset_value.begin(), this->bitset_value.end(), [&count, this](unsigned long long v) {
 			// Brian Kernighan’s Algorithm
 			// https://www.geeksforgeeks.org/count-set-bits-in-an-integer/
 			unsigned long long n(v);
@@ -469,7 +469,7 @@ public:
 	Bitset& bitset_or(const Bitset& b) override
 	{
 		const CustomBitset& a = dynamic_cast<const CustomBitset&>(b);
-		std::transform(std::execution::seq, a.bitset_value.begin(), a.bitset_value.end(), this->bitset_value.begin(), this->bitset_value.begin(), [](unsigned long long v0, unsigned long long v1) {
+		std::transform(a.bitset_value.begin(), a.bitset_value.end(), this->bitset_value.begin(), this->bitset_value.begin(), [](unsigned long long v0, unsigned long long v1) {
 			unsigned long long v(v0);
 			v |= v1;
 			return v;
@@ -481,7 +481,7 @@ public:
 	{
 		const CustomBitset& a = dynamic_cast<const CustomBitset&>(b);
 		CustomBitset bitset(b.size());
-		std::transform(std::execution::seq, a.bitset_value.begin(), a.bitset_value.end(), this->bitset_value.begin(), this->bitset_value.begin(), [](unsigned long long v0, unsigned long long v1) {
+		std::transform(a.bitset_value.begin(), a.bitset_value.end(), this->bitset_value.begin(), this->bitset_value.begin(), [](unsigned long long v0, unsigned long long v1) {
 			unsigned long long v(v0);
 			v &= v1;
 			return v;

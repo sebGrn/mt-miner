@@ -342,9 +342,9 @@ template class TreeNode<StaticBitset<std::bitset<SIZE_3>>>;
 template class TreeNode<StaticBitset<std::bitset<SIZE_4>>>;
 template class TreeNode<StaticBitset<std::bitset<SIZE_5>>>;
 template class TreeNode<StaticBitset<std::bitset<SIZE_6>>>;
-template class TreeNode<VariantBitset>;
+//template class TreeNode<VariantBitset>;
 template class TreeNode<CustomBitset>;
-template class TreeNode<AnyBitset>;
+//template class TreeNode<AnyBitset>;
 template class TreeNode<DynamicBitset>;
 
 // --------------------------------------------------------------------------------------------------------------------------------- //

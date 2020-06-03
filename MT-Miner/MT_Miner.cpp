@@ -80,10 +80,10 @@ ItemsetList MT_Miner<T>::computeMinimalTransversals()
 	ItemsetList toTraverse = computeInitalToTraverseList();
 
 	// create a graph, then compute minimal transversal from the binary representation
-	TreeNode rootNode(this->useCloneOptimization, this->binaryRepresentation);
+	TreeNode<T> rootNode(this->useCloneOptimization, this->binaryRepresentation);
 
 	// lambda function called during parsing every 20 seconds
-	auto ftr = std::async(std::launch::async, [&rootNode]() {
+	auto ftr = std::async(std::launch::async, [&]() {
 		const int secondsToWait = 20;
 		int n = 0;
 		auto beginTime = std::chrono::system_clock::now();
@@ -145,9 +145,9 @@ template class MT_Miner<StaticBitset<std::bitset<SIZE_3>>>;
 template class MT_Miner<StaticBitset<std::bitset<SIZE_4>>>;
 template class MT_Miner<StaticBitset<std::bitset<SIZE_5>>>;
 template class MT_Miner<StaticBitset<std::bitset<SIZE_6>>>;
-template class MT_Miner<VariantBitset>;
+//template class MT_Miner<VariantBitset>;
 template class MT_Miner<CustomBitset>;
-template class MT_Miner<AnyBitset>;
+//template class MT_Miner<AnyBitset>;
 template class MT_Miner<DynamicBitset>;
 
 
