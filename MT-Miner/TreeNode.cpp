@@ -10,7 +10,7 @@ template <class T> std::atomic_ullong TreeNode<T>::nbTotalChildren(0);
 // to avoid interleaved outputs
 template <class T> std::mutex TreeNode<T>::output_guard;
 // synchro stuff
-template <class T> std::deque<std::future<void>> TreeNode<T>::task_queue;
+template <class T> std::deque<std::future<std::vector<Itemset>>> TreeNode<T>::task_queue;
 template <class T> std::mutex TreeNode<T>::task_guard;
 template <class T> std::condition_variable TreeNode<T>::task_signal;
 template <class T> std::atomic_int TreeNode<T>::pending_task_count(0);
@@ -342,18 +342,19 @@ std::vector<Itemset> TreeNode<T>::computeMinimalTransversals_recursive(const std
 }
 */
 // --------------------------------------------------------------------------------------------------------------------------------- //
+/*
 template <class T>
-void TreeNode<T>::computeMinimalTransversals_task(const std::vector<Itemset>& toTraverse)
+std::vector<Itemset> TreeNode<T>::computeMinimalTransversals_task(const std::vector<Itemset>& toTraverse)
 {
 	{// TRACE
 		const std::lock_guard<std::mutex> lock(output_guard);
 		std::cout << "\t\t\t\t\t[" << std::this_thread::get_id() << "]";
+		std::cout << "\tSTART task " << std::endl;
 	}
 
 	// test trivial case
 	if (toTraverse.empty())
-		return;
-	//return ItemsetList();
+		return ItemsetList();
 
 	// contains list of itemsets that will be combined to the candidates
 	ItemsetList maxClique;
@@ -403,11 +404,16 @@ void TreeNode<T>::computeMinimalTransversals_task(const std::vector<Itemset>& to
 				this->children.push_back(node);
 				nbTotalChildren++;
 
+				// do not create a thread for each node, compute minimal transversals for the branch
+				//std::vector<Itemset>&& graph_mt_child = node->computeMinimalTransversals_task(std::move(newToTraverse));
+				//std::copy(graph_mt_child.begin(), graph_mt_child.end(), std::back_inserter(graph_mt));
+
 				// emit recursive task
 				auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, node, std::move(newToTraverse));
 				{// TRACE
 					const std::lock_guard<std::mutex> lock(output_guard);
 					std::cout << "\t\t\t\t\t[" << std::this_thread::get_id() << "]";
+					std::cout << "\tSPAWN task " << std::endl;
 				}
 				{
 					const std::lock_guard<std::mutex> lock(task_guard);
@@ -425,16 +431,72 @@ void TreeNode<T>::computeMinimalTransversals_task(const std::vector<Itemset>& to
 				std::cout << "\t\t\t\t\t[" << std::this_thread::get_id() << "]";
 				std::cout << "\tEMIT SHUTDOWN SIGNAL " << std::endl;
 			}
-
 			// awake all idle units for auto-shutdown
 			task_signal.notify_all();
 		}
 		{// TRACE
 			const std::lock_guard<std::mutex> lock(output_guard);
 			std::cout << "\t\t\t\t\t[" << std::this_thread::get_id() << "]";
+			std::cout << "\tCOMPLETE task " << Utils::itemsetListToString(graph_mt) << " " << graph_mt.size() << std::endl;
 		}
 	}
-}
+	return graph_mt;
+}*/
+
+template <class T>
+int TreeNode<T>::node_function(int task_id)
+{
+	/*
+	{// TRACE
+		const std::lock_guard<std::mutex> lock(output_guard);
+		std::cout << "\t\t\t\t\t[" << std::this_thread::get_id() << "]";
+		std::cout << "\tSTART task " << task_id << std::endl;
+	}
+	// emit some recursive tasks
+	if (task_id < 5 || (task_id > 99 && task_id < 105))
+	{
+		for (auto n = 10; --n;)
+		{
+			auto k = task_id * 10 + n;
+			auto subtask = std::async(std::launch::deferred, &TreeNode::node_function, k);
+			{// TRACE
+				const std::lock_guard<std::mutex> lock(output_guard);
+				std::cout << "\t\t\t\t\t[" << std::this_thread::get_id() << "]";
+				std::cout << "\tSPAWN task " << k << std::endl;
+			}
+			{
+				const std::lock_guard<std::mutex> lock(task_guard);
+				task_queue.emplace_back(std::move(subtask));
+				++pending_task_count;
+			}
+			task_signal.notify_one(); // be sure at least one unit is awaken
+
+			// modify delay from 1 to 100 to see idle behaviour
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		}
+	}
+	// DUMMY WORK
+	std::this_thread::sleep_for(std::chrono::milliseconds((task_id % 3) * 100));
+
+	// terminate task
+	if (!--pending_task_count)
+	{
+		{// TRACE
+			std::cout << "\t\t\t\t\t[" << std::this_thread::get_id() << "]";
+			std::cout << "\tEMIT SHUTDOWN SIGNAL " << std::endl;
+		}
+		// awake all idle units for auto-shutdown
+		task_signal.notify_all();
+	}
+	{// TRACE
+		const std::lock_guard<std::mutex> lock(output_guard);
+		std::cout << "\t\t\t\t\t[" << std::this_thread::get_id() << "]";
+		std::cout << "\tCOMPLETE task " << task_id << std::endl;
+	}
+	return task_id;
+	*/
+	return 1;
+};
 
 template <class T>
 std::vector<Itemset> TreeNode<T>::computeMinimalTransversals(const std::vector<Itemset>& toTraverse)
@@ -444,71 +506,76 @@ std::vector<Itemset> TreeNode<T>::computeMinimalTransversals(const std::vector<I
 	std::cout << "START system [" << std::this_thread::get_id() << "]" << std::endl;
 
 	// emit initial task
-	auto task = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(toTraverse));
+	auto task = std::async(std::launch::deferred, &TreeNode::node_function, 0);
 	{// TRACE
 		std::cout << "\t\t\t\t\t[" << std::this_thread::get_id() << "]";
 		std::cout << "\tSPAWN task " << 0 << std::endl;
 	}
 	{
 		const std::lock_guard<std::mutex> lock(task_guard);
-		this->task_queue.emplace_back(std::move(task));
+		task_queue.emplace_back(std::move(task));
 		++pending_task_count;
 	}
-	
+
 	// launch processing units
 	std::list<std::thread> units;
 	for (auto n = std::thread::hardware_concurrency(); --n;)
 	{
-		units.emplace_back(std::thread([n, result_mt]()
-		{
-			{// TRACE
-				const std::lock_guard<std::mutex> lock(output_guard);
-				std::cout << "Unit #" << n;
-				std::cout << "\tLAUNCH [" << std::this_thread::get_id() << "]" << std::endl;
-			}
-
-			std::unique_lock<std::mutex> lock(task_guard);
-			while (true)
+		units.emplace_back(std::thread([n]()
 			{
-				if (!task_queue.empty())
-
+				{// TRACE
+					const std::lock_guard<std::mutex> lock(output_guard);
+					std::cout << "Unit #" << n;
+					std::cout << "\tLAUNCH [" << std::this_thread::get_id() << "]" << std::endl;
+				}
+				std::list<int> completed_tasks;
 				{
-					// pick a task
-					auto task = std::move(task_queue.front());
-					task_queue.pop_front();
-					lock.unlock(); // unlock while processing task
+					std::unique_lock<std::mutex> lock(task_guard);
+					while (true)
 					{
-						// process task
-						task.get();
-						//std::copy(mt.begin(), mt.end(), std::back_inserter(result_mt));
+						if (!task_queue.empty())
+						{
+							// pick a task
+							auto task = std::move(task_queue.front());
+							task_queue.pop_front();
+							lock.unlock(); // unlock while processing task
+							{
+								// process task
+								int i = task.get();
+								completed_tasks.push_back(i);
+							}
+							lock.lock(); // reacquire lock
+						}
+						else if (!pending_task_count)
+							break;
+						else
+						{
+							{// TRACE
+								const std::lock_guard<std::mutex> lock(output_guard);
+								std::cout << "Unit #" << n;
+								std::cout << "\tPAUSE" << std::endl;
+							}
+							// IDLE
+							task_signal.wait(lock);
+							{// TRACE
+								const std::lock_guard<std::mutex> lock(output_guard);
+								std::cout << "Unit #" << n;
+								std::cout << "\tAWAKE" << std::endl;
+							}
+						}
 					}
-					lock.lock(); // reacquire lock
 				}
-				else if (!pending_task_count)
-					break;
-				else
-				{
-					{// TRACE
-						const std::lock_guard<std::mutex> lock(output_guard);
-						std::cout << "Unit #" << n;
-						std::cout << "\tPAUSE" << std::endl;
+				{// TRACE
+					const std::lock_guard<std::mutex> lock(output_guard);
+					std::cout << "Unit #" << n;
+					std::cout << "\tTERMINATE {";
+					for (auto i : completed_tasks)
+					{
+						std::cout << " " << i << " ";
 					}
-					// IDLE
-					task_signal.wait(lock);
-					{// TRACE
-						const std::lock_guard<std::mutex> lock(output_guard);
-						std::cout << "Unit #" << n;
-						std::cout << "\tAWAKE" << std::endl;
-					}
+					std::cout << "}" << std::endl;
 				}
-			}
-			{// TRACE
-				const std::lock_guard<std::mutex> lock(output_guard);
-				std::cout << "Unit #" << n;
-				std::cout << "\tTERMINATE {";
-			}
-
-		}));
+			}));
 	}
 
 	// wait for shutdown
@@ -516,7 +583,7 @@ std::vector<Itemset> TreeNode<T>::computeMinimalTransversals(const std::vector<I
 	{
 		unit.join();
 	}
-	
+
 	return result_mt;
 }
 
