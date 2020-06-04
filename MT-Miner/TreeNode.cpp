@@ -624,7 +624,7 @@ ItemsetList TreeNode<T>::computeMinimalTransversals(const ItemsetList& toTravers
 			//	std::cout << "Unit #" << n;
 			//	std::cout << "\tLAUNCH [" << std::this_thread::get_id() << "]" << std::endl;
 			//}
-			//std::list<ItemsetList> completed_tasks;
+			std::list<ItemsetList> completed_tasks;
 			{
 				std::unique_lock<std::mutex> lock(task_guard);
 				while (true)
@@ -640,9 +640,9 @@ ItemsetList TreeNode<T>::computeMinimalTransversals(const ItemsetList& toTravers
 							ItemsetList && mt = task.get();
 							if (!mt.empty())
 							{
-								//completed_tasks.push_back(mt);
-								const std::lock_guard<std::mutex> lock(output_guard);
-								std::copy(mt.begin(), mt.end(), std::back_inserter(result_mt));
+								completed_tasks.push_back(mt);
+								//const std::lock_guard<std::mutex> lock(output_guard);
+								//std::copy(mt.begin(), mt.end(), std::back_inserter(result_mt));
 							}
 						}
 						lock.lock(); // reacquire lock
@@ -667,11 +667,11 @@ ItemsetList TreeNode<T>::computeMinimalTransversals(const ItemsetList& toTravers
 				}
 			}
 			{
-				/*const std::lock_guard<std::mutex> lock(output_guard);
+				const std::lock_guard<std::mutex> lock(output_guard);
 				for (auto i : completed_tasks)
 				{
 					std::copy(i.begin(), i.end(), std::back_inserter(result_mt));
-				}*/
+				}
 			}
 			//{// TRACE
 			//	const std::lock_guard<std::mutex> lock(output_guard);
@@ -681,8 +681,7 @@ ItemsetList TreeNode<T>::computeMinimalTransversals(const ItemsetList& toTravers
 			//	{
 			//		std::cout << " " << Utils::itemsetListToString(i) << " ";
 			//	}
-			//	std::cout << "}" << std::endl;
-			//	//std::copy(completed_tasks.begin(), completed_tasks.end(), std::back_inserter(result_mt));
+			//	std::cout << "}" << std::endl;				
 			//}
 		}));
 	}
