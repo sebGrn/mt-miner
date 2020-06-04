@@ -24,7 +24,8 @@ private:
 	static std::mutex output_guard;
 
 	// synchro stuff
-	static std::deque<std::future<std::vector<Itemset>>> task_queue;
+	//static std::deque<std::future<ItemsetList>> task_queue;
+	static std::deque<std::future<ItemsetList>> task_queue;
 	static std::mutex task_guard;
 	static std::condition_variable task_signal;
 	static std::atomic_int pending_task_count;
@@ -55,9 +56,10 @@ private:
 
 	//void exploreNextBranch(const ItemsetList& maxClique, const ItemsetList& toExplore, ItemsetList& graph_mt);
 
-	//std::vector<Itemset> computeMinimalTransversals_task(const std::vector<Itemset>& toTraverse);
+	//int computeMinimalTransversals_task(int task_id, const std::vector<Itemset>& toTraverse);
+	ItemsetList computeMinimalTransversals_task(const ItemsetList& toTraverse);
 
-	int node_function(int task_id);
+	//int node_function(int task_id);
 	
 public:
 	TreeNode(bool useCloneOptimization, const std::shared_ptr<BinaryRepresentation<T>>& binaryRepresentation);	

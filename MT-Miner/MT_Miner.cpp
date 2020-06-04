@@ -80,7 +80,7 @@ ItemsetList MT_Miner<T>::computeMinimalTransversals()
 	ItemsetList toTraverse = computeInitalToTraverseList();
 
 	// create a graph, then compute minimal transversal from the binary representation
-	TreeNode rootNode(this->useCloneOptimization, this->binaryRepresentation);
+	TreeNode<T> rootNode(this->useCloneOptimization, this->binaryRepresentation);
 
 	// lambda function called during parsing every 20 seconds
 	auto ftr = std::async(std::launch::async, [&rootNode]() {

@@ -122,7 +122,7 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 		
 		//beginTime = std::chrono::system_clock::now();
 		
-		MT_Miner<CustomBitset> miner(hypergraph, useCloneOptimization);
+		MT_Miner<StaticBitset<std::bitset<SIZE_2>>> miner(hypergraph, useCloneOptimization);
 		// compute minimal transversals		
 		ItemsetList minimalTransversals = miner.computeMinimalTransversals();
 				
