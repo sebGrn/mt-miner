@@ -2,14 +2,7 @@
 #include <vector>
 #include <cassert>
 #include <fstream>
-
-#ifndef _DEBUG
-#include <boost/dynamic_bitset.hpp>
-#include <bitset>
-#endif
-#include <any>
 #include <memory>
-#include <variant>
 
 #include "Bitset.h"
 #include "HyperGraph.h"
@@ -114,15 +107,17 @@ template class FormalContext<StaticBitset<std::bitset<SIZE_3>>>;
 template class FormalContext<StaticBitset<std::bitset<SIZE_4>>>;
 template class FormalContext<StaticBitset<std::bitset<SIZE_5>>>;
 template class FormalContext<StaticBitset<std::bitset<SIZE_6>>>;
-//template class FormalContext<VariantBitset>;
 template class FormalContext<CustomBitset>;
-//template class FormalContext<AnyBitset>;
+#ifdef _WIN32
+template class FormalContext<VariantBitset>; 
+template class FormalContext<AnyBitset>;
+#endif
 
 // --------------------------------------------------------------------------------------------------------------------------------- //
 // --------------------------------------------------------------------------------------------------------------------------------- //
 
 //typedef FormalContext<AnyBitset> FormalContext_impl;
-//typedef FormalContext<StaticBitset> FormalContext_impl;
+//typedef FormalContext<StaticBitset<std::bitset<SIZE_0>>> FormalContext_impl;
 typedef FormalContext<CustomBitset> FormalContext_impl;
 //typedef FormalContext<VariantBitset> FormalContext_impl;
 

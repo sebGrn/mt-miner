@@ -83,9 +83,9 @@ ItemsetList MT_Miner<T>::computeMinimalTransversals()
 	TreeNode<T> rootNode(this->useCloneOptimization, this->binaryRepresentation);
 
 	// lambda function called during parsing every 20 seconds
-	auto ftr = std::async(std::launch::async, [&]() {
-		const int secondsToWait = 20;
-		int n = 0;
+	auto ftr = std::async(std::launch::async, [&rootNode]() {
+		const int secondsToWait = 30;
+		int n = 1;
 		auto beginTime = std::chrono::system_clock::now();
 		while (!stop)
 		{
@@ -102,7 +102,8 @@ ItemsetList MT_Miner<T>::computeMinimalTransversals()
 	});
 
 	// compute all minimal transversal from the root node
-	std::vector<Itemset>&& graph_mt = rootNode.computeMinimalTransversals_recursive(toTraverse);
+	std::vector<Itemset>&& graph_mt = rootNode.computeMinimalTransversals(toTraverse);
+	//std::vector<Itemset>&& graph_mt = rootNode.computeMinimalTransversals_recursive(toTraverse);
 	//std::vector<Itemset>&& graph_mt = rootNode.computeMinimalTransversals_iterative(toTraverse);
 	
 	// stop the thread and detach it (dont not wait next n seconds)
@@ -145,31 +146,9 @@ template class MT_Miner<StaticBitset<std::bitset<SIZE_3>>>;
 template class MT_Miner<StaticBitset<std::bitset<SIZE_4>>>;
 template class MT_Miner<StaticBitset<std::bitset<SIZE_5>>>;
 template class MT_Miner<StaticBitset<std::bitset<SIZE_6>>>;
-//template class MT_Miner<VariantBitset>;
 template class MT_Miner<CustomBitset>;
-//template class MT_Miner<AnyBitset>;
 template class MT_Miner<DynamicBitset>;
-
-
-// --------------------------------------------------------------------------------------------------------------------------------- //
-// --------------------------------------------------------------------------------------------------------------------------------- //
-/*
-// template implementation
-template class BinaryRepresentation<StaticBitset>;
-template class BinaryRepresentation<VariantBitset>;
-template class BinaryRepresentation<CustomBitset>;
-template class BinaryRepresentation<AnyBitset>;
-template class BinaryRepresentation<DynamicBitset>;
-
-// --------------------------------------------------------------------------------------------------------------------------------- //
-// --------------------------------------------------------------------------------------------------------------------------------- //
-
-// template implementation
-template class TreeNode<StaticBitset>;
-template class TreeNode<VariantBitset>;
-template class TreeNode<CustomBitset>;
-template class TreeNode<AnyBitset>;
-template class TreeNode<DynamicBitset>;
-*/
-// --------------------------------------------------------------------------------------------------------------------------------- //
-// --------------------------------------------------------------------------------------------------------------------------------- //
+#ifdef  _WIN32
+template class MT_Miner<VariantBitset>;
+template class MT_Miner<AnyBitset>;
+#endif //  _WIN32
