@@ -15,15 +15,12 @@ BinaryRepresentation<T>::BinaryRepresentation(const FormalContext_impl& context)
 	this->itemCount = context.getItemCount();		// 77
 	this->nbItemsetNotAddedFromClone = 0;
 
-	std::vector<double> averageSet;
-
-	T bitset(this->objectCount);	
+	unsigned int sum = 0;
+	T bitset(this->objectCount);
 	for (unsigned int j = 0; j < this->itemCount; j++)			// 8 on test.txt
 	{
 		// allocate bitset with object count bit (formal context column size)
 		bitset.reset();
-
-		unsigned int sum = 0;
 		for (unsigned int i = 0; i < this->objectCount; i++)		// 6 on test.txt
 		{
 			bool bit = context.getBit(i, j);
@@ -31,15 +28,15 @@ BinaryRepresentation<T>::BinaryRepresentation(const FormalContext_impl& context)
 			if (bit)				
 				sum++;
 		}
-		averageSet.push_back(sum);
-
+		
 		// set a critical section to allow multiple thread to write in size_tuples vector
 		unsigned int currentKey = j + 1; 		
 		this->binaryRepresentation[currentKey] = bitset;
 	}
 
-	auto lambda = [&averageSet](double a, double b) { return a + b / averageSet.size(); };   
-	std::cout << RED << "set bit " << std::accumulate(averageSet.begin(), averageSet.end(), 0.0, lambda) * 100.0 / static_cast<double>(this->objectCount) << "%" << std::endl;
+	unsigned int nbElement = this->itemCount * this->objectCount;
+	double sparsity = (nbElement - sum) / static_cast<double>(nbElement);
+	std::cout << RED << "sparsity " << (1.0 - sparsity) * 100.0 << "% of bits are sets" << std::endl;
 };
 
 template <class T>
