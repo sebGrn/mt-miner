@@ -15,7 +15,7 @@ find_package(Boost REQUIRED)
 
 # set sources and headers
 set(SOURCES ${HEADERS} HypergraphParser.h MT_Miner.h utils.h BinaryRepresentation.h FormalContext.h HyperGraph.h Bitset.h TreeNode.h Logger.h Profiler.h JsonTree.h JsonTreeNode.h)
-set(SOURCES ${SOURCES} HypergraphParser.cpp MT_Miner.cpp BinaryRepresentation.cpp TreeNode.cpp Logger.cpp Profiler.cpp JsonTree.cpp JsonTree.cpp main.cpp)
+set(SOURCES ${SOURCES} HypergraphParser.cpp MT_Miner.cpp BinaryRepresentation.cpp TreeNode.cpp Logger.cpp Profiler.cpp JsonTree.cpp JsonTree.cpp Bitset.cpp main.cpp)
 
 # create static library .a
 add_executable(mt_miner ${SOURCES} ${HEADERS})

@@ -3,10 +3,7 @@
 #include "Profiler.h"
 #include "JsonTree.h"
 
-//template <class T> std::atomic_int TreeNode<T>::nbRunningThread(0);
 template <class T> std::atomic_ullong TreeNode<T>::nbTotalChildren(0);
-//template <class T> std::atomic_int TreeNode<T>::processorCount(std::thread::hardware_concurrency());
-
 // to avoid interleaved outputs
 template <class T> std::mutex TreeNode<T>::output_guard;
 // synchro stuff
@@ -598,7 +595,6 @@ template <class T>
 ItemsetList TreeNode<T>::computeMinimalTransversals(const ItemsetList& toTraverse)
 {
 	ItemsetList result_mt;
-
 	//std::cout << "START system [" << std::this_thread::get_id() << "]" << std::endl;
 
 	// emit initial task
@@ -634,6 +630,7 @@ ItemsetList TreeNode<T>::computeMinimalTransversals(const ItemsetList& toTravers
 						// pick a task
 						auto task = std::move(task_queue.front());
 						task_queue.pop_front();
+						
 						lock.unlock(); // unlock while processing task
 						{
 							// process task
@@ -706,10 +703,12 @@ template class TreeNode<StaticBitset<std::bitset<SIZE_3>>>;
 template class TreeNode<StaticBitset<std::bitset<SIZE_4>>>;
 template class TreeNode<StaticBitset<std::bitset<SIZE_5>>>;
 template class TreeNode<StaticBitset<std::bitset<SIZE_6>>>;
-template class TreeNode<VariantBitset>;
 template class TreeNode<CustomBitset>;
-template class TreeNode<AnyBitset>;
 template class TreeNode<DynamicBitset>;
+#ifdef _WIN32
+template class TreeNode<VariantBitset>;
+template class TreeNode<AnyBitset>;
+#endif
 
 // --------------------------------------------------------------------------------------------------------------------------------- //
 // --------------------------------------------------------------------------------------------------------------------------------- //

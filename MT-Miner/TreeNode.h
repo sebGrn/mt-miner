@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <map>
+#include <deque>
 #include <string>
 #include <algorithm>
 #include <mutex>
@@ -9,6 +10,7 @@
 #include <atomic>
 #include <future>
 #include <numeric>
+#include <list>
 
 #include "utils.h"
 #include "BinaryRepresentation.h"
@@ -24,15 +26,11 @@ private:
 	static std::mutex output_guard;
 
 	// synchro stuff
-	//static std::deque<std::future<ItemsetList>> task_queue;
-	static std::deque<std::future<ItemsetList>> task_queue;
+	static std::deque<std::future<std::vector<Itemset>>> task_queue;
 	static std::mutex task_guard;
 	static std::condition_variable task_signal;
 	static std::atomic_int pending_task_count;
-
-	//static std::atomic_int processorCount;
 	static std::atomic_ullong nbTotalChildren;
-	//static std::atomic_int nbRunningThread;
 
 	std::shared_ptr<BinaryRepresentation<T>> binaryRepresentation;
 
@@ -79,11 +77,5 @@ public:
 	{
 		return nbTotalChildren;
 	};
-
-	//unsigned int getTotalThread() const
-	//{
-	//	return nbRunningThread;
-	//};
-	
 };
 

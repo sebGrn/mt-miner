@@ -62,13 +62,11 @@ bool BinaryRepresentation<T>::isEssential(const Itemset& itemset)
 		// dont forget to initialize boolean
 		isEssential = false;
 	
-		//#pragma omp parallel for
 		for (int i2 = 0; i2 < n; i2++)
 		{			
 			if (i1 != i2)
 			{
 				unsigned int key2 = itemset[i2];
-				
 				Bitset&& bitset = this->getBitsetFromKey(key2);
 				SumOfN_1Items.bitset_or(bitset);
 			}
@@ -76,13 +74,12 @@ bool BinaryRepresentation<T>::isEssential(const Itemset& itemset)
 
 		unsigned int key1 = itemset[i1];
 		Bitset&& bitset = this->getBitsetFromKey(key1);
-
-		//#pragma omp parallel for
 		for (unsigned int i = 0; i < this->objectCount; i++)
 		{
+			// FIX ME : SLOW !!
 			if (SumOfN_1Items.get(i) == false && bitset.get(i) == true)
 			{
-				// this bitset is essential, check we next bitset
+				// this bitset is essential, check with next bitset
 				isEssential = true;
 				break;
 			}
@@ -104,7 +101,6 @@ unsigned int BinaryRepresentation<T>::computeDisjonctifSupport(const Itemset& pa
 	for (size_t i = 0, n = pattern.size(); i < n; i++)
 	{
 		unsigned int columnKey = pattern[i];
-
 		Bitset&& bitset = this->getBitsetFromKey(columnKey);
 		SumOfN_1Items.bitset_or(bitset);
 	}
@@ -128,7 +124,6 @@ bool BinaryRepresentation<T>::compareItemsets(const Itemset& itemset1, const Ite
 			assert(i < itemset2.size());
 			unsigned int columnKey_itemset1 = itemset1[i];
 			unsigned int columnKey_itemset2 = itemset2[i];
-
 			Bitset&& bitset1 = this->getBitsetFromKey(columnKey_itemset1);
 			Bitset&& bitset2 = this->getBitsetFromKey(columnKey_itemset2);
 			return bitset1.bitset_compare(bitset2);
@@ -203,7 +198,9 @@ template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_3>>>;
 template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_4>>>;
 template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_5>>>;
 template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_6>>>;
-template class BinaryRepresentation<VariantBitset>;
 template class BinaryRepresentation<CustomBitset>;
-template class BinaryRepresentation<AnyBitset>;
 template class BinaryRepresentation<DynamicBitset>;
+#ifdef _WIN32
+template class BinaryRepresentation<VariantBitset>;
+template class BinaryRepresentation<AnyBitset>;
+#endif

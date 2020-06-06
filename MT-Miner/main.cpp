@@ -117,13 +117,8 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 		objectCount = parser.getObjectCount();
 		itemCount = parser.getItemCount();
 
-		// minimal transversals computing
-		int64_t isEssentialDuration = 0;
-		
-		//beginTime = std::chrono::system_clock::now();
-		
-		MT_Miner<StaticBitset<std::bitset<SIZE_2>>> miner(hypergraph, useCloneOptimization);
-		// compute minimal transversals		
+		// allocate miner and compute minimal transversals
+		MT_Miner<StaticBitset<std::bitset<SIZE_2>>> miner(hypergraph, useCloneOptimization);		
 		ItemsetList minimalTransversals = miner.computeMinimalTransversals();
 				
 		// ----------------------------------------------------- //

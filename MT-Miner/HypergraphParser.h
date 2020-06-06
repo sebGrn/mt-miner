@@ -20,7 +20,6 @@ class HypergraphParser
 private:
 	/// hypergraph ie matrix of int
 	std::shared_ptr<HyperGraph> hypergraph;
-	bool parsingDone;
 
 public:
 	HypergraphParser();
