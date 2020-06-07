@@ -441,6 +441,7 @@ template class TreeNode<StaticBitset<std::bitset<SIZE_5>>>;
 template class TreeNode<StaticBitset<std::bitset<SIZE_6>>>;
 template class TreeNode<CustomBitset>;
 template class TreeNode<DynamicBitset>;
+template class TreeNode<SparseIndexBitset>;
 #ifdef _WIN32
 template class TreeNode<VariantBitset>;
 template class TreeNode<AnyBitset>;

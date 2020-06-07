@@ -197,6 +197,7 @@ template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_5>>>;
 template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_6>>>;
 template class BinaryRepresentation<CustomBitset>;
 template class BinaryRepresentation<DynamicBitset>;
+template class BinaryRepresentation<SparseIndexBitset>;
 #ifdef _WIN32
 template class BinaryRepresentation<VariantBitset>;
 template class BinaryRepresentation<AnyBitset>;

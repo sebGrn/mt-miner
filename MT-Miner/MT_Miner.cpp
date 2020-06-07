@@ -148,6 +148,7 @@ template class MT_Miner<StaticBitset<std::bitset<SIZE_5>>>;
 template class MT_Miner<StaticBitset<std::bitset<SIZE_6>>>;
 template class MT_Miner<CustomBitset>;
 template class MT_Miner<DynamicBitset>;
+template class MT_Miner<SparseIndexBitset>;
 #ifdef  _WIN32
 template class MT_Miner<VariantBitset>;
 template class MT_Miner<AnyBitset>;

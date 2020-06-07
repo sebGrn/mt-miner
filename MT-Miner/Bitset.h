@@ -64,8 +64,6 @@ public:
 	StaticBitset<T>& operator=(const StaticBitset<T>& other);
 };
 
-
-
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
 class CustomBitset : public Bitset
@@ -116,6 +114,30 @@ public:
 	Bitset& bitset_and(const Bitset& b) override;
 	bool bitset_compare(const Bitset& b) const override;
 	DynamicBitset& operator=(const DynamicBitset& other);
+};
+
+// -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+class SparseIndexBitset : public Bitset
+{
+private:
+	std::list<unsigned int> bitset_value;
+
+public:
+	SparseIndexBitset();
+	SparseIndexBitset(unsigned int bitsetSize);
+	SparseIndexBitset(const SparseIndexBitset& bitset);
+	~SparseIndexBitset();
+
+	void reset(bool b = false) override;
+	void set(unsigned int iAttribute, bool b = true) override;
+	bool get(unsigned int iAttribute) const override;
+	unsigned int size() const override;
+	unsigned int count() const override;
+	Bitset& bitset_or(const Bitset& b) override;
+	Bitset& bitset_and(const Bitset& b) override;
+	bool bitset_compare(const Bitset& b) const override;
+	SparseIndexBitset& operator=(const SparseIndexBitset& other);
 };
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //

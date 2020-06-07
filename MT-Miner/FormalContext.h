@@ -117,7 +117,7 @@ template class FormalContext<AnyBitset>;
 // --------------------------------------------------------------------------------------------------------------------------------- //
 
 //typedef FormalContext<AnyBitset> FormalContext_impl;
-//typedef FormalContext<StaticBitset<std::bitset<SIZE_0>>> FormalContext_impl;
-typedef FormalContext<CustomBitset> FormalContext_impl;
+typedef FormalContext<StaticBitset<std::bitset<SIZE_0>>> FormalContext_impl;
+//typedef FormalContext<CustomBitset> FormalContext_impl;
 //typedef FormalContext<VariantBitset> FormalContext_impl;
 

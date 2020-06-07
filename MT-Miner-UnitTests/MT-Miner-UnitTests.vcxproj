@@ -158,7 +158,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;$(SolutionDir)MT-Miner\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>BinaryRepresentation.obj;TreeNode.obj;MT_Miner.obj;HypergraphParser.obj;Logger.obj;Profiler.obj;JsonTree.obj</AdditionalDependencies>
+      <AdditionalDependencies>BinaryRepresentation.obj;TreeNode.obj;MT_Miner.obj;HypergraphParser.obj;Logger.obj;Profiler.obj;Bitset.obj;JsonTree.obj</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
