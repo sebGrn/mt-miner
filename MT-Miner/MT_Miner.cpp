@@ -93,7 +93,7 @@ ItemsetList MT_Miner<T>::computeMinimalTransversals()
 			if(duration > secondsToWait * 1000)
 			{
 				std::cout << CYAN << "computing minimal transversals in progress : " << secondsToWait * n << " seconds, "
-				<< rootNode.getTotalChildren() << " nodes created"
+				<< rootNode.nbTotalChildren << " nodes created"
 				<< RESET << std::endl;
 				n++;
 				beginTime = std::chrono::system_clock::now();

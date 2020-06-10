@@ -58,9 +58,9 @@ namespace MTMinerUnitTests_Bitset_benchmark
 
 		TEST_METHOD(SparseBitsets_sparse)
 		{
-			SparseIndexBitset b(SIZE_TEST);
-			srand(time(nullptr));
-			testing(b);
+			//SparseIndexBitset b(SIZE_TEST);
+			//srand(time(nullptr));
+			//testing(b);
 			Assert::AreEqual(true, true);
 		}
 	};

@@ -24,6 +24,10 @@ constexpr std::uint32_t item_count = 1<<N;
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
+/**
+ * Bitset parent class
+ * Describe minimum virtual interface for bitsets
+ */
 class Bitset
 {
 protected:
@@ -42,6 +46,11 @@ public:
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
+/**
+ * Static Bitset implementation
+ * Wrapper of std::bitset<n> with hardcoded n value
+ * Template value can be std::bitset<SIZE_0>, std::bitset<SIZE_1>, ... std::bitset<SIZE_6>
+ */
 template <class T>
 class StaticBitset : public Bitset
 {
@@ -66,6 +75,10 @@ public:
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
+/**
+ * Custom Bitset implementation
+ * Use vector of unsigned long long value (64 bits) as a bitset
+  */
 class CustomBitset : public Bitset
 {
 private:	
@@ -94,6 +107,10 @@ public:
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
+/**
+* Dynamic Bitset implementation
+* Wrapper of boost dynamic bitset 
+*/ 
 class DynamicBitset : public Bitset
 {
 private:
@@ -118,6 +135,12 @@ public:
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
+/**
+* Sparse Bitset implementation
+* Use sparsity property of bitsets
+* Stores a vector of indexes
+* an index is a reference to the ith element corresponding to set bit from the original bitset
+*/ 
 class SparseIndexBitset : public Bitset
 {
 private:
@@ -143,6 +166,11 @@ public:
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
 #ifdef _WIN32
+/**
+* Any Bitset implementation
+* Wrapper to a bitset of type any
+* can be can be std::bitset<SIZE_0>, std::bitset<SIZE_1>, ... std::bitset<SIZE_6>
+*/
 class AnyBitset : public Bitset
 {
 private:
@@ -170,6 +198,11 @@ public:
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
 #ifdef _WIN32
+/**
+* Variant Bitset implementation
+* Wrapper to a bitset of type variant
+* can be can be std::bitset<SIZE_0>, std::bitset<SIZE_1>, ... std::bitset<SIZE_6>
+*/
 class VariantBitset : public Bitset
 {
 private:

@@ -142,8 +142,58 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 }
 
 // ----------------------------------------------------------------------------------------------------------- //
-// ----------------------------------------------------------------------------------------------------------- //
 
+void benchmarkbitset()
+{
+	auto testing = [](Bitset& b)
+	{
+		for (int i = 0; i < SIZE_6; i++)
+			b.set(i, rand() % 2);
+		b.bitset_or(b);
+		b.bitset_and(b);
+		b.bitset_compare(b);
+		b = b;
+	};
+
+	const unsigned int n = 10;
+	srand(time(nullptr));
+
+	{
+		auto beginTime = std::chrono::system_clock::now();
+		for (unsigned int i = 0; i < n; i++)
+		{
+			CustomBitset b(SIZE_6);
+			testing(b);
+		}
+		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
+		std::cout << "duration for custom bitset : " << duration << " ms" << std::endl;
+	}
+
+	{
+		auto beginTime = std::chrono::system_clock::now();
+		for (unsigned int i = 0; i < n; i++)
+		{
+			StaticBitset<std::bitset<SIZE_6>> b(SIZE_6);
+			testing(b);
+		}
+		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
+		std::cout << "duration for static bitset : " << duration << " ms" << std::endl;
+	}
+
+	{
+		auto beginTime = std::chrono::system_clock::now();
+		for (unsigned int i = 0; i < n; i++)
+		{
+			SparseIndexBitset b(SIZE_6);
+			testing(b);
+		}
+		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
+		std::cout << "duration for sparse index bitset : " << duration << " ms" << std::endl;
+	}
+}
+
+// ----------------------------------------------------------------------------------------------------------- //
+// ----------------------------------------------------------------------------------------------------------- //
 
 int main(int argc, char* argv[])
 {
@@ -167,4 +217,5 @@ int main(int argc, char* argv[])
 	bool useCloneOptimization = parameterList[ArgumentParser::USE_CLONE] == "true" || parameterList[ArgumentParser::USE_CLONE] == "True" || parameterList[ArgumentParser::USE_CLONE] == "TRUE";
 
 	runMinimalTransversals(file, useCloneOptimization, verboseMode, useOutputFile, useOutputLogFile);
+	//benchmarkbitset();
 }

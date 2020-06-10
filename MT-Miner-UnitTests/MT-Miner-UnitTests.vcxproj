@@ -169,6 +169,7 @@
     <ClCompile Include="MT-Miner-UnitTests_test.cpp" />
     <ClCompile Include="MT-Minter-UnitTests_Bitset_benchmark.cpp" />
     <ClCompile Include="MT-Minter-UnitTests_CustomBitset.cpp" />
+    <ClCompile Include="MT-Minter-UnitTests_SparseBitset.cpp" />
     <ClCompile Include="MT-Minter-UnitTests_StaticBitset.cpp" />
     <ClCompile Include="MT-Minter-UnitTests_VarianBitset.cpp" />
     <ClCompile Include="pch.cpp">

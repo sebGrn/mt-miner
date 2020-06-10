@@ -45,6 +45,9 @@
     <ClCompile Include="MT-Minter-UnitTests_Bitset_benchmark.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MT-Minter-UnitTests_SparseBitset.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">

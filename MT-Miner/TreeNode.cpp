@@ -238,7 +238,11 @@ ItemsetList TreeNode<T>::computeMinimalTransversals_task(const ItemsetList& toTr
 
 	// test trivial case
 	if (toTraverse.empty())
+	{
 		return ItemsetList();
+		//mt_node_result.reset();
+		//return shared_from_this();
+	}
 
 	// contains list of itemsets that will be combined to the candidates
 	ItemsetList maxClique;
@@ -283,13 +287,10 @@ ItemsetList TreeNode<T>::computeMinimalTransversals_task(const ItemsetList& toTr
 
 			if (!newToTraverse.empty())
 			{
-				// create a new child node for this newToTraverse list and add the node as a child
-				std::shared_ptr<TreeNode> node = std::make_shared<TreeNode>(this->useCloneOptimization, this->binaryRepresentation);
-				this->children.push_back(node);
-				nbTotalChildren++;
-
 				// emit recursive task
-				auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, node, std::move(newToTraverse));
+				nbTotalChildren++;
+				// call on the same node, it works because no class members are used except atomics
+				auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(newToTraverse));
 				//{// TRACE
 				//	const std::lock_guard<std::mutex> lock(output_guard);
 				//	std::cout << "\t\t\t\t\t[" << std::this_thread::get_id() << "]";
@@ -325,6 +326,9 @@ ItemsetList TreeNode<T>::computeMinimalTransversals_task(const ItemsetList& toTr
 	//}
 
 	return graph_mt;
+	/*mt_node_result.reset();
+	mt_node_result = std::make_shared<ItemsetList>(graph_mt);
+	return std::make_shared<TreeNode<T>>(this);*/
 }
 
 template <class T>
@@ -371,12 +375,19 @@ ItemsetList TreeNode<T>::computeMinimalTransversals(const ItemsetList& toTravers
 						{
 							// process task
 							ItemsetList && mt = task.get();
-							if (!mt.empty())
-							{
+							if(!mt.empty())
+							{ 
 								completed_tasks.push_back(mt);
+							}
+							//std::shared_ptr<TreeNode<T>> node = task.get();
+							//if (node && node->mt_node_result && !node->mt_node_result->empty())
+							//{
+								//completed_tasks.push_back(node->mt_node_result);
 								//const std::lock_guard<std::mutex> lock(output_guard);
 								//std::copy(mt.begin(), mt.end(), std::back_inserter(result_mt));
-							}
+							//}
+							// get shared_ptr corresponding to task and delete managed object
+							// --> ptr.reset();
 						}
 						lock.lock(); // reacquire lock
 					}
@@ -401,9 +412,9 @@ ItemsetList TreeNode<T>::computeMinimalTransversals(const ItemsetList& toTravers
 			}
 			{
 				const std::lock_guard<std::mutex> lock(output_guard);
-				for (auto i : completed_tasks)
+				for (auto list : completed_tasks)
 				{
-					std::copy(i.begin(), i.end(), std::back_inserter(result_mt));
+					std::copy(list.begin(), list.end(), std::back_inserter(result_mt));
 				}
 			}
 			//{// TRACE
