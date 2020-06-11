@@ -3,30 +3,27 @@
 #include "Profiler.h"
 #include "JsonTree.h"
 
-template <class T> std::atomic_ullong TreeNode<T>::nbTotalChildren(0);
+std::atomic_ullong TreeNode::nbTotalChildren(0);
 // to avoid interleaved outputs
-template <class T> std::mutex TreeNode<T>::output_guard;
+std::mutex TreeNode::output_guard;
 // synchro stuff
-template <class T> std::deque<std::future<ItemsetList>> TreeNode<T>::task_queue;
-template <class T> std::mutex TreeNode<T>::task_guard;
-template <class T> std::condition_variable TreeNode<T>::task_signal;
-template <class T> int TreeNode<T>::pending_task_count(0);
+std::deque<std::future<ItemsetList>> TreeNode::task_queue;
+std::mutex TreeNode::task_guard;
+std::condition_variable TreeNode::task_signal;
+int TreeNode::pending_task_count(0);
 
-template <class T>
-TreeNode<T>::TreeNode(bool useCloneOptimization, const std::shared_ptr<BinaryRepresentation<T>>& binaryRepresentation)
+TreeNode::TreeNode(bool useCloneOptimization, const std::shared_ptr<BinaryRepresentation>& binaryRepresentation)
 {
 	this->binaryRepresentation = binaryRepresentation;
 	this->useCloneOptimization = useCloneOptimization;
 	this->useMultitheadOptimization = true;
 }
 
-template <class T>
-TreeNode<T>::~TreeNode()
+TreeNode::~TreeNode()
 {
 }
 
-template <class T>
-void TreeNode<T>::buildClonedCombination(const Itemset& currentItem, std::vector<Itemset>& clonedCombination, const std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes)
+void TreeNode::buildClonedCombination(const Itemset& currentItem, std::vector<Itemset>& clonedCombination, const std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes)
 {
 	for (auto it = originalClonedIndexes.begin(); it != originalClonedIndexes.end(); it++)
 	{
@@ -47,8 +44,7 @@ void TreeNode<T>::buildClonedCombination(const Itemset& currentItem, std::vector
 	}
 }
 
-template <class T>
-void TreeNode<T>::updateListsFromToTraverse(const ItemsetList& toTraverse, ItemsetList& maxClique, ItemsetList& toExplore, ItemsetList& graph_mt)
+void TreeNode::updateListsFromToTraverse(const ItemsetList& toTraverse, ItemsetList& maxClique, ItemsetList& toExplore, ItemsetList& graph_mt)
 {
 	maxClique.clear();
 	toExplore.clear();
@@ -106,129 +102,8 @@ void TreeNode<T>::updateListsFromToTraverse(const ItemsetList& toTraverse, Items
 }
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
-/*
-template <class T>
-std::vector<Itemset> TreeNode<T>::computeMinimalTransversals_iterative(const std::vector<Itemset>& toTraverse)
-{
-	typedef std::vector<Itemset> ItemsetList;
 
-	// test trivial case
-	if (toTraverse.empty())
-		return ItemsetList();
-
-	// structure to queue and synchronize toExplore and maxClique lists
-	struct TailList
-	{
-		std::vector<ItemsetList> toExploreTailList;
-		std::vector<ItemsetList> maxCliqueTailList;
-	};
-	TailList iterativeTailList;
-
-	// contains the final minimal transverals for this node
-	ItemsetList graph_mt;
-	{
-		// contains list of itemsets that are candidates
-		ItemsetList toExplore;
-		// contains list of itemsets that will be combined to the candidates
-		ItemsetList maxClique;
-		// update lists from toTraverse
-		this->updateListsFromToTraverse(toTraverse, maxClique, toExplore, graph_mt);
-
-		//Logger::log("toExplore list", ItemsetListToString(toExplore), "\n");
-		//Logger::log("maxClique list", ItemsetListToString(maxClique), "\n");
-
-		iterativeTailList.toExploreTailList.push_back(toExplore);
-		iterativeTailList.maxCliqueTailList.push_back(maxClique);
-	}
-
-	auto timer1 = std::chrono::system_clock::now();
-	//auto timer2 = std::chrono::system_clock::now();
-	//auto timer3 = std::chrono::system_clock::now();
-	//auto duration2 = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timer2).count();
-	//auto duration3 = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timer3).count();
-
-	unsigned int nbIter = 0;
-
-	std::vector<long long> durationList1;
-	std::vector<long long> durationList2;
-	std::vector<long long> durationList3;
-
-	while (!iterativeTailList.toExploreTailList.empty())
-	{
-		//auto timer2 = std::chrono::system_clock::now();
-		//auto timer3 = std::chrono::system_clock::now();
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
-
-		ItemsetList toExplore = iterativeTailList.toExploreTailList.back();
-		iterativeTailList.toExploreTailList.pop_back();
-
-		ItemsetList maxClique = iterativeTailList.maxCliqueTailList.back();
-		iterativeTailList.maxCliqueTailList.pop_back();
-
-		unsigned int lastIndexToTest = static_cast<unsigned int>(toExplore.size());
-		// combine toExplore (left part) with maxClique list (right part) into a combined list
-		ItemsetList combinedItemsetList = toExplore;
-		combinedItemsetList.insert(combinedItemsetList.end(), maxClique.begin(), maxClique.end());
-
-		//durationList2.push_back(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timer2).count());
-
-		//std::this_thread::sleep_for(std::chrono::milliseconds(1));
-
-		// loop on candidates from toExplore list only
-		for (unsigned int i = 0; i < lastIndexToTest; i++)
-		{
-			// build newTraverse list
-			ItemsetList newToTraverse;
-			Itemset toCombinedLeft = combinedItemsetList[i];
-			// combine each element between [0, lastIndexToTest] with the entire combined itemset list
-			for (unsigned int j = i + 1; j < combinedItemsetList.size(); j++)
-			{
-				assert(j < combinedItemsetList.size());
-				Itemset toCombinedRight = combinedItemsetList[j];
-				Itemset && combinedItemset = Utils::combineItemset(toCombinedLeft, toCombinedRight);
-
-				// check if combined item is containing a clone (if true, do not compute the minimal transverals) and if combined itemset is essential
-				if (!this->binaryRepresentation->containsAClone(combinedItemset) && binaryRepresentation->isEssential(combinedItemset))
-					newToTraverse.push_back(combinedItemset);
-			}
-
-			if (!newToTraverse.empty())
-			{
-				// compute minimal transversals for the branch
-				this->updateListsFromToTraverse(newToTraverse, maxClique, toExplore, graph_mt);
-
-				//std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-				if (!toExplore.empty())
-				{
-					iterativeTailList.toExploreTailList.push_back(toExplore);
-					iterativeTailList.maxCliqueTailList.push_back(maxClique);
-				}
-			}
-		}		
-		//durationList3.push_back(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timer3).count());
-	
-		nbIter++;
-	}
-
-	//int duration1 = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timer1).count();
-	//int duration2 = std::accumulate(durationList2.begin(), durationList2.end(), 0);
-	//int duration3 = std::accumulate(durationList3.begin(), durationList3.end(), 0);
-	//double avg = duration3 / (double)durationList3.size();
-
-	//Logger::log(RED, "duration1 ", duration1, " ms\n", RESET);
-	//Logger::log(RED, "duration2 ", duration2, " ms\n", RESET);
-	//Logger::log(RED, "duration3 ", duration3, " ms\n", RESET);
-	//Logger::log(RED, "avg ", avg, " ms\n", RESET);
-	Logger::log(RED, "nbIter ", nbIter, "\n", RESET);
-	
-	return graph_mt;
-}
-*/
-
-template <class T>
-ItemsetList TreeNode<T>::computeMinimalTransversals_task(const ItemsetList& toTraverse)
+ItemsetList TreeNode::computeMinimalTransversals_task(const ItemsetList& toTraverse)
 {
 	// ## START TASK ##
 
@@ -236,8 +111,6 @@ ItemsetList TreeNode<T>::computeMinimalTransversals_task(const ItemsetList& toTr
 	if (toTraverse.empty())
 	{
 		return ItemsetList();
-		//mt_node_result.reset();
-		//return shared_from_this();
 	}
 
 	// contains list of itemsets that will be combined to the candidates
@@ -315,8 +188,7 @@ ItemsetList TreeNode<T>::computeMinimalTransversals_task(const ItemsetList& toTr
 	return graph_mt;
 }
 
-template <class T>
-ItemsetList TreeNode<T>::computeMinimalTransversals(const ItemsetList& toTraverse)
+ItemsetList TreeNode::computeMinimalTransversals(const ItemsetList& toTraverse)
 {
 	ItemsetList final_mt;
 	//std::cout << "START system [" << std::this_thread::get_id() << "]" << std::endl;
@@ -384,25 +256,3 @@ ItemsetList TreeNode<T>::computeMinimalTransversals(const ItemsetList& toTravers
 	}
 	return final_mt;
 }
-
-// --------------------------------------------------------------------------------------------------------------------------------- //
-// --------------------------------------------------------------------------------------------------------------------------------- //
-
-// template implementation
-template class TreeNode<StaticBitset<std::bitset<SIZE_0>>>;
-template class TreeNode<StaticBitset<std::bitset<SIZE_1>>>;
-template class TreeNode<StaticBitset<std::bitset<SIZE_2>>>;
-template class TreeNode<StaticBitset<std::bitset<SIZE_3>>>;
-template class TreeNode<StaticBitset<std::bitset<SIZE_4>>>;
-template class TreeNode<StaticBitset<std::bitset<SIZE_5>>>;
-template class TreeNode<StaticBitset<std::bitset<SIZE_6>>>;
-template class TreeNode<CustomBitset>;
-template class TreeNode<DynamicBitset>;
-template class TreeNode<SparseIndexBitset>;
-#ifdef _WIN32
-template class TreeNode<VariantBitset>;
-template class TreeNode<AnyBitset>;
-#endif
-
-// --------------------------------------------------------------------------------------------------------------------------------- //
-// --------------------------------------------------------------------------------------------------------------------------------- //

@@ -7,15 +7,12 @@
 #include "Bitset.h"
 #include "HyperGraph.h"
 
-template <class T>
 class FormalContext
 {
 private:
 	// a formal context is a matrix of bool
-	std::vector<T> formalContext;
+	std::vector<SparseIndexBitset> formalContext;
 
-	//std::vector<Bitset> formalContext;
-	
 	// number of columns / number of boolean values
 	unsigned int itemCount;
 	
@@ -36,7 +33,7 @@ public:
 		// build formal context
 		for (unsigned int i = 0, n = hypergraph->getObjectCount(); i < n; i++)
 		{
-			T bitset(bitsetSize);
+			SparseIndexBitset bitset(bitsetSize);
 						
 			// loop on hyper graph and build formal context
 			std::vector<unsigned int> line = hypergraph->getLine(i);
@@ -95,31 +92,4 @@ public:
 		return bitset.get(iAttribute);
 	};
 };
-
-// --------------------------------------------------------------------------------------------------------------------------------- //
-// --------------------------------------------------------------------------------------------------------------------------------- //
-
-// template implementation
-//template class FormalContext<StaticBitset<std::bitset<SIZE_0>>>;
-//template class FormalContext<StaticBitset<std::bitset<SIZE_1>>>;
-//template class FormalContext<StaticBitset<std::bitset<SIZE_2>>>;
-//template class FormalContext<StaticBitset<std::bitset<SIZE_3>>>;
-//template class FormalContext<StaticBitset<std::bitset<SIZE_4>>>;
-//template class FormalContext<StaticBitset<std::bitset<SIZE_5>>>;
-//template class FormalContext<StaticBitset<std::bitset<SIZE_6>>>;
-//template class FormalContext<CustomBitset>;
-//#ifdef _WIN32
-//template class FormalContext<VariantBitset>; 
-//template class FormalContext<AnyBitset>;
-//#endif
-template class FormalContext<SparseIndexBitset>;
-
-// --------------------------------------------------------------------------------------------------------------------------------- //
-// --------------------------------------------------------------------------------------------------------------------------------- //
-
-//typedef FormalContext<AnyBitset> FormalContext_impl;
-//typedef FormalContext<StaticBitset<std::bitset<SIZE_0>>> FormalContext_impl;
-//typedef FormalContext<CustomBitset> FormalContext_impl;
-//typedef FormalContext<VariantBitset> FormalContext_impl;
-typedef FormalContext<SparseIndexBitset> FormalContext_impl;
 

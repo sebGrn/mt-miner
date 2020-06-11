@@ -8,25 +8,25 @@
 
 
 /// build binary representation from formal context
-template <class T> 
-BinaryRepresentation<T>::BinaryRepresentation(const FormalContext_impl& context)
+BinaryRepresentation::BinaryRepresentation(const FormalContext& context)
 {
 	this->objectCount = context.getObjectCount();	// 800
 	this->itemCount = context.getItemCount();		// 77
 	this->nbItemsetNotAddedFromClone = 0;
 
 	unsigned int sum = 0;
-	T bitset(this->objectCount);
+	unsigned long bitset(0);
 	for (unsigned int j = 0; j < this->itemCount; j++)			// 8 on test.txt
 	{
+		bitset = 0;
 		// allocate bitset with object count bit (formal context column size)
-		bitset.reset();
 		for (unsigned int i = 0; i < this->objectCount; i++)		// 6 on test.txt
 		{
 			bool bit = context.getBit(i, j);
-			bitset.set(i, bit);
-			if (bit)				
-				sum++;
+			bitset |= (bit ? 1UL : 0UL) << i;
+			//SET_BIT(bitset, bit, i);
+			if (bit)
+				sum++;			
 		}
 		
 		// set a critical section to allow multiple thread to write in size_tuples vector
@@ -39,14 +39,12 @@ BinaryRepresentation<T>::BinaryRepresentation(const FormalContext_impl& context)
 	std::cout << RED << "sparsity " << (1.0 - sparsity) * 100.0 << "% of bits are sets" << std::endl;
 };
 
-template <class T>
-BinaryRepresentation<T>::~BinaryRepresentation()
+BinaryRepresentation::~BinaryRepresentation()
 {
 }
 
 // return true if element is essential
-template <class T>
-bool BinaryRepresentation<T>::isEssential(const Itemset& itemset)
+bool BinaryRepresentation::isEssential(const Itemset& itemset)
 {
 	if (itemset.size() == 1)
 		return true;
@@ -54,7 +52,7 @@ bool BinaryRepresentation<T>::isEssential(const Itemset& itemset)
 	bool isEssential = false;
 	for (int i1 = 0, n = static_cast<int>(itemset.size()); i1 != n; i1++)
 	{
-		T SumOfN_1Items(this->objectCount);
+		unsigned long SumOfN_1Items(0);
 		
 		// dont forget to initialize boolean
 		isEssential = false;
@@ -64,17 +62,19 @@ bool BinaryRepresentation<T>::isEssential(const Itemset& itemset)
 			if (i1 != i2)
 			{
 				unsigned int key2 = itemset[i2];
-				Bitset&& bitset = this->getBitsetFromKey(key2);
-				SumOfN_1Items.bitset_or(bitset);
+				unsigned long bitset = this->getBitsetFromKey(key2);
+				SumOfN_1Items |= bitset;
 			}
 		}
 
 		unsigned int key1 = itemset[i1];
-		Bitset&& bitset = this->getBitsetFromKey(key1);
+		unsigned long bitset = this->getBitsetFromKey(key1);
 		for (unsigned int i = 0; i < this->objectCount; i++)
 		{
-			// FIX ME : SLOW !!
-			if (SumOfN_1Items.get(i) == false && bitset.get(i) == true)
+			// compare bit
+			bool bit0 = GET_BIT(SumOfN_1Items, i);
+			bool bit1 = GET_BIT(bitset, i);
+			if (!bit0 && bit1)
 			{
 				// this bitset is essential, check with next bitset
 				isEssential = true;
@@ -91,23 +91,21 @@ bool BinaryRepresentation<T>::isEssential(const Itemset& itemset)
 	return isEssential;
 }
 
-template <class T> 
-unsigned int BinaryRepresentation<T>::computeDisjonctifSupport(const Itemset& pattern) const
+unsigned int BinaryRepresentation::computeDisjonctifSupport(const Itemset& pattern) const
 {
-	T SumOfN_1Items(this->objectCount);
+	unsigned long SumOfN_1Items(0);
 	for (size_t i = 0, n = pattern.size(); i < n; i++)
 	{
 		unsigned int columnKey = pattern[i];
-		Bitset&& bitset = this->getBitsetFromKey(columnKey);
-		SumOfN_1Items.bitset_or(bitset);
+		unsigned long bitset = this->getBitsetFromKey(columnKey);
+		SumOfN_1Items |= bitset;
 	}
 
-	unsigned int disSupp = SumOfN_1Items.count();
+	unsigned int disSupp = COUNT_BIT(SumOfN_1Items);
 	return disSupp;
 };
 
-template <class T>
-bool BinaryRepresentation<T>::compareItemsets(const Itemset& itemset1, const Itemset& itemset2) const
+bool BinaryRepresentation::compareItemsets(const Itemset& itemset1, const Itemset& itemset2) const
 {
 	bool sameItemset = true;
 	unsigned int supp1 = computeDisjonctifSupport(itemset1);
@@ -121,16 +119,15 @@ bool BinaryRepresentation<T>::compareItemsets(const Itemset& itemset1, const Ite
 			assert(i < itemset2.size());
 			unsigned int columnKey_itemset1 = itemset1[i];
 			unsigned int columnKey_itemset2 = itemset2[i];
-			Bitset&& bitset1 = this->getBitsetFromKey(columnKey_itemset1);
-			Bitset&& bitset2 = this->getBitsetFromKey(columnKey_itemset2);
-			return bitset1.bitset_compare(bitset2);
+			unsigned long bitset1 = this->getBitsetFromKey(columnKey_itemset1);
+			unsigned long bitset2 = this->getBitsetFromKey(columnKey_itemset2);
+			return bitset1 == bitset2;
 		}
 	}
 	return sameItemset;
 }
 
-template <class T>
-unsigned int BinaryRepresentation<T>::buildCloneList()
+unsigned int BinaryRepresentation::buildCloneList()
 {
 	for (auto it1 = this->binaryRepresentation.begin(); it1 != this->binaryRepresentation.end(); it1++)
 	{
@@ -140,7 +137,7 @@ unsigned int BinaryRepresentation<T>::buildCloneList()
 			if (it1 != it2)
 			{
 				// test if binary representation bitsets are equal (it2 is a clone of it1 ?)
-				if (it1->second.bitset_compare(it2->second))
+				if (it1->second == it2->second)
 				{
 					// check that original (it1->first) is not already registered as a clone (second) in clonedBitsetIndexes
 					auto it_finder = find_if(clonedBitsetIndexes.begin(), clonedBitsetIndexes.end(), Utils::compare_second_value_of_pair(it1->first));
@@ -157,8 +154,7 @@ unsigned int BinaryRepresentation<T>::buildCloneList()
 	return static_cast<unsigned int>(clonedBitsetIndexes.size());
 };
 
-template <class T>
-bool BinaryRepresentation<T>::containsAClone(const Itemset& itemset)
+bool BinaryRepresentation::containsAClone(const Itemset& itemset)
 {
 	for (auto it = clonedBitsetIndexes.begin(); it != clonedBitsetIndexes.end(); it++)
 	{
@@ -172,8 +168,7 @@ bool BinaryRepresentation<T>::containsAClone(const Itemset& itemset)
 	return false;
 }
 
-template <class T>
-bool BinaryRepresentation<T>::containsOriginals(const Itemset& itemset, std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes) const
+bool BinaryRepresentation::containsOriginals(const Itemset& itemset, std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes) const
 {
 	originalClonedIndexes.clear();
 	for (auto it = clonedBitsetIndexes.begin(); it != clonedBitsetIndexes.end(); it++)
@@ -186,21 +181,3 @@ bool BinaryRepresentation<T>::containsOriginals(const Itemset& itemset, std::vec
 	}
 	return !originalClonedIndexes.empty();
 }
-
-// template class implementation
-//template class BinaryRepresentation<Bitset32>;
-//template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_0>>>;
-//template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_1>>>;
-//template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_2>>>;
-//template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_3>>>;
-//template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_4>>>;
-//template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_5>>>;
-//template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_6>>>;
-//template class BinaryRepresentation<CustomBitset>;
-//template class BinaryRepresentation<DynamicBitset>;
-//template class BinaryRepresentation<SparseIndexBitset>;
-//#ifdef _WIN32
-//template class BinaryRepresentation<VariantBitset>;
-//template class BinaryRepresentation<AnyBitset>;
-//#endif
-template class BinaryRepresentation<Bitset32>;

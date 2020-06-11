@@ -119,85 +119,37 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 
 		// allocate miner and compute minimal transversals
 		//MT_Miner<StaticBitset<std::bitset<SIZE_0>>> miner(hypergraph, useCloneOptimization);
-		MT_Miner<BasedTypeBitset<unsigned long>> miner(hypergraph, useCloneOptimization);
-		//MT_Miner<SparseIndexBitset> miner(hypergraph, useCloneOptimization);
-		ItemsetList minimalTransversals = miner.computeMinimalTransversals();
-				
-		// ----------------------------------------------------- //
-
-		// save minimal transversals into a file
-		if (useOutputFile)
+		MT_Miner miner(useCloneOptimization);
+		if (miner.createBinaryRepresentation(hypergraph))
 		{
-			std::string outFile = file;
-			outFile += ".out";
+			ItemsetList minimalTransversals = miner.computeMinimalTransversals();
 
-			Logger::log(GREEN, "saving minimal transversals into file : ", outFile, "\n", RESET);
-			std::ofstream outputStream;
-			outputStream.open(outFile);
-			for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { outputStream << Utils::itemsetToString(elt) << std::endl; });
-			outputStream.close();
+			// save minimal transversals into a file
+			if (useOutputFile)
+			{
+				std::string outFile = file;
+				outFile += ".out";
+
+				Logger::log(GREEN, "saving minimal transversals into file : ", outFile, "\n", RESET);
+				std::ofstream outputStream;
+				outputStream.open(outFile);
+				for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { outputStream << Utils::itemsetToString(elt) << std::endl; });
+				outputStream.close();
+			}
 		}
 	}
 
 	Logger::close();
 }
-
-// ----------------------------------------------------------------------------------------------------------- //
-
-void benchmarkbitset()
-{
-	auto testing = [](Bitset& b)
-	{
-		for (int i = 0; i < SIZE_6; i++)
-			b.set(i, rand() % 2);
-		b.bitset_or(b);
-		b.bitset_and(b);
-		b.bitset_compare(b);
-		b = b;
-	};
-
-	const unsigned int n = 10;
-	srand(time(nullptr));
-
-	{
-		auto beginTime = std::chrono::system_clock::now();
-		for (unsigned int i = 0; i < n; i++)
-		{
-			CustomBitset b(SIZE_6);
-			testing(b);
-		}
-		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
-		std::cout << "duration for custom bitset : " << duration << " ms" << std::endl;
-	}
-
-	{
-		auto beginTime = std::chrono::system_clock::now();
-		for (unsigned int i = 0; i < n; i++)
-		{
-			StaticBitset<std::bitset<SIZE_6>> b(SIZE_6);
-			testing(b);
-		}
-		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
-		std::cout << "duration for static bitset : " << duration << " ms" << std::endl;
-	}
-
-	{
-		auto beginTime = std::chrono::system_clock::now();
-		for (unsigned int i = 0; i < n; i++)
-		{
-			SparseIndexBitset b(SIZE_6);
-			testing(b);
-		}
-		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
-		std::cout << "duration for sparse index bitset : " << duration << " ms" << std::endl;
-	}
-}
-
 // ----------------------------------------------------------------------------------------------------------- //
 // ----------------------------------------------------------------------------------------------------------- //
 
 int main(int argc, char* argv[])
 {
+	//unsigned long b = 0;
+	//bool bit = true;
+	//b |= (bit ? 1UL : 0UL) << 2;
+
 	// http://research.nii.ac.jp/~uno/dualization.html
 
 	if (argc <= 1)
@@ -218,5 +170,4 @@ int main(int argc, char* argv[])
 	bool useCloneOptimization = parameterList[ArgumentParser::USE_CLONE] == "true" || parameterList[ArgumentParser::USE_CLONE] == "True" || parameterList[ArgumentParser::USE_CLONE] == "TRUE";
 
 	runMinimalTransversals(file, useCloneOptimization, verboseMode, useOutputFile, useOutputLogFile);
-	//benchmarkbitset();
 }

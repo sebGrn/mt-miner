@@ -19,8 +19,7 @@
 /**
  * Minimal tranversals are found while running through a tree which is dynamically build
  */
-template <class T>
-class TreeNode// : public std::enable_shared_from_this<TreeNode<T>>
+class TreeNode
 {
 private:
 	// to avoid interleaved outputs
@@ -35,7 +34,7 @@ private:
 	// egual à la taille des tâches arrêtées
 	static int pending_task_count;
 	
-	std::shared_ptr<BinaryRepresentation<T>> binaryRepresentation;
+	std::shared_ptr<BinaryRepresentation> binaryRepresentation;
 
 	/// true if we want to use clone optimization
 	/// a clone is an item from binary representation 
@@ -63,7 +62,7 @@ private:
 	//int node_function(int task_id);
 	
 public:
-	TreeNode(bool useCloneOptimization, const std::shared_ptr<BinaryRepresentation<T>>& binaryRepresentation);	
+	TreeNode(bool useCloneOptimization, const std::shared_ptr<BinaryRepresentation>& binaryRepresentation);	
 	~TreeNode();
 
 	/// recursive method, going through tree representation 

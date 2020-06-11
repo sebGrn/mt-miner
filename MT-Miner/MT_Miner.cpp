@@ -3,36 +3,32 @@
 #include "Profiler.h"
 #include "JsonTree.h"
 
-template <class T>
-std::atomic_bool MT_Miner<T>::stop(false);
+std::atomic_bool MT_Miner::stop(false);
 
-template <class T>
-MT_Miner<T>::MT_Miner(const std::shared_ptr<HyperGraph>& hypergraph, bool useCloneOptimization)
+MT_Miner::MT_Miner(bool useCloneOptimization)
 {
-	this->useCloneOptimization = useCloneOptimization;	
-	createBinaryRepresentation(hypergraph);
+	this->useCloneOptimization = useCloneOptimization;		
 }
 
-template <class T>
-MT_Miner<T>::~MT_Miner()
+MT_Miner::~MT_Miner()
 {
 }
 
-template <class T>
-void MT_Miner<T>::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hypergraph)
+bool MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hypergraph)
 {
-	//const unsigned int objectCount = hypergraph->getObjectCount();
-	//constexpr std::uint32_t n = objectCount;
-	//constexpr std::uint32_t a = item_count<objectCount>;
-	//std::bitset<a> b;
-
 	// build formal context from hypergraph
-	FormalContext_impl formalContext(hypergraph);
+	FormalContext formalContext(hypergraph);
 	//formalContext.serialize("format_context.csv");
+
+	if (formalContext.getObjectCount() >= 32)
+	{
+		Logger::log(RED, "Bitset count is superior to 32 bits, cannot manage this context\n", RESET);
+		return false;
+	}
 
 	// build binary representation from formal context
 	binaryRepresentation.reset();
-	binaryRepresentation = std::make_shared<BinaryRepresentation<T>>(formalContext);
+	binaryRepresentation = std::make_shared<BinaryRepresentation>(formalContext);
 	//binaryRepresentation->serialize("binary_rep.csv");
 
 	if (this->useCloneOptimization)
@@ -57,10 +53,10 @@ void MT_Miner<T>::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& 
 		if (cloneListSize == 0)
 			this->useCloneOptimization = false;
 	}
+	return true;
 }
 
-template <class T>
-ItemsetList MT_Miner<T>::computeInitalToTraverseList()
+ItemsetList MT_Miner::computeInitalToTraverseList()
 {
 	ItemsetList toTraverse;
 	for (unsigned int i = 1; i <= this->binaryRepresentation->getItemCount(); i++)
@@ -72,15 +68,17 @@ ItemsetList MT_Miner<T>::computeInitalToTraverseList()
 	return toTraverse;
 }
 
-template <class T>
-ItemsetList MT_Miner<T>::computeMinimalTransversals()
+ItemsetList MT_Miner::computeMinimalTransversals()
 {
+	if (!binaryRepresentation)
+		return ItemsetList();
+
 	auto beginTime = std::chrono::system_clock::now();
 
 	ItemsetList toTraverse = computeInitalToTraverseList();
 
 	// create a graph, then compute minimal transversal from the binary representation
-	TreeNode<T> rootNode(this->useCloneOptimization, this->binaryRepresentation);
+	TreeNode rootNode(this->useCloneOptimization, this->binaryRepresentation);
 
 	// lambda function called during parsing every 20 seconds
 	auto ftr = std::async(std::launch::async, [&rootNode]() {
@@ -135,21 +133,3 @@ ItemsetList MT_Miner<T>::computeMinimalTransversals()
 	return graph_mt;
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------- //
-// --------------------------------------------------------------------------------------------------------------------------------- //
-
-// template implementation
-template class MT_Miner<StaticBitset<std::bitset<SIZE_0>>>;
-template class MT_Miner<StaticBitset<std::bitset<SIZE_1>>>;
-template class MT_Miner<StaticBitset<std::bitset<SIZE_2>>>;
-template class MT_Miner<StaticBitset<std::bitset<SIZE_3>>>;
-template class MT_Miner<StaticBitset<std::bitset<SIZE_4>>>;
-template class MT_Miner<StaticBitset<std::bitset<SIZE_5>>>;
-template class MT_Miner<StaticBitset<std::bitset<SIZE_6>>>;
-template class MT_Miner<CustomBitset>;
-template class MT_Miner<DynamicBitset>;
-template class MT_Miner<SparseIndexBitset>;
-#ifdef  _WIN32
-template class MT_Miner<VariantBitset>;
-template class MT_Miner<AnyBitset>;
-#endif //  _WIN32

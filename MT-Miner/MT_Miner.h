@@ -20,7 +20,6 @@
  * owns the binary represention
  * create the graphnode that will explore the hypergrapho 
  */
-template <class T>
 class MT_Miner
 {
 private:
@@ -29,19 +28,19 @@ private:
 	///
 	bool useCloneOptimization;
 	// binary representation 
-	std::shared_ptr<BinaryRepresentation<T>> binaryRepresentation;
+	std::shared_ptr<BinaryRepresentation> binaryRepresentation;
 	
 private:
-	/// this function build a format context from the hypergraph, then build the binary representation
-	void createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hypergraph);
-
 	/// return the minimal transversals miner
 	ItemsetList computeInitalToTraverseList();
 
 public:
-	MT_Miner(const std::shared_ptr<HyperGraph>& hypergraph, bool useCloneOptimization = true);
+	MT_Miner(bool useCloneOptimization = true);
 	~MT_Miner();
 
+	/// this function build a format context from the hypergraph, then build the binary representation
+	bool createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hypergraph);
+	
 	///
 	ItemsetList computeMinimalTransversals();
 

@@ -2,10 +2,14 @@
 
 #include <unordered_map>
 
-
 #include "utils.h"
 #include "Bitset.h"
 #include "FormalContext.h"
+
+#define BITSET_SIZE				32
+#define GET_BIT(bitset, i)		(bitset >> i) & 1UL
+#define SET_BIT(bitset, bit, i)	(bitset |= (bit ? 1UL : 0UL) << i)
+#define COUNT_BIT(bitset)		BinaryRepresentation::countBit(bitset)
 
 /** 
  * a binary representation is a formal context representation in columns
@@ -13,12 +17,11 @@
  * the index of the map is the item number
  * this representation is usefull to compute disjonctif support easyly (with a OR operator)
  */
-template <class T>
 class BinaryRepresentation
 {
 private:
 	///  key/value definition of a binary represention (key as the attribute id, value as the bitset)
-	std::unordered_map<unsigned int, T> binaryRepresentation;	
+	std::unordered_map<unsigned int, unsigned long> binaryRepresentation;	
 
 	/// number of objects/lines
 	unsigned int objectCount;
@@ -37,7 +40,7 @@ private:
 
 public:
 	/// build binary representation from formal context
-	BinaryRepresentation(const FormalContext_impl& context);
+	BinaryRepresentation(const FormalContext& context);
 	///
 	~BinaryRepresentation();
 	///
@@ -57,9 +60,11 @@ public:
 		std::ofstream fileStream = std::ofstream(outputile, std::ofstream::out);
 		for (auto it = this->binaryRepresentation.begin(); it != this->binaryRepresentation.end(); it++)
 		{
-			for (int i = 0, n = it->second.size(); i < n; i++)
-			{
-				fileStream << it->second.get(i) ? "1" : "0";
+			unsigned long bitset = it->second;
+			for (int i = 0, n = BITSET_SIZE; i < n; i++)
+			{				
+				bool bit = (bitset >> i) & 1ULL;
+				fileStream << bit ? "1" : "0";
 				fileStream << ";";
 			}
 			fileStream << std::endl;
@@ -77,9 +82,21 @@ public:
 		return this->objectCount;
 	};
 
-	T getBitsetFromKey(unsigned int key) const
+	unsigned long getBitsetFromKey(unsigned int key) const
 	{
 		assert(binaryRepresentation.find(key) != binaryRepresentation.end());
 		return binaryRepresentation.at(key);
+	}
+
+	static unsigned int countBit(unsigned long bitset)
+	{
+		unsigned int count(0);
+		unsigned long int n(bitset);
+		while (n)
+		{
+			n &= (n - 1);
+			count++;
+		}
+		return count;
 	}
 };
