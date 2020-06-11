@@ -188,17 +188,19 @@ bool BinaryRepresentation<T>::containsOriginals(const Itemset& itemset, std::vec
 }
 
 // template class implementation
-template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_0>>>;
-template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_1>>>;
-template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_2>>>;
-template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_3>>>;
-template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_4>>>;
-template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_5>>>;
-template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_6>>>;
-template class BinaryRepresentation<CustomBitset>;
-template class BinaryRepresentation<DynamicBitset>;
-template class BinaryRepresentation<SparseIndexBitset>;
-#ifdef _WIN32
-template class BinaryRepresentation<VariantBitset>;
-template class BinaryRepresentation<AnyBitset>;
-#endif
+//template class BinaryRepresentation<Bitset32>;
+//template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_0>>>;
+//template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_1>>>;
+//template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_2>>>;
+//template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_3>>>;
+//template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_4>>>;
+//template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_5>>>;
+//template class BinaryRepresentation<StaticBitset<std::bitset<SIZE_6>>>;
+//template class BinaryRepresentation<CustomBitset>;
+//template class BinaryRepresentation<DynamicBitset>;
+//template class BinaryRepresentation<SparseIndexBitset>;
+//#ifdef _WIN32
+//template class BinaryRepresentation<VariantBitset>;
+//template class BinaryRepresentation<AnyBitset>;
+//#endif
+template class BinaryRepresentation<Bitset32>;

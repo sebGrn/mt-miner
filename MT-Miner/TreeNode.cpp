@@ -333,85 +333,43 @@ ItemsetList TreeNode<T>::computeMinimalTransversals(const ItemsetList& toTravers
 
 	// launch processing units
 	std::list<std::future<ItemsetList>> units;
-	for (auto n = std::thread::hardware_concurrency(); --n;)
+	const unsigned int thead_multiplicator = 4;
+	for (auto n = std::thread::hardware_concurrency() * thead_multiplicator; --n;)
 	{
 		units.emplace_back(std::async(std::launch::async, [n]()
 		{
 			// ## LAUNCH task ##
-			//std::list<ItemsetList> completed_tasks;
-			
-				ItemsetList result_mt;
+			ItemsetList result_mt;
 
-				std::unique_lock<std::mutex> lock(task_guard);
-				while (true)
+			std::unique_lock<std::mutex> lock(task_guard);
+			while (true)
+			{
+				if (!task_queue.empty())
 				{
-					if (!task_queue.empty())
-					{
-						// pick a task
-						auto task = std::move(task_queue.front());
-						task_queue.pop_front();
+					// pick a task
+					auto task = std::move(task_queue.front());
+					task_queue.pop_front();
 						
-						lock.unlock(); // unlock while processing task
-						{
-							// process task
-							ItemsetList mt = task.get();
-							std::copy(mt.begin(), mt.end(), std::back_inserter(result_mt));
-							//if(!mt.empty())
-							//{ 
-							//	// TODO lock with different mutex
-							//	completed_tasks.push_back(mt);
-							//}
-							// TODO USE THIS VERSION AND REMOVE completedTask
-							//std::shared_ptr<TreeNode<T>> node = task.get();
-							//if (node && node->mt_node_result && !node->mt_node_result->empty())
-							//{
-								//completed_tasks.push_back(node->mt_node_result);
-								//const std::lock_guard<std::mutex> lock(output_guard);
-								//std::copy(mt.begin(), mt.end(), std::back_inserter(result_mt));
-							//}
-							// get shared_ptr corresponding to task and delete managed object
-							// --> ptr.reset();
-						}
-						lock.lock(); // reacquire lock
-					}
-					else if (!pending_task_count)
-						break;
-					else
+					lock.unlock(); // unlock while processing task
 					{
-						//{// TRACE
-						//	const std::lock_guard<std::mutex> lock(output_guard);
-						//	std::cout << "Unit #" << n;
-						//	std::cout << "\tPAUSE" << std::endl;
-						//}
-						// IDLE
-						task_signal.wait(lock);
-						//{// TRACE
-						//	const std::lock_guard<std::mutex> lock(output_guard);
-						//	std::cout << "Unit #" << n;
-						//	std::cout << "\tAWAKE" << std::endl;
-						//}
+						// process task
+						ItemsetList mt = task.get();
+						std::copy(mt.begin(), mt.end(), std::back_inserter(result_mt));
 					}
+					lock.lock(); // reacquire lock
 				}
+				else if (!pending_task_count)
+					break;
+				else
+				{
+					// ## PAUSE / IDLE ##
+					task_signal.wait(lock);
+					// ## AWAKE ##
+				}
+			}
 			
 			// ## TERMINATE ##
 			return result_mt;
-			//{
-			//	const std::lock_guard<std::mutex> lock(output_guard);
-			//	for (auto list : completed_tasks)
-			//	{
-			//		std::copy(list.begin(), list.end(), std::back_inserter(result_mt));
-			//	}
-			//}
-			//{// TRACE
-			//	const std::lock_guard<std::mutex> lock(output_guard);
-			//	std::cout << "Unit #" << n;
-			//	std::cout << "\tTERMINATE {";
-			//	for (auto i : completed_tasks)
-			//	{
-			//		std::cout << " " << Utils::itemsetListToString(i) << " ";
-			//	}
-			//	std::cout << "}" << std::endl;				
-			//}
 		}));
 	}
 
@@ -422,7 +380,6 @@ ItemsetList TreeNode<T>::computeMinimalTransversals(const ItemsetList& toTravers
 		{
 			const std::lock_guard<std::mutex> lock(output_guard);
 			std::copy(result.begin(), result.end(), std::back_inserter(final_mt));
-			//std::cout << "Unit #" << result.first << " COMPLETE " << result.second << " tasks" << std::endl;
 		}
 	}
 	return final_mt;

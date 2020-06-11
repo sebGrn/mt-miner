@@ -100,18 +100,19 @@ public:
 // --------------------------------------------------------------------------------------------------------------------------------- //
 
 // template implementation
-template class FormalContext<StaticBitset<std::bitset<SIZE_0>>>;
-template class FormalContext<StaticBitset<std::bitset<SIZE_1>>>;
-template class FormalContext<StaticBitset<std::bitset<SIZE_2>>>;
-template class FormalContext<StaticBitset<std::bitset<SIZE_3>>>;
-template class FormalContext<StaticBitset<std::bitset<SIZE_4>>>;
-template class FormalContext<StaticBitset<std::bitset<SIZE_5>>>;
-template class FormalContext<StaticBitset<std::bitset<SIZE_6>>>;
-template class FormalContext<CustomBitset>;
-#ifdef _WIN32
-template class FormalContext<VariantBitset>; 
-template class FormalContext<AnyBitset>;
-#endif
+//template class FormalContext<StaticBitset<std::bitset<SIZE_0>>>;
+//template class FormalContext<StaticBitset<std::bitset<SIZE_1>>>;
+//template class FormalContext<StaticBitset<std::bitset<SIZE_2>>>;
+//template class FormalContext<StaticBitset<std::bitset<SIZE_3>>>;
+//template class FormalContext<StaticBitset<std::bitset<SIZE_4>>>;
+//template class FormalContext<StaticBitset<std::bitset<SIZE_5>>>;
+//template class FormalContext<StaticBitset<std::bitset<SIZE_6>>>;
+//template class FormalContext<CustomBitset>;
+//#ifdef _WIN32
+//template class FormalContext<VariantBitset>; 
+//template class FormalContext<AnyBitset>;
+//#endif
+template class FormalContext<SparseIndexBitset>;
 
 // --------------------------------------------------------------------------------------------------------------------------------- //
 // --------------------------------------------------------------------------------------------------------------------------------- //
@@ -120,5 +121,5 @@ template class FormalContext<AnyBitset>;
 //typedef FormalContext<StaticBitset<std::bitset<SIZE_0>>> FormalContext_impl;
 //typedef FormalContext<CustomBitset> FormalContext_impl;
 //typedef FormalContext<VariantBitset> FormalContext_impl;
-typedef FormalContext < SparseIndexBitset> FormalContext_impl;
+typedef FormalContext<SparseIndexBitset> FormalContext_impl;
 

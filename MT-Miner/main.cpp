@@ -118,7 +118,8 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 		itemCount = parser.getItemCount();
 
 		// allocate miner and compute minimal transversals
-		MT_Miner<StaticBitset<std::bitset<SIZE_0>>> miner(hypergraph, useCloneOptimization);
+		//MT_Miner<StaticBitset<std::bitset<SIZE_0>>> miner(hypergraph, useCloneOptimization);
+		MT_Miner<BasedTypeBitset<unsigned long>> miner(hypergraph, useCloneOptimization);
 		//MT_Miner<SparseIndexBitset> miner(hypergraph, useCloneOptimization);
 		ItemsetList minimalTransversals = miner.computeMinimalTransversals();
 				
