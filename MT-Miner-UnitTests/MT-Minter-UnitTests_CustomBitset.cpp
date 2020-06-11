@@ -8,7 +8,7 @@ namespace MTMinerUnitTests_Bitset
 	TEST_CLASS(MTMinerUnitTests_CustomBitset)
 	{
 	public:
-		TEST_METHOD(TestingBitsets_equal)
+		/*TEST_METHOD(TestingBitsets_equal)
 		{
 			CustomBitset b0(1000);
 			CustomBitset b1(1000);

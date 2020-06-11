@@ -16,7 +16,8 @@ namespace MTMinerUnitTests_ac_clone
 			Assert::IsNotNull(parser.getHypergraph().get());
 
 			bool useCloneOptimization = true;
-			MT_Miner<StaticBitset<std::bitset<SIZE_0>>> miner(parser.getHypergraph(), useCloneOptimization);
+			MT_Miner miner(useCloneOptimization);
+			miner.createBinaryRepresentation(parser.getHypergraph());
 
 			// compute minimal transversals
 			std::vector<Itemset> minimalTransversals = miner.computeMinimalTransversals();
@@ -31,7 +32,8 @@ namespace MTMinerUnitTests_ac_clone
 			Assert::IsNotNull(parser.getHypergraph().get());
 
 			bool useCloneOptimization = true;
-			MT_Miner<StaticBitset<std::bitset<SIZE_0>>> miner(parser.getHypergraph(), useCloneOptimization);
+			MT_Miner miner(useCloneOptimization);
+			miner.createBinaryRepresentation(parser.getHypergraph());
 
 			// compute minimal transversals
 			std::vector<Itemset> minimalTransversals = miner.computeMinimalTransversals();
@@ -46,7 +48,8 @@ namespace MTMinerUnitTests_ac_clone
 			Assert::IsNotNull(parser.getHypergraph().get());
 
 			bool useCloneOptimization = true;
-			MT_Miner<StaticBitset<std::bitset<SIZE_0>>> miner(parser.getHypergraph(), useCloneOptimization);
+			MT_Miner miner(useCloneOptimization);
+			miner.createBinaryRepresentation(parser.getHypergraph());
 
 			// compute minimal transversals
 			std::vector<Itemset> minimalTransversals = miner.computeMinimalTransversals();

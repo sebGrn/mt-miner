@@ -103,7 +103,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;$(SolutionDir)MT-Miner\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>BinaryRepresentation.obj;TreeNode.obj;MT_Miner.obj;HypergraphParser.obj;Logger.obj;Profiler.obj;JsonTree.obj</AdditionalDependencies>
+      <AdditionalDependencies>BinaryRepresentation.obj;TreeNode.obj;MT_Miner.obj;HypergraphParser.obj;Logger.obj;Profiler.obj;JsonTree.obj;bitset.obj</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -167,11 +167,6 @@
     <ClCompile Include="MT-Miner-UnitTests_hyp_clone.cpp" />
     <ClCompile Include="MT-Miner-UnitTests_hyp_no_clone.cpp" />
     <ClCompile Include="MT-Miner-UnitTests_test.cpp" />
-    <ClCompile Include="MT-Minter-UnitTests_Bitset_benchmark.cpp" />
-    <ClCompile Include="MT-Minter-UnitTests_CustomBitset.cpp" />
-    <ClCompile Include="MT-Minter-UnitTests_SparseBitset.cpp" />
-    <ClCompile Include="MT-Minter-UnitTests_StaticBitset.cpp" />
-    <ClCompile Include="MT-Minter-UnitTests_VarianBitset.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
