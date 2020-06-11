@@ -76,7 +76,7 @@ CustomBitset::CustomBitset(unsigned int bitsetSize) : memory_size(64)
 	this->bitset_size = bitsetSize;
 	unsigned int n = (bitsetSize / memory_size) + 1;
 	this->bitset_value.resize(n);
-	std::for_each(this->bitset_value.begin(), this->bitset_value.end(), [](unsigned long long& v) { v = 0ULL; });
+	std::for_each(this->bitset_value.begin(), this->bitset_value.end(), [](unsigned long int& v) { v = 0ULL; });
 };
 
 CustomBitset::CustomBitset(const CustomBitset& bitset) : memory_size(64)
@@ -91,7 +91,7 @@ CustomBitset::~CustomBitset()
 
 void CustomBitset::reset(bool b) 
 {
-	std::for_each(this->bitset_value.begin(), this->bitset_value.end(), [&b](unsigned long long& v) { v = (b ? 1ULL : 0ULL); });
+	std::for_each(this->bitset_value.begin(), this->bitset_value.end(), [&b](unsigned long int& v) { v = (b ? 1ULL : 0ULL); });
 };
 
 void CustomBitset::set(unsigned int iAttribute, bool b) 
@@ -99,7 +99,7 @@ void CustomBitset::set(unsigned int iAttribute, bool b)
 	unsigned int iArray = iAttribute / memory_size;
 	unsigned int iBit = iAttribute % memory_size;
 	assert(iArray < this->bitset_value.size());
-	unsigned long long number = this->bitset_value[iArray];
+	unsigned long int number = this->bitset_value[iArray];
 	number |= (b ? 1ULL : 0ULL) << iBit;
 	this->bitset_value[iArray] = number;
 };
@@ -110,7 +110,7 @@ bool CustomBitset::get(unsigned int iAttribute) const
 	unsigned int iArray = iAttribute / memory_size;
 	unsigned int iBit = iAttribute % memory_size;
 	assert(iArray < this->bitset_value.size());
-	unsigned long long number = this->bitset_value[iArray];
+	unsigned long int number = this->bitset_value[iArray];
 	bool bit = (number >> iBit) & 1ULL;
 	return bit;
 };
@@ -122,7 +122,7 @@ unsigned int CustomBitset::count() const
 	std::for_each(this->bitset_value.begin(), this->bitset_value.end(), [&count, this](unsigned long long v) {
 		// Brian Kernighan’s Algorithm
 		// https://www.geeksforgeeks.org/count-set-bits-in-an-integer/
-		unsigned long long n(v);
+		unsigned long int n(v);
 		while (n)
 		{
 			n &= (n - 1);
@@ -135,8 +135,8 @@ unsigned int CustomBitset::count() const
 Bitset& CustomBitset::bitset_or(const Bitset& b) 
 {
 	const CustomBitset& a = dynamic_cast<const CustomBitset&>(b);
-	std::transform(a.bitset_value.begin(), a.bitset_value.end(), this->bitset_value.begin(), this->bitset_value.begin(), [](unsigned long long v0, unsigned long long v1) {
-		unsigned long long v(v0);
+	std::transform(a.bitset_value.begin(), a.bitset_value.end(), this->bitset_value.begin(), this->bitset_value.begin(), [](unsigned long int v0, unsigned long int v1) {
+		unsigned long int v(v0);
 		v |= v1;
 		return v;
 	});
@@ -147,8 +147,8 @@ Bitset& CustomBitset::bitset_and(const Bitset& b)
 {
 	const CustomBitset& a = dynamic_cast<const CustomBitset&>(b);
 	CustomBitset bitset(b.size());
-	std::transform(a.bitset_value.begin(), a.bitset_value.end(), this->bitset_value.begin(), this->bitset_value.begin(), [](unsigned long long v0, unsigned long long v1) {
-		unsigned long long v(v0);
+	std::transform(a.bitset_value.begin(), a.bitset_value.end(), this->bitset_value.begin(), this->bitset_value.begin(), [](unsigned long int v0, unsigned long int v1) {
+		unsigned long int v(v0);
 		v &= v1;
 		return v;
 	});

@@ -82,9 +82,9 @@ public:
 class CustomBitset : public Bitset
 {
 private:	
-	// use block of 64 bits (unsigned long long) to represent a bitset
+	// use block of 32 bits (unsigned long int) to represent a bitset
 	// https://fr.cppreference.com/w/cpp/language/types
-	std::vector<unsigned long long> bitset_value;
+	std::vector<unsigned long int> bitset_value;
 
 	const unsigned int memory_size;
 

@@ -10,7 +10,7 @@ template <class T> std::mutex TreeNode<T>::output_guard;
 template <class T> std::deque<std::future<ItemsetList>> TreeNode<T>::task_queue;
 template <class T> std::mutex TreeNode<T>::task_guard;
 template <class T> std::condition_variable TreeNode<T>::task_signal;
-template <class T> std::atomic_int TreeNode<T>::pending_task_count(0);
+template <class T> int TreeNode<T>::pending_task_count(0);
 
 template <class T>
 TreeNode<T>::TreeNode(bool useCloneOptimization, const std::shared_ptr<BinaryRepresentation<T>>& binaryRepresentation)
@@ -230,11 +230,7 @@ std::vector<Itemset> TreeNode<T>::computeMinimalTransversals_iterative(const std
 template <class T>
 ItemsetList TreeNode<T>::computeMinimalTransversals_task(const ItemsetList& toTraverse)
 {
-	//{// TRACE
-	//	const std::lock_guard<std::mutex> lock(output_guard);
-	//	std::cout << "\t\t\t\t\t[" << std::this_thread::get_id() << "]";
-	//	std::cout << "\tSTART task " << std::endl;
-	//}
+	// ## START TASK ##
 
 	// test trivial case
 	if (toTraverse.empty())
@@ -291,11 +287,8 @@ ItemsetList TreeNode<T>::computeMinimalTransversals_task(const ItemsetList& toTr
 				nbTotalChildren++;
 				// call on the same node, it works because no class members are used except atomics
 				auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(newToTraverse));
-				//{// TRACE
-				//	const std::lock_guard<std::mutex> lock(output_guard);
-				//	std::cout << "\t\t\t\t\t[" << std::this_thread::get_id() << "]";
-				//	std::cout << "\tSPAWN task " << std::endl;
-				//}
+
+				// ## SPAWN TASK ##
 				{
 					const std::lock_guard<std::mutex> lock(task_guard);
 					task_queue.emplace_back(std::move(subtask));
@@ -310,39 +303,28 @@ ItemsetList TreeNode<T>::computeMinimalTransversals_task(const ItemsetList& toTr
 	}
 
 	// terminate task
+	const std::lock_guard<std::mutex> lock(task_guard);
 	if (!--pending_task_count)
 	{
-		//{// TRACE
-		//	std::cout << "\t\t\t\t\t[" << std::this_thread::get_id() << "]";
-		//	std::cout << "\tEMIT SHUTDOWN SIGNAL " << std::endl;
-		//}
+		// ## EMIT SHUTDOWN SIGNAL ##
 		// awake all idle units for auto-shutdown
 		task_signal.notify_all();
 	}
-	//{// TRACE
-	//	const std::lock_guard<std::mutex> lock(output_guard);
-	//	std::cout << "\t\t\t\t\t[" << std::this_thread::get_id() << "]";
-	//	std::cout << "\tCOMPLETE task " << Utils::itemsetListToString(graph_mt) << " " << graph_mt.size() << std::endl;
-	//}
+	// ## EMIT COMPLETE TASK ##
 
 	return graph_mt;
-	/*mt_node_result.reset();
-	mt_node_result = std::make_shared<ItemsetList>(graph_mt);
-	return std::make_shared<TreeNode<T>>(this);*/
 }
 
 template <class T>
 ItemsetList TreeNode<T>::computeMinimalTransversals(const ItemsetList& toTraverse)
 {
-	ItemsetList result_mt;
+	ItemsetList final_mt;
 	//std::cout << "START system [" << std::this_thread::get_id() << "]" << std::endl;
 
 	// emit initial task
 	auto task = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(toTraverse));
-	//{// TRACE
-	//	std::cout << "\t\t\t\t\t[" << std::this_thread::get_id() << "]";
-	//	std::cout << "\tSPAWN task " << 0 << std::endl;
-	//}
+
+	// ## SPAWN task ##
 	{
 		const std::lock_guard<std::mutex> lock(task_guard);
 		task_queue.emplace_back(std::move(task));
@@ -350,18 +332,16 @@ ItemsetList TreeNode<T>::computeMinimalTransversals(const ItemsetList& toTravers
 	}
 
 	// launch processing units
-	std::list<std::thread> units;
+	std::list<std::future<ItemsetList>> units;
 	for (auto n = std::thread::hardware_concurrency(); --n;)
 	{
-		units.emplace_back(std::thread([n, &result_mt]()
+		units.emplace_back(std::async(std::launch::async, [n]()
 		{
-			//{// TRACE
-			//	const std::lock_guard<std::mutex> lock(output_guard);
-			//	std::cout << "Unit #" << n;
-			//	std::cout << "\tLAUNCH [" << std::this_thread::get_id() << "]" << std::endl;
-			//}
-			std::list<ItemsetList> completed_tasks;
-			{
+			// ## LAUNCH task ##
+			//std::list<ItemsetList> completed_tasks;
+			
+				ItemsetList result_mt;
+
 				std::unique_lock<std::mutex> lock(task_guard);
 				while (true)
 				{
@@ -374,11 +354,14 @@ ItemsetList TreeNode<T>::computeMinimalTransversals(const ItemsetList& toTravers
 						lock.unlock(); // unlock while processing task
 						{
 							// process task
-							ItemsetList && mt = task.get();
-							if(!mt.empty())
-							{ 
-								completed_tasks.push_back(mt);
-							}
+							ItemsetList mt = task.get();
+							std::copy(mt.begin(), mt.end(), std::back_inserter(result_mt));
+							//if(!mt.empty())
+							//{ 
+							//	// TODO lock with different mutex
+							//	completed_tasks.push_back(mt);
+							//}
+							// TODO USE THIS VERSION AND REMOVE completedTask
 							//std::shared_ptr<TreeNode<T>> node = task.get();
 							//if (node && node->mt_node_result && !node->mt_node_result->empty())
 							//{
@@ -409,14 +392,16 @@ ItemsetList TreeNode<T>::computeMinimalTransversals(const ItemsetList& toTravers
 						//}
 					}
 				}
-			}
-			{
-				const std::lock_guard<std::mutex> lock(output_guard);
-				for (auto list : completed_tasks)
-				{
-					std::copy(list.begin(), list.end(), std::back_inserter(result_mt));
-				}
-			}
+			
+			// ## TERMINATE ##
+			return result_mt;
+			//{
+			//	const std::lock_guard<std::mutex> lock(output_guard);
+			//	for (auto list : completed_tasks)
+			//	{
+			//		std::copy(list.begin(), list.end(), std::back_inserter(result_mt));
+			//	}
+			//}
 			//{// TRACE
 			//	const std::lock_guard<std::mutex> lock(output_guard);
 			//	std::cout << "Unit #" << n;
@@ -433,10 +418,14 @@ ItemsetList TreeNode<T>::computeMinimalTransversals(const ItemsetList& toTravers
 	// wait for shutdown
 	for (auto& unit : units)
 	{
-		unit.join();
+		ItemsetList result = unit.get();
+		{
+			const std::lock_guard<std::mutex> lock(output_guard);
+			std::copy(result.begin(), result.end(), std::back_inserter(final_mt));
+			//std::cout << "Unit #" << result.first << " COMPLETE " << result.second << " tasks" << std::endl;
+		}
 	}
-
-	return result_mt;
+	return final_mt;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------- //

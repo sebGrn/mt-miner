@@ -31,7 +31,9 @@ private:
 	static std::deque<std::future<ItemsetList>> task_queue;
 	static std::mutex task_guard;
 	static std::condition_variable task_signal;
-	static std::atomic_int pending_task_count;
+
+	// egual à la taille des tâches arrêtées
+	static int pending_task_count;
 	
 	std::shared_ptr<BinaryRepresentation<T>> binaryRepresentation;
 
@@ -40,8 +42,6 @@ private:
 	bool useCloneOptimization;
 
 	bool useMultitheadOptimization;
-
-	//std::vector<std::shared_ptr<TreeNode>> children;
 
 	//std::shared_ptr<ItemsetList> mt_node_result;
 
