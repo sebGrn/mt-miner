@@ -45,7 +45,7 @@ public:
 	ItemsetList computeMinimalTransversals();
 
 	///
-	unsigned int computeDisjonctifSupport(const Itemset& pattern) const
+	unsigned int computeDisjonctifSupport(Itemset& pattern) const
 	{
 		return binaryRepresentation->computeDisjonctifSupport(pattern);
 	}

@@ -8,13 +8,25 @@
 #include <algorithm>
 #include "Profiler.h"
 
-typedef std::vector<unsigned int> Itemset;
+#define BITSET_SIZE				32
+#define GET_BIT(bitset, i)		(bitset >> i) & 1UL
+#define SET_BIT(bitset, bit, i)	(bitset |= (bit ? 1UL : 0UL) << i)
+#define COUNT_BIT(bitset)		Utils::countBit(bitset)
+
+//typedef std::vector<unsigned int> Itemset;
+
+struct Itemset
+{
+	std::vector<unsigned int> itemset_list;
+	unsigned int bitset_count= 0;
+	unsigned long or_value = 0;
+	bool computed = false;
+};
+
 typedef std::vector<Itemset> ItemsetList;
 
 class Utils
 {
-public:
-
 public:
 	struct compare_int
 	{
@@ -35,18 +47,7 @@ public:
 		bool operator()(Itemset const& item)
 		{
 			// use AND operator for comparaison
-#ifdef _DEBUG
-			for (unsigned int i = 0; i < item.size(); i++)
-			{
-				assert(i < key.size());
-				if (item[i] != key[i])
-					return false;				
-			}
-			return true;
-#else
-			return key == item;
-#endif
-
+			return key.itemset_list == item.itemset_list;
 		}
 	};
 
@@ -67,7 +68,7 @@ public:
 	static std::string itemsetToString(const Itemset& v)
 	{
 		std::string res = "{";
-		for_each(v.begin(), v.end(), [&](unsigned int i) {
+		for_each(v.itemset_list.begin(), v.itemset_list.end(), [&](unsigned int i) {
 			res += std::to_string(i);
 			res += ",";
 			});
@@ -97,11 +98,11 @@ public:
 		transform(strVector.begin(), strVector.end(), sortedList.begin(), [&](const Itemset& elt) {
 			//Itemset v = splitToVectorOfInt(elt, ' ');	
 			Itemset v = elt;
-			std::sort(v.begin(), v.end());
+			std::sort(v.itemset_list.begin(), v.itemset_list.end());
 
 			Itemset res;
-			for_each(v.begin(), v.end(), [&](unsigned int i) {
-				res.push_back(i);
+			for_each(v.itemset_list.begin(), v.itemset_list.end(), [&](unsigned int i) {
+				res.itemset_list.push_back(i);
 				});
 			return res;
 			});
@@ -115,25 +116,36 @@ public:
 		Itemset left = str1;
 		Itemset right = str2;
 		ItemsetList combinedListElt;
-		for_each(str1.begin(), str1.end(), [&](unsigned int i) {
-			auto it = std::find_if(right.begin(), right.end(), Utils::compare_int(i));
-			if (it != right.end())
+		for_each(str1.itemset_list.begin(), str1.itemset_list.end(), [&](unsigned int i) {
+			auto it = std::find_if(right.itemset_list.begin(), right.itemset_list.end(), Utils::compare_int(i));
+			if (it != right.itemset_list.end())
 			{
 				// remove elt
-				right.erase(it);
+				right.itemset_list.erase(it);
 			}
 			});
 		// merge 2 lists into intList1
-		left.insert(left.end(), right.begin(), right.end());
+		left.itemset_list.insert(left.itemset_list.end(), right.itemset_list.begin(), right.itemset_list.end());
 		// transform int list into string list seperated by ' '
 		Itemset combinedElt;
-		for_each(left.begin(), left.end(), [&combinedElt](unsigned int i) { combinedElt.push_back(i); });
+		for_each(left.itemset_list.begin(), left.itemset_list.end(), [&combinedElt](unsigned int i) { combinedElt.itemset_list.push_back(i); });
+		if (str1.computed && str2.computed)
+		{
+			if(!str1.or_value)
+				combinedElt.or_value = str2.or_value;
+			else if (!str2.or_value)
+				combinedElt.or_value = str1.or_value;
+			else
+				combinedElt.or_value = str1.or_value | str2.or_value;
+			combinedElt.bitset_count = COUNT_BIT(combinedElt.or_value);
+			combinedElt.computed = true;
+		}
 		return combinedElt;
 	};
 	
 	static bool containsZero(const Itemset& data)
 	{
-		return (std::find(data.begin(), data.end(), 0) != data.end());
+		return (std::find(data.itemset_list.begin(), data.itemset_list.end(), 0) != data.itemset_list.end());
 	}
 
 	// ------------------------------------------------------------------------------------------------------------------------- //
@@ -184,5 +196,19 @@ public:
 	static std::string& trim(std::string& str, const std::string& chars = "\t\n\v\f\r ")
 	{
 		return ltrim(rtrim(str, chars), chars);
+	}
+
+	// ------------------------------------------------------------------------------------------------------------------------- //
+
+	static unsigned int countBit(unsigned long bitset)
+	{
+		unsigned int count(0);
+		unsigned long int n(bitset);
+		while (n)
+		{
+			n &= (n - 1);
+			count++;
+		}
+		return count;
 	}
 };

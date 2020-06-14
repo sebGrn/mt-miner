@@ -73,6 +73,6 @@ public:
 	/// computes minimal transversals for binary representation
 	//std::vector<Itemset> computeMinimalTransversals_iterative(const std::vector<Itemset>& toTraverse);
 
-	std::vector<Itemset> computeMinimalTransversals(const std::vector<Itemset>& toTraverse);
+	std::vector<Itemset> computeMinimalTransversals(std::vector<Itemset>& toTraverse);
 };
 

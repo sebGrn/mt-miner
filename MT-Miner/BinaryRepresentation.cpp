@@ -46,11 +46,11 @@ BinaryRepresentation::~BinaryRepresentation()
 // return true if element is essential
 bool BinaryRepresentation::isEssential(const Itemset& itemset)
 {
-	if (itemset.size() == 1)
+	if (itemset.itemset_list.size() == 1)
 		return true;
 
 	bool isEssential = false;
-	for (int i1 = 0, n = static_cast<int>(itemset.size()); i1 != n; i1++)
+	for (int i1 = 0, n = static_cast<int>(itemset.itemset_list.size()); i1 != n; i1++)
 	{
 		unsigned long SumOfN_1Items(0);
 		
@@ -61,13 +61,13 @@ bool BinaryRepresentation::isEssential(const Itemset& itemset)
 		{			
 			if (i1 != i2)
 			{
-				unsigned int key2 = itemset[i2];
+				unsigned int key2 = itemset.itemset_list[i2];
 				unsigned long bitset = this->getBitsetFromKey(key2);
 				SumOfN_1Items |= bitset;
 			}
 		}
 
-		unsigned int key1 = itemset[i1];
+		unsigned int key1 = itemset.itemset_list[i1];
 		unsigned long bitset = this->getBitsetFromKey(key1);
 		for (unsigned int i = 0; i < this->objectCount; i++)
 		{
@@ -91,21 +91,30 @@ bool BinaryRepresentation::isEssential(const Itemset& itemset)
 	return isEssential;
 }
 
-unsigned int BinaryRepresentation::computeDisjonctifSupport(const Itemset& pattern) const
+unsigned int BinaryRepresentation::computeDisjonctifSupport(Itemset& pattern) const
 {
-	unsigned long SumOfN_1Items(0);
-	for (size_t i = 0, n = pattern.size(); i < n; i++)
+	// stocker le résultat du OR dans le bitset pour ne pas les recalculer
+	// tester si bitset à 0 --> pas d'opérateur OR
+	// 
+	if (!pattern.computed)
 	{
-		unsigned int columnKey = pattern[i];
-		unsigned long bitset = this->getBitsetFromKey(columnKey);
-		SumOfN_1Items |= bitset;
+		unsigned long SumOfN_1Items(0);
+		for (size_t i = 0, n = pattern.itemset_list.size(); i < n; i++)
+		{
+			unsigned int columnKey = pattern.itemset_list[i];
+			unsigned long bitset = this->getBitsetFromKey(columnKey);
+			if(bitset)
+				SumOfN_1Items |= bitset;
+		}
+		unsigned int disSupp = COUNT_BIT(SumOfN_1Items);
+		pattern.bitset_count = disSupp;
+		pattern.computed = true;
+		pattern.or_value = SumOfN_1Items;
 	}
-
-	unsigned int disSupp = COUNT_BIT(SumOfN_1Items);
-	return disSupp;
+	return pattern.bitset_count;
 };
 
-bool BinaryRepresentation::compareItemsets(const Itemset& itemset1, const Itemset& itemset2) const
+bool BinaryRepresentation::compareItemsets(Itemset& itemset1, Itemset& itemset2) const
 {
 	bool sameItemset = true;
 	unsigned int supp1 = computeDisjonctifSupport(itemset1);
@@ -114,11 +123,11 @@ bool BinaryRepresentation::compareItemsets(const Itemset& itemset1, const Itemse
 		sameItemset = false;
 	else
 	{
-		for (size_t i = 0, n = itemset1.size(); i< n; i++)
+		for (size_t i = 0, n = itemset1.itemset_list.size(); i< n; i++)
 		{
-			assert(i < itemset2.size());
-			unsigned int columnKey_itemset1 = itemset1[i];
-			unsigned int columnKey_itemset2 = itemset2[i];
+			assert(i < itemset2.itemset_list.size());
+			unsigned int columnKey_itemset1 = itemset1.itemset_list[i];
+			unsigned int columnKey_itemset2 = itemset2.itemset_list[i];
 			unsigned long bitset1 = this->getBitsetFromKey(columnKey_itemset1);
 			unsigned long bitset2 = this->getBitsetFromKey(columnKey_itemset2);
 			return bitset1 == bitset2;
@@ -159,7 +168,7 @@ bool BinaryRepresentation::containsAClone(const Itemset& itemset)
 	for (auto it = clonedBitsetIndexes.begin(); it != clonedBitsetIndexes.end(); it++)
 	{
 		// check if 
-		if (std::find(itemset.begin(), itemset.end(), it->second) != itemset.end())
+		if (std::find(itemset.itemset_list.begin(), itemset.itemset_list.end(), it->second) != itemset.itemset_list.end())
 		{
 			this->nbItemsetNotAddedFromClone++;
 			return true;
@@ -174,7 +183,7 @@ bool BinaryRepresentation::containsOriginals(const Itemset& itemset, std::vector
 	for (auto it = clonedBitsetIndexes.begin(); it != clonedBitsetIndexes.end(); it++)
 	{
 		// check if 
-		if (std::find(itemset.begin(), itemset.end(), it->first) != itemset.end())
+		if (std::find(itemset.itemset_list.begin(), itemset.itemset_list.end(), it->first) != itemset.itemset_list.end())
 		{
 			originalClonedIndexes.push_back(std::pair<unsigned int, unsigned int>(it->first, it->second));
 		}

@@ -18,7 +18,7 @@ bool MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hyp
 {
 	// build formal context from hypergraph
 	FormalContext formalContext(hypergraph);
-	//formalContext.serialize("format_context.csv");
+	formalContext.serialize("format_context.csv");
 
 	if (formalContext.getObjectCount() >= 32)
 	{
@@ -61,7 +61,8 @@ ItemsetList MT_Miner::computeInitalToTraverseList()
 	ItemsetList toTraverse;
 	for (unsigned int i = 1; i <= this->binaryRepresentation->getItemCount(); i++)
 	{
-		Itemset itemset(1, i);
+		Itemset itemset;
+		itemset.itemset_list.push_back(i);
 		if (!this->binaryRepresentation->containsAClone(itemset))	
 			toTraverse.push_back(itemset);
 	}

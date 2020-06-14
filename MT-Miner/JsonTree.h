@@ -55,7 +55,7 @@ public:
 			// create node with name
 			std::shared_ptr<JsonTreeNode> node = std::make_shared<JsonTreeNode>(name);
 			// add to the tree root if there is only one element
-			if (_item.size() == 1)
+			if (_item.itemset_list.size() == 1)
 			{
 				tree->addRoot(node);
 			}

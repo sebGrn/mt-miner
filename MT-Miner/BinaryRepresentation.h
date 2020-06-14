@@ -6,11 +6,6 @@
 #include "Bitset.h"
 #include "FormalContext.h"
 
-#define BITSET_SIZE				32
-#define GET_BIT(bitset, i)		(bitset >> i) & 1UL
-#define SET_BIT(bitset, bit, i)	(bitset |= (bit ? 1UL : 0UL) << i)
-#define COUNT_BIT(bitset)		BinaryRepresentation::countBit(bitset)
-
 /** 
  * a binary representation is a formal context representation in columns
  * each vector contains the attributes/items boolean values
@@ -36,7 +31,7 @@ private:
 	std::vector<std::pair<unsigned int, unsigned int>> clonedBitsetIndexes;
 
 private:
-	bool compareItemsets(const Itemset& itemset1, const Itemset& itemset2) const;
+	bool compareItemsets(Itemset& itemset1, Itemset& itemset2) const;
 
 public:
 	/// build binary representation from formal context
@@ -44,7 +39,7 @@ public:
 	///
 	~BinaryRepresentation();
 	///
-	unsigned int computeDisjonctifSupport(const Itemset& pattern) const;
+	unsigned int computeDisjonctifSupport(Itemset& pattern) const;
 	/// return true if element is essential
 	bool isEssential(const Itemset& itemsOfPattern);
 	///
@@ -86,17 +81,5 @@ public:
 	{
 		assert(binaryRepresentation.find(key) != binaryRepresentation.end());
 		return binaryRepresentation.at(key);
-	}
-
-	static unsigned int countBit(unsigned long bitset)
-	{
-		unsigned int count(0);
-		unsigned long int n(bitset);
-		while (n)
-		{
-			n &= (n - 1);
-			count++;
-		}
-		return count;
 	}
 };

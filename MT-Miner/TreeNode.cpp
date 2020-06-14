@@ -30,8 +30,8 @@ void TreeNode::buildClonedCombination(const Itemset& currentItem, std::vector<It
 		unsigned int originalIndex = it->first;
 		unsigned int clonedIndex = it->second;
 		Itemset clonedCurrentItem = currentItem;
-		replace(clonedCurrentItem.begin(), clonedCurrentItem.end(), originalIndex, clonedIndex);
-		if (clonedCurrentItem != currentItem)
+		replace(clonedCurrentItem.itemset_list.begin(), clonedCurrentItem.itemset_list.end(), originalIndex, clonedIndex);
+		if (clonedCurrentItem.itemset_list != currentItem.itemset_list)
 		{
 			auto it = std::find_if(clonedCombination.begin(), clonedCombination.end(), Utils::compare_itemset(clonedCurrentItem));
 			if (it == clonedCombination.end())
@@ -52,10 +52,9 @@ void TreeNode::updateListsFromToTraverse(const ItemsetList& toTraverse, ItemsetL
 	// results of cumulated combined items / must be declared outside of the loop
 	Itemset previousItem;
 	// loop on toTraverse list and build maxClique and toExplore lists
-	//for_each(toTraverse.begin(), toTraverse.end(), [&](const Itemset& currentItem) {
 	for (auto it = toTraverse.begin(); it != toTraverse.end(); it++)
 	{
-		Itemset currentItem = *it;
+		Itemset& currentItem = const_cast<Itemset&>(*it);
 		unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(currentItem);		
 		if (disjSup == this->binaryRepresentation->getObjectCount())
 		{
@@ -76,7 +75,7 @@ void TreeNode::updateListsFromToTraverse(const ItemsetList& toTraverse, ItemsetL
 		}
 		else
 		{
-			if (currentItem == *toTraverse.begin() && currentItem.size() == 1)
+			if (currentItem.itemset_list == toTraverse.begin()->itemset_list && currentItem.itemset_list.size() == 1)
 			{
 				// must be the 1st element with only one element
 				previousItem = currentItem;
@@ -109,9 +108,7 @@ ItemsetList TreeNode::computeMinimalTransversals_task(const ItemsetList& toTrave
 
 	// test trivial case
 	if (toTraverse.empty())
-	{
 		return ItemsetList();
-	}
 
 	// contains list of itemsets that will be combined to the candidates
 	ItemsetList maxClique;
@@ -133,7 +130,7 @@ ItemsetList TreeNode::computeMinimalTransversals_task(const ItemsetList& toTrave
 		// store toExploreList max index
 		unsigned int lastIndexToTest = static_cast<unsigned int>(toExplore.size());
 		// combine toExplore (left part) with maxClique list (right part) into a combined list
-		ItemsetList combinedItemsetList = toExplore;
+		ItemsetList& combinedItemsetList = toExplore;
 		combinedItemsetList.insert(combinedItemsetList.end(), maxClique.begin(), maxClique.end());
 
 		// loop on candidates from toExplore list only
@@ -141,7 +138,7 @@ ItemsetList TreeNode::computeMinimalTransversals_task(const ItemsetList& toTrave
 		{
 			// build newTraverse list
 			ItemsetList newToTraverse;
-			Itemset toCombinedLeft = combinedItemsetList[i];
+			Itemset& toCombinedLeft = combinedItemsetList[i];
 			// combine each element between [0, lastIndexToTest] with the entire combined itemset list
 			for (unsigned int j = i + 1; j < combinedItemsetList.size(); j++)
 			{
@@ -188,7 +185,7 @@ ItemsetList TreeNode::computeMinimalTransversals_task(const ItemsetList& toTrave
 	return graph_mt;
 }
 
-ItemsetList TreeNode::computeMinimalTransversals(const ItemsetList& toTraverse)
+ItemsetList TreeNode::computeMinimalTransversals(ItemsetList& toTraverse)
 {
 	ItemsetList final_mt;
 	//std::cout << "START system [" << std::this_thread::get_id() << "]" << std::endl;

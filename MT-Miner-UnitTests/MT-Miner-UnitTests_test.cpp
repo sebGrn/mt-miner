@@ -25,19 +25,29 @@ namespace MTMinerUnitTests_test
 			MT_Miner miner(true);
 			miner.createBinaryRepresentation(parser.getHypergraph());
 
-			Itemset item1{ 1 };
+			Itemset item1;
+			item1.itemset_list.push_back(1);
 			int disjonctifSupport = miner.computeDisjonctifSupport(item1);
 			Assert::AreEqual(1, disjonctifSupport);
 
-			Itemset item2{ 1, 2 };
+			Itemset item2;
+			item2.itemset_list.push_back(1);
+			item2.itemset_list.push_back(2);
 			disjonctifSupport = miner.computeDisjonctifSupport(item2);
 			Assert::AreEqual(2, disjonctifSupport);
 
-			Itemset item3{ 1, 2, 3 };
+			Itemset item3;
+			item3.itemset_list.push_back(1);
+			item3.itemset_list.push_back(2);
+			item3.itemset_list.push_back(3);
 			disjonctifSupport = miner.computeDisjonctifSupport(item3);
 			Assert::AreEqual(3, disjonctifSupport);
 
-			Itemset item4{ 1, 2, 3, 4 };
+			Itemset item4;
+			item4.itemset_list.push_back(1);
+			item4.itemset_list.push_back(2);
+			item4.itemset_list.push_back(3);
+			item4.itemset_list.push_back(4);
 			disjonctifSupport = miner.computeDisjonctifSupport(item4);
 			Assert::AreEqual(4, disjonctifSupport);
 		}

@@ -39,10 +39,11 @@ bool HypergraphParser::parse(const std::string& file)
 		{
 			line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
 			line = Utils::trim(line);
-			Itemset data = Utils::splitToVectorOfInt(line, ' ');
-			maxItemCount = std::max(*std::max_element(data.begin(), data.end()), maxItemCount);
+			Itemset data;
+			data.itemset_list = Utils::splitToVectorOfInt(line, ' ');
+			maxItemCount = std::max(*std::max_element(data.itemset_list.begin(), data.itemset_list.end()), maxItemCount);
 
-			hypergraph->addLine(data);
+			hypergraph->addLine(data.itemset_list);
 
 			if (oneIndexedBase && Utils::containsZero(data))
 				oneIndexedBase = false;

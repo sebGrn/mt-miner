@@ -25,7 +25,7 @@ public:
 	void set(unsigned int iAttribute, bool b = true);
 	bool get(unsigned int iAttribute) const;
 	unsigned int size() const;
-	unsigned int count() const;
+	//unsigned int count() const;
 	//Bitset& bitset_or(const Bitset& b) override;
 	//Bitset& bitset_and(const Bitset& b) override;
 	//bool bitset_compare(const Bitset& b) const override;

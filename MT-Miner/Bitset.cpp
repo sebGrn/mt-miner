@@ -60,12 +60,12 @@ unsigned int SparseIndexBitset::size() const
 	return this->bitset_size;
 }
 
-unsigned int SparseIndexBitset::count() const
+/*unsigned int SparseIndexBitset::count() const
 {
 	return static_cast<unsigned int>(this->bitset_value.size());
 }
 
-/*SparseIndexBitset& SparseIndexBitset::bitset_or(const SparseIndexBitset& b)
+SparseIndexBitset& SparseIndexBitset::bitset_or(const SparseIndexBitset& b)
 {
 	//assert(this->bitset_size == b.bitset_size);
 	const SparseIndexBitset& a = dynamic_cast<const SparseIndexBitset&>(b);
