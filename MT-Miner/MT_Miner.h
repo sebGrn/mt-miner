@@ -28,7 +28,7 @@ private:
 	///
 	bool useCloneOptimization;
 	// binary representation 
-	std::shared_ptr<BinaryRepresentation> binaryRepresentation;
+	//std::shared_ptr<BinaryRepresentation> binaryRepresentation;
 	
 private:
 	/// return the minimal transversals miner
@@ -45,9 +45,9 @@ public:
 	ItemsetList computeMinimalTransversals();
 
 	///
-	unsigned int computeDisjonctifSupport(Itemset& pattern) const
-	{
-		return binaryRepresentation->computeDisjonctifSupport(pattern);
-	}
+	//unsigned int computeDisjonctifSupport(Itemset& pattern) const
+	//{		
+	//	//return binaryRepresentation->computeDisjonctifSupport(pattern);
+	//}
 };
 

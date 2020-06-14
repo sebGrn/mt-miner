@@ -16,44 +16,47 @@ class BinaryRepresentation
 {
 private:
 	///  key/value definition of a binary represention (key as the attribute id, value as the bitset)
-	std::unordered_map<unsigned int, unsigned long> binaryRepresentation;	
+	static std::unordered_map<unsigned int, unsigned long> binaryRepresentation;
 
 	/// number of objects/lines
-	unsigned int objectCount;
+	static unsigned int objectCount;
 
 	/// number of items/attributes/columns
-	unsigned int itemCount;
+	static unsigned int itemCount;
 
 	/// count number of cloned itemsets has beend removed from mt computation
-	unsigned int nbItemsetNotAddedFromClone;
+	static unsigned int nbItemsetNotAddedFromClone;
 
 	/// pair of original index, clone index
-	std::vector<std::pair<unsigned int, unsigned int>> clonedBitsetIndexes;
+	static std::vector<std::pair<unsigned int, unsigned int>> clonedBitsetIndexes;
 
 private:
-	bool compareItemsets(Itemset& itemset1, Itemset& itemset2) const;
+	static bool compareItemsets(Itemset& itemset1, Itemset& itemset2);
 
 public:
 	/// build binary representation from formal context
-	BinaryRepresentation(const FormalContext& context);
+	//BinaryRepresentation(const FormalContext& context);
+	//BinaryRepresentation();
 	///
-	~BinaryRepresentation();
+	//~BinaryRepresentation();
 	///
-	unsigned int computeDisjonctifSupport(Itemset& pattern) const;
+	static void buildFromFormalContext(const FormalContext& context);
+	///
+	static unsigned int computeDisjonctifSupport(Itemset& pattern);
 	/// return true if element is essential
-	bool isEssential(const Itemset& itemsOfPattern);
+	static bool isEssential(Itemset& itemsOfPattern);
 	///
-	unsigned int buildCloneList();
+	static unsigned int buildCloneList();
 	///
-	bool containsAClone(const Itemset& itemset);
+	static bool containsAClone(const Itemset& itemset);
 	///
-	bool containsOriginals(const Itemset& itemset, std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes) const;
+	static bool containsOriginals(const Itemset& itemset, std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes);
 
 	//
-	void serialize(const std::string& outputile) const
+	static void serialize(const std::string& outputile)
 	{
 		std::ofstream fileStream = std::ofstream(outputile, std::ofstream::out);
-		for (auto it = this->binaryRepresentation.begin(); it != this->binaryRepresentation.end(); it++)
+		for (auto it = binaryRepresentation.begin(); it != binaryRepresentation.end(); it++)
 		{
 			unsigned long bitset = it->second;
 			for (int i = 0, n = BITSET_SIZE; i < n; i++)
@@ -67,17 +70,17 @@ public:
 		fileStream.close();
 	};
 
-	unsigned int getItemCount() const
+	static unsigned int getItemCount()
 	{
-		return this->itemCount;
+		return itemCount;
 	};
 
-	unsigned int getObjectCount() const
+	static unsigned int getObjectCount()
 	{
-		return this->objectCount;
+		return objectCount;
 	};
 
-	unsigned long getBitsetFromKey(unsigned int key) const
+	static unsigned long getBitsetFromKey(unsigned int key)
 	{
 		assert(binaryRepresentation.find(key) != binaryRepresentation.end());
 		return binaryRepresentation.at(key);

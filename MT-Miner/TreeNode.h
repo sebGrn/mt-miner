@@ -34,7 +34,7 @@ private:
 	// egual à la taille des tâches arrêtées
 	static int pending_task_count;
 	
-	std::shared_ptr<BinaryRepresentation> binaryRepresentation;
+	static std::shared_ptr<BinaryRepresentation> binaryRepresentation;
 
 	/// true if we want to use clone optimization
 	/// a clone is an item from binary representation 
@@ -62,8 +62,14 @@ private:
 	//int node_function(int task_id);
 	
 public:
-	TreeNode(bool useCloneOptimization, const std::shared_ptr<BinaryRepresentation>& binaryRepresentation);	
+	TreeNode(bool useCloneOptimization);
 	~TreeNode();
+
+	//static const BinaryRepresentation* GetBinaryRepresentation() 
+	//{
+	//	return binaryRepresentation.get();
+	//}
+
 
 	/// recursive method, going through tree representation 
 	/// computes minimal transversals for binary representation

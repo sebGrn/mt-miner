@@ -107,3 +107,111 @@ SparseIndexBitset& SparseIndexBitset::operator=(const SparseIndexBitset& other)
 	this->bitset_value = other.bitset_value;
 	return *this;
 }*/
+
+// -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+CustomBitset::CustomBitset(unsigned int bitsetSize) : memory_size(64)
+{
+	this->modified = true;
+	this->bitset_size = bitsetSize;
+	unsigned int n = (bitsetSize / memory_size) + 1;
+	this->bitset_value.resize(n);
+	std::for_each(this->bitset_value.begin(), this->bitset_value.end(), [](unsigned long int& v) { v = 0ULL; });
+};
+
+//CustomBitset::CustomBitset(const CustomBitset& bitset) : memory_size(64)
+//{
+//	this->bitset_size = bitset.size();
+//	std::copy(bitset.bitset_value.begin(), bitset.bitset_value.end(), std::back_inserter(this->bitset_value));
+//};
+
+CustomBitset::~CustomBitset()
+{
+}
+
+unsigned int CustomBitset::size() const
+{
+	return this->bitset_size;
+}
+
+void CustomBitset::reset(bool b)
+{
+	this->modified = true;
+	std::for_each(this->bitset_value.begin(), this->bitset_value.end(), [&b](unsigned long int& v) { v = (b ? 1ULL : 0ULL); });
+};
+
+void CustomBitset::set(unsigned int iAttribute, bool b)
+{
+	this->modified = true;
+	unsigned int iArray = iAttribute / memory_size;
+	unsigned int iBit = iAttribute % memory_size;
+	assert(iArray < this->bitset_value.size());
+	unsigned long int number = this->bitset_value[iArray];
+	number |= (b ? 1UL : 0UL) << iBit;
+	this->bitset_value[iArray] = number;
+};
+
+bool CustomBitset::get(unsigned int iAttribute) const
+{
+	assert(iAttribute < size());
+	unsigned int iArray = iAttribute / memory_size;
+	unsigned int iBit = iAttribute % memory_size;
+	assert(iArray < this->bitset_value.size());
+	unsigned long int number = this->bitset_value[iArray];
+	bool bit = (number >> iBit) & 1UL;
+	return bit;
+};
+
+
+unsigned int CustomBitset::count()
+{
+	if (this->modified)
+	{
+		this->count_value = 0;
+		std::for_each(this->bitset_value.begin(), this->bitset_value.end(), [this](unsigned long long v) {
+			// Brian Kernighan’s Algorithm
+			// https://www.geeksforgeeks.org/count-set-bits-in-an-integer/
+			unsigned long int n(v);
+			while (n)
+			{
+				n &= (n - 1);
+				this->count_value++;
+			}
+		});
+		this->modified = false;
+	}
+	return this->count_value;
+};
+
+CustomBitset& CustomBitset::operator|(const CustomBitset& other)
+{
+	if (other.bitset_size != this->bitset_size)
+		return *this;
+	std::transform(other.bitset_value.begin(), other.bitset_value.end(), this->bitset_value.begin(), this->bitset_value.begin(), [](unsigned long int v0, unsigned long int v1) { return v0 | v1; });
+	return *this;
+};
+
+CustomBitset& CustomBitset::operator&(const CustomBitset& other)
+{
+	std::transform(other.bitset_value.begin(), other.bitset_value.end(), this->bitset_value.begin(), this->bitset_value.begin(), [](unsigned long int v0, unsigned long int v1) { return v0 & v1;	});
+	return *this;
+};
+
+bool CustomBitset::operator==(const CustomBitset& other)
+{ 
+	if (other.bitset_size != this->bitset_size)
+		return false;
+	return std::equal(other.bitset_value.begin(), other.bitset_value.end(), this->bitset_value.begin());
+};
+
+// copy assignment
+CustomBitset& CustomBitset::operator=(const CustomBitset& other)
+{
+	if (this != &other)
+	{
+		this->bitset_value.clear();
+		this->bitset_size = other.size();
+		std::copy(other.bitset_value.begin(), other.bitset_value.end(), std::back_inserter(this->bitset_value));
+	}
+	return *this;
+}

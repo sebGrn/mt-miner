@@ -18,7 +18,7 @@ bool MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hyp
 {
 	// build formal context from hypergraph
 	FormalContext formalContext(hypergraph);
-	formalContext.serialize("format_context.csv");
+	//formalContext.serialize("format_context.csv");
 
 	if (formalContext.getObjectCount() >= 32)
 	{
@@ -27,9 +27,8 @@ bool MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hyp
 	}
 
 	// build binary representation from formal context
-	binaryRepresentation.reset();
-	binaryRepresentation = std::make_shared<BinaryRepresentation>(formalContext);
-	//binaryRepresentation->serialize("binary_rep.csv");
+	BinaryRepresentation::buildFromFormalContext(formalContext);
+	//binaryRepresentation::serialize("binary_rep.csv");
 
 	if (this->useCloneOptimization)
 	{
@@ -47,7 +46,7 @@ bool MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hyp
 		// if we have, memorize the indexes of the original and the cloned
 		// if the cloned bitset index is into a toExplore list, dont compute the mt for the clone but use those from the original
 		Logger::log(GREEN, "computing clones\n", RESET);
-		unsigned int cloneListSize = binaryRepresentation->buildCloneList();
+		unsigned int cloneListSize = BinaryRepresentation::buildCloneList();
 		Logger::log(GREEN, "found ", cloneListSize, " clones\n", RESET);
 
 		if (cloneListSize == 0)
@@ -59,11 +58,11 @@ bool MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hyp
 ItemsetList MT_Miner::computeInitalToTraverseList()
 {
 	ItemsetList toTraverse;
-	for (unsigned int i = 1; i <= this->binaryRepresentation->getItemCount(); i++)
+	for (unsigned int i = 1; i <= BinaryRepresentation::getItemCount(); i++)
 	{
 		Itemset itemset;
 		itemset.itemset_list.push_back(i);
-		if (!this->binaryRepresentation->containsAClone(itemset))	
+		if (!BinaryRepresentation::containsAClone(itemset))
 			toTraverse.push_back(itemset);
 	}
 	return toTraverse;
@@ -71,15 +70,12 @@ ItemsetList MT_Miner::computeInitalToTraverseList()
 
 ItemsetList MT_Miner::computeMinimalTransversals()
 {
-	if (!binaryRepresentation)
-		return ItemsetList();
-
 	auto beginTime = std::chrono::system_clock::now();
 
 	ItemsetList toTraverse = computeInitalToTraverseList();
 
 	// create a graph, then compute minimal transversal from the binary representation
-	TreeNode rootNode(this->useCloneOptimization, this->binaryRepresentation);
+	TreeNode rootNode(this->useCloneOptimization);
 
 	// lambda function called during parsing every 20 seconds
 	auto ftr = std::async(std::launch::async, [&rootNode]() {

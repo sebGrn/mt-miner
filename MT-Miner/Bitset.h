@@ -2,6 +2,7 @@
 #include <cassert>
 #include <algorithm>
 #include <list>
+#include <deque>
 
 /**
 * Sparse Bitset implementation
@@ -32,3 +33,35 @@ public:
 	//SparseIndexBitset& operator=(const SparseIndexBitset& other);
 };
 
+// -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+/**
+ * Custom Bitset implementation
+ * Use vector of unsigned long long value (64 bits) as a bitset
+  */
+class CustomBitset
+{
+private:
+	// use block of 32 bits (unsigned long int) to represent a bitset
+	// https://fr.cppreference.com/w/cpp/language/types
+	unsigned int bitset_size;
+	std::deque<unsigned long int> bitset_value;
+	bool modified;
+	unsigned int count_value;
+
+	const unsigned int memory_size;
+
+public:
+	CustomBitset(unsigned int bitsetSize);
+	~CustomBitset();
+
+	void reset(bool b = false);
+	void set(unsigned int iAttribute, bool b = true);
+	bool get(unsigned int iAttribute) const;
+	unsigned int size() const;
+	unsigned int count();
+	CustomBitset& operator|(const CustomBitset& other);
+	CustomBitset& operator&(const CustomBitset& other);
+	CustomBitset& operator=(const CustomBitset& other);
+	bool operator==(const CustomBitset& other);
+};

@@ -6,45 +6,47 @@
 #include "Profiler.h"
 #include <numeric>
 
+unsigned int BinaryRepresentation::objectCount = 0;
+unsigned int BinaryRepresentation::itemCount = 0;
+unsigned int BinaryRepresentation::nbItemsetNotAddedFromClone = 0;
+std::unordered_map<unsigned int, unsigned long> BinaryRepresentation::binaryRepresentation;
+std::vector<std::pair<unsigned int, unsigned int>> BinaryRepresentation::clonedBitsetIndexes;
 
 /// build binary representation from formal context
-BinaryRepresentation::BinaryRepresentation(const FormalContext& context)
+void BinaryRepresentation::buildFromFormalContext(const FormalContext& context)
 {
-	this->objectCount = context.getObjectCount();	// 800
-	this->itemCount = context.getItemCount();		// 77
-	this->nbItemsetNotAddedFromClone = 0;
+	objectCount = context.getObjectCount();	// 800
+	itemCount = context.getItemCount();		// 77
+	nbItemsetNotAddedFromClone = 0;
+	binaryRepresentation.clear();
 
 	unsigned int sum = 0;
 	unsigned long bitset(0);
-	for (unsigned int j = 0; j < this->itemCount; j++)			// 8 on test.txt
+	for (unsigned int j = 0; j < itemCount; j++)			// 8 on test.txt
 	{
 		bitset = 0;
 		// allocate bitset with object count bit (formal context column size)
-		for (unsigned int i = 0; i < this->objectCount; i++)		// 6 on test.txt
+		for (unsigned int i = 0; i < objectCount; i++)		// 6 on test.txt
 		{
 			bool bit = context.getBit(i, j);
 			bitset |= (bit ? 1UL : 0UL) << i;
 			//SET_BIT(bitset, bit, i);
 			if (bit)
-				sum++;			
+				sum++;
 		}
-		
+
 		// set a critical section to allow multiple thread to write in size_tuples vector
-		unsigned int currentKey = j + 1; 		
-		this->binaryRepresentation[currentKey] = bitset;
+		unsigned int currentKey = j + 1;
+		binaryRepresentation[currentKey] = bitset;
 	}
 
-	unsigned int nbElement = this->itemCount * this->objectCount;
+	unsigned int nbElement = itemCount * objectCount;
 	double sparsity = (nbElement - sum) / static_cast<double>(nbElement);
 	std::cout << RED << "sparsity " << (1.0 - sparsity) * 100.0 << "% of bits are sets" << std::endl;
 };
 
-BinaryRepresentation::~BinaryRepresentation()
-{
-}
-
 // return true if element is essential
-bool BinaryRepresentation::isEssential(const Itemset& itemset)
+bool BinaryRepresentation::isEssential(Itemset& itemset)
 {
 	if (itemset.itemset_list.size() == 1)
 		return true;
@@ -62,14 +64,15 @@ bool BinaryRepresentation::isEssential(const Itemset& itemset)
 			if (i1 != i2)
 			{
 				unsigned int key2 = itemset.itemset_list[i2];
-				unsigned long bitset = this->getBitsetFromKey(key2);
-				SumOfN_1Items |= bitset;
+				unsigned long bitset = getBitsetFromKey(key2);
+				if(bitset)
+					SumOfN_1Items |= bitset;
 			}
 		}
 
 		unsigned int key1 = itemset.itemset_list[i1];
-		unsigned long bitset = this->getBitsetFromKey(key1);
-		for (unsigned int i = 0; i < this->objectCount; i++)
+		unsigned long bitset = getBitsetFromKey(key1);
+		for (unsigned int i = 0; i < objectCount; i++)
 		{
 			// compare bit
 			bool bit0 = GET_BIT(SumOfN_1Items, i);
@@ -91,7 +94,7 @@ bool BinaryRepresentation::isEssential(const Itemset& itemset)
 	return isEssential;
 }
 
-unsigned int BinaryRepresentation::computeDisjonctifSupport(Itemset& pattern) const
+unsigned int BinaryRepresentation::computeDisjonctifSupport(Itemset& pattern)
 {
 	// stocker le résultat du OR dans le bitset pour ne pas les recalculer
 	// tester si bitset à 0 --> pas d'opérateur OR
@@ -102,7 +105,7 @@ unsigned int BinaryRepresentation::computeDisjonctifSupport(Itemset& pattern) co
 		for (size_t i = 0, n = pattern.itemset_list.size(); i < n; i++)
 		{
 			unsigned int columnKey = pattern.itemset_list[i];
-			unsigned long bitset = this->getBitsetFromKey(columnKey);
+			unsigned long bitset = getBitsetFromKey(columnKey);
 			if(bitset)
 				SumOfN_1Items |= bitset;
 		}
@@ -114,7 +117,7 @@ unsigned int BinaryRepresentation::computeDisjonctifSupport(Itemset& pattern) co
 	return pattern.bitset_count;
 };
 
-bool BinaryRepresentation::compareItemsets(Itemset& itemset1, Itemset& itemset2) const
+bool BinaryRepresentation::compareItemsets(Itemset& itemset1, Itemset& itemset2)
 {
 	bool sameItemset = true;
 	unsigned int supp1 = computeDisjonctifSupport(itemset1);
@@ -128,8 +131,8 @@ bool BinaryRepresentation::compareItemsets(Itemset& itemset1, Itemset& itemset2)
 			assert(i < itemset2.itemset_list.size());
 			unsigned int columnKey_itemset1 = itemset1.itemset_list[i];
 			unsigned int columnKey_itemset2 = itemset2.itemset_list[i];
-			unsigned long bitset1 = this->getBitsetFromKey(columnKey_itemset1);
-			unsigned long bitset2 = this->getBitsetFromKey(columnKey_itemset2);
+			unsigned long bitset1 = getBitsetFromKey(columnKey_itemset1);
+			unsigned long bitset2 = getBitsetFromKey(columnKey_itemset2);
 			return bitset1 == bitset2;
 		}
 	}
@@ -138,9 +141,9 @@ bool BinaryRepresentation::compareItemsets(Itemset& itemset1, Itemset& itemset2)
 
 unsigned int BinaryRepresentation::buildCloneList()
 {
-	for (auto it1 = this->binaryRepresentation.begin(); it1 != this->binaryRepresentation.end(); it1++)
+	for (auto it1 = binaryRepresentation.begin(); it1 != binaryRepresentation.end(); it1++)
 	{
-		for (auto it2 = it1; it2 != this->binaryRepresentation.end(); it2++)
+		for (auto it2 = it1; it2 != binaryRepresentation.end(); it2++)
 		{
 			// check do not test the same bitset
 			if (it1 != it2)
@@ -170,14 +173,14 @@ bool BinaryRepresentation::containsAClone(const Itemset& itemset)
 		// check if 
 		if (std::find(itemset.itemset_list.begin(), itemset.itemset_list.end(), it->second) != itemset.itemset_list.end())
 		{
-			this->nbItemsetNotAddedFromClone++;
+			nbItemsetNotAddedFromClone++;
 			return true;
 		}
 	}
 	return false;
 }
 
-bool BinaryRepresentation::containsOriginals(const Itemset& itemset, std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes) const
+bool BinaryRepresentation::containsOriginals(const Itemset& itemset, std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes)
 {
 	originalClonedIndexes.clear();
 	for (auto it = clonedBitsetIndexes.begin(); it != clonedBitsetIndexes.end(); it++)
