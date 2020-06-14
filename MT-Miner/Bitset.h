@@ -76,6 +76,65 @@ public:
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
+class ULBitset
+{
+protected:
+	unsigned long bitset_value;
+
+public:
+	ULBitset(unsigned int bitsetSize)
+	{
+		bitset_value = 0;
+	}
+	~ULBitset()
+	{}
+	void set(unsigned int i, bool b = true)
+	{
+		this->bitset_value |= (b ? 1UL : 0UL) << i;
+	}
+	bool get(unsigned int i) const
+	{
+		return (this->bitset_value >> i) & 1UL;
+	}
+	unsigned int size() const
+	{
+		return 32;
+	}
+	unsigned int count()
+	{
+		unsigned int count(0);
+		unsigned long int n(bitset_value);
+		while (n)
+		{
+			n &= (n - 1);
+			count++;
+		}
+		return count;
+	}
+	ULBitset& operator|(const ULBitset& other)
+	{
+		this->bitset_value |= other.bitset_value;
+		return *this;
+	}
+	ULBitset& operator&(const ULBitset& other)
+	{
+		this->bitset_value &= other.bitset_value;
+		return *this;
+	}
+	ULBitset& operator=(const ULBitset& other)
+	{
+		this->bitset_value = other.bitset_value;
+		return *this;
+	}
+	bool operator==(const ULBitset& other)
+	{
+		return this->bitset_value == other.bitset_value;
+	}
+
+};
+
+
+
 static unsigned int countBit(unsigned long bitset)
 {
 	unsigned int count(0);
