@@ -45,7 +45,7 @@ bool HypergraphParser::parse(const std::string& file)
 
 			hypergraph->addLine(data.itemset_list);
 
-			if (oneIndexedBase && Utils::containsZero(data))
+			if (oneIndexedBase && Itemset::containsZero(data))
 				oneIndexedBase = false;
 
 			// as many items as lines in the file

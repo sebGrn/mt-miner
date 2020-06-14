@@ -4,6 +4,11 @@
 #include <list>
 #include <deque>
 
+#define BITSET_SIZE				32
+#define GET_BIT(bitset, i)		(bitset >> i) & 1UL
+#define SET_BIT(bitset, bit, i)	(bitset |= (bit ? 1UL : 0UL) << i)
+#define COUNT_BIT(bitset)		countBit(bitset)
+
 /**
 * Sparse Bitset implementation
 * Use sparsity property of bitsets
@@ -65,3 +70,17 @@ public:
 	CustomBitset& operator=(const CustomBitset& other);
 	bool operator==(const CustomBitset& other);
 };
+
+// -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+static unsigned int countBit(unsigned long bitset)
+{
+	unsigned int count(0);
+	unsigned long int n(bitset);
+	while (n)
+	{
+		n &= (n - 1);
+		count++;
+	}
+	return count;
+}

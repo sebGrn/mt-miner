@@ -27,7 +27,7 @@ bool MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hyp
 	}
 
 	// build binary representation from formal context
-	BinaryRepresentation::buildFromFormalContext(formalContext);
+	BinaryRepresentation<unsigned long>::buildFromFormalContext(formalContext);
 	//binaryRepresentation::serialize("binary_rep.csv");
 
 	if (this->useCloneOptimization)
@@ -46,7 +46,7 @@ bool MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hyp
 		// if we have, memorize the indexes of the original and the cloned
 		// if the cloned bitset index is into a toExplore list, dont compute the mt for the clone but use those from the original
 		Logger::log(GREEN, "computing clones\n", RESET);
-		unsigned int cloneListSize = BinaryRepresentation::buildCloneList();
+		unsigned int cloneListSize = BinaryRepresentation<unsigned long>::buildCloneList();
 		Logger::log(GREEN, "found ", cloneListSize, " clones\n", RESET);
 
 		if (cloneListSize == 0)
@@ -55,24 +55,24 @@ bool MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hyp
 	return true;
 }
 
-ItemsetList MT_Miner::computeInitalToTraverseList()
+std::vector<Itemset> MT_Miner::computeInitalToTraverseList()
 {
-	ItemsetList toTraverse;
-	for (unsigned int i = 1; i <= BinaryRepresentation::getItemCount(); i++)
+	std::vector<Itemset> toTraverse;
+	for (unsigned int i = 1; i <= BinaryRepresentation<unsigned long>::getItemCount(); i++)
 	{
 		Itemset itemset;
 		itemset.itemset_list.push_back(i);
-		if (!BinaryRepresentation::containsAClone(itemset))
+		if (!BinaryRepresentation<unsigned long>::containsAClone(itemset))
 			toTraverse.push_back(itemset);
 	}
 	return toTraverse;
 }
 
-ItemsetList MT_Miner::computeMinimalTransversals()
+std::vector<Itemset> MT_Miner::computeMinimalTransversals()
 {
 	auto beginTime = std::chrono::system_clock::now();
 
-	ItemsetList toTraverse = computeInitalToTraverseList();
+	std::vector<Itemset> toTraverse = computeInitalToTraverseList();
 
 	// create a graph, then compute minimal transversal from the binary representation
 	TreeNode rootNode(this->useCloneOptimization);
@@ -118,11 +118,11 @@ ItemsetList MT_Miner::computeMinimalTransversals()
 	Logger::log(YELLOW, "\nminimal transversals count : ", graph_mt.size(), "\n", RESET);
 	if (graph_mt.size() > 6)
 	{
-		for_each(graph_mt.begin(), graph_mt.begin() + 5, [&](const Itemset& elt) { Logger::log(GREEN, Utils::itemsetToString(elt), "\n", RESET); });
+		for_each(graph_mt.begin(), graph_mt.begin() + 5, [&](const Itemset& elt) { Logger::log(GREEN, Itemset::itemsetToString(elt), "\n", RESET); });
 		Logger::log(GREEN, "...\n", RESET);
 	}
 	else
-		for_each(graph_mt.begin(), graph_mt.end(), [&](const Itemset& elt) { Logger::log(GREEN, Utils::itemsetToString(elt), "\n", RESET); });
+		for_each(graph_mt.begin(), graph_mt.end(), [&](const Itemset& elt) { Logger::log(GREEN, Itemset::itemsetToString(elt), "\n", RESET); });
 
 	// write tree into js
 	//JsonTree::writeJsonNode(graph_mt);

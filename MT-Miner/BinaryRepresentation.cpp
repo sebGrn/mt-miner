@@ -1,19 +1,25 @@
 
 #include <algorithm>
+#include <numeric>
 
 #include "BinaryRepresentation.h"
 #include "Logger.h"
 #include "Profiler.h"
-#include <numeric>
 
-unsigned int BinaryRepresentation::objectCount = 0;
-unsigned int BinaryRepresentation::itemCount = 0;
-unsigned int BinaryRepresentation::nbItemsetNotAddedFromClone = 0;
-std::unordered_map<unsigned int, unsigned long> BinaryRepresentation::binaryRepresentation;
-std::vector<std::pair<unsigned int, unsigned int>> BinaryRepresentation::clonedBitsetIndexes;
+template <class T>
+unsigned int BinaryRepresentation<T>::objectCount = 0;
+template <class T>
+unsigned int BinaryRepresentation<T>::itemCount = 0;
+template <class T>
+unsigned int BinaryRepresentation<T>::nbItemsetNotAddedFromClone = 0;
+template <class T>
+std::unordered_map<unsigned int, T> BinaryRepresentation<T>::binaryRepresentation;
+template <class T>
+std::vector<std::pair<unsigned int, unsigned int>> BinaryRepresentation<T>::clonedBitsetIndexes;
 
 /// build binary representation from formal context
-void BinaryRepresentation::buildFromFormalContext(const FormalContext& context)
+template <class T>
+void BinaryRepresentation<T>::buildFromFormalContext(const FormalContext& context)
 {
 	objectCount = context.getObjectCount();	// 800
 	itemCount = context.getItemCount();		// 77
@@ -46,7 +52,8 @@ void BinaryRepresentation::buildFromFormalContext(const FormalContext& context)
 };
 
 // return true if element is essential
-bool BinaryRepresentation::isEssential(Itemset& itemset)
+template <class T>
+bool BinaryRepresentation<T>::isEssential(Itemset& itemset)
 {
 	if (itemset.itemset_list.size() == 1)
 		return true;
@@ -94,7 +101,8 @@ bool BinaryRepresentation::isEssential(Itemset& itemset)
 	return isEssential;
 }
 
-unsigned int BinaryRepresentation::computeDisjonctifSupport(Itemset& pattern)
+template <class T>
+unsigned int BinaryRepresentation<T>::computeDisjonctifSupport(Itemset& pattern)
 {
 	// stocker le résultat du OR dans le bitset pour ne pas les recalculer
 	// tester si bitset à 0 --> pas d'opérateur OR
@@ -117,7 +125,8 @@ unsigned int BinaryRepresentation::computeDisjonctifSupport(Itemset& pattern)
 	return pattern.bitset_count;
 };
 
-bool BinaryRepresentation::compareItemsets(Itemset& itemset1, Itemset& itemset2)
+template <class T>
+bool BinaryRepresentation<T>::compareItemsets(Itemset& itemset1, Itemset& itemset2)
 {
 	bool sameItemset = true;
 	unsigned int supp1 = computeDisjonctifSupport(itemset1);
@@ -139,7 +148,8 @@ bool BinaryRepresentation::compareItemsets(Itemset& itemset1, Itemset& itemset2)
 	return sameItemset;
 }
 
-unsigned int BinaryRepresentation::buildCloneList()
+template <class T>
+unsigned int BinaryRepresentation<T>::buildCloneList()
 {
 	for (auto it1 = binaryRepresentation.begin(); it1 != binaryRepresentation.end(); it1++)
 	{
@@ -166,7 +176,8 @@ unsigned int BinaryRepresentation::buildCloneList()
 	return static_cast<unsigned int>(clonedBitsetIndexes.size());
 };
 
-bool BinaryRepresentation::containsAClone(const Itemset& itemset)
+template <class T>
+bool BinaryRepresentation<T>::containsAClone(const Itemset& itemset)
 {
 	for (auto it = clonedBitsetIndexes.begin(); it != clonedBitsetIndexes.end(); it++)
 	{
@@ -180,7 +191,8 @@ bool BinaryRepresentation::containsAClone(const Itemset& itemset)
 	return false;
 }
 
-bool BinaryRepresentation::containsOriginals(const Itemset& itemset, std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes)
+template <class T>
+bool BinaryRepresentation<T>::containsOriginals(const Itemset& itemset, std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes)
 {
 	originalClonedIndexes.clear();
 	for (auto it = clonedBitsetIndexes.begin(); it != clonedBitsetIndexes.end(); it++)
@@ -193,3 +205,8 @@ bool BinaryRepresentation::containsOriginals(const Itemset& itemset, std::vector
 	}
 	return !originalClonedIndexes.empty();
 }
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------ //
+
+// template implementation
+template class BinaryRepresentation<unsigned long>;

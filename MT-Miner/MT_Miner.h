@@ -32,7 +32,7 @@ private:
 	
 private:
 	/// return the minimal transversals miner
-	ItemsetList computeInitalToTraverseList();
+	std::vector<Itemset> computeInitalToTraverseList();
 
 public:
 	MT_Miner(bool useCloneOptimization = true);
@@ -42,7 +42,7 @@ public:
 	bool createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hypergraph);
 	
 	///
-	ItemsetList computeMinimalTransversals();
+	std::vector<Itemset> computeMinimalTransversals();
 
 	///
 	//unsigned int computeDisjonctifSupport(Itemset& pattern) const

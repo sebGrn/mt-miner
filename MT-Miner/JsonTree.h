@@ -8,6 +8,7 @@
 #include "Logger.h"
 #include "JsonTreeNode.h"
 #include "utils.h"
+#include "Itemset.h"
 
 /// front-end tree
 class JsonTree
@@ -44,12 +45,12 @@ public:
 	}
 
 	// build front-end tree
-	static void addJsonNode(const ItemsetList& toExplore)
+	static void addJsonNode(const std::vector<Itemset>& toExplore)
 	{
 		std::shared_ptr<JsonTree> tree = JsonTree::getTree();
 		for_each(toExplore.begin(), toExplore.end(), [&](const Itemset& _item)
 		{
-			std::string name = Utils::itemsetToString(_item);
+			std::string name = Itemset::itemsetToString(_item);
 			// remove {}
 			name = name.substr(1, name.length() - 2);
 			// create node with name
@@ -66,14 +67,14 @@ public:
 		});
 	}
 
-	static void writeJsonNode(const ItemsetList& minimalTransversals)
+	static void writeJsonNode(const std::vector<Itemset>& minimalTransversals)
 	{
 		std::shared_ptr<JsonTree> tree = JsonTree::getTree();
 		//std::cout << "create front-end json tree" << std::endl;
 		for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt)
 		{
 			// add front-end tree leaves
-			std::string name = Utils::itemsetToString(elt);
+			std::string name = Itemset::itemsetToString(elt);
 			// remove {}
 			name = name.substr(1, name.length() - 2);
 			// indicate leaf

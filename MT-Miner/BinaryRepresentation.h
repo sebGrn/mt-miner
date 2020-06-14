@@ -2,6 +2,7 @@
 
 #include <unordered_map>
 
+#include "Itemset.h"
 #include "utils.h"
 #include "Bitset.h"
 #include "FormalContext.h"
@@ -12,11 +13,12 @@
  * the index of the map is the item number
  * this representation is usefull to compute disjonctif support easyly (with a OR operator)
  */
+template <class T>
 class BinaryRepresentation
 {
 private:
 	///  key/value definition of a binary represention (key as the attribute id, value as the bitset)
-	static std::unordered_map<unsigned int, unsigned long> binaryRepresentation;
+	static std::unordered_map<unsigned int, T> binaryRepresentation;
 
 	/// number of objects/lines
 	static unsigned int objectCount;
@@ -35,11 +37,6 @@ private:
 
 public:
 	/// build binary representation from formal context
-	//BinaryRepresentation(const FormalContext& context);
-	//BinaryRepresentation();
-	///
-	//~BinaryRepresentation();
-	///
 	static void buildFromFormalContext(const FormalContext& context);
 	///
 	static unsigned int computeDisjonctifSupport(Itemset& pattern);
@@ -58,7 +55,7 @@ public:
 		std::ofstream fileStream = std::ofstream(outputile, std::ofstream::out);
 		for (auto it = binaryRepresentation.begin(); it != binaryRepresentation.end(); it++)
 		{
-			unsigned long bitset = it->second;
+			T bitset = it->second;
 			for (int i = 0, n = BITSET_SIZE; i < n; i++)
 			{				
 				bool bit = (bitset >> i) & 1ULL;

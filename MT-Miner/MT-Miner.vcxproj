@@ -164,6 +164,7 @@
     <ClInclude Include="FormalContext.h" />
     <ClInclude Include="HyperGraph.h" />
     <ClInclude Include="HypergraphParser.h" />
+    <ClInclude Include="Itemset.h" />
     <ClInclude Include="JsonTree.h" />
     <ClInclude Include="JsonTreeNode.h" />
     <ClInclude Include="Logger.h" />

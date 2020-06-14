@@ -27,37 +27,35 @@ private:
 
 	// synchro stuff
 	// https://www.youtube.com/watch?v=2Xad9bCYbJE&list=PL1835A90FC78FF8BE&index=6
-	static std::deque<std::future<ItemsetList>> task_queue;
+	static std::deque<std::future<std::vector<Itemset>>> task_queue;
 	static std::mutex task_guard;
 	static std::condition_variable task_signal;
 
 	// egual à la taille des tâches arrêtées
 	static int pending_task_count;
 	
-	static std::shared_ptr<BinaryRepresentation> binaryRepresentation;
+	static std::shared_ptr<BinaryRepresentation<unsigned long>> binaryRepresentation;
 
 	/// true if we want to use clone optimization
 	/// a clone is an item from binary representation 
 	bool useCloneOptimization;
 
-	bool useMultitheadOptimization;
-
-	//std::shared_ptr<ItemsetList> mt_node_result;
+	bool useMultitheadOptimization;	
 
 public:
 	static std::atomic_ullong nbTotalChildren;
 
-private:
-	void buildClonedCombination(const Itemset& currentItem, ItemsetList& clonedCombination, const std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes);
+private: 
+	void buildClonedCombination(const Itemset& currentItem, std::vector<Itemset>& clonedCombination, const std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes);
 
 	/// compute maxClique list, toExplore list and mt list
 	/// update graph_mt with new minimal transversal itemset
-	void updateListsFromToTraverse(const ItemsetList& toTraverse, ItemsetList& maxClique, ItemsetList& toExplore, ItemsetList& graph_mt);
+	void updateListsFromToTraverse(const std::vector<Itemset>& toTraverse, std::vector<Itemset>& maxClique, std::vector<Itemset>& toExplore, std::vector<Itemset>& graph_mt);
 
 	//void exploreNextBranch(const ItemsetList& maxClique, const ItemsetList& toExplore, ItemsetList& graph_mt);
 
 	//int computeMinimalTransversals_task(int task_id, const std::vector<Itemset>& toTraverse);
-	ItemsetList computeMinimalTransversals_task(const ItemsetList& toTraverse);
+	std::vector<Itemset> computeMinimalTransversals_task(const std::vector<Itemset>& toTraverse);
 
 	//int node_function(int task_id);
 	
