@@ -168,10 +168,10 @@ unsigned int CustomBitset::count()
 	if (this->modified)
 	{
 		this->count_value = 0;
-		std::for_each(this->bitset_value.begin(), this->bitset_value.end(), [this](unsigned long long v) {
+		std::for_each(this->bitset_value.begin(), this->bitset_value.end(), [this](bitset_impl& v) {
 			// Brian Kernighan’s Algorithm
 			// https://www.geeksforgeeks.org/count-set-bits-in-an-integer/
-			unsigned long int n(v);
+			unsigned long n(v);
 			while (n)
 			{
 				n &= (n - 1);

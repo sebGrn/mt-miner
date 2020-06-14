@@ -9,6 +9,9 @@
 #define SET_BIT(bitset, bit, i)	(bitset |= (bit ? 1UL : 0UL) << i)
 #define COUNT_BIT(bitset)		countBit(bitset)
 
+typedef unsigned long bitset_impl;
+
+
 /**
 * Sparse Bitset implementation
 * Use sparsity property of bitsets

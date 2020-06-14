@@ -11,8 +11,7 @@ std::deque<std::future<std::vector<Itemset>>> TreeNode::task_queue;
 std::mutex TreeNode::task_guard;
 std::condition_variable TreeNode::task_signal;
 int TreeNode::pending_task_count(0);
-
-std::shared_ptr<BinaryRepresentation<unsigned long>> TreeNode::binaryRepresentation = std::make_shared<BinaryRepresentation<unsigned long>>();
+std::shared_ptr<BinaryRepresentation<bitset_impl>> TreeNode::binaryRepresentation = std::make_shared<BinaryRepresentation<bitset_impl>>();
 
 TreeNode::TreeNode(bool useCloneOptimization)
 {

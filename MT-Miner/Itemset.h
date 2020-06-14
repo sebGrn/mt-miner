@@ -22,11 +22,7 @@ public:
 		this->computed = false;
 	}
 
-	//static bool compare_itemset(const Itemset& item)
-	//{
-	//	// use AND operator for comparaison ?
-	//	return itemset_list == item.itemset_list;
-	//}
+	// ------------------------------------------------------------------------------------------------------------------------- //
 
 	static std::string itemsetToString(const Itemset& v)
 	{
@@ -71,6 +67,8 @@ public:
 			});
 		return sortedList;
 	}
+
+	// ------------------------------------------------------------------------------------------------------------------------- //
 
 	static Itemset combineItemset(const Itemset& str1, const Itemset& str2)
 	{
