@@ -77,7 +77,7 @@ public:
 		return objectCount;
 	};
 
-	static unsigned long getBitsetFromKey(unsigned int key)
+	static T getBitsetFromKey(unsigned int key)
 	{
 		assert(binaryRepresentation.find(key) != binaryRepresentation.end());
 		return binaryRepresentation.at(key);

@@ -61,7 +61,7 @@ bool BinaryRepresentation<T>::isEssential(Itemset& itemset)
 	bool isEssential = false;
 	for (int i1 = 0, n = static_cast<int>(itemset.itemset_list.size()); i1 != n; i1++)
 	{
-		unsigned long SumOfN_1Items(0);
+		T SumOfN_1Items(0);
 		
 		// dont forget to initialize boolean
 		isEssential = false;
@@ -71,14 +71,14 @@ bool BinaryRepresentation<T>::isEssential(Itemset& itemset)
 			if (i1 != i2)
 			{
 				unsigned int key2 = itemset.itemset_list[i2];
-				unsigned long bitset = getBitsetFromKey(key2);
+				T bitset = getBitsetFromKey(key2);
 				if(bitset)
 					SumOfN_1Items |= bitset;
 			}
 		}
 
 		unsigned int key1 = itemset.itemset_list[i1];
-		unsigned long bitset = getBitsetFromKey(key1);
+		T bitset = getBitsetFromKey(key1);
 		for (unsigned int i = 0; i < objectCount; i++)
 		{
 			// compare bit
@@ -109,11 +109,11 @@ unsigned int BinaryRepresentation<T>::computeDisjonctifSupport(Itemset& pattern)
 	// 
 	if (!pattern.computed)
 	{
-		unsigned long SumOfN_1Items(0);
+		T SumOfN_1Items(0);
 		for (size_t i = 0, n = pattern.itemset_list.size(); i < n; i++)
 		{
 			unsigned int columnKey = pattern.itemset_list[i];
-			unsigned long bitset = getBitsetFromKey(columnKey);
+			T bitset = getBitsetFromKey(columnKey);
 			if(bitset)
 				SumOfN_1Items |= bitset;
 		}
@@ -140,8 +140,8 @@ bool BinaryRepresentation<T>::compareItemsets(Itemset& itemset1, Itemset& itemse
 			assert(i < itemset2.itemset_list.size());
 			unsigned int columnKey_itemset1 = itemset1.itemset_list[i];
 			unsigned int columnKey_itemset2 = itemset2.itemset_list[i];
-			unsigned long bitset1 = getBitsetFromKey(columnKey_itemset1);
-			unsigned long bitset2 = getBitsetFromKey(columnKey_itemset2);
+			T bitset1 = getBitsetFromKey(columnKey_itemset1);
+			T bitset2 = getBitsetFromKey(columnKey_itemset2);
 			return bitset1 == bitset2;
 		}
 	}
@@ -205,6 +205,8 @@ bool BinaryRepresentation<T>::containsOriginals(const Itemset& itemset, std::vec
 	}
 	return !originalClonedIndexes.empty();
 }
+
+
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------ //
 
