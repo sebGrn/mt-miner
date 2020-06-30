@@ -4,12 +4,10 @@
 #include <list>
 #include <deque>
 
-#define BITSET_SIZE				32
-#define GET_BIT(bitset, i)		(bitset >> i) & 1UL
-#define SET_BIT(bitset, bit, i)	(bitset |= (bit ? 1UL : 0UL) << i)
-#define COUNT_BIT(bitset)		countBit(bitset)
-
-typedef unsigned long bitset_impl;
+//#define BITSET_SIZE				32
+//#define GET_BIT(bitset, i)		(bitset >> i) & 1UL
+//#define SET_BIT(bitset, bit, i)	(bitset |= (bit ? 1UL : 0UL) << i)
+//#define COUNT_BIT(bitset)		countBit(bitset)
 
 
 /**
@@ -79,27 +77,71 @@ public:
 class ULBitset
 {
 protected:
+	// value of the bitset
 	unsigned long bitset_value;
+	// true if this bitset is an original
+	bool isOriginal;
+	// true if this bitset is a clone
+	bool isClone;
+	// if this bitset is an original, store its clone index from binaryRepresentation map
+	unsigned int cloneIndex;
 
 public:
-	ULBitset(unsigned int bitsetSize)
+	ULBitset() :bitset_value(0), isOriginal(false), isClone(false), cloneIndex(0)	{}
+
+	~ULBitset()	{}
+
+	void setAsAnOriginal(unsigned int cloneIndex)
 	{
-		bitset_value = 0;
+		this->isOriginal = true;
+		this->cloneIndex = cloneIndex;
 	}
-	~ULBitset()
-	{}
+	
+	void setAsAClone()
+	{
+		this->isClone = true;
+	}
+	
+	bool isAnOriginal()
+	{
+		return this->isOriginal;
+	}
+	
+	unsigned int getCloneIndex()
+	{
+		return this->cloneIndex;
+	}
+	
+	bool isAClone()
+	{
+		return this->isClone;
+	}
+	
 	void set(unsigned int i, bool b = true)
 	{
 		this->bitset_value |= (b ? 1UL : 0UL) << i;
 	}
+	
+	unsigned long data() const
+	{
+		return bitset_value;
+	}
+	
 	bool get(unsigned int i) const
 	{
 		return (this->bitset_value >> i) & 1UL;
 	}
+	
 	unsigned int size() const
 	{
 		return 32;
 	}
+	
+	bool valid() const
+	{
+		return bitset_value != 0;
+	}
+	
 	unsigned int count()
 	{
 		unsigned int count(0);
@@ -111,26 +153,35 @@ public:
 		}
 		return count;
 	}
+	
 	ULBitset& operator|(const ULBitset& other)
 	{
 		this->bitset_value |= other.bitset_value;
 		return *this;
 	}
+	
 	ULBitset& operator&(const ULBitset& other)
 	{
 		this->bitset_value &= other.bitset_value;
 		return *this;
 	}
+	
+	ULBitset& operator=(unsigned long value)
+	{
+		this->bitset_value = value;
+		return *this;
+	}
+	
 	ULBitset& operator=(const ULBitset& other)
 	{
 		this->bitset_value = other.bitset_value;
 		return *this;
 	}
+	
 	bool operator==(const ULBitset& other)
 	{
 		return this->bitset_value == other.bitset_value;
 	}
-
 };
 
 

@@ -98,7 +98,7 @@ public:
 				combinedElt.or_value = str1.or_value;
 			else
 				combinedElt.or_value = str1.or_value | str2.or_value;
-			combinedElt.bitset_count = COUNT_BIT(combinedElt.or_value);
+			combinedElt.bitset_count = countBit(combinedElt.or_value);
 			combinedElt.computed = true;
 		}
 		return combinedElt;

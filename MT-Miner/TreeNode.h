@@ -34,7 +34,7 @@ private:
 	// egual à la taille des tâches arrêtées
 	static int pending_task_count;
 	
-	static std::shared_ptr<BinaryRepresentation<bitset_impl>> binaryRepresentation;
+	static std::shared_ptr<BinaryRepresentation<ULBitset>> binaryRepresentation;
 
 	/// true if we want to use clone optimization
 	/// a clone is an item from binary representation 

@@ -26,14 +26,11 @@ private:
 	/// number of items/attributes/columns
 	static unsigned int itemCount;
 
-	/// count number of cloned itemsets has beend removed from mt computation
+	/// count number of cloned itemsets has been removed from mt computation
 	static unsigned int nbItemsetNotAddedFromClone;
 
-	/// pair of original index, clone index
-	static std::vector<std::pair<unsigned int, unsigned int>> clonedBitsetIndexes;
-
 private:
-	static bool compareItemsets(Itemset& itemset1, Itemset& itemset2);
+	//static bool compareItemsets(Itemset& itemset1, Itemset& itemset2);
 
 public:
 	/// build binary representation from formal context
@@ -56,9 +53,10 @@ public:
 		for (auto it = binaryRepresentation.begin(); it != binaryRepresentation.end(); it++)
 		{
 			T bitset = it->second;
-			for (int i = 0, n = BITSET_SIZE; i < n; i++)
+			for (int i = 0, n = bitset.size(); i < n; i++)
 			{				
-				bool bit = (bitset >> i) & 1ULL;
+				//bool bit = (bitset >> i) & 1ULL;
+				bool bit = bitset.get(i);
 				fileStream << bit ? "1" : "0";
 				fileStream << ";";
 			}

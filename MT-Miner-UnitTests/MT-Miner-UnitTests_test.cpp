@@ -27,20 +27,20 @@ namespace MTMinerUnitTests_test
 
 			Itemset item1;
 			item1.itemset_list.push_back(1);
-			int disjonctifSupport = BinaryRepresentation<unsigned long>::computeDisjonctifSupport(item1);
+			int disjonctifSupport = BinaryRepresentation<ULBitset>::computeDisjonctifSupport(item1);
 			Assert::AreEqual(1, disjonctifSupport);
 
 			Itemset item2;
 			item2.itemset_list.push_back(1);
 			item2.itemset_list.push_back(2);
-			disjonctifSupport = BinaryRepresentation<unsigned long>::computeDisjonctifSupport(item2);
+			disjonctifSupport = BinaryRepresentation<ULBitset>::computeDisjonctifSupport(item2);
 			Assert::AreEqual(2, disjonctifSupport);
 
 			Itemset item3;
 			item3.itemset_list.push_back(1);
 			item3.itemset_list.push_back(2);
 			item3.itemset_list.push_back(3);
-			disjonctifSupport = BinaryRepresentation<unsigned long>::computeDisjonctifSupport(item3);
+			disjonctifSupport = BinaryRepresentation<ULBitset>::computeDisjonctifSupport(item3);
 			Assert::AreEqual(3, disjonctifSupport);
 
 			Itemset item4;
@@ -48,7 +48,7 @@ namespace MTMinerUnitTests_test
 			item4.itemset_list.push_back(2);
 			item4.itemset_list.push_back(3);
 			item4.itemset_list.push_back(4);
-			disjonctifSupport = BinaryRepresentation<unsigned long>::computeDisjonctifSupport(item4);
+			disjonctifSupport = BinaryRepresentation<ULBitset>::computeDisjonctifSupport(item4);
 			Assert::AreEqual(4, disjonctifSupport);
 		}
 
