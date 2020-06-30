@@ -55,7 +55,7 @@ void TreeNode::updateListsFromToTraverse(const std::vector<Itemset>& toTraverse,
 	for (auto it = toTraverse.begin(); it != toTraverse.end(); it++)
 	{
 		Itemset& currentItem = const_cast<Itemset&>(*it);
-		unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(currentItem);		
+		unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(currentItem);
 		if (disjSup == this->binaryRepresentation->getObjectCount())
 		{
 			// we have a minimal transversal
@@ -157,7 +157,7 @@ std::vector<Itemset> TreeNode::computeMinimalTransversals_task(const std::vector
 				nbTotalChildren++;
 				// call on the same node, it works because no class members are used except atomics
 				auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(newToTraverse));
-
+				
 				// ## SPAWN TASK ##
 				{
 					const std::lock_guard<std::mutex> lock(task_guard);
@@ -187,9 +187,9 @@ std::vector<Itemset> TreeNode::computeMinimalTransversals_task(const std::vector
 
 std::vector<Itemset> TreeNode::computeMinimalTransversals(std::vector<Itemset>& toTraverse)
 {
-	std::vector<Itemset> final_mt;
-	//std::cout << "START system [" << std::this_thread::get_id() << "]" << std::endl;
+	// ## START system ##
 
+	std::vector<Itemset> final_mt;
 	// emit initial task
 	auto task = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(toTraverse));
 
@@ -208,7 +208,7 @@ std::vector<Itemset> TreeNode::computeMinimalTransversals(std::vector<Itemset>& 
 		units.emplace_back(std::async(std::launch::async, [n]()
 		{
 			// ## LAUNCH task ##
-				std::vector<Itemset> result_mt;
+			std::vector<Itemset> result_mt;
 
 			std::unique_lock<std::mutex> lock(task_guard);
 			while (true)

@@ -54,7 +54,7 @@ public:
 		{
 			T bitset = it->second;
 			for (int i = 0, n = bitset.size(); i < n; i++)
-			{				
+			{
 				//bool bit = (bitset >> i) & 1ULL;
 				bool bit = bitset.get(i);
 				fileStream << bit ? "1" : "0";

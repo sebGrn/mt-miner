@@ -94,7 +94,7 @@ bool BinaryRepresentation<T>::isEssential(Itemset& itemset)
 
 		if (!isEssential)
 		{
-			// this bitset is not essential, return false
+			// this bitset is not essential, break the main loop and return false
 			break;
 		}
 	}

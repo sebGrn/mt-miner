@@ -54,20 +54,11 @@ private:
 
 	//void exploreNextBranch(const ItemsetList& maxClique, const ItemsetList& toExplore, ItemsetList& graph_mt);
 
-	//int computeMinimalTransversals_task(int task_id, const std::vector<Itemset>& toTraverse);
 	std::vector<Itemset> computeMinimalTransversals_task(const std::vector<Itemset>& toTraverse);
-
-	//int node_function(int task_id);
 	
 public:
 	TreeNode(bool useCloneOptimization);
 	~TreeNode();
-
-	//static const BinaryRepresentation* GetBinaryRepresentation() 
-	//{
-	//	return binaryRepresentation.get();
-	//}
-
 
 	/// recursive method, going through tree representation 
 	/// computes minimal transversals for binary representation

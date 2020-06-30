@@ -76,6 +76,8 @@ public:
 		// "71" + "72" => "712"
 		Itemset left = str1;
 		Itemset right = str2;
+		
+		// remove duplicate indexes from left into right itemset
 		std::vector<Itemset> combinedListElt;
 		for_each(str1.itemset_list.begin(), str1.itemset_list.end(), [&](unsigned int i) {
 			auto it = std::find_if(right.itemset_list.begin(), right.itemset_list.end(), Utils::compare_int(i));
@@ -85,25 +87,31 @@ public:
 				right.itemset_list.erase(it);
 			}
 			});
-		// merge 2 lists into intList1
-		left.itemset_list.insert(left.itemset_list.end(), right.itemset_list.begin(), right.itemset_list.end());
-		// transform int list into string list seperated by ' '
-		Itemset combinedElt;
-		for_each(left.itemset_list.begin(), left.itemset_list.end(), [&combinedElt](unsigned int i) { combinedElt.itemset_list.push_back(i); });
+
+		// merge right itemset at the end of left itemset
+		//left.itemset_list.insert(left.itemset_list.end(), right.itemset_list.begin(), right.itemset_list.end());
+		std::copy(right.itemset_list.begin(), right.itemset_list.end(), std::back_inserter(left.itemset_list));
+		
+		// create a new combined itemset
+		//Itemset combinedElt;
+		//std::copy(left.itemset_list.begin(), left.itemset_list.end(), std::back_inserter(combinedElt.itemset_list));
+
+		// compute OR value from left and right itemsets
 		if (str1.computed && str2.computed)
 		{
 			if (!str1.or_value)
-				combinedElt.or_value = str2.or_value;
+				left.or_value = str2.or_value;
 			else if (!str2.or_value)
-				combinedElt.or_value = str1.or_value;
+				left.or_value = str1.or_value;
 			else
-				combinedElt.or_value = str1.or_value | str2.or_value;
-			combinedElt.bitset_count = countBit(combinedElt.or_value);
-			combinedElt.computed = true;
+				left.or_value = str1.or_value | str2.or_value;
+			left.bitset_count = countBit(left.or_value);
+			left.computed = true;
 		}
-		return combinedElt;
+		return left;
 	};
 
+	// check if itemset contains a 0 index
 	static bool containsZero(const Itemset& data)
 	{
 		return (std::find(data.itemset_list.begin(), data.itemset_list.end(), 0) != data.itemset_list.end());
