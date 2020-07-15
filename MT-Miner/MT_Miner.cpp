@@ -18,18 +18,17 @@ bool MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hyp
 {
 	// build formal context from hypergraph
 	FormalContext formalContext(hypergraph);
-	//formalContext.serialize("format_context.csv");
+	formalContext.serialize("format_context.csv");
 
-	if (formalContext.getObjectCount() >= 32)
-	{
-		Logger::log(RED, "Bitset count is superior to 32 bits, cannot manage this context\n", RESET);
-		return false;
-	}
+	//if (formalContext.getObjectCount() >= 32)
+	//{
+	//	Logger::log(RED, "Bitset count is superior to 32 bits, cannot manage this context\n", RESET);
+	//	return false;
+	//}
 
 	// build binary representation from formal context
-	//BinaryRepresentation<unsigned long>::buildFromFormalContext(formalContext);
-	BinaryRepresentation<ULBitset>::buildFromFormalContext(formalContext);
-	//binaryRepresentation::serialize("binary_rep.csv");
+	BinaryRepresentation<bitset_type>::buildFromFormalContext(formalContext);
+	//BinaryRepresentation<bitset_type>::serialize("binary_rep.csv");
 
 	if (this->useCloneOptimization)
 	{
@@ -47,7 +46,7 @@ bool MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hyp
 		// if we have, memorize the indexes of the original and the cloned
 		// if the cloned bitset index is into a toExplore list, dont compute the mt for the clone but use those from the original
 		Logger::log(GREEN, "computing clones\n", RESET);
-		unsigned int cloneListSize = BinaryRepresentation<ULBitset>::buildCloneList();
+		unsigned int cloneListSize = BinaryRepresentation<bitset_type>::buildCloneList();
 		Logger::log(GREEN, "found ", cloneListSize, " clones\n", RESET);
 
 		if (cloneListSize == 0)
@@ -59,11 +58,11 @@ bool MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hyp
 std::vector<Itemset> MT_Miner::computeInitalToTraverseList()
 {
 	std::vector<Itemset> toTraverse;
-	for (unsigned int i = 1; i <= BinaryRepresentation<ULBitset>::getItemCount(); i++)
+	for (unsigned int i = 1; i <= BinaryRepresentation<bitset_type>::getItemCount(); i++)
 	{
 		Itemset itemset;
 		itemset.itemset_list.push_back(i);
-		if (!BinaryRepresentation<ULBitset>::containsAClone(itemset))
+		if (!BinaryRepresentation<bitset_type>::containsAClone(itemset))
 			toTraverse.push_back(itemset);
 	}
 	return toTraverse;

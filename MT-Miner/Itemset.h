@@ -11,14 +11,13 @@ class Itemset
 public:
 	std::vector<unsigned int> itemset_list;
 	unsigned int bitset_count;
-	unsigned long or_value;
+	bitset_type or_value;
 	bool computed;
 
 public:
 	Itemset()
 	{
 		this->bitset_count = 0;
-		this->or_value = 0;
 		this->computed = false;
 	}
 
@@ -99,13 +98,13 @@ public:
 		// compute OR value from left and right itemsets
 		if (str1.computed && str2.computed)
 		{
-			if (!str1.or_value)
-				left.or_value = str2.or_value;
-			else if (!str2.or_value)
-				left.or_value = str1.or_value;
-			else
-				left.or_value = str1.or_value | str2.or_value;
-			left.bitset_count = countBit(left.or_value);
+			//if (str1.or_value)
+			//	left.or_value = str2.or_value;
+			//else if (!str2.or_value)
+			//	left.or_value = str1.or_value;
+			//else
+			left.or_value = str1.or_value | str2.or_value;
+			left.bitset_count = left.or_value.count();
 			left.computed = true;
 		}
 		return left;

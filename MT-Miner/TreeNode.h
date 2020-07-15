@@ -34,13 +34,12 @@ private:
 	// egual à la taille des tâches arrêtées
 	static int pending_task_count;
 	
-	static std::shared_ptr<BinaryRepresentation<ULBitset>> binaryRepresentation;
+	//static std::shared_ptr<BinaryRepresentation<CustomULBitset>> binaryRepresentation;
+	static std::shared_ptr<BinaryRepresentation<bitset_type>> binaryRepresentation;
 
 	/// true if we want to use clone optimization
 	/// a clone is an item from binary representation 
 	bool useCloneOptimization;
-
-	bool useMultitheadOptimization;	
 
 public:
 	static std::atomic_ullong nbTotalChildren;

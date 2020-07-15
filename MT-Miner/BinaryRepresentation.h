@@ -18,7 +18,7 @@ class BinaryRepresentation
 {
 private:
 	///  key/value definition of a binary represention (key as the attribute id, value as the bitset)
-	static std::unordered_map<unsigned int, T> binaryRepresentation;
+	static std::unordered_map<unsigned int, T> binaryRepresentationMap;
 
 	/// number of objects/lines
 	static unsigned int objectCount;
@@ -50,12 +50,12 @@ public:
 	static void serialize(const std::string& outputile)
 	{
 		std::ofstream fileStream = std::ofstream(outputile, std::ofstream::out);
-		for (auto it = binaryRepresentation.begin(); it != binaryRepresentation.end(); it++)
+		for (auto it = binaryRepresentationMap.begin(); it != binaryRepresentationMap.end(); it++)
 		{
 			T bitset = it->second;
-			for (int i = 0, n = bitset.size(); i < n; i++)
+			//for (int i = 0, n = bitset.size(); i < n; i++)
+			for (int i = 0, n = 32; i < n; i++)
 			{
-				//bool bit = (bitset >> i) & 1ULL;
 				bool bit = bitset.get(i);
 				fileStream << bit ? "1" : "0";
 				fileStream << ";";
@@ -77,7 +77,7 @@ public:
 
 	static T getBitsetFromKey(unsigned int key)
 	{
-		assert(binaryRepresentation.find(key) != binaryRepresentation.end());
-		return binaryRepresentation.at(key);
+		assert(binaryRepresentationMap.find(key) != binaryRepresentationMap.end());
+		return binaryRepresentationMap.at(key);
 	}
 };

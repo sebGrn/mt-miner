@@ -109,7 +109,7 @@ SparseIndexBitset& SparseIndexBitset::operator=(const SparseIndexBitset& other)
 }*/
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
-
+/*
 CustomBitset::CustomBitset(unsigned int bitsetSize) : memory_size(64)
 {
 	this->modified = true;
@@ -215,3 +215,4 @@ CustomBitset& CustomBitset::operator=(const CustomBitset& other)
 	}
 	return *this;
 }
+*/

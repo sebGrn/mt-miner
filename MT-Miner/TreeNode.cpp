@@ -11,12 +11,12 @@ std::deque<std::future<std::vector<Itemset>>> TreeNode::task_queue;
 std::mutex TreeNode::task_guard;
 std::condition_variable TreeNode::task_signal;
 int TreeNode::pending_task_count(0);
-std::shared_ptr<BinaryRepresentation<ULBitset>> TreeNode::binaryRepresentation = std::make_shared<BinaryRepresentation<ULBitset>>();
+//std::shared_ptr<BinaryRepresentation<CustomULBitset>> TreeNode::binaryRepresentation = std::make_shared<BinaryRepresentation<CustomULBitset>>();
+std::shared_ptr<BinaryRepresentation<bitset_type>> TreeNode::binaryRepresentation = std::make_shared<BinaryRepresentation<bitset_type>>();
 
 TreeNode::TreeNode(bool useCloneOptimization)
 {
 	this->useCloneOptimization = useCloneOptimization;
-	this->useMultitheadOptimization = true;
 }
 
 TreeNode::~TreeNode()
@@ -30,14 +30,19 @@ void TreeNode::buildClonedCombination(const Itemset& currentItem, std::vector<It
 		unsigned int originalIndex = it->first;
 		unsigned int clonedIndex = it->second;
 		Itemset clonedCurrentItem = currentItem;
+
+		// replace originalIndex into clonedIndex into clonedCurrentItem.itemset_list list
 		std::replace(clonedCurrentItem.itemset_list.begin(), clonedCurrentItem.itemset_list.end(), originalIndex, clonedIndex);
+
+		// tester le support de l'itemset pour savoir si le bitset est un clone avant de tester s'ils sont égaux
 		if (clonedCurrentItem.itemset_list != currentItem.itemset_list)
 		{
 			auto it = std::find_if(clonedCombination.begin(), clonedCombination.end(), compare_itemset(clonedCurrentItem));
 			if (it == clonedCombination.end())
 			{
+				// add cloned item into clonedCombination list					
 				clonedCombination.push_back(clonedCurrentItem);
-				// recurse on new combination
+				// recurse on new combination with cloned item as current item
 				buildClonedCombination(clonedCurrentItem, clonedCombination, originalClonedIndexes);
 			}
 		}
@@ -69,6 +74,7 @@ void TreeNode::updateListsFromToTraverse(const std::vector<Itemset>& toTraverse,
 				{
 					std::vector<Itemset> clonedCombination;
 					buildClonedCombination(currentItem, clonedCombination, originalClonedIndexes);
+					// copy from clonedCombination list into graph_mt list
 					std::copy(clonedCombination.begin(), clonedCombination.end(), std::back_inserter(graph_mt));
 				}
 			}

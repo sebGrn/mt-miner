@@ -118,7 +118,6 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 		itemCount = parser.getItemCount();
 
 		// allocate miner and compute minimal transversals
-		//MT_Miner<StaticBitset<std::bitset<SIZE_0>>> miner(hypergraph, useCloneOptimization);
 		MT_Miner miner(useCloneOptimization);
 		if (miner.createBinaryRepresentation(hypergraph))
 		{
@@ -146,9 +145,14 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 
 int main(int argc, char* argv[])
 {
-	//unsigned long b = 0;
-	//bool bit = true;
-	//b |= (bit ? 1UL : 0UL) << 2;
+	//{
+	//	HypergraphParser parser;
+	//	bool parserResult = parser.parse("../data/Hyp3.txt");
+	//	unsigned int k = parser.getItemCount();
+	//	unsigned int l = parser.getObjectCount();
+	//	int z;
+
+	//}
 
 	// http://research.nii.ac.jp/~uno/dualization.html
 
