@@ -10,10 +10,14 @@ class Itemset
 {
 public:
 	std::vector<unsigned int> itemset_list;
+	
+	// true if bitset_count & or value have been computed
+	bool computed; 
+	// support of the current itemset (nb 1's bit)
 	unsigned int bitset_count;
+	// stored OR value of all bitset from the item set
 	bitset_type or_value;
-	bool computed;
-
+	
 public:
 	Itemset()
 	{

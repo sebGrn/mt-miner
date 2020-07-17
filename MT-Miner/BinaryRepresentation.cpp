@@ -14,8 +14,6 @@ template <class T>
 unsigned int BinaryRepresentation<T>::nbItemsetNotAddedFromClone = 0;
 template <class T>
 std::unordered_map<unsigned int, T> BinaryRepresentation<T>::binaryRepresentationMap;
-//template <class T>
-//std::vector<std::pair<unsigned int, unsigned int>> BinaryRepresentation<T>::clonedBitsetIndexes;
 
 /// build binary representation from formal context
 template <class T>
@@ -26,15 +24,16 @@ void BinaryRepresentation<T>::buildFromFormalContext(const FormalContext& contex
 	BinaryRepresentation<T>::nbItemsetNotAddedFromClone = 0;
 	BinaryRepresentation<T>::binaryRepresentationMap.clear();
 
-	unsigned int sum = 0;
 	T bitset(BinaryRepresentation<T>::objectCount);
+
+	unsigned int sum = 0;
 	for (unsigned int j = 0; j < BinaryRepresentation<T>::itemCount; j++)			// 8 on test.txt
 	{
-		bitset = 0;
+		bitset.reset();
 		// allocate bitset with object count bit (formal context column size)
 		for (unsigned int i = 0; i < BinaryRepresentation<T>::objectCount; i++)		// 6 on test.txt
 		{
-			bool bit = context.getBit(i, j);			
+			bool bit = context.getBit(i, j);
 			bitset.set(i, bit);
 			if (bit)
 				sum++;
@@ -165,7 +164,7 @@ unsigned int BinaryRepresentation<T>::buildCloneList()
 				// test if binary representation bitsets are equal (it2 is a clone of it1 ?)
 				if (it1->second == it2->second)
 				{
-					// check that original (it1->first) is not already registered as a clone (second) in clonedBitsetIndexes
+					// check that second is a clone
 					if (!it1->second.isAClone())
 					{
 						// bitset it1 is an original and bitset it2 is its clone
@@ -193,16 +192,6 @@ bool BinaryRepresentation<T>::containsAClone(const Itemset& itemset)
 		if (bitset.isAClone())
 			return true;
 	}
-
-	//for (auto it = clonedBitsetIndexes.begin(); it != clonedBitsetIndexes.end(); it++)
-	//{
-	//	// check if 
-	//	if (std::find(itemset.itemset_list.begin(), itemset.itemset_list.end(), it->second) != itemset.itemset_list.end())
-	//	{
-	//		nbItemsetNotAddedFromClone++;
-	//		return true;
-	//	}
-	//}
 	return false;
 }
 
@@ -218,16 +207,6 @@ bool BinaryRepresentation<T>::containsOriginals(const Itemset& itemset, std::vec
 				originalClonedIndexes.push_back(std::pair<unsigned int, unsigned int>(index, bitset.getCloneIndex(i)));
 		}
 	});
-
-	//originalClonedIndexes.clear();
-	//for (auto it = clonedBitsetIndexes.begin(); it != clonedBitsetIndexes.end(); it++)
-	//{
-	//	// check if 
-	//	if (std::find(itemset.itemset_list.begin(), itemset.itemset_list.end(), it->first) != itemset.itemset_list.end())
-	//	{
-	//		originalClonedIndexes.push_back(std::pair<unsigned int, unsigned int>(it->first, it->second));
-	//	}
-	//}
 	return !originalClonedIndexes.empty();
 }
 
