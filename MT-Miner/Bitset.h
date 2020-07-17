@@ -63,7 +63,6 @@ private:
 	std::vector<unsigned int> cloneIndexes;
 
 	// true if deque has not been reserved
-	bool initialized;
 	unsigned int bitset_size;
 
 	// true if bitset has been modified, we need to compute count_value 
@@ -73,18 +72,15 @@ private:
 public:
 	CustomULBitset(unsigned int size) : bitset_size(size), isOriginal(false), isClone(false)
 	{
-		this->initialized = true;
 		this->modified = true;		
 		unsigned int n = (size / 32) + 1;
 		this->bitset_value.resize(n);
-		int k = this->bitset_value.size();
 		this->count_value = 0;
 		std::for_each(this->bitset_value.begin(), this->bitset_value.end(), [](unsigned long& v) { v = 0UL; });
 	}
 
 	CustomULBitset() : isOriginal(false), isClone(false)
 	{
-		this->initialized = false;
 		this->modified = true;
 		this->count_value = this->bitset_size = 0;
 	}
@@ -191,7 +187,6 @@ public:
 		assert(this->bitset_size == other.bitset_size);
 		CustomULBitset res(this->bitset_size);
 		res.modified = true;
-		res.initialized = true;
 		unsigned int n = (this->bitset_size / 32) + 1;
 		res.bitset_value.resize(n);
 
