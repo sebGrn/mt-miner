@@ -26,86 +26,86 @@
 #define _aheap_h_
 
 #include"stdlib2.h"
-//
-//#ifndef AHEAP_KEY
-// #ifdef AHEAP_KEY_DOUBLE
-//  #define AHEAP_KEY  double
-//  #define AHEAP_KEYHUGE DOUBLEHUGE
-//  #define AHEAP_KEYF "%f"
-// #elif defined(AHEAP_KEY_WEIGHT)
-//  #define AHEAP_KEY  WEIGHT
-//  #define AHEAP_KEYHUGE WEIGHTHUGE
-//  #define AHEAP_KEYF WEIGHTF
-// #else
-//#define AHEAP_KEY  int
-//  #define AHEAP_KEYHUGE INTHUGE
-//  #define AHEAP_KEYF "%d"
-// #endif
-//#endif
-//
-//#ifndef AHEAP_ID
-// #define AHEAP_ID int
-// #define AHEAP_ID_END INTHUGE
-// #define AHEAP_IDF "%d"
-//#endif
-//
-//#define AHEAP_IDX(H,i) (((i)+1-(H).base)%(H).end)
-//#define AHEAP_LEAF(H,i)   (((i)+(H).base)%(H).end+(H).end-1)
-//#define AHEAP_H(H,i)   (H).v[(((i)+(H).base)%(H).end+(H).end-1)]
-//
-//typedef struct {
-//  unsigned char type;
-//  AHEAP_KEY *v;       /* array for heap key */
-//  int end;            /* the number of maximum elements */
-//  int base;           /* the constant for set 0 to the leftmost leaf */
-//} AHEAP;
-//
-//QSORT_TYPE_HEADER (AHEAP_KEY, AHEAP_KEY)
-//QSORT_TYPE_HEADER (AHEAP_ID, AHEAP_ID)
-//extern AHEAP INIT_AHEAP;
-//
-///* initialization. allocate memory for H and fill it by +infinity */
-//void AHEAP_alloc (AHEAP *H, int num);
-//void AHEAP_end (AHEAP *H);
-//
-///* return the index of the leaf having the minimum key among the descendants
-//  of the given node i. If several leaves with the smallest key are there, 
-//  return the minimum index among them if f=0, maximum index if f=1, and
-//  random choice if f=2  */
-//AHEAP_ID AHEAP_findmin_node_ (AHEAP *H, AHEAP_ID i, int f);
-//AHEAP_ID AHEAP_findmin_node (AHEAP *H, AHEAP_ID i, int f);
-//AHEAP_ID AHEAP_findmin_head (AHEAP *H);
-//AHEAP_ID AHEAP_findmin_tail (AHEAP *H);
-//AHEAP_ID AHEAP_findmin_rnd (AHEAP *H);
-//
-///* return the index of the leaf having smaller value than a among the
-//  descendants of the given node i. If several leaves with the smallest key
-//  are there, return the minimum index among them if f=0, maximum index if f=1,
-//  and random choice if f=2  */
-//AHEAP_ID AHEAP_findlow_node (AHEAP *H, AHEAP_KEY a, AHEAP_ID i, int f);
-//AHEAP_ID AHEAP_findlow_head (AHEAP *H, AHEAP_KEY a);
-//AHEAP_ID AHEAP_findlow_tail (AHEAP *H, AHEAP_KEY a);
-//AHEAP_ID AHEAP_findlow_rnd (AHEAP *H, AHEAP_KEY a);
-//
-///* return the index of the leaf having smaller value than a next/previous to
-//  leaf i. return -1 if such a leaf does not exist  */
-//AHEAP_ID AHEAP_findlow_nxt (AHEAP *H, AHEAP_ID i, AHEAP_KEY a);
-//AHEAP_ID AHEAP_findlow_prv (AHEAP *H, AHEAP_ID i, AHEAP_KEY a);
-//
-///* change the key of node i to a /Add a to the key of node i, and update heap H */
-//void AHEAP_chg (AHEAP *H, AHEAP_ID i, AHEAP_KEY a);
-//void AHEAP_add (AHEAP *H, AHEAP_ID i, AHEAP_KEY a);
-//
-///* update the ancestor of node i */
-//void AHEAP_update (AHEAP *H, AHEAP_ID i);
-//
-///* find the leaf with the minimum key value among the leaves having index 
-// smaller/larger than i, or between i and j */
-//AHEAP_ID AHEAP_upper_min (AHEAP *H, AHEAP_ID i);
-//AHEAP_ID AHEAP_lower_min (AHEAP *H, AHEAP_ID i);
-//AHEAP_ID AHEAP_interval_min (AHEAP *H, AHEAP_ID i, AHEAP_ID j);
-//
-///* print heap keys according to the structure of the heap */
-//void AHEAP_print (AHEAP *H);
+
+#ifndef AHEAP_KEY
+ #ifdef AHEAP_KEY_DOUBLE
+  #define AHEAP_KEY  double
+  #define AHEAP_KEYHUGE DOUBLEHUGE
+  #define AHEAP_KEYF "%f"
+ #elif defined(AHEAP_KEY_WEIGHT)
+  #define AHEAP_KEY  WEIGHT
+  #define AHEAP_KEYHUGE WEIGHTHUGE
+  #define AHEAP_KEYF WEIGHTF
+ #else
+#define AHEAP_KEY  int
+  #define AHEAP_KEYHUGE INTHUGE
+  #define AHEAP_KEYF "%d"
+ #endif
+#endif
+
+#ifndef AHEAP_ID
+ #define AHEAP_ID int
+ #define AHEAP_ID_END INTHUGE
+ #define AHEAP_IDF "%d"
+#endif
+
+#define AHEAP_IDX(H,i) (((i)+1-(H).base)%(H).end)
+#define AHEAP_LEAF(H,i)   (((i)+(H).base)%(H).end+(H).end-1)
+#define AHEAP_H(H,i)   (H).v[(((i)+(H).base)%(H).end+(H).end-1)]
+
+typedef struct {
+  unsigned char type;
+  AHEAP_KEY *v;       /* array for heap key */
+  int end;            /* the number of maximum elements */
+  int base;           /* the constant for set 0 to the leftmost leaf */
+} AHEAP;
+
+QSORT_TYPE_HEADER (AHEAP_KEY, AHEAP_KEY)
+QSORT_TYPE_HEADER (AHEAP_ID, AHEAP_ID)
+extern AHEAP INIT_AHEAP;
+
+/* initialization. allocate memory for H and fill it by +infinity */
+void AHEAP_alloc (AHEAP *H, int num);
+void AHEAP_end (AHEAP *H);
+
+/* return the index of the leaf having the minimum key among the descendants
+  of the given node i. If several leaves with the smallest key are there, 
+  return the minimum index among them if f=0, maximum index if f=1, and
+  random choice if f=2  */
+AHEAP_ID AHEAP_findmin_node_ (AHEAP *H, AHEAP_ID i, int f);
+AHEAP_ID AHEAP_findmin_node (AHEAP *H, AHEAP_ID i, int f);
+AHEAP_ID AHEAP_findmin_head (AHEAP *H);
+AHEAP_ID AHEAP_findmin_tail (AHEAP *H);
+AHEAP_ID AHEAP_findmin_rnd (AHEAP *H);
+
+/* return the index of the leaf having smaller value than a among the
+  descendants of the given node i. If several leaves with the smallest key
+  are there, return the minimum index among them if f=0, maximum index if f=1,
+  and random choice if f=2  */
+AHEAP_ID AHEAP_findlow_node (AHEAP *H, AHEAP_KEY a, AHEAP_ID i, int f);
+AHEAP_ID AHEAP_findlow_head (AHEAP *H, AHEAP_KEY a);
+AHEAP_ID AHEAP_findlow_tail (AHEAP *H, AHEAP_KEY a);
+AHEAP_ID AHEAP_findlow_rnd (AHEAP *H, AHEAP_KEY a);
+
+/* return the index of the leaf having smaller value than a next/previous to
+  leaf i. return -1 if such a leaf does not exist  */
+AHEAP_ID AHEAP_findlow_nxt (AHEAP *H, AHEAP_ID i, AHEAP_KEY a);
+AHEAP_ID AHEAP_findlow_prv (AHEAP *H, AHEAP_ID i, AHEAP_KEY a);
+
+/* change the key of node i to a /Add a to the key of node i, and update heap H */
+void AHEAP_chg (AHEAP *H, AHEAP_ID i, AHEAP_KEY a);
+void AHEAP_add (AHEAP *H, AHEAP_ID i, AHEAP_KEY a);
+
+/* update the ancestor of node i */
+void AHEAP_update (AHEAP *H, AHEAP_ID i);
+
+/* find the leaf with the minimum key value among the leaves having index 
+ smaller/larger than i, or between i and j */
+AHEAP_ID AHEAP_upper_min (AHEAP *H, AHEAP_ID i);
+AHEAP_ID AHEAP_lower_min (AHEAP *H, AHEAP_ID i);
+AHEAP_ID AHEAP_interval_min (AHEAP *H, AHEAP_ID i, AHEAP_ID j);
+
+/* print heap keys according to the structure of the heap */
+void AHEAP_print (AHEAP *H);
 
 #endif

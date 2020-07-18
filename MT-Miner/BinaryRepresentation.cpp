@@ -161,26 +161,29 @@ unsigned int BinaryRepresentation<T>::buildCloneList()
 			// check do not test the same bitset
 			if (it1 != it2)
 			{
-				// test if binary representation bitsets are equal (it2 is a clone of it1 ?)
-				if (it1->second == it2->second)
+				// test if bitsets have the same support
+				if (it1->second.count() == it2->second.count())
 				{
-					// check that second is a clone
-					if (!it1->second.isAClone())
+					// test if binary representation bitsets are equals (it2 is a clone of it1 ?)
+					if (it1->second == it2->second)
 					{
-						// bitset it1 is an original and bitset it2 is its clone
-						// store cloned index from it2 into it1
-						it1->second.setAsAnOriginal(it2->first);
-						// set it2 as a clone
-						it2->second.setAsAClone();
-						// inc nb clone
-						nbClone++;
+						// check that second is a clone
+						if (!it1->second.isAClone())
+						{
+							// bitset it1 is an original and bitset it2 is its clone
+							// store cloned index from it2 into it1
+							it1->second.setAsAnOriginal(it2->first);
+							// set it2 as a clone
+							it2->second.setAsAClone();
+							// inc nb clone
+							nbClone++;
+						}
 					}
 				}
 			}
 		}
 	}
 	return nbClone;
-	
 };
 
 template <class T>

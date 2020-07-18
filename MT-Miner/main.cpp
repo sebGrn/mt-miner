@@ -13,7 +13,9 @@
 #include <algorithm>
 #include <iterator>
 #include <chrono>
+#include <bitset>
 #include <omp.h>
+#include <iomanip>
 
 #include "utils.h"
 #include "HypergraphParser.h"
@@ -137,24 +139,55 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 			}
 		}
 	}
-
 	Logger::close();
 }
+
+// ----------------------------------------------------------------------------------------------------------- //
+
+void runBitsetBenchmark()
+{
+	srand(time(NULL));
+
+	std::chrono::high_resolution_clock::time_point tick, tock;
+
+	const int bitset_size = 100000;
+
+	{
+		std::bitset<bitset_size> bitset_1, bitset_2, bitset_3;
+		for (unsigned int num = bitset_size; num--;)
+		{
+			bitset_1.set(rand() % bitset_size, rand() % 2);
+			bitset_2.set(rand() % bitset_size, rand() % 2);
+		}
+		tick = std::chrono::high_resolution_clock::now();
+		bitset_3 = bitset_1 | bitset_2;
+		tock = std::chrono::high_resolution_clock::now();
+		std::cout << "std::bitset	OR : " << std::setw(16) << std::chrono::duration_cast<std::chrono::nanoseconds>(tock - tick).count() << " nsecs" << std::endl;
+	}
+
+	{
+		CustomULBitset bitset_1(bitset_size), bitset_2(bitset_size), bitset_3(bitset_size);
+		for (unsigned int num = bitset_size; num--;)
+		{
+			bitset_1.set(rand() % bitset_size, rand() % 2);
+			bitset_2.set(rand() % bitset_size, rand() % 2);
+		}
+		tick = std::chrono::high_resolution_clock::now();
+		bitset_3 = bitset_1 | bitset_2;
+		tock = std::chrono::high_resolution_clock::now();
+		std::cout << "CustomULBitset	OR : " << std::setw(16) << std::chrono::duration_cast<std::chrono::nanoseconds>(tock - tick).count() << " nsecs" << std::endl;
+	}
+}
+
 // ----------------------------------------------------------------------------------------------------------- //
 // ----------------------------------------------------------------------------------------------------------- //
 
 int main(int argc, char* argv[])
 {
-	//{
-	//	HypergraphParser parser;
-	//	bool parserResult = parser.parse("../data/Hyp3.txt");
-	//	unsigned int k = parser.getItemCount();
-	//	unsigned int l = parser.getObjectCount();
-	//	int z;
-
-	//}
-
 	// http://research.nii.ac.jp/~uno/dualization.html
+
+	//runBitsetBenchmark();
+	//return 0;
 
 	if (argc <= 1)
 	{
