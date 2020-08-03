@@ -16,6 +16,19 @@ SparseIndexBitset::SparseIndexBitset(const SparseIndexBitset& bitset)
 	this->bitset_value = bitset.bitset_value;
 }
 
+SparseIndexBitset::SparseIndexBitset(const StaticBitset& bitset)
+{
+	this->bitset_size = bitset.size();
+	this->bitset_value.clear();
+	for (unsigned int i = 0; i < this->bitset_size; i++)
+	{
+		bool bit = bitset.get(i);
+		if (bit)
+			this->bitset_value.emplace_back(i);
+	}
+	this->bitset_value.sort();
+}
+
 SparseIndexBitset::~SparseIndexBitset()
 {}
 
@@ -60,24 +73,27 @@ unsigned int SparseIndexBitset::size() const
 	return this->bitset_size;
 }
 
-/*unsigned int SparseIndexBitset::count() const
+unsigned int SparseIndexBitset::count() const
 {
 	return static_cast<unsigned int>(this->bitset_value.size());
 }
 
-SparseIndexBitset& SparseIndexBitset::bitset_or(const SparseIndexBitset& b)
+/*SparseIndexBitset SparseIndexBitset::operator|(const SparseIndexBitset& other) const
 {
 	//assert(this->bitset_size == b.bitset_size);
-	const SparseIndexBitset& a = dynamic_cast<const SparseIndexBitset&>(b);
-	SparseIndexBitset& c = const_cast<SparseIndexBitset&>(a);
 	//this->bitset_value.insert(this->bitset_value.end(), a.bitset_value.begin(), a.bitset_value.end());
-	this->bitset_value.merge(c.bitset_value);
-	this->bitset_value.unique();
+	SparseIndexBitset res;
+	res.bitset_size = other.bitset_size;
+	res.bitset_value = other.bitset_value;
+	std::list<unsigned int> test = this->bitset_value;
+	res.bitset_value.merge(test);
+	res.bitset_value.merge(this->bitset_value);
+	res.bitset_value.unique();
 	//this->bitset_value.sort();
 	return *this;
-}
+}*/
 
-SparseIndexBitset& SparseIndexBitset::bitset_and(const SparseIndexBitset& b)
+/*SparseIndexBitset& SparseIndexBitset::bitset_and(const SparseIndexBitset& b)
 {
 	//assert(this->bitset_size == b.bitset_size);
 	const SparseIndexBitset& a = dynamic_cast<const SparseIndexBitset&>(b);

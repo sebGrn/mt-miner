@@ -17,12 +17,21 @@ public:
 	unsigned int bitset_count;
 	// stored OR value of all bitset from the item set
 	bitset_type or_value;
+
+	//bool and_computed;
+	//bitset_type and_value;
+	
+	// 
+	bool is_essential_computed;
+	bool is_essential;
 	
 public:
 	Itemset()
 	{
 		this->bitset_count = 0;
 		this->computed = false;
+		this->is_essential_computed = false;
+		this->is_essential = false;
 	}
 
 	// ------------------------------------------------------------------------------------------------------------------------- //

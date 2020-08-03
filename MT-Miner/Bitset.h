@@ -34,6 +34,7 @@ private:
 public:
 	SparseIndexBitset();
 	SparseIndexBitset(unsigned int bitsetSize);
+	SparseIndexBitset(const StaticBitset& bitset);
 	SparseIndexBitset(const SparseIndexBitset& bitset);
 	~SparseIndexBitset();
 
@@ -41,8 +42,8 @@ public:
 	void set(unsigned int iAttribute, bool b = true);
 	bool get(unsigned int iAttribute) const;
 	unsigned int size() const;
-	//unsigned int count() const;
-	//Bitset& bitset_or(const Bitset& b) override;
+	unsigned int count() const;
+	//SparseIndexBitset operator|(const SparseIndexBitset& other) const;
 	//Bitset& bitset_and(const Bitset& b) override;
 	//bool bitset_compare(const Bitset& b) const override;
 	//SparseIndexBitset& operator=(const SparseIndexBitset& other);
