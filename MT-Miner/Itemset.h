@@ -4,7 +4,7 @@
 #include <algorithm>
 #include "utils.h"
 #include "Bitset.h"
-
+#include "SparseBitset.h"
 
 class Itemset
 {

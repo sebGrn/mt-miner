@@ -4,7 +4,7 @@
 
 #include "Itemset.h"
 #include "utils.h"
-#include "Bitset.h"
+#include "Item.h"
 #include "FormalContext.h"
 
 /** 
@@ -17,7 +17,7 @@ class BinaryRepresentation
 {
 private:
 	///  key/value definition of a binary represention (key as the attribute id, value as the bitset)
-	static std::unordered_map<unsigned int, StaticBitset> binaryRepresentationMap;
+	static std::unordered_map<unsigned int, std::shared_ptr<Item>> binaryRepresentationMap;
 
 	/// number of objects/lines
 	static unsigned int objectCount;
@@ -46,37 +46,33 @@ public:
 	static bool containsOriginals(const Itemset& itemset, std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes);
 
 	//
-	static void serialize(const std::string& outputile)
-	{
-		std::ofstream fileStream = std::ofstream(outputile, std::ofstream::out);
-		for (auto it = binaryRepresentationMap.begin(); it != binaryRepresentationMap.end(); it++)
-		{
-			StaticBitset bitset = it->second;
-			//for (int i = 0, n = bitset.size(); i < n; i++)
-			for (int i = 0, n = 32; i < n; i++)
-			{
-				bool bit = bitset.get(i);
-				fileStream << bit ? "1" : "0";
-				fileStream << ";";
-			}
-			fileStream << std::endl;
-		}
-		fileStream.close();
-	};
+	static void serialize(const std::string& outputile);
 
-	static unsigned int getItemCount()
-	{
-		return itemCount;
-	};
+	static unsigned int getItemCount();
+	static unsigned int getObjectCount();
 
-	static unsigned int getObjectCount()
-	{
-		return objectCount;
-	};
-
-	static StaticBitset getBitsetFromKey(unsigned int key)
-	{
-		assert(binaryRepresentationMap.find(key) != binaryRepresentationMap.end());
-		return binaryRepresentationMap.at(key);
-	}
+	static std::shared_ptr<Item> getItemFromKey(unsigned int key);	
+	static std::shared_ptr<StaticBitset> getBitsetFromKey(unsigned int key);
 };
+
+inline unsigned int BinaryRepresentation::getItemCount()
+{
+	return itemCount;
+};
+
+inline unsigned int BinaryRepresentation::getObjectCount()
+{
+	return objectCount;
+};
+
+inline std::shared_ptr<Item> BinaryRepresentation::getItemFromKey(unsigned int key)
+{
+	assert(binaryRepresentationMap.find(key) != binaryRepresentationMap.end());
+	return binaryRepresentationMap.at(key);
+}
+
+inline std::shared_ptr<StaticBitset> BinaryRepresentation::getBitsetFromKey(unsigned int key)
+{
+	assert(binaryRepresentationMap.find(key) != binaryRepresentationMap.end());
+	return binaryRepresentationMap.at(key)->staticBitset;
+}

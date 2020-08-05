@@ -9,7 +9,7 @@
 unsigned int BinaryRepresentation::objectCount = 0;
 unsigned int BinaryRepresentation::itemCount = 0;
 unsigned int BinaryRepresentation::nbItemsetNotAddedFromClone = 0;
-std::unordered_map<unsigned int, StaticBitset> BinaryRepresentation::binaryRepresentationMap;
+std::unordered_map<unsigned int, std::shared_ptr<Item>> BinaryRepresentation::binaryRepresentationMap;
 
 /// build binary representation from formal context
 void BinaryRepresentation::buildFromFormalContext(const FormalContext& context)
@@ -19,24 +19,29 @@ void BinaryRepresentation::buildFromFormalContext(const FormalContext& context)
 	BinaryRepresentation::nbItemsetNotAddedFromClone = 0;
 	BinaryRepresentation::binaryRepresentationMap.clear();
 
-	StaticBitset bitset(BinaryRepresentation::objectCount);
-
+	//Item item(BinaryRepresentation::objectCount);
+	
+	std::shared_ptr<Item> item;
 	unsigned int sum = 0;
 	for (unsigned int j = 0; j < BinaryRepresentation::itemCount; j++)			// 8 on test.txt
 	{
-		bitset.reset();
+		unsigned int currentKey = j + 1;
+		item = std::make_shared<Item>(currentKey, BinaryRepresentation::objectCount);
+		//bitset.reset();
 		// allocate bitset with object count bit (formal context column size)
 		for (unsigned int i = 0; i < BinaryRepresentation::objectCount; i++)		// 6 on test.txt
 		{
 			bool bit = context.getBit(i, j);
-			bitset.set(i, bit);
+			item->staticBitset->set(i, bit);			
 			if (bit)
+			{
+				item->sparseBitset->set(i, true);
 				sum++;
+			}
 		}
 
-		// set a critical section to allow multiple thread to write in size_tuples vector
-		unsigned int currentKey = j + 1;
-		BinaryRepresentation::binaryRepresentationMap[currentKey] = bitset;
+		// set a critical section to allow multiple thread to write in size_tuples vector		
+		BinaryRepresentation::binaryRepresentationMap[currentKey] = item;
 	}
 
 	unsigned int nbElement = BinaryRepresentation::itemCount * BinaryRepresentation::objectCount;
@@ -136,7 +141,7 @@ bool BinaryRepresentation::isEssential(Itemset& itemset)
 		return true;
 
 	// all bitsets have the same size
-	unsigned int bitset_size = getBitsetFromKey(itemset.itemset_list[0]).size();
+	unsigned int bitset_size = getBitsetFromKey(itemset.itemset_list[0])->size();
 	
 	bool isEssential = false;
 	for (int i1 = 0, n = static_cast<int>(itemset.itemset_list.size()); i1 != n; i1++)
@@ -151,19 +156,19 @@ bool BinaryRepresentation::isEssential(Itemset& itemset)
 			if (i1 != i2)
 			{
 				unsigned int key2 = itemset.itemset_list[i2];
-				StaticBitset bitset = getBitsetFromKey(key2);
-				if(bitset.valid())
-					SumOfN_1Items = SumOfN_1Items | bitset;
+				std::shared_ptr<StaticBitset> bitset = getBitsetFromKey(key2);
+				if(bitset->valid())
+					SumOfN_1Items = SumOfN_1Items | (*bitset);
 			}
 		}
 
 		unsigned int key1 = itemset.itemset_list[i1];
-		StaticBitset bitset = getBitsetFromKey(key1);
+		std::shared_ptr<StaticBitset> bitset = getBitsetFromKey(key1);
 		for (unsigned int i = 0; i < objectCount; i++)
 		{
 			// compare bit
 			bool bit0 = SumOfN_1Items.get(i);
-			bool bit1 = bitset.get(i);
+			bool bit1 = bitset->get(i);
 			if (!bit0 && bit1)
 			{
 				// this bitset is essential, check with next bitset
@@ -188,14 +193,14 @@ unsigned int BinaryRepresentation::computeDisjonctifSupport(Itemset& pattern)
 	{
 		// all bitsets have the same size
 		unsigned int key = pattern.itemset_list[0];
-		unsigned int bitset_size = BinaryRepresentation::getBitsetFromKey(key).size();
+		unsigned int bitset_size = BinaryRepresentation::getBitsetFromKey(key)->size();
 		StaticBitset SumOfN_1Items(bitset_size);
 		for (size_t i = 0, n = pattern.itemset_list.size(); i < n; i++)
 		{
 			unsigned int columnKey = pattern.itemset_list[i];
-			StaticBitset bitset = BinaryRepresentation::getBitsetFromKey(columnKey);
-			if(bitset.valid())
-				SumOfN_1Items = SumOfN_1Items | bitset;
+			std::shared_ptr<StaticBitset> bitset = BinaryRepresentation::getBitsetFromKey(columnKey);
+			if(bitset->valid())
+				SumOfN_1Items = SumOfN_1Items | (*bitset);
 		}
 		unsigned int disSupp = SumOfN_1Items.count();
 		pattern.bitset_count = disSupp;
@@ -239,19 +244,19 @@ unsigned int BinaryRepresentation::buildCloneList()
 			if (it1 != it2)
 			{
 				// test if bitsets have the same support
-				if (it1->second.count() == it2->second.count())
+				if (it1->second->staticBitset->count() == it2->second->staticBitset->count())
 				{
 					// test if binary representation bitsets are equals (it2 is a clone of it1 ?)
 					if (it1->second == it2->second)
 					{
 						// check that second is a clone
-						if (!it1->second.isAClone())
+						if (!it1->second->isAClone())
 						{
 							// bitset it1 is an original and bitset it2 is its clone
 							// store cloned index from it2 into it1
-							it1->second.setAsAnOriginal(it2->first);
+							it1->second->setAsAnOriginal(it2->first);
 							// set it2 as a clone
-							it2->second.setAsAClone();
+							it2->second->setAsAClone();
 							// inc nb clone
 							nbClone++;
 						}
@@ -267,8 +272,8 @@ bool BinaryRepresentation::containsAClone(const Itemset& itemset)
 {
 	for (auto index : itemset.itemset_list)
 	{
-		StaticBitset bitset = getBitsetFromKey(index);
-		if (bitset.isAClone())
+		std::shared_ptr<Item> item = getItemFromKey(index);
+		if (item->isAClone())
 			return true;
 	}
 	return false;
@@ -278,12 +283,30 @@ bool BinaryRepresentation::containsOriginals(const Itemset& itemset, std::vector
 {
 	originalClonedIndexes.clear();
 	std::for_each(itemset.itemset_list.begin(), itemset.itemset_list.end(), [&originalClonedIndexes](unsigned int index) {
-		StaticBitset bitset = getBitsetFromKey(index);
-		if (bitset.isAnOriginal())
+		std::shared_ptr<Item> item = getItemFromKey(index);
+		if (item->isAnOriginal())
 		{
-			for(unsigned int i = 0, n = bitset.getCloneIndexesCount(); i < n; i++)
-				originalClonedIndexes.push_back(std::pair<unsigned int, unsigned int>(index, bitset.getCloneIndex(i)));
+			for(unsigned int i = 0, n = item->getCloneAttributeIndexesCount(); i < n; i++)
+				originalClonedIndexes.push_back(std::pair<unsigned int, unsigned int>(index, item->getCloneAttributeIndex(i)));
 		}
 	});
 	return !originalClonedIndexes.empty();
 }
+
+void BinaryRepresentation::serialize(const std::string& outputile)
+{
+	std::ofstream fileStream = std::ofstream(outputile, std::ofstream::out);
+	for (auto it = binaryRepresentationMap.begin(); it != binaryRepresentationMap.end(); it++)
+	{
+		std::shared_ptr<StaticBitset> bitset = it->second->staticBitset;
+		//for (int i = 0, n = bitset.size(); i < n; i++)
+		for (int i = 0, n = 32; i < n; i++)
+		{
+			bool bit = bitset->get(i);
+			fileStream << bit ? "1" : "0";
+			fileStream << ";";
+		}
+		fileStream << std::endl;
+	}
+	fileStream.close();
+};

@@ -206,7 +206,7 @@ std::vector<Itemset> TreeNode::computeMinimalTransversals(std::vector<Itemset>& 
 
 	// launch processing units
 	std::list<std::future<std::vector<Itemset>>> units;
-	const unsigned int thead_multiplicator = 4;
+	const unsigned int thead_multiplicator = 1;
 	for (auto n = std::thread::hardware_concurrency() * thead_multiplicator; --n;)
 	{
 		units.emplace_back(std::async(std::launch::async, [n]()
