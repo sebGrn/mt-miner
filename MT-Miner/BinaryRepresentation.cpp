@@ -139,16 +139,13 @@ bool BinaryRepresentation::isEssential(Itemset& itemset)
 {
 	if (itemset.itemset_list.size() == 1)
 		return true;
-
-	// all bitsets have the same size
-	unsigned int bitset_size = getBitsetFromKey(itemset.itemset_list[0])->size();
 	
 	bool isEssential = false;
+	StaticBitset SumOfN_1Items;
 	for (int i1 = 0, n = static_cast<int>(itemset.itemset_list.size()); i1 != n; i1++)
 	{		
-		StaticBitset SumOfN_1Items(bitset_size);
-		
 		// dont forget to initialize boolean
+		SumOfN_1Items.reset();
 		isEssential = false;
 	
 		for (int i2 = 0; i2 < n; i2++)
@@ -157,7 +154,7 @@ bool BinaryRepresentation::isEssential(Itemset& itemset)
 			{
 				unsigned int key2 = itemset.itemset_list[i2];
 				std::shared_ptr<StaticBitset> bitset = getBitsetFromKey(key2);
-				if(bitset->valid())
+				if(!bitset->none())
 					SumOfN_1Items = SumOfN_1Items | (*bitset);
 			}
 		}
@@ -167,8 +164,8 @@ bool BinaryRepresentation::isEssential(Itemset& itemset)
 		for (unsigned int i = 0; i < objectCount; i++)
 		{
 			// compare bit
-			bool bit0 = SumOfN_1Items.get(i);
-			bool bit1 = bitset->get(i);
+			bool bit0 = SumOfN_1Items[i];
+			bool bit1 = (*bitset)[i];
 			if (!bit0 && bit1)
 			{
 				// this bitset is essential, check with next bitset
@@ -192,22 +189,20 @@ unsigned int BinaryRepresentation::computeDisjonctifSupport(Itemset& pattern)
 	if (!pattern.computed)
 	{
 		// all bitsets have the same size
-		unsigned int key = pattern.itemset_list[0];
-		unsigned int bitset_size = BinaryRepresentation::getBitsetFromKey(key)->size();
-		StaticBitset SumOfN_1Items(bitset_size);
+		StaticBitset SumOfN_1Items;
 		for (size_t i = 0, n = pattern.itemset_list.size(); i < n; i++)
 		{
 			unsigned int columnKey = pattern.itemset_list[i];
 			std::shared_ptr<StaticBitset> bitset = BinaryRepresentation::getBitsetFromKey(columnKey);
-			if(bitset->valid())
+			if(!bitset->none())
 				SumOfN_1Items = SumOfN_1Items | (*bitset);
 		}
 		unsigned int disSupp = SumOfN_1Items.count();
-		pattern.bitset_count = disSupp;
+		pattern.bitsetCount = disSupp;
 		pattern.computed = true;
-		pattern.or_value = SumOfN_1Items;
+		pattern.orValue = SumOfN_1Items;
 	}
-	return pattern.bitset_count;
+	return pattern.bitsetCount;
 };
 
 //template <class T>
@@ -302,7 +297,7 @@ void BinaryRepresentation::serialize(const std::string& outputile)
 		//for (int i = 0, n = bitset.size(); i < n; i++)
 		for (int i = 0, n = 32; i < n; i++)
 		{
-			bool bit = bitset->get(i);
+			bool bit = (*bitset)[i];
 			fileStream << bit ? "1" : "0";
 			fileStream << ";";
 		}

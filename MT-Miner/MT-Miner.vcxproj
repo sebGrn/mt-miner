@@ -164,8 +164,6 @@
     <ClInclude Include="HypergraphParser.h" />
     <ClInclude Include="Item.h" />
     <ClInclude Include="Itemset.h" />
-    <ClInclude Include="JsonTree.h" />
-    <ClInclude Include="JsonTreeNode.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="MT_Miner.h" />
     <ClInclude Include="Profiler.h" />

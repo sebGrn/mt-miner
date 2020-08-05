@@ -13,22 +13,23 @@ public:
 	
 	// true if bitset_count & or value have been computed
 	bool computed; 
-	// support of the current itemset (nb 1's bit)
-	unsigned int bitset_count;
 	// stored OR value of all bitset from the item set
-	StaticBitset or_value;
-	
+	//StaticBitset orValue;
+	std::bitset<1000> orValue;
+	// support of the current itemset (nb 1's bit) of OR computation
+	unsigned int bitsetCount;
+
 	// 
 	bool is_essential_computed;
 	bool is_essential;
 	
 public:
-	Itemset()
+	Itemset() : orValue()
 	{
-		this->bitset_count = 0;
+		this->bitsetCount = 0;
 		this->computed = false;
-		this->is_essential_computed = false;
-		this->is_essential = false;
+		//this->is_essential_computed = false;
+		//this->is_essential = false;
 	}
 
 	// ------------------------------------------------------------------------------------------------------------------------- //
@@ -113,8 +114,8 @@ public:
 			//else if (!str2.or_value)
 			//	left.or_value = str1.or_value;
 			//else
-			left.or_value = str1.or_value | str2.or_value;
-			left.bitset_count = left.or_value.count();
+			left.orValue = str1.orValue | str2.orValue;
+			left.bitsetCount = left.orValue.count();
 			left.computed = true;
 		}
 		return left;

@@ -19,11 +19,11 @@ private:
 	///  key/value definition of a binary represention (key as the attribute id, value as the bitset)
 	static std::unordered_map<unsigned int, std::shared_ptr<Item>> binaryRepresentationMap;
 
-	/// number of objects/lines
-	static unsigned int objectCount;
-
 	/// number of items/attributes/columns
 	static unsigned int itemCount;
+
+	/// number of objects/lines
+	static unsigned int objectCount;
 
 	/// count number of cloned itemsets has been removed from mt computation
 	static unsigned int nbItemsetNotAddedFromClone;
