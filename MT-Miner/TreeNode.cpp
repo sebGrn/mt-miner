@@ -1,7 +1,6 @@
 #include "TreeNode.h"
 #include "Logger.h"
 #include "Profiler.h"
-#include "JsonTree.h"
 
 std::atomic_ullong TreeNode::nbTotalChildren(0);
 // to avoid interleaved outputs
@@ -11,7 +10,7 @@ std::deque<std::future<std::vector<Itemset>>> TreeNode::task_queue;
 std::mutex TreeNode::task_guard;
 std::condition_variable TreeNode::task_signal;
 int TreeNode::pending_task_count(0);
-std::shared_ptr<BinaryRepresentation<bitset_type>> TreeNode::binaryRepresentation = std::make_shared<BinaryRepresentation<bitset_type>>();
+std::shared_ptr<BinaryRepresentation> TreeNode::binaryRepresentation = std::make_shared<BinaryRepresentation>();
 
 TreeNode::TreeNode(bool useCloneOptimization)
 {
@@ -31,10 +30,16 @@ void TreeNode::buildClonedCombination(const Itemset& currentItem, std::vector<It
 		Itemset clonedCurrentItem = currentItem;
 
 		// replace originalIndex into clonedIndex into clonedCurrentItem.itemset_list list
-		std::replace(clonedCurrentItem.itemset_list.begin(), clonedCurrentItem.itemset_list.end(), originalIndex, clonedIndex);
+		// replace originalIndex by clonedIndex
+		//std::replace(clonedCurrentItem.itemset.begin(), clonedCurrentItem.itemset.end(), originalIndex, clonedIndex);
+		std::for_each(clonedCurrentItem.itemset.begin(), clonedCurrentItem.itemset.end(), [&](Itemset::Item& item) {
+			if (item.item_index == originalIndex)
+				item.item_index = clonedIndex;
+		});
 
 		// tester le support de l'itemset pour savoir si le bitset est un clone avant de tester s'ils sont égaux
-		if (clonedCurrentItem.itemset_list != currentItem.itemset_list)
+		// test if itemsets are equal, if not we can continue
+		if (clonedCurrentItem.itemset.size() != currentItem.itemset.size())
 		{
 			auto it = std::find_if(clonedCombination.begin(), clonedCombination.end(), compare_itemset(clonedCurrentItem));
 			if (it == clonedCombination.end())
@@ -80,7 +85,9 @@ void TreeNode::updateListsFromToTraverse(const std::vector<Itemset>& toTraverse,
 		}
 		else
 		{
-			if (currentItem.itemset_list == toTraverse.begin()->itemset_list && currentItem.itemset_list.size() == 1)
+			if ((toTraverse.begin()->itemset.size() == 1) && 
+				(currentItem.itemset.size() == 1) && 
+				(currentItem.itemset[0].item_index == toTraverse.begin()->itemset[0].item_index))
 			{
 				// must be the 1st element with only one element
 				previousItem = currentItem;

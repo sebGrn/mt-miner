@@ -176,6 +176,11 @@ public:
 		return elems;
 	}
 
+	static bool containsZero(const std::vector<unsigned int> v)
+	{
+		return (std::find(v.begin(), v.end(), 0) != v.end());
+	}
+
 	// ------------------------------------------------------------------------------------------------------------------------- //
 
 	static std::string& ltrim(std::string& str, const std::string& chars = "\t\n\v\f\r ")
@@ -195,3 +200,4 @@ public:
 		return ltrim(rtrim(str, chars), chars);
 	}
 };
+

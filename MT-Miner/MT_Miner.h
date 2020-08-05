@@ -27,8 +27,6 @@ private:
 	static std::atomic_bool stop;
 	///
 	bool useCloneOptimization;
-	// binary representation 
-	//std::shared_ptr<BinaryRepresentation> binaryRepresentation;
 	
 private:
 	/// return the minimal transversals miner
@@ -43,11 +41,4 @@ public:
 	
 	///
 	std::vector<Itemset> computeMinimalTransversals();
-
-	///
-	//unsigned int computeDisjonctifSupport(Itemset& pattern) const
-	//{		
-	//	//return binaryRepresentation->computeDisjonctifSupport(pattern);
-	//}
 };
-

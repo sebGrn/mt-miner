@@ -5,13 +5,18 @@
 #include <memory>
 
 #include "Bitset.h"
+#include "SparseBitset.h"
 #include "HyperGraph.h"
 
+/**
+ *
+ *
+ */
 class FormalContext
 {
 private:
 	// a formal context is a matrix of bool
-	std::vector<SparseIndexBitset> formalContext;
+	std::vector<SparseBitset> formalContext;
 
 	// number of columns / number of boolean values
 	unsigned int itemCount;
@@ -33,7 +38,7 @@ public:
 		// build formal context
 		for (unsigned int i = 0, n = hypergraph->getObjectCount(); i < n; i++)
 		{
-			SparseIndexBitset bitset(bitsetSize);
+			SparseBitset bitset(bitsetSize);
 						
 			// loop on hyper graph and build formal context
 			std::vector<unsigned int> line = hypergraph->getLine(i);
@@ -50,7 +55,7 @@ public:
 				}
 				assert(index >= 0);
 				assert(index < bitsetSize);
-				bitset.set(index);				
+				bitset.set(index, true);
 			}
 			// add bitset for this object (line)
 			this->formalContext.push_back(bitset);
@@ -92,4 +97,3 @@ public:
 		return bitset.get(iAttribute);
 	};
 };
-

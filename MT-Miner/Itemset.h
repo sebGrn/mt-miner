@@ -4,27 +4,36 @@
 #include <algorithm>
 #include "utils.h"
 #include "Bitset.h"
+#include "SparseBitset.h"
 
 
+/**
+ *
+ *
+ */
 class Itemset
 {
 public:
-	std::vector<unsigned int> itemset_list;
-	
+	struct Item
+	{
+		unsigned int item_index;
+		StaticBitset item_bitset;
+		SparseBitset item_sparse_bitset;
+	};
+	std::vector<Item> itemset;
+
 	// true if bitset_count & or value have been computed
 	bool computed; 
 	// support of the current itemset (nb 1's bit)
 	unsigned int bitset_count;
 	// stored OR value of all bitset from the item set
-	bitset_type or_value;
+	StaticBitset or_value;
 
-	//bool and_computed;
-	//bitset_type and_value;
-	
 	// 
 	bool is_essential_computed;
 	bool is_essential;
-	
+
+
 public:
 	Itemset()
 	{
@@ -34,13 +43,24 @@ public:
 		this->is_essential = false;
 	}
 
+	//bool operator!=(const Itemset& other)
+	//{
+	//	if (other.itemset.size() != this->itemset.size())
+	//		return true;
+	//	auto it2 = other.itemset.begin();
+	//	for (auto it1 = this->itemset.begin(); it1 != this->itemset.end(); it1++, it2++)
+	//		if(it1->item_index != it2->item_index)
+	//			return true;
+	//	return false;
+	//}
+
 	// ------------------------------------------------------------------------------------------------------------------------- //
 
 	static std::string itemsetToString(const Itemset& v)
 	{
 		std::string res = "{";
-		for_each(v.itemset_list.begin(), v.itemset_list.end(), [&](unsigned int i) {
-			res += std::to_string(i);
+		for_each(v.itemset.begin(), v.itemset.end(), [&](const Item& item) {
+			res += std::to_string(item.item_index);
 			res += ",";
 			});
 		res.pop_back();
@@ -63,22 +83,22 @@ public:
 	// ------------------------------------------------------------------------------------------------------------------------- //
 
 	// sort each element of minimalTransversals
-	static std::vector<Itemset> sortVectorOfItemset(const std::vector<Itemset>& strVector)
-	{
-		std::vector<Itemset> sortedList = strVector;
-		std::transform(strVector.begin(), strVector.end(), sortedList.begin(), [&](const Itemset& elt) {
-			//Itemset v = splitToVectorOfInt(elt, ' ');	
-			Itemset v = elt;
-			std::sort(v.itemset_list.begin(), v.itemset_list.end());
+	//static std::vector<Itemset> sortVectorOfItemset(const std::vector<Itemset>& strVector)
+	//{
+	//	std::vector<Itemset> sortedList = strVector;
+	//	std::transform(strVector.begin(), strVector.end(), sortedList.begin(), [&](const Itemset& elt) {
+	//		//Itemset v = splitToVectorOfInt(elt, ' ');	
+	//		Itemset v = elt;
+	//		std::sort(v.item_list.begin(), v.item_list.end());
 
-			Itemset res;
-			for_each(v.itemset_list.begin(), v.itemset_list.end(), [&](unsigned int i) {
-				res.itemset_list.push_back(i);
-				});
-			return res;
-			});
-		return sortedList;
-	}
+	//		Itemset res;
+	//		for_each(v.item_list.begin(), v.item_list.end(), [&](unsigned int i) {
+	//			res.item_list.push_back(i);
+	//			});
+	//		return res;
+	//		});
+	//	return sortedList;
+	//}
 
 	// ------------------------------------------------------------------------------------------------------------------------- //
 
@@ -91,18 +111,24 @@ public:
 		
 		// remove duplicate indexes from left into right itemset
 		std::vector<Itemset> combinedListElt;
-		for_each(str1.itemset_list.begin(), str1.itemset_list.end(), [&](unsigned int i) {
-			auto it = std::find_if(right.itemset_list.begin(), right.itemset_list.end(), Utils::compare_int(i));
-			if (it != right.itemset_list.end())
+		for_each(str1.itemset.begin(), str1.itemset.end(), [&](const Item& item) {
+			auto it = right.itemset.begin();
+			while (it != right.itemset.end())
+			{
+				if (it->item_index == item.item_index)
+					break;
+				it++;
+			}
+			if(it != right.itemset.end())
 			{
 				// remove elt
-				right.itemset_list.erase(it);
+				right.itemset.erase(it);							
 			}
-			});
+		});
 
 		// merge right itemset at the end of left itemset
 		//left.itemset_list.insert(left.itemset_list.end(), right.itemset_list.begin(), right.itemset_list.end());
-		std::copy(right.itemset_list.begin(), right.itemset_list.end(), std::back_inserter(left.itemset_list));
+		std::copy(right.itemset.begin(), right.itemset.end(), std::back_inserter(left.itemset));
 		
 		// create a new combined itemset
 		//Itemset combinedElt;
@@ -124,12 +150,16 @@ public:
 	};
 
 	// check if itemset contains a 0 index
-	static bool containsZero(const Itemset& data)
-	{
-		return (std::find(data.itemset_list.begin(), data.itemset_list.end(), 0) != data.itemset_list.end());
-	}
+	//static bool containsZero(const Itemset& data)
+	//{
+	//	for(auto it = data.itemset.begin(); it != data.itemset.end(); it++)
+	//	{
+	//		if (it->item_index == 0)
+	//			return true;
+	//	}
+	//	return false;
+	//}
 };
-
 
 struct compare_itemset
 {
@@ -138,7 +168,20 @@ struct compare_itemset
 
 	bool operator()(Itemset const& item)
 	{
-		// use AND operator for comparaison
-		return key.itemset_list == item.itemset_list;
+		//return key.itemset == item.itemset;
+		//std::function<bool(const Itemset&, const Itemset&)> comparator = [](const Itemset& item1, const Itemset& item2) {
+		//	return std::equal
+		//});
+
+		if (key.itemset.size() != item.itemset.size())
+			return false;
+
+		auto it2 = item.itemset.begin();
+		for (auto it1 = key.itemset.begin(); it1 != key.itemset.end(); it1++, it2++)
+		{
+			if (it1->item_index != it2->item_index)
+				return false;
+		}
+		return true;
 	}
 };

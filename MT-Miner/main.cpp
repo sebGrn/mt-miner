@@ -144,40 +144,40 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 
 // ----------------------------------------------------------------------------------------------------------- //
 
-void runBitsetBenchmark()
-{
-	srand(time(NULL));
-
-	std::chrono::high_resolution_clock::time_point tick, tock;
-
-	const int bitset_size = 100000;
-
-	{
-		std::bitset<bitset_size> bitset_1, bitset_2, bitset_3;
-		for (unsigned int num = bitset_size; num--;)
-		{
-			bitset_1.set(rand() % bitset_size, rand() % 2);
-			bitset_2.set(rand() % bitset_size, rand() % 2);
-		}
-		tick = std::chrono::high_resolution_clock::now();
-		bitset_3 = bitset_1 | bitset_2;
-		tock = std::chrono::high_resolution_clock::now();
-		std::cout << "std::bitset	OR : " << std::setw(16) << std::chrono::duration_cast<std::chrono::nanoseconds>(tock - tick).count() << " nsecs" << std::endl;
-	}
-
-	{
-		CustomULBitset bitset_1(bitset_size), bitset_2(bitset_size), bitset_3(bitset_size);
-		for (unsigned int num = bitset_size; num--;)
-		{
-			bitset_1.set(rand() % bitset_size, rand() % 2);
-			bitset_2.set(rand() % bitset_size, rand() % 2);
-		}
-		tick = std::chrono::high_resolution_clock::now();
-		bitset_3 = bitset_1 | bitset_2;
-		tock = std::chrono::high_resolution_clock::now();
-		std::cout << "CustomULBitset	OR : " << std::setw(16) << std::chrono::duration_cast<std::chrono::nanoseconds>(tock - tick).count() << " nsecs" << std::endl;
-	}
-}
+//void runBitsetBenchmark()
+//{
+//	srand(time(NULL));
+//
+//	std::chrono::high_resolution_clock::time_point tick, tock;
+//
+//	const int bitset_size = 100000;
+//
+//	{
+//		std::bitset<bitset_size> bitset_1, bitset_2, bitset_3;
+//		for (unsigned int num = bitset_size; num--;)
+//		{
+//			bitset_1.set(rand() % bitset_size, rand() % 2);
+//			bitset_2.set(rand() % bitset_size, rand() % 2);
+//		}
+//		tick = std::chrono::high_resolution_clock::now();
+//		bitset_3 = bitset_1 | bitset_2;
+//		tock = std::chrono::high_resolution_clock::now();
+//		std::cout << "std::bitset	OR : " << std::setw(16) << std::chrono::duration_cast<std::chrono::nanoseconds>(tock - tick).count() << " nsecs" << std::endl;
+//	}
+//
+//	{
+//		CustomULBitset bitset_1(bitset_size), bitset_2(bitset_size), bitset_3(bitset_size);
+//		for (unsigned int num = bitset_size; num--;)
+//		{
+//			bitset_1.set(rand() % bitset_size, rand() % 2);
+//			bitset_2.set(rand() % bitset_size, rand() % 2);
+//		}
+//		tick = std::chrono::high_resolution_clock::now();
+//		bitset_3 = bitset_1 | bitset_2;
+//		tock = std::chrono::high_resolution_clock::now();
+//		std::cout << "CustomULBitset	OR : " << std::setw(16) << std::chrono::duration_cast<std::chrono::nanoseconds>(tock - tick).count() << " nsecs" << std::endl;
+//	}
+//}
 
 // ----------------------------------------------------------------------------------------------------------- //
 // ----------------------------------------------------------------------------------------------------------- //
@@ -185,7 +185,6 @@ void runBitsetBenchmark()
 int main(int argc, char* argv[])
 {
 	// http://research.nii.ac.jp/~uno/dualization.html
-
 	//runBitsetBenchmark();
 	//return 0;
 
@@ -206,5 +205,5 @@ int main(int argc, char* argv[])
 	bool useOutputFile = parameterList[ArgumentParser::OUTPUT_TO_FILE] == "true" || parameterList[ArgumentParser::OUTPUT_TO_FILE] == "True" || parameterList[ArgumentParser::OUTPUT_TO_FILE] == "TRUE";
 	bool useCloneOptimization = parameterList[ArgumentParser::USE_CLONE] == "true" || parameterList[ArgumentParser::USE_CLONE] == "True" || parameterList[ArgumentParser::USE_CLONE] == "TRUE";
 
-	runMinimalTransversals(file, useCloneOptimization, verboseMode, useOutputFile, useOutputLogFile);
+	runMinimalTransversals(file, false, verboseMode, useOutputFile, useOutputLogFile);
 }
