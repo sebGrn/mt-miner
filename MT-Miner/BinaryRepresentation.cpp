@@ -50,7 +50,7 @@ void BinaryRepresentation<T>::buildFromFormalContext(const FormalContext& contex
 };
 
 // return true if element is essential
-template <class T>
+/*template <class T>
 bool BinaryRepresentation<T>::isEssential(Itemset& itemset)
 {
 	if (itemset.is_essential_computed)
@@ -89,7 +89,7 @@ bool BinaryRepresentation<T>::isEssential(Itemset& itemset)
 
 
 
-		/*//T xor_bitset(bitset_size);
+		//T xor_bitset(bitset_size);
 		std::vector<unsigned int> base_indexes;
 		// loop on each item 
 		for (int i = 0, n = static_cast<int>(itemset.itemset_list.size()); i != n; i++)
@@ -129,13 +129,13 @@ bool BinaryRepresentation<T>::isEssential(Itemset& itemset)
 					}
 				}
 			}
-		}*/
+		}
 	}
 	return itemset.is_essential;
-}
+}*/
 
 // return true if element is essential
-/*template <class T>
+template <class T>
 bool BinaryRepresentation<T>::isEssential(Itemset& itemset)
 {
 	if (itemset.itemset_list.size() == 1)
@@ -185,7 +185,7 @@ bool BinaryRepresentation<T>::isEssential(Itemset& itemset)
 		}
 	}
 	return isEssential;
-}*/
+}
 
 template <class T>
 unsigned int BinaryRepresentation<T>::computeDisjonctifSupport(Itemset& pattern)

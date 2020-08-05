@@ -14,17 +14,17 @@ namespace MTMinerUnitTests_test
 			HypergraphParser parser;
 			bool parserResult = parser.parse("../../data/test.txt");
 			Assert::AreEqual(parserResult, true);
-
+			
 			std::shared_ptr<HyperGraph> hypergraph = parser.getHypergraph();
 			int objectCount = parser.getObjectCount();
 			int itemCount = parser.getItemCount();
 			Assert::AreEqual(6, objectCount);
 			Assert::AreEqual(8, itemCount);
 
-			// allocate miner
 			MT_Miner miner(true);
-			miner.createBinaryRepresentation(parser.getHypergraph());
+			miner.createBinaryRepresentation(hypergraph);
 
+			// allocate miner
 			Itemset item1;
 			item1.itemset_list.push_back(1);
 			int disjonctifSupport = BinaryRepresentation<bitset_type>::computeDisjonctifSupport(item1);
