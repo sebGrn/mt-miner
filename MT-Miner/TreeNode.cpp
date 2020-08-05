@@ -1,7 +1,6 @@
 #include "TreeNode.h"
 #include "Logger.h"
 #include "Profiler.h"
-#include "JsonTree.h"
 
 std::atomic_ullong TreeNode::nbTotalChildren(0);
 // to avoid interleaved outputs
@@ -11,7 +10,7 @@ std::deque<std::future<std::vector<Itemset>>> TreeNode::task_queue;
 std::mutex TreeNode::task_guard;
 std::condition_variable TreeNode::task_signal;
 int TreeNode::pending_task_count(0);
-std::shared_ptr<BinaryRepresentation<bitset_type>> TreeNode::binaryRepresentation = std::make_shared<BinaryRepresentation<bitset_type>>();
+std::shared_ptr<BinaryRepresentation> TreeNode::binaryRepresentation = std::make_shared<BinaryRepresentation>();
 
 TreeNode::TreeNode(bool useCloneOptimization)
 {

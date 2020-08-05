@@ -146,9 +146,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BinaryRepresentation.cpp" />
-    <ClCompile Include="Bitset.cpp" />
     <ClCompile Include="HypergraphParser.cpp" />
-    <ClCompile Include="JsonTree.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MT_Miner.cpp" />
@@ -170,6 +168,7 @@
     <ClInclude Include="Logger.h" />
     <ClInclude Include="MT_Miner.h" />
     <ClInclude Include="Profiler.h" />
+    <ClInclude Include="SparseBitset.h" />
     <ClInclude Include="TreeNode.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>

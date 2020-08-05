@@ -16,10 +16,7 @@ public:
 	// support of the current itemset (nb 1's bit)
 	unsigned int bitset_count;
 	// stored OR value of all bitset from the item set
-	bitset_type or_value;
-
-	//bool and_computed;
-	//bitset_type and_value;
+	StaticBitset or_value;
 	
 	// 
 	bool is_essential_computed;

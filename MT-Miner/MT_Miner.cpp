@@ -1,7 +1,6 @@
 #include "MT_Miner.h"
 #include "utils.h"
 #include "Profiler.h"
-#include "JsonTree.h"
 
 std::atomic_bool MT_Miner::stop(false);
 
@@ -27,7 +26,7 @@ bool MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hyp
 	//}
 
 	// build binary representation from formal context
-	BinaryRepresentation<bitset_type>::buildFromFormalContext(formalContext);
+	BinaryRepresentation::buildFromFormalContext(formalContext);
 	//BinaryRepresentation<bitset_type>::serialize("binary_rep.csv");
 
 	if (this->useCloneOptimization)
@@ -46,7 +45,7 @@ bool MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hyp
 		// if we have, memorize the indexes of the original and the cloned
 		// if the cloned bitset index is into a toExplore list, dont compute the mt for the clone but use those from the original
 		Logger::log(GREEN, "computing clones\n", RESET);
-		unsigned int cloneListSize = BinaryRepresentation<bitset_type>::buildCloneList();
+		unsigned int cloneListSize = BinaryRepresentation::buildCloneList();
 		Logger::log(GREEN, "found ", cloneListSize, " clones\n", RESET);
 
 		if (cloneListSize == 0)
@@ -58,11 +57,11 @@ bool MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hyp
 std::vector<Itemset> MT_Miner::computeInitalToTraverseList()
 {
 	std::vector<Itemset> toTraverse;
-	for (unsigned int i = 1; i <= BinaryRepresentation<bitset_type>::getItemCount(); i++)
+	for (unsigned int i = 1; i <= BinaryRepresentation::getItemCount(); i++)
 	{
 		Itemset itemset;
 		itemset.itemset_list.push_back(i);
-		if (!BinaryRepresentation<bitset_type>::containsAClone(itemset))
+		if (!BinaryRepresentation::containsAClone(itemset))
 			toTraverse.push_back(itemset);
 	}
 	return toTraverse;

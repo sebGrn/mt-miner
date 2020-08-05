@@ -13,12 +13,11 @@
  * the index of the map is the item number
  * this representation is usefull to compute disjonctif support easyly (with a OR operator)
  */
-template <class T>
 class BinaryRepresentation
 {
 private:
 	///  key/value definition of a binary represention (key as the attribute id, value as the bitset)
-	static std::unordered_map<unsigned int, T> binaryRepresentationMap;
+	static std::unordered_map<unsigned int, StaticBitset> binaryRepresentationMap;
 
 	/// number of objects/lines
 	static unsigned int objectCount;
@@ -52,7 +51,7 @@ public:
 		std::ofstream fileStream = std::ofstream(outputile, std::ofstream::out);
 		for (auto it = binaryRepresentationMap.begin(); it != binaryRepresentationMap.end(); it++)
 		{
-			T bitset = it->second;
+			StaticBitset bitset = it->second;
 			//for (int i = 0, n = bitset.size(); i < n; i++)
 			for (int i = 0, n = 32; i < n; i++)
 			{
@@ -75,7 +74,7 @@ public:
 		return objectCount;
 	};
 
-	static T getBitsetFromKey(unsigned int key)
+	static StaticBitset getBitsetFromKey(unsigned int key)
 	{
 		assert(binaryRepresentationMap.find(key) != binaryRepresentationMap.end());
 		return binaryRepresentationMap.at(key);
