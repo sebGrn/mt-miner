@@ -137,12 +137,12 @@ bool BinaryRepresentation<T>::isEssential(Itemset& itemset)
 // return true if element is essential
 bool BinaryRepresentation::isEssential(Itemset& itemset)
 {
-	if (itemset.itemset_list.size() == 1)
+	if (itemset.itemset.size() == 1)
 		return true;
 	
 	bool isEssential = false;
 	StaticBitset SumOfN_1Items;
-	for (int i1 = 0, n = static_cast<int>(itemset.itemset_list.size()); i1 != n; i1++)
+	for (int i1 = 0, n = static_cast<int>(itemset.itemset.size()); i1 != n; i1++)
 	{		
 		// dont forget to initialize boolean
 		SumOfN_1Items.reset();
@@ -152,14 +152,14 @@ bool BinaryRepresentation::isEssential(Itemset& itemset)
 		{			
 			if (i1 != i2)
 			{
-				unsigned int key2 = itemset.itemset_list[i2];
+				unsigned int key2 = itemset.itemset[i2].attributeIndex;
 				std::shared_ptr<StaticBitset> bitset = getBitsetFromKey(key2);
 				if(!bitset->none())
 					SumOfN_1Items = SumOfN_1Items | (*bitset);
 			}
 		}
 
-		unsigned int key1 = itemset.itemset_list[i1];
+		unsigned int key1 = itemset.itemset[i1].attributeIndex;
 		std::shared_ptr<StaticBitset> bitset = getBitsetFromKey(key1);
 		for (unsigned int i = 0; i < objectCount; i++)
 		{
@@ -186,20 +186,20 @@ bool BinaryRepresentation::isEssential(Itemset& itemset)
 unsigned int BinaryRepresentation::computeDisjonctifSupport(Itemset& pattern)
 {
 	// check if OR operation has already been computed for this itemset
-	if (!pattern.computed)
+	if (pattern.dirty)
 	{
 		// all bitsets have the same size
 		StaticBitset SumOfN_1Items;
-		for (size_t i = 0, n = pattern.itemset_list.size(); i < n; i++)
+		for (size_t i = 0, n = pattern.itemset.size(); i < n; i++)
 		{
-			unsigned int columnKey = pattern.itemset_list[i];
+			unsigned int columnKey = pattern.itemset[i].attributeIndex;
 			std::shared_ptr<StaticBitset> bitset = BinaryRepresentation::getBitsetFromKey(columnKey);
 			if(!bitset->none())
 				SumOfN_1Items = SumOfN_1Items | (*bitset);
 		}
 		unsigned int disSupp = SumOfN_1Items.count();
 		pattern.bitsetCount = disSupp;
-		pattern.computed = true;
+		pattern.dirty = false;
 		pattern.orValue = SumOfN_1Items;
 	}
 	return pattern.bitsetCount;
@@ -265,9 +265,9 @@ unsigned int BinaryRepresentation::buildCloneList()
 
 bool BinaryRepresentation::containsAClone(const Itemset& itemset)
 {
-	for (auto index : itemset.itemset_list)
+	for (auto elt : itemset.itemset)
 	{
-		std::shared_ptr<Item> item = getItemFromKey(index);
+		std::shared_ptr<Item> item = getItemFromKey(elt.attributeIndex);
 		if (item->isAClone())
 			return true;
 	}
@@ -277,12 +277,12 @@ bool BinaryRepresentation::containsAClone(const Itemset& itemset)
 bool BinaryRepresentation::containsOriginals(const Itemset& itemset, std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes)
 {
 	originalClonedIndexes.clear();
-	std::for_each(itemset.itemset_list.begin(), itemset.itemset_list.end(), [&originalClonedIndexes](unsigned int index) {
-		std::shared_ptr<Item> item = getItemFromKey(index);
+	std::for_each(itemset.itemset.begin(), itemset.itemset.end(), [&originalClonedIndexes](const Item& elt) {
+		std::shared_ptr<Item> item = getItemFromKey(elt.attributeIndex);
 		if (item->isAnOriginal())
 		{
 			for(unsigned int i = 0, n = item->getCloneAttributeIndexesCount(); i < n; i++)
-				originalClonedIndexes.push_back(std::pair<unsigned int, unsigned int>(index, item->getCloneAttributeIndex(i)));
+				originalClonedIndexes.push_back(std::pair<unsigned int, unsigned int>(elt.attributeIndex, item->getCloneAttributeIndex(i)));
 		}
 	});
 	return !originalClonedIndexes.empty();

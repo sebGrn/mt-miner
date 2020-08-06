@@ -60,7 +60,7 @@ std::vector<Itemset> MT_Miner::computeInitalToTraverseList()
 	for (unsigned int i = 1; i <= BinaryRepresentation::getItemCount(); i++)
 	{
 		Itemset itemset;
-		itemset.itemset_list.push_back(i);
+		itemset.itemset.push_back(Item(i, BinaryRepresentation::getObjectCount()));
 		if (!BinaryRepresentation::containsAClone(itemset))
 			toTraverse.push_back(itemset);
 	}
@@ -117,11 +117,11 @@ std::vector<Itemset> MT_Miner::computeMinimalTransversals()
 	Logger::log(YELLOW, "\nminimal transversals count : ", graph_mt.size(), "\n", RESET);
 	if (graph_mt.size() > 6)
 	{
-		for_each(graph_mt.begin(), graph_mt.begin() + 5, [&](const Itemset& elt) { Logger::log(GREEN, Itemset::itemsetToString(elt), "\n", RESET); });
+		for_each(graph_mt.begin(), graph_mt.begin() + 5, [&](const Itemset& elt) { Logger::log(GREEN, elt.toString(), "\n", RESET); });
 		Logger::log(GREEN, "...\n", RESET);
 	}
 	else
-		for_each(graph_mt.begin(), graph_mt.end(), [&](const Itemset& elt) { Logger::log(GREEN, Itemset::itemsetToString(elt), "\n", RESET); });
+		for_each(graph_mt.begin(), graph_mt.end(), [&](const Itemset& elt) { Logger::log(GREEN, elt.toString(), "\n", RESET); });
 
 	// write tree into js
 	//JsonTree::writeJsonNode(graph_mt);

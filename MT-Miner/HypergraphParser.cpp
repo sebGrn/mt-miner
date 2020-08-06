@@ -39,13 +39,13 @@ bool HypergraphParser::parse(const std::string& file)
 		{
 			line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
 			line = Utils::trim(line);
-			Itemset data;
-			data.itemset_list = Utils::splitToVectorOfInt(line, ' ');
-			maxItemCount = std::max(*std::max_element(data.itemset_list.begin(), data.itemset_list.end()), maxItemCount);
+			std::vector<unsigned int> data = Utils::splitToVectorOfInt(line, ' ');
+			maxItemCount = std::max(*std::max_element(data.begin(), data.end()), maxItemCount);
 
-			hypergraph->addLine(data.itemset_list);
+			hypergraph->addLine(data);
 
-			if (oneIndexedBase && Itemset::containsZero(data))
+			// check if file is zero indexed
+			if (oneIndexedBase && (std::find(data.begin(), data.end(), 0) != data.end()))
 				oneIndexedBase = false;
 
 			// as many items as lines in the file

@@ -29,16 +29,32 @@ void TreeNode::buildClonedCombination(const Itemset& currentItem, std::vector<It
 		unsigned int clonedIndex = it->second;
 		Itemset clonedCurrentItem = currentItem;
 
-		// replace originalIndex into clonedIndex into clonedCurrentItem.itemset_list list
-		std::replace(clonedCurrentItem.itemset_list.begin(), clonedCurrentItem.itemset_list.end(), originalIndex, clonedIndex);
+		// replace originalIndex with clonedIndex into clonedCurrentItem.itemset_list list
+		//std::replace(clonedCurrentItem.itemset_list.begin(), clonedCurrentItem.itemset_list.end(), originalIndex, clonedIndex);
+		std::transform(clonedCurrentItem.itemset.begin(), clonedCurrentItem.itemset.end(), clonedCurrentItem.itemset.begin(), [&](Item& item) {
+			if (item.attributeIndex == originalIndex)
+				item.attributeIndex = clonedIndex;
+			return item;
+		});
 
 		// tester le support de l'itemset pour savoir si le bitset est un clone avant de tester s'ils sont égaux
-		if (clonedCurrentItem.itemset_list != currentItem.itemset_list)
+		// test if itemsets are equals
+		if (!(clonedCurrentItem == currentItem))
 		{
-			auto it = std::find_if(clonedCombination.begin(), clonedCombination.end(), compare_itemset(clonedCurrentItem));
-			if (it == clonedCombination.end())
+			// check if clonedCurrentItem is contained in clonedCombination
+			//auto it = std::find_if(clonedCombination.begin(), clonedCombination.end(), compare_itemset(clonedCurrentItem));			
+			bool found = false;
+			for (auto it1 = clonedCombination.begin(); it1 != clonedCombination.end(); it1++)
 			{
-				// add cloned item into clonedCombination list					
+				if ((*it1) == clonedCurrentItem)
+				{
+					found = true;
+					break;
+				}
+			}
+			if (!found)
+			{
+				// if not, add cloned item into clonedCombination list					
 				clonedCombination.push_back(clonedCurrentItem);
 				// recurse on new combination with cloned item as current item
 				buildClonedCombination(clonedCurrentItem, clonedCombination, originalClonedIndexes);
@@ -79,7 +95,7 @@ void TreeNode::updateListsFromToTraverse(const std::vector<Itemset>& toTraverse,
 		}
 		else
 		{
-			if (currentItem.itemset_list == toTraverse.begin()->itemset_list && currentItem.itemset_list.size() == 1)
+			if ((currentItem == (*toTraverse.begin())) && currentItem.itemset.size() == 1)
 			{
 				// must be the 1st element with only one element
 				previousItem = currentItem;

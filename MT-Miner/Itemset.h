@@ -3,19 +3,20 @@
 #include <string>
 #include <algorithm>
 #include "utils.h"
-#include "Bitset.h"
+#include "Item.h"
 #include "SparseBitset.h"
 
 class Itemset
 {
 public:
-	std::vector<unsigned int> itemset_list;
+	//std::vector<unsigned int> itemset_list;
+	std::vector<Item> itemset;
 	
-	// true if bitset_count & or value have been computed
-	bool computed; 
+	// true if bitset_count & or value has to be computed
+	bool dirty; 
 	// stored OR value of all bitset from the item set
 	//StaticBitset orValue;
-	std::bitset<1000> orValue;
+	StaticBitset orValue;
 	// support of the current itemset (nb 1's bit) of OR computation
 	unsigned int bitsetCount;
 
@@ -27,116 +28,46 @@ public:
 	Itemset() : orValue()
 	{
 		this->bitsetCount = 0;
-		this->computed = false;
-		//this->is_essential_computed = false;
-		//this->is_essential = false;
+		this->dirty = true;
 	}
 
-	// ------------------------------------------------------------------------------------------------------------------------- //
+	std::string toString() const;
+	static std::string itemsetListToString(const std::vector<Itemset>& v);
 
-	static std::string itemsetToString(const Itemset& v)
-	{
-		std::string res = "{";
-		for_each(v.itemset_list.begin(), v.itemset_list.end(), [&](unsigned int i) {
-			res += std::to_string(i);
-			res += ",";
-			});
-		res.pop_back();
-		res += "}";
-		return res;
-	}
+	static Itemset combineItemset(const Itemset& str1, const Itemset& str2);
 
-	static std::string itemsetListToString(const std::vector<Itemset>& v)
-	{
-		std::string res = "{";
-		for_each(v.begin(), v.end(), [&](const Itemset& elt) {
-			res += itemsetToString(elt);
-			res += ",";
-			});
-		res.pop_back();
-		res += "}";
-		return res;
-	}
-
-	// ------------------------------------------------------------------------------------------------------------------------- //
-
-	// sort each element of minimalTransversals
-	static std::vector<Itemset> sortVectorOfItemset(const std::vector<Itemset>& strVector)
-	{
-		std::vector<Itemset> sortedList = strVector;
-		std::transform(strVector.begin(), strVector.end(), sortedList.begin(), [&](const Itemset& elt) {
-			//Itemset v = splitToVectorOfInt(elt, ' ');	
-			Itemset v = elt;
-			std::sort(v.itemset_list.begin(), v.itemset_list.end());
-
-			Itemset res;
-			for_each(v.itemset_list.begin(), v.itemset_list.end(), [&](unsigned int i) {
-				res.itemset_list.push_back(i);
-				});
-			return res;
-			});
-		return sortedList;
-	}
-
-	// ------------------------------------------------------------------------------------------------------------------------- //
-
-	static Itemset combineItemset(const Itemset& str1, const Itemset& str2)
-	{
-		// "1" + "2" => "12"
-		// "71" + "72" => "712"
-		Itemset left = str1;
-		Itemset right = str2;
-		
-		// remove duplicate indexes from left into right itemset
-		std::vector<Itemset> combinedListElt;
-		for_each(str1.itemset_list.begin(), str1.itemset_list.end(), [&](unsigned int i) {
-			auto it = std::find_if(right.itemset_list.begin(), right.itemset_list.end(), Utils::compare_int(i));
-			if (it != right.itemset_list.end())
-			{
-				// remove elt
-				right.itemset_list.erase(it);
-			}
-			});
-
-		// merge right itemset at the end of left itemset
-		//left.itemset_list.insert(left.itemset_list.end(), right.itemset_list.begin(), right.itemset_list.end());
-		std::copy(right.itemset_list.begin(), right.itemset_list.end(), std::back_inserter(left.itemset_list));
-		
-		// create a new combined itemset
-		//Itemset combinedElt;
-		//std::copy(left.itemset_list.begin(), left.itemset_list.end(), std::back_inserter(combinedElt.itemset_list));
-
-		// compute OR value from left and right itemsets
-		if (str1.computed && str2.computed)
-		{
-			//if (str1.or_value)
-			//	left.or_value = str2.or_value;
-			//else if (!str2.or_value)
-			//	left.or_value = str1.or_value;
-			//else
-			left.orValue = str1.orValue | str2.orValue;
-			left.bitsetCount = left.orValue.count();
-			left.computed = true;
-		}
-		return left;
-	};
+	bool operator==(const Itemset& other);
 
 	// check if itemset contains a 0 index
-	static bool containsZero(const Itemset& data)
-	{
-		return (std::find(data.itemset_list.begin(), data.itemset_list.end(), 0) != data.itemset_list.end());
-	}
+	//bool containsZero() const
+	//{
+	//	return (std::find(data.itemset_list.begin(), data.itemset_list.end(), 0) != data.itemset_list.end());
+	//}
 };
 
-
-struct compare_itemset
+inline bool Itemset::operator==(const Itemset& other) 
 {
-	Itemset key;
-	compare_itemset(Itemset const& i) : key(i) { }
+	// first test if support is different, itemsets are differents
+	if ((!this->dirty && !other.dirty) && (this->bitsetCount != other.bitsetCount))
+		return false;
 
-	bool operator()(Itemset const& item)
+	// test each attributeIndex of itemset
+	auto it1 = other.itemset.begin();
+	for (auto it2 = this->itemset.begin(); it2 != this->itemset.end(); it1++, it2++)
 	{
-		// use AND operator for comparaison
-		return key.itemset_list == item.itemset_list;
+		if (it1->attributeIndex != it2->attributeIndex)
+			return false;
 	}
-};
+	return true;
+}
+
+//struct compare_itemset
+//{
+//	Itemset key;
+//	compare_itemset(Itemset const& i) : key(i) { }
+//
+//	bool operator()(Itemset const& item)
+//	{
+//		return key.itemset_list == item.itemset_list;
+//	}
+//};

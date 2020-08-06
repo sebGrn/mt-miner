@@ -147,6 +147,7 @@
   <ItemGroup>
     <ClCompile Include="BinaryRepresentation.cpp" />
     <ClCompile Include="HypergraphParser.cpp" />
+    <ClCompile Include="Itemset.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MT_Miner.cpp" />
