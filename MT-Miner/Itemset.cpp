@@ -26,26 +26,6 @@ std::string Itemset::itemsetListToString(const std::vector<Itemset>& v)
 	return res;
 }
 
-//// sort each element of minimalTransversals
-//static std::vector<Itemset> sortVectorOfItemset(const std::vector<Itemset>& strVector)
-//{
-//	std::vector<Itemset> sortedList = strVector;
-//	std::transform(strVector.begin(), strVector.end(), sortedList.begin(), [&](const Itemset& elt) {
-//		//Itemset v = splitToVectorOfInt(elt, ' ');	
-//		Itemset v = elt;
-//		std::sort(v.itemset.begin(), v.itemset.end());
-//
-//		Itemset res;
-//		for_each(v.itemset.begin(), v.itemset.end(), [&](unsigned int i) {
-//			res.itemset.push_back(i);
-//			});
-//		return res;
-//		});
-//	return sortedList;
-//}
-
-// ------------------------------------------------------------------------------------------------------------------------- //
-
 Itemset Itemset::combineItemset(const Itemset& str1, const Itemset& str2)
 {
 	// "1" + "2" => "12"
@@ -94,3 +74,21 @@ Itemset Itemset::combineItemset(const Itemset& str1, const Itemset& str2)
 	}
 	return left;
 };
+
+//// sort each element of minimalTransversals
+//static std::vector<Itemset> sortVectorOfItemset(const std::vector<Itemset>& strVector)
+//{
+//	std::vector<Itemset> sortedList = strVector;
+//	std::transform(strVector.begin(), strVector.end(), sortedList.begin(), [&](const Itemset& elt) {
+//		//Itemset v = splitToVectorOfInt(elt, ' ');	
+//		Itemset v = elt;
+//		std::sort(v.itemset.begin(), v.itemset.end());
+//
+//		Itemset res;
+//		for_each(v.itemset.begin(), v.itemset.end(), [&](unsigned int i) {
+//			res.itemset.push_back(i);
+//			});
+//		return res;
+//		});
+//	return sortedList;
+//}

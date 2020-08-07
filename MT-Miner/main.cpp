@@ -184,41 +184,10 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 
 int main(int argc, char* argv[])
 {
-	HypergraphParser parser;
-	bool parserResult = parser.parse("../data/test.txt");
-
-	std::shared_ptr<HyperGraph> hypergraph = parser.getHypergraph();
-
-	MT_Miner miner(true);
-	miner.createBinaryRepresentation(hypergraph);
-
-	// allocate miner
-	Itemset item1;
-	item1.itemset.push_back(Item(1, 1));
-	int disjonctifSupport = BinaryRepresentation::computeDisjonctifSupport(item1);
-
-	Itemset item2;
-	item2.itemset.push_back(Item(1, 1));
-	item2.itemset.push_back(Item(2, 2));
-	disjonctifSupport = BinaryRepresentation::computeDisjonctifSupport(item2);
-	
-	Itemset item3;
-	item3.itemset.push_back(Item(1, 1));
-	item3.itemset.push_back(Item(2, 2));
-	item3.itemset.push_back(Item(3, 3));
-	disjonctifSupport = BinaryRepresentation::computeDisjonctifSupport(item3);
-	
-	Itemset item4;
-	item4.itemset.push_back(Item(1, 1));
-	item4.itemset.push_back(Item(2, 2));
-	item4.itemset.push_back(Item(3, 3));
-	item4.itemset.push_back(Item(4, 4));
-	disjonctifSupport = BinaryRepresentation::computeDisjonctifSupport(item4);
-
 	// http://research.nii.ac.jp/~uno/dualization.html
 	//runBitsetBenchmark();
-	return 0;
-	/*if (argc <= 1)
+	
+	if (argc <= 1)
 	{
 		std::cout << "Usage " << argv[0] << "<filename> <option><outputfile>" << std::endl;
 		return 0;
@@ -235,5 +204,5 @@ int main(int argc, char* argv[])
 	bool useOutputFile = parameterList[ArgumentParser::OUTPUT_TO_FILE] == "true" || parameterList[ArgumentParser::OUTPUT_TO_FILE] == "True" || parameterList[ArgumentParser::OUTPUT_TO_FILE] == "TRUE";
 	bool useCloneOptimization = parameterList[ArgumentParser::USE_CLONE] == "true" || parameterList[ArgumentParser::USE_CLONE] == "True" || parameterList[ArgumentParser::USE_CLONE] == "TRUE";
 
-	runMinimalTransversals(file, useCloneOptimization, verboseMode, useOutputFile, useOutputLogFile);*/
+	runMinimalTransversals(file, useCloneOptimization, verboseMode, useOutputFile, useOutputLogFile);
 }

@@ -79,5 +79,8 @@ inline bool Item::isAClone()
 
 inline bool Item::operator==(const Item& other)
 {
-	return (other.attributeIndex == this->attributeIndex);
+	if(other.attributeIndex == this->attributeIndex)
+		return true;
+	bool res = ((*other.staticBitset) == (*this->staticBitset));
+	return res;
 }

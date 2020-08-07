@@ -15,7 +15,6 @@ public:
 	// true if bitset_count & or value has to be computed
 	bool dirty; 
 	// stored OR value of all bitset from the item set
-	//StaticBitset orValue;
 	StaticBitset orValue;
 	// support of the current itemset (nb 1's bit) of OR computation
 	unsigned int bitsetCount;
@@ -37,12 +36,6 @@ public:
 	static Itemset combineItemset(const Itemset& str1, const Itemset& str2);
 
 	bool operator==(const Itemset& other);
-
-	// check if itemset contains a 0 index
-	//bool containsZero() const
-	//{
-	//	return (std::find(data.itemset_list.begin(), data.itemset_list.end(), 0) != data.itemset_list.end());
-	//}
 };
 
 inline bool Itemset::operator==(const Itemset& other) 
@@ -60,14 +53,3 @@ inline bool Itemset::operator==(const Itemset& other)
 	}
 	return true;
 }
-
-//struct compare_itemset
-//{
-//	Itemset key;
-//	compare_itemset(Itemset const& i) : key(i) { }
-//
-//	bool operator()(Itemset const& item)
-//	{
-//		return key.itemset_list == item.itemset_list;
-//	}
-//};

@@ -242,7 +242,7 @@ unsigned int BinaryRepresentation::buildCloneList()
 				if (it1->second->staticBitset->count() == it2->second->staticBitset->count())
 				{
 					// test if binary representation bitsets are equals (it2 is a clone of it1 ?)
-					if (it1->second == it2->second)
+					if ((*it1->second) == (*it2->second))
 					{
 						// check that second is a clone
 						if (!it1->second->isAClone())
