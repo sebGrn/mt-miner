@@ -5,8 +5,8 @@
 std::string Itemset::toString() const
 {
 	std::string res = "{";
-	for_each(this->itemset.begin(), this->itemset.end(), [&](const Item& item) {
-		res += std::to_string(item.attributeIndex);
+	for_each(this->itemset.begin(), this->itemset.end(), [&](const std::shared_ptr<Item>& item) {
+		res += std::to_string(item->attributeIndex);
 		res += ",";
 		});
 	res.pop_back();
@@ -14,65 +14,52 @@ std::string Itemset::toString() const
 	return res;
 }
 
-std::string Itemset::itemsetListToString(const std::vector<Itemset>& v)
-{
-	std::string res = "{";
-	for_each(v.begin(), v.end(), [&](const Itemset& elt) {
-		res += elt.toString();
-		res += ",";
-		});
-	res.pop_back();
-	res += "}";
-	return res;
-}
+//std::string Itemset::itemsetListToString(const std::vector<Itemset>& v)
+//{
+//	std::string res = "{";
+//	for_each(v.begin(), v.end(), [&](const Itemset& elt) {
+//		res += elt.toString();
+//		res += ",";
+//		});
+//	res.pop_back();
+//	res += "}";
+//	return res;
+//}
 
-Itemset Itemset::combineItemset(const Itemset& str1, const Itemset& str2)
+std::shared_ptr<Itemset> Itemset::combineItemset(const std::shared_ptr<Itemset>& itemset_left, const std::shared_ptr<Itemset>& itemset_right)
 {
 	// "1" + "2" => "12"
 	// "71" + "72" => "712"
-	Itemset left = str1;
-	Itemset right = str2;
+	std::shared_ptr<Itemset> combinedItemset = std::make_shared<Itemset>();
+	std::copy(itemset_left->itemset.begin(), itemset_left->itemset.end(), std::back_inserter(combinedItemset->itemset));
 
-	// remove duplicate indexes from left into right itemset
-	std::vector<Itemset> combinedListElt;
-	for_each(str1.itemset.begin(), str1.itemset.end(), [&](const Item& item) {
-		//auto it = std::find_if(right.itemset_list.begin(), right.itemset_list.end(), Utils::compare_int(i));
-		//auto it = std::find(right.itemset.begin(), right.itemset.end(), item.attributeIndex);
-		
+	// 
+	for_each(itemset_right->itemset.begin(), itemset_right->itemset.end(), [&](const std::shared_ptr<Item>& item) {
 		// search if right itemset contains current item from left
-		auto it = right.itemset.begin();
-		for (; it != right.itemset.end(); it++)
+		bool found = false;
+		for (auto it = combinedItemset->itemset.begin(); it != combinedItemset->itemset.end(); it++)
 		{
-			if (it->attributeIndex == item.attributeIndex)
+			if ((*it)->attributeIndex == item->attributeIndex)
+			{
+				found = true;
 				break;
-		}		
-		if (it != right.itemset.end())
+			}				
+		}
+		if (!found)
 		{
-			// remove duplicate elt
-			right.itemset.erase(it);
+			// didnt find duplicates, we can add the item at the end of the list
+			combinedItemset->itemset.push_back(item);
 		}
 	});
 
-	// merge right itemset at the end of left itemset
-	std::copy(right.itemset.begin(), right.itemset.end(), std::back_inserter(left.itemset));
-
-	// create a new combined itemset
-	//Itemset combinedElt;
-	//std::copy(left.itemset_list.begin(), left.itemset_list.end(), std::back_inserter(combinedElt.itemset_list));
-
 	// compute OR value from left and right itemsets
-	if (!str1.dirty || !str2.dirty)
+	if (!itemset_left->dirty || !itemset_right->dirty)
 	{
-		//if (str1.or_value)
-		//	left.or_value = str2.or_value;
-		//else if (!str2.or_value)
-		//	left.or_value = str1.or_value;
-		//else
-		left.orValue = str1.orValue | str2.orValue;
-		left.bitsetCount = left.orValue.count();
-		left.dirty = false;
+		combinedItemset->orValue = itemset_left->orValue | itemset_right->orValue;
+		combinedItemset->bitsetCount = combinedItemset->orValue.count();
+		combinedItemset->dirty = false;
 	}
-	return left;
+	return combinedItemset;
 };
 
 //// sort each element of minimalTransversals

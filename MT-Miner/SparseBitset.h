@@ -11,7 +11,7 @@
 */
 class SparseBitset
 {
-private:
+public:
 	unsigned int bitset_size;
 	std::list<unsigned int> bitset_value;
 

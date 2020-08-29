@@ -35,15 +35,13 @@ public:
 	/// build binary representation from formal context
 	static void buildFromFormalContext(const FormalContext& context);
 	///
-	static unsigned int computeDisjonctifSupport(Itemset& pattern);
+	static unsigned int computeDisjonctifSupport(std::shared_ptr<Itemset>& pattern);
 	/// return true if element is essential
-	static bool isEssential(Itemset& itemsOfPattern);
+	static bool isEssential(std::shared_ptr<Itemset>& itemsOfPattern);
 	///
 	static unsigned int buildCloneList();
 	///
-	static bool containsAClone(const Itemset& itemset);
-	///
-	static bool containsOriginals(const Itemset& itemset, std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes);
+	static bool containsAClone(const std::shared_ptr<Itemset>& itemset);
 
 	//
 	static void serialize(const std::string& outputile);
@@ -52,7 +50,6 @@ public:
 	static unsigned int getObjectCount();
 
 	static std::shared_ptr<Item> getItemFromKey(unsigned int key);	
-	static std::shared_ptr<StaticBitset> getBitsetFromKey(unsigned int key);
 };
 
 inline unsigned int BinaryRepresentation::getItemCount()
@@ -69,10 +66,4 @@ inline std::shared_ptr<Item> BinaryRepresentation::getItemFromKey(unsigned int k
 {
 	assert(binaryRepresentationMap.find(key) != binaryRepresentationMap.end());
 	return binaryRepresentationMap.at(key);
-}
-
-inline std::shared_ptr<StaticBitset> BinaryRepresentation::getBitsetFromKey(unsigned int key)
-{
-	assert(binaryRepresentationMap.find(key) != binaryRepresentationMap.end());
-	return binaryRepresentationMap.at(key)->staticBitset;
 }

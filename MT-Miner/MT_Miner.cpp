@@ -54,24 +54,29 @@ bool MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hyp
 	return true;
 }
 
-std::vector<Itemset> MT_Miner::computeInitalToTraverseList()
+void MT_Miner::computeInitalToTraverseList(std::vector<std::shared_ptr<Itemset>>& toTraverse) const
 {
-	std::vector<Itemset> toTraverse;
+	toTraverse.clear();
 	for (unsigned int i = 1; i <= BinaryRepresentation::getItemCount(); i++)
 	{
-		Itemset itemset;
-		itemset.itemset.push_back(Item(i, BinaryRepresentation::getObjectCount()));
-		if (!BinaryRepresentation::containsAClone(itemset))
+		std::shared_ptr<Item> item = BinaryRepresentation::getItemFromKey(i);
+		// get itemset from binary representation and store them into lists
+		// these itemsets will be used in the program
+		// we dont need binary representation anymore here
+		std::shared_ptr<Itemset> itemset = std::make_shared<Itemset>();
+		itemset->itemset.push_back(item);
+		// dont push clones into initial trasverse list
+		if (!item->isAClone())
 			toTraverse.push_back(itemset);
 	}
-	return toTraverse;
 }
 
-std::vector<Itemset> MT_Miner::computeMinimalTransversals()
+std::vector<std::shared_ptr<Itemset>> MT_Miner::computeMinimalTransversals()
 {
 	auto beginTime = std::chrono::system_clock::now();
 
-	std::vector<Itemset> toTraverse = computeInitalToTraverseList();
+	std::vector<std::shared_ptr<Itemset>> toTraverse;
+	computeInitalToTraverseList(toTraverse);
 
 	// create a graph, then compute minimal transversal from the binary representation
 	TreeNode rootNode(this->useCloneOptimization);
@@ -96,7 +101,7 @@ std::vector<Itemset> MT_Miner::computeMinimalTransversals()
 	});
 
 	// compute all minimal transversal from the root node
-	std::vector<Itemset>&& graph_mt = rootNode.computeMinimalTransversals(toTraverse);
+	std::vector< std::shared_ptr<Itemset>>&& graph_mt = rootNode.computeMinimalTransversals(toTraverse);
 	//std::vector<Itemset>&& graph_mt = rootNode.computeMinimalTransversals_recursive(toTraverse);
 	//std::vector<Itemset>&& graph_mt = rootNode.computeMinimalTransversals_iterative(toTraverse);
 	
@@ -117,11 +122,11 @@ std::vector<Itemset> MT_Miner::computeMinimalTransversals()
 	Logger::log(YELLOW, "\nminimal transversals count : ", graph_mt.size(), "\n", RESET);
 	if (graph_mt.size() > 6)
 	{
-		for_each(graph_mt.begin(), graph_mt.begin() + 5, [&](const Itemset& elt) { Logger::log(GREEN, elt.toString(), "\n", RESET); });
+		for_each(graph_mt.begin(), graph_mt.begin() + 5, [&](const std::shared_ptr<Itemset>& elt) { Logger::log(GREEN, elt->toString(), "\n", RESET); });
 		Logger::log(GREEN, "...\n", RESET);
 	}
 	else
-		for_each(graph_mt.begin(), graph_mt.end(), [&](const Itemset& elt) { Logger::log(GREEN, elt.toString(), "\n", RESET); });
+		for_each(graph_mt.begin(), graph_mt.end(), [&](const std::shared_ptr<Itemset>& elt) { Logger::log(GREEN, elt->toString(), "\n", RESET); });
 
 	// write tree into js
 	//JsonTree::writeJsonNode(graph_mt);

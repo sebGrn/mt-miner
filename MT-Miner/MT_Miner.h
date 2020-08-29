@@ -27,12 +27,10 @@ private:
 	static std::atomic_bool stop;
 	///
 	bool useCloneOptimization;
-	// binary representation 
-	//std::shared_ptr<BinaryRepresentation> binaryRepresentation;
 	
 private:
 	/// return the minimal transversals miner
-	std::vector<Itemset> computeInitalToTraverseList();
+	void computeInitalToTraverseList(std::vector<std::shared_ptr<Itemset>>& toTraverse) const;
 
 public:
 	MT_Miner(bool useCloneOptimization = true);
@@ -42,12 +40,6 @@ public:
 	bool createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hypergraph);
 	
 	///
-	std::vector<Itemset> computeMinimalTransversals();
-
-	///
-	//unsigned int computeDisjonctifSupport(Itemset& pattern) const
-	//{		
-	//	//return binaryRepresentation->computeDisjonctifSupport(pattern);
-	//}
+	std::vector<std::shared_ptr<Itemset>> computeMinimalTransversals();
 };
 

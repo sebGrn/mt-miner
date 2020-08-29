@@ -13,63 +13,74 @@ class Item
 {
 public:
 	unsigned int attributeIndex;
-	std::shared_ptr<StaticBitset> staticBitset;
-	std::shared_ptr<SparseBitset> sparseBitset;
+	StaticBitset staticBitset;
+	SparseBitset sparseBitset;
 
-	// true if this item is an original
-	bool isOriginal;
 	// true if this item is a clone
 	bool isClone;
-	// if this bitset is an original, store its clone index from binaryRepresentation map
-	std::vector<unsigned int> clonedAttributeIndexes;
+	
+	// contains a list of clone for this item (same bitset)
+	std::vector<std::shared_ptr<Item>> clones;
 
 public:
-	Item(int index, unsigned int bitsetSize)
+	Item(int index, unsigned int bitsetSize) : sparseBitset(bitsetSize)
 	{
-		attributeIndex = index;
-		staticBitset = std::make_shared<StaticBitset>(bitsetSize);
-		sparseBitset = std::make_shared<SparseBitset>(bitsetSize);
-		isOriginal = isClone = false;
+		this->attributeIndex = index;
+		this->isClone = false;
+	}
+
+	Item(const Item* item) : sparseBitset(item->sparseBitset.bitset_size)
+	{
+		this->attributeIndex = item->attributeIndex;
+		this->staticBitset = item->staticBitset;
+		this->sparseBitset = item->sparseBitset;
+		this->isClone = item->isClone;
+		this->clones = item->clones;
 	}
 
 	~Item()
 	{}
 
-	void setAsAnOriginal(unsigned int cloneIndex);
-	void setAsAClone();
+	void addClone(const std::shared_ptr<Item>& clone);
+	void setClone();
 	bool isAnOriginal() const;
-	unsigned int getCloneAttributeIndexesCount() const;
-	unsigned int getCloneAttributeIndex(unsigned int i) const;
+	unsigned int getCloneCount() const;
+	std::shared_ptr<Item> getClone(unsigned int i) const;
+	void resetClonedAttributesIndexes();
 	bool isAClone();
 
 	bool operator==(const Item& other);
 };
 
-inline void Item::setAsAnOriginal(unsigned int cloneIndex)
+inline void Item::addClone(const std::shared_ptr<Item>& clone)
 {
-	this->isOriginal = true;
-	this->clonedAttributeIndexes.push_back(cloneIndex);
+	this->clones.push_back(clone);
 }
 
-inline void Item::setAsAClone()
+inline void Item::setClone()
 {
 	this->isClone = true;
 }
 
 inline bool Item::isAnOriginal() const
 {
-	return this->isOriginal;
+	return !this->clones.empty();
 }
 
-inline unsigned int Item::getCloneAttributeIndexesCount() const
+inline void Item::resetClonedAttributesIndexes()
 {
-	return static_cast<unsigned int>(this->clonedAttributeIndexes.size());
+	this->clones.clear();
 }
 
-inline unsigned int Item::getCloneAttributeIndex(unsigned int i) const
+inline unsigned int Item::getCloneCount() const
 {
-	assert(i < this->clonedAttributeIndexes.size());
-	return this->clonedAttributeIndexes[i];
+	return static_cast<unsigned int>(this->clones.size());
+}
+
+inline std::shared_ptr<Item> Item::getClone(unsigned int i) const
+{
+	assert(i < this->clones.size());
+	return this->clones[i];
 }
 
 inline bool Item::isAClone()
@@ -81,6 +92,6 @@ inline bool Item::operator==(const Item& other)
 {
 	if(other.attributeIndex == this->attributeIndex)
 		return true;
-	bool res = ((*other.staticBitset) == (*this->staticBitset));
+	bool res = other.staticBitset == this->staticBitset;
 	return res;
 }

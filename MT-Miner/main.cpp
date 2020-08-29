@@ -123,7 +123,7 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 		MT_Miner miner(useCloneOptimization);
 		if (miner.createBinaryRepresentation(hypergraph))
 		{
-			std::vector<Itemset> minimalTransversals = miner.computeMinimalTransversals();
+			std::vector<std::shared_ptr<Itemset>> minimalTransversals = miner.computeMinimalTransversals();
 
 			// save minimal transversals into a file
 			if (useOutputFile)
@@ -134,7 +134,7 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 				Logger::log(GREEN, "saving minimal transversals into file : ", outFile, "\n", RESET);
 				std::ofstream outputStream;
 				outputStream.open(outFile);
-				for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset& elt) { outputStream << elt.toString() << std::endl; });
+				for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const std::shared_ptr<Itemset>& elt) { outputStream << elt->toString() << std::endl; });
 				outputStream.close();
 			}
 		}

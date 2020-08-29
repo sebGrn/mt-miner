@@ -6,7 +6,7 @@ std::atomic_ullong TreeNode::nbTotalChildren(0);
 // to avoid interleaved outputs
 std::mutex TreeNode::output_guard;
 // synchro stuff
-std::deque<std::future<std::vector<Itemset>>> TreeNode::task_queue;
+std::deque<std::future<std::vector<std::shared_ptr<Itemset>>>> TreeNode::task_queue;
 std::mutex TreeNode::task_guard;
 std::condition_variable TreeNode::task_signal;
 int TreeNode::pending_task_count(0);
@@ -21,99 +21,85 @@ TreeNode::~TreeNode()
 {
 }
 
-void TreeNode::buildClonedCombination(const Itemset& currentItem, std::vector<Itemset>& clonedCombination, const std::vector<std::pair<unsigned int, unsigned int>>& originalClonedIndexes)
+void TreeNode::recurseOnClonedItemset(const std::shared_ptr<Itemset>& currentItemset, unsigned int i, std::vector<std::shared_ptr<Itemset>>& graph_mt)
 {
-	for (auto it = originalClonedIndexes.begin(); it != originalClonedIndexes.end(); it++)
+	if (i < currentItemset->getItemCount())
 	{
-		unsigned int originalIndex = it->first;
-		unsigned int clonedIndex = it->second;
-		Itemset clonedCurrentItem = currentItem;
+		std::shared_ptr<Item> item = currentItemset->getItem(i);
 
-		// replace originalIndex with clonedIndex into clonedCurrentItem.itemset_list list
-		//std::replace(clonedCurrentItem.itemset_list.begin(), clonedCurrentItem.itemset_list.end(), originalIndex, clonedIndex);
-		std::transform(clonedCurrentItem.itemset.begin(), clonedCurrentItem.itemset.end(), clonedCurrentItem.itemset.begin(), [&](Item& item) {
-			if (item.attributeIndex == originalIndex)
-				item.attributeIndex = clonedIndex;
-			return item;
-		});
-
-		// tester le support de l'itemset pour savoir si le bitset est un clone avant de tester s'ils sont égaux
-		// test if itemsets are equals
-		if (!(clonedCurrentItem == currentItem))
+		// test if current item contains an original for all its items
+		if (item->isAnOriginal())
 		{
-			// check if clonedCurrentItem is contained in clonedCombination
-			//auto it = std::find_if(clonedCombination.begin(), clonedCombination.end(), compare_itemset(clonedCurrentItem));			
-			bool found = false;
-			for (auto it1 = clonedCombination.begin(); it1 != clonedCombination.end(); it1++)
+			for (unsigned int j = 0, cloneCount = item->getCloneCount(); j < cloneCount; j++)
 			{
-				if ((*it1) == clonedCurrentItem)
-				{
-					found = true;
-					break;
-				}
-			}
-			if (!found)
-			{
-				// if not, add cloned item into clonedCombination list					
-				clonedCombination.push_back(clonedCurrentItem);
-				// recurse on new combination with cloned item as current item
-				buildClonedCombination(clonedCurrentItem, clonedCombination, originalClonedIndexes);
+				// get clone index for current itemset
+				std::shared_ptr<Item> clone = item->getClone(j);
+
+				// call copy constructor to make a new copy of the itemset
+				std::shared_ptr<Itemset> clonedItemset = std::make_shared<Itemset>(currentItemset.get());
+				clonedItemset->replaceItem(i, clone);
+
+				graph_mt.push_back(clonedItemset);
+
+				for(unsigned int j = i; j < clonedItemset->getItemCount(); j++)
+					recurseOnClonedItemset(clonedItemset, j, graph_mt);
 			}
 		}
 	}
 }
 
-void TreeNode::updateListsFromToTraverse(const std::vector<Itemset>& toTraverse, std::vector<Itemset>& maxClique, std::vector<Itemset>& toExplore, std::vector<Itemset>& graph_mt)
+void TreeNode::updateListsFromToTraverse(const std::vector<std::shared_ptr<Itemset>>& toTraverse,
+										       std::vector<std::shared_ptr<Itemset>>& maxClique, 											
+											   std::vector<std::shared_ptr<Itemset>>& toExplore,
+											   std::vector<std::shared_ptr<Itemset>>& graph_mt)
 {
 	maxClique.clear();
 	toExplore.clear();
 
 	// results of cumulated combined items / must be declared outside of the loop
-	Itemset previousItem;
+	std::shared_ptr<Itemset> previousItem;
 	// loop on toTraverse list and build maxClique and toExplore lists
 	for (auto it = toTraverse.begin(); it != toTraverse.end(); it++)
 	{
-		Itemset& currentItem = const_cast<Itemset&>(*it);
-		unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(currentItem);
+		//Itemset& currentItem = const_cast<Itemset&>(*it);
+		std::shared_ptr<Itemset> currentItemset = (*it);
+		unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(currentItemset);
 		if (disjSup == this->binaryRepresentation->getObjectCount())
 		{
 			// we have a minimal transversal
-			graph_mt.push_back(currentItem);
+			graph_mt.push_back(currentItemset);
 
 			if (this->useCloneOptimization)
 			{
-				// if this itemset contains an original, add the same minimal transverals list for all the clones
-				std::vector<std::pair<unsigned int, unsigned int>> originalClonedIndexes;
-				if (this->binaryRepresentation->containsOriginals(currentItem, originalClonedIndexes))
-				{
-					std::vector<Itemset> clonedCombination;
-					buildClonedCombination(currentItem, clonedCombination, originalClonedIndexes);
-					// copy from clonedCombination list into graph_mt list
-					std::copy(clonedCombination.begin(), clonedCombination.end(), std::back_inserter(graph_mt));
-				}
+				for (unsigned int i = 0; i < currentItemset->getItemCount(); i++)
+					recurseOnClonedItemset(currentItemset, i, graph_mt);
 			}
 		}
 		else
 		{
-			if ((currentItem == (*toTraverse.begin())) && currentItem.itemset.size() == 1)
+			if ((currentItemset == (*toTraverse.begin())) && currentItemset->itemset.size() == 1)
 			{
 				// must be the 1st element with only one element
-				previousItem = currentItem;
-				maxClique.push_back(currentItem);
+				previousItem = currentItemset;
+				maxClique.push_back(currentItemset);
 			}
 			else
 			{
 				// we can combine with previous element / make a union on 2 elements
-				Itemset combinedItem = Itemset::combineItemset(previousItem, currentItem);
+				std::shared_ptr<Itemset> combinedItem;
+				if(previousItem)
+					combinedItem = Itemset::combineItemset(previousItem, currentItemset);
+				else 
+					combinedItem = currentItemset;
 				unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(combinedItem);
 				if (disjSup != this->binaryRepresentation->getObjectCount())
 				{
 					previousItem = combinedItem;
-					maxClique.push_back(currentItem);
+					maxClique.push_back(currentItemset);
 				}
 				else
 				{
-					toExplore.push_back(currentItem);
+					toExplore.push_back(currentItemset);
 				}
 			}
 		}
@@ -122,20 +108,20 @@ void TreeNode::updateListsFromToTraverse(const std::vector<Itemset>& toTraverse,
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
-std::vector<Itemset> TreeNode::computeMinimalTransversals_task(const std::vector<Itemset>& toTraverse)
+std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals_task(const std::vector<std::shared_ptr<Itemset>>& toTraverse)
 {
 	// ## START TASK ##
 
 	// test trivial case
 	if (toTraverse.empty())
-		return std::vector<Itemset>();
+		return std::vector<std::shared_ptr<Itemset>>();
 
 	// contains list of itemsets that will be combined to the candidates
-	std::vector<Itemset> maxClique;
+	std::vector<std::shared_ptr<Itemset>> maxClique;
 	// contains list of itemsets that are candidates
-	std::vector<Itemset> toExplore;
+	std::vector<std::shared_ptr<Itemset>> toExplore;
 	// contains the final minimal transverals for this node
-	std::vector<Itemset> graph_mt;
+	std::vector<std::shared_ptr<Itemset>> graph_mt;
 	// update lists from toTraverse
 	this->updateListsFromToTraverse(toTraverse, maxClique, toExplore, graph_mt);
 
@@ -150,21 +136,21 @@ std::vector<Itemset> TreeNode::computeMinimalTransversals_task(const std::vector
 		// store toExploreList max index
 		unsigned int lastIndexToTest = static_cast<unsigned int>(toExplore.size());
 		// combine toExplore (left part) with maxClique list (right part) into a combined list
-		std::vector<Itemset>& combinedItemsetList = toExplore;
+		std::vector<std::shared_ptr<Itemset>> combinedItemsetList = toExplore;
 		combinedItemsetList.insert(combinedItemsetList.end(), maxClique.begin(), maxClique.end());
 
 		// loop on candidates from toExplore list only
 		for (unsigned int i = 0; i < lastIndexToTest; i++)
 		{
 			// build newTraverse list
-			std::vector<Itemset> newToTraverse;
-			Itemset& toCombinedLeft = combinedItemsetList[i];
+			std::vector<std::shared_ptr<Itemset>> newToTraverse;
+			std::shared_ptr<Itemset> toCombinedLeft = combinedItemsetList[i];
 			// combine each element between [0, lastIndexToTest] with the entire combined itemset list
 			for (unsigned int j = i + 1; j < combinedItemsetList.size(); j++)
 			{
 				assert(j < combinedItemsetList.size());
-				Itemset toCombinedRight = combinedItemsetList[j];
-				Itemset combinedItemset = Itemset::combineItemset(toCombinedLeft, toCombinedRight);
+				std::shared_ptr<Itemset> toCombinedRight = combinedItemsetList[j];
+				std::shared_ptr<Itemset> combinedItemset = Itemset::combineItemset(toCombinedLeft, toCombinedRight);
 
 				// check if combined item is containing a clone (if true, do not compute the minimal transverals) and if combined itemset is essential
 				if (!this->binaryRepresentation->containsAClone(combinedItemset) && binaryRepresentation->isEssential(combinedItemset))
@@ -205,11 +191,11 @@ std::vector<Itemset> TreeNode::computeMinimalTransversals_task(const std::vector
 	return graph_mt;
 }
 
-std::vector<Itemset> TreeNode::computeMinimalTransversals(std::vector<Itemset>& toTraverse)
+std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>& toTraverse)
 {
 	// ## START system ##
 
-	std::vector<Itemset> final_mt;
+	std::vector<std::shared_ptr<Itemset>> final_mt;
 	// emit initial task
 	auto task = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(toTraverse));
 
@@ -221,14 +207,14 @@ std::vector<Itemset> TreeNode::computeMinimalTransversals(std::vector<Itemset>& 
 	}
 
 	// launch processing units
-	std::list<std::future<std::vector<Itemset>>> units;
+	std::list<std::future<std::vector<std::shared_ptr<Itemset>>>> units;
 	const unsigned int thead_multiplicator = 1;
 	for (auto n = std::thread::hardware_concurrency() * thead_multiplicator; --n;)
 	{
 		units.emplace_back(std::async(std::launch::async, [n]()
 		{
 			// ## LAUNCH task ##
-			std::vector<Itemset> result_mt;
+			std::vector<std::shared_ptr<Itemset>> result_mt;
 
 			std::unique_lock<std::mutex> lock(task_guard);
 			while (true)
@@ -242,7 +228,7 @@ std::vector<Itemset> TreeNode::computeMinimalTransversals(std::vector<Itemset>& 
 					lock.unlock(); // unlock while processing task
 					{
 						// process task
-						std::vector<Itemset> mt = task.get();
+						std::vector<std::shared_ptr<Itemset>> mt = task.get();
 						std::copy(mt.begin(), mt.end(), std::back_inserter(result_mt));
 					}
 					lock.lock(); // reacquire lock
@@ -265,7 +251,7 @@ std::vector<Itemset> TreeNode::computeMinimalTransversals(std::vector<Itemset>& 
 	// wait for shutdown
 	for (auto& unit : units)
 	{
-		std::vector<Itemset> result = unit.get();
+		std::vector<std::shared_ptr<Itemset>> result = unit.get();
 		{
 			const std::lock_guard<std::mutex> lock(output_guard);
 			std::copy(result.begin(), result.end(), std::back_inserter(final_mt));
