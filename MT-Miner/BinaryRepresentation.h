@@ -41,7 +41,7 @@ public:
 	///
 	static unsigned int buildCloneList();
 	///
-	static bool containsAClone(const std::shared_ptr<Itemset>& itemset);
+	//static bool containsAClone(const std::shared_ptr<Itemset>& itemset);
 
 	//
 	static void serialize(const std::string& outputile);

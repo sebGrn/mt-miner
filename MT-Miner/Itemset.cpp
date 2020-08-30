@@ -30,7 +30,10 @@ std::shared_ptr<Itemset> Itemset::combineItemset(const std::shared_ptr<Itemset>&
 {
 	// "1" + "2" => "12"
 	// "71" + "72" => "712"
+	
+	// create a new itemset
 	std::shared_ptr<Itemset> combinedItemset = std::make_shared<Itemset>();
+	// copy left item set into new combined itemset
 	std::copy(itemset_left->itemset.begin(), itemset_left->itemset.end(), std::back_inserter(combinedItemset->itemset));
 
 	// 
@@ -53,11 +56,15 @@ std::shared_ptr<Itemset> Itemset::combineItemset(const std::shared_ptr<Itemset>&
 	});
 
 	// compute OR value from left and right itemsets
-	if (!itemset_left->dirty || !itemset_right->dirty)
+	if (itemset_left->dirty && itemset_right->dirty)
 	{
 		combinedItemset->orValue = itemset_left->orValue | itemset_right->orValue;
-		combinedItemset->bitsetCount = combinedItemset->orValue.count();
+		combinedItemset->orSupport = combinedItemset->orValue.count();
+		combinedItemset->andValue = itemset_left->andValue & itemset_right->andValue;
+		combinedItemset->andSupport = combinedItemset->andValue.count();
 		combinedItemset->dirty = false;
+		if (!combinedItemset->andSupport)
+			combinedItemset->isEssential = true;
 	}
 	return combinedItemset;
 };

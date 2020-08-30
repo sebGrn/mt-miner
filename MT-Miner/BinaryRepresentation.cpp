@@ -134,12 +134,12 @@ bool BinaryRepresentation<T>::isEssential(Itemset& itemset)
 // return true if element is essential
 bool BinaryRepresentation::isEssential(std::shared_ptr<Itemset>& itemset)
 {
-	if (itemset->itemset.size() == 1)
+	if (itemset->getItemCount() == 1)
 		return true;
 	
 	bool isEssential = false;
 	StaticBitset SumOfN_1Items;
-	for (int i1 = 0, n = static_cast<int>(itemset->itemset.size()); i1 != n; i1++)
+	for (int i1 = 0, n = itemset->getItemCount(); i1 != n; i1++)
 	{		
 		// dont forget to initialize boolean
 		SumOfN_1Items.reset();
@@ -149,14 +149,14 @@ bool BinaryRepresentation::isEssential(std::shared_ptr<Itemset>& itemset)
 		{			
 			if (i1 != i2)
 			{
-				unsigned int key2 = itemset->itemset[i2]->attributeIndex;
+				unsigned int key2 = itemset->getItem(i2)->attributeIndex;
 				StaticBitset bitset = getItemFromKey(key2)->staticBitset;
 				if(!bitset.none())
 					SumOfN_1Items = SumOfN_1Items | bitset;
 			}
 		}
 
-		unsigned int key1 = itemset->itemset[i1]->attributeIndex;
+		unsigned int key1 = itemset->getItem(i1)->attributeIndex;
 		StaticBitset bitset = getItemFromKey(key1)->staticBitset;
 		for (unsigned int i = 0; i < objectCount; i++)
 		{
@@ -187,19 +187,19 @@ unsigned int BinaryRepresentation::computeDisjonctifSupport(std::shared_ptr<Item
 	{
 		// all bitsets have the same size
 		StaticBitset SumOfN_1Items;
-		for (size_t i = 0, n = pattern->itemset.size(); i < n; i++)
+		for (size_t i = 0, n = pattern->getItemCount(); i < n; i++)
 		{
-			unsigned int columnKey = pattern->itemset[i]->attributeIndex;
+			unsigned int columnKey = pattern->getItem(i)->attributeIndex;
 			StaticBitset bitset = BinaryRepresentation::getItemFromKey(columnKey)->staticBitset;
 			if(!bitset.none())
 				SumOfN_1Items = SumOfN_1Items | bitset;
 		}
 		unsigned int disSupp = SumOfN_1Items.count();
-		pattern->bitsetCount = disSupp;
+		pattern->orSupport = disSupp;
 		pattern->dirty = false;
 		pattern->orValue = SumOfN_1Items;
 	}
-	return pattern->bitsetCount;
+	return pattern->orSupport;
 };
 
 //template <class T>
@@ -260,16 +260,15 @@ unsigned int BinaryRepresentation::buildCloneList()
 	return nbClone;
 };
 
-bool BinaryRepresentation::containsAClone(const std::shared_ptr<Itemset>& itemset)
-{
-	
-	for (auto elt : itemset->itemset)
-	{
-		if (elt->isAClone())
-			return true;
-	}
-	return false;
-}
+//bool BinaryRepresentation::containsAClone(const std::shared_ptr<Itemset>& itemset)
+//{	
+//	for (auto elt : itemset->itemset)
+//	{
+//		if (elt->isAClone())
+//			return true;
+//	}
+//	return false;
+//}
 
 void BinaryRepresentation::serialize(const std::string& outputile)
 {

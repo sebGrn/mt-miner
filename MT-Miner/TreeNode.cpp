@@ -74,10 +74,10 @@ void TreeNode::updateListsFromToTraverse(const std::vector<std::shared_ptr<Items
 				for (unsigned int i = 0; i < currentItemset->getItemCount(); i++)
 					recurseOnClonedItemset(currentItemset, i, graph_mt);
 			}
-		}
+		} 
 		else
 		{
-			if ((currentItemset == (*toTraverse.begin())) && currentItemset->itemset.size() == 1)
+			if ((currentItemset == (*toTraverse.begin())) && currentItemset->getItemCount() == 1)
 			{
 				// must be the 1st element with only one element
 				previousItem = currentItemset;
@@ -153,7 +153,9 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals_task(
 				std::shared_ptr<Itemset> combinedItemset = Itemset::combineItemset(toCombinedLeft, toCombinedRight);
 
 				// check if combined item is containing a clone (if true, do not compute the minimal transverals) and if combined itemset is essential
-				if (!this->binaryRepresentation->containsAClone(combinedItemset) && binaryRepresentation->isEssential(combinedItemset))
+				//if (!this->binaryRepresentation->containsAClone(combinedItemset) && binaryRepresentation->isEssential(combinedItemset))
+				//if (!combinedItemset->containsAClone() && combinedItemset->isEssential)
+				if (!combinedItemset->containsAClone() && binaryRepresentation->isEssential(combinedItemset))
 					newToTraverse.push_back(combinedItemset);
 			}
 
