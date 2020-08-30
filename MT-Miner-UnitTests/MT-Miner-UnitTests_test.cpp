@@ -25,29 +25,29 @@ namespace MTMinerUnitTests_test
 			miner.createBinaryRepresentation(hypergraph);
 
 			// allocate miner
-			Itemset item1;
-			item1.itemset.push_back(Item(1, 1));
+			std::shared_ptr<Itemset> item1 = std::make_shared<Itemset>();
+			item1->addItem(BinaryRepresentation::getItemFromKey(1));
 			int disjonctifSupport = BinaryRepresentation::computeDisjonctifSupport(item1);
 			Assert::AreEqual(1, disjonctifSupport);
 
-			Itemset item2;
-			item2.itemset.push_back(Item(1, 1));
-			item2.itemset.push_back(Item(2, 2));
+			std::shared_ptr<Itemset> item2 = std::make_shared<Itemset>();
+			item2->addItem(BinaryRepresentation::getItemFromKey(1));
+			item2->addItem(BinaryRepresentation::getItemFromKey(2));
 			disjonctifSupport = BinaryRepresentation::computeDisjonctifSupport(item2);
 			Assert::AreEqual(2, disjonctifSupport);
 
-			Itemset item3;
-			item3.itemset.push_back(Item(1, 1));
-			item3.itemset.push_back(Item(2, 2));
-			item3.itemset.push_back(Item(3, 3));			
+			std::shared_ptr<Itemset> item3 = std::make_shared<Itemset>();
+			item3->addItem(BinaryRepresentation::getItemFromKey(1));
+			item3->addItem(BinaryRepresentation::getItemFromKey(2));
+			item3->addItem(BinaryRepresentation::getItemFromKey(3));
 			disjonctifSupport = BinaryRepresentation::computeDisjonctifSupport(item3);
 			Assert::AreEqual(3, disjonctifSupport);
 
-			Itemset item4;
-			item4.itemset.push_back(Item(1, 1));
-			item4.itemset.push_back(Item(2, 2));
-			item4.itemset.push_back(Item(3, 3));
-			item4.itemset.push_back(Item(4, 4));
+			std::shared_ptr<Itemset> item4 = std::make_shared<Itemset>();
+			item4->addItem(BinaryRepresentation::getItemFromKey(1));
+			item4->addItem(BinaryRepresentation::getItemFromKey(2));
+			item4->addItem(BinaryRepresentation::getItemFromKey(3));
+			item4->addItem(BinaryRepresentation::getItemFromKey(4));
 			disjonctifSupport = BinaryRepresentation::computeDisjonctifSupport(item4);
 			Assert::AreEqual(4, disjonctifSupport);
 		}
@@ -62,7 +62,7 @@ namespace MTMinerUnitTests_test
 			miner.createBinaryRepresentation(parser.getHypergraph());
 
 			// compute minimal transversals
-			std::vector<Itemset>&& minimalTransversals = miner.computeMinimalTransversals();
+			std::vector<std::shared_ptr<Itemset>>&& minimalTransversals = miner.computeMinimalTransversals();
 			//minimalTransversals = Utils::sortVectorOfItemset(minimalTransversals);
 			Assert::AreEqual(6, static_cast<int>(minimalTransversals.size()));
 		}
@@ -77,7 +77,7 @@ namespace MTMinerUnitTests_test
 			miner.createBinaryRepresentation(parser.getHypergraph());
 
 			// compute minimal transversals
-			std::vector<Itemset>&& minimalTransversals = miner.computeMinimalTransversals();
+			std::vector<std::shared_ptr<Itemset>>&& minimalTransversals = miner.computeMinimalTransversals();
 			//minimalTransversals = Utils::sortVectorOfItemset(minimalTransversals);
 			Assert::AreEqual(15, static_cast<int>(minimalTransversals.size()));
 		}
@@ -92,7 +92,7 @@ namespace MTMinerUnitTests_test
 			miner.createBinaryRepresentation(parser.getHypergraph());
 
 			// compute minimal transversals
-			std::vector<Itemset>&& minimalTransversals = miner.computeMinimalTransversals();
+			std::vector<std::shared_ptr<Itemset>>&& minimalTransversals = miner.computeMinimalTransversals();
 			//minimalTransversals = Utils::sortVectorOfItemset(minimalTransversals);
 			Assert::AreEqual(15, static_cast<int>(minimalTransversals.size()));
 		}
