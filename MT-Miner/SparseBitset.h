@@ -12,29 +12,24 @@
 class SparseBitset
 {
 public:
-	unsigned int bitset_size;
 	std::list<unsigned int> bitset_value;
 
 public:
-	SparseBitset(unsigned int bitsetSize)
+	SparseBitset()
 	{
-		// contains original size of bitset
-		this->bitset_size = bitsetSize;
 	};
 
 	SparseBitset(const SparseBitset& bitset)
 	{
-		this->bitset_size = bitset.bitset_size;
 		this->bitset_value = bitset.bitset_value;
 	};
 
-	//SparseBitset(const StaticBitset& bitset)
+	//void set(const StaticBitset& bitset)
 	//{
-	//	this->bitset_size = bitset.size();
 	//	this->bitset_value.clear();
-	//	for (unsigned int i = 0; i < this->bitset_size; i++)
+	//	for (unsigned int i = 0; i < bitset.size(); i++)
 	//	{
-	//		bool bit = bitset.get(i);
+	//		bool bit = bitset[i];
 	//		if (bit)
 	//			this->bitset_value.emplace_back(i);
 	//	}
@@ -44,22 +39,16 @@ public:
 	~SparseBitset()
 	{};
 
-	void reset(bool b = false);
+	void reset();
 	void set(unsigned int iAttribute, bool b);
 	bool get(unsigned int iAttribute) const;
-	unsigned int size() const;
 	unsigned int count() const;
 	
 };
 
-inline void SparseBitset::reset(bool b)
+inline void SparseBitset::reset()
 {
 	this->bitset_value.clear();
-	if (b)
-	{
-		for (unsigned int i = 0; i < this->bitset_size; i++)
-			this->bitset_value.push_back(i);
-	}
 };
 
 inline void SparseBitset::set(unsigned int iAttribute, bool b)
@@ -86,11 +75,6 @@ inline bool SparseBitset::get(unsigned int iAttribute) const
 {
 	auto it = std::find(this->bitset_value.begin(), this->bitset_value.end(), iAttribute);
 	return (it != this->bitset_value.end());
-}
-
-inline unsigned int SparseBitset::size() const
-{
-	return this->bitset_size;
 }
 
 inline unsigned int SparseBitset::count() const

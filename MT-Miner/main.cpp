@@ -183,7 +183,7 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 // ----------------------------------------------------------------------------------------------------------- //
 
 int main(int argc, char* argv[])
-{
+ {
 	// http://research.nii.ac.jp/~uno/dualization.html
 	//runBitsetBenchmark();
 	

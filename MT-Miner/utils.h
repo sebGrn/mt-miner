@@ -25,16 +25,16 @@
 class Utils
 {
 public:
-	struct compare_int
-	{
-		int key;
-		compare_int(int const& i) : key(i) { }
+	//struct compare_int
+	//{
+	//	int key;
+	//	compare_int(int const& i) : key(i) { }
 
-		bool operator()(int const& i)
-		{
-			return (i == key);
-		}
-	};
+	//	bool operator()(int const& i)
+	//	{
+	//		return (i == key);
+	//	}
+	//};
 
 	//struct compare_itemset
 	//{

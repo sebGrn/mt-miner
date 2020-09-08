@@ -23,13 +23,13 @@ public:
 	std::vector<std::shared_ptr<Item>> clones;
 
 public:
-	Item(int index, unsigned int bitsetSize) : sparseBitset(bitsetSize)
+	Item(int index, unsigned int bitsetSize)
 	{
 		this->attributeIndex = index;
 		this->isClone = false;
 	}
 
-	Item(const Item* item) : sparseBitset(item->sparseBitset.bitset_size)
+	Item(const Item* item)
 	{
 		this->attributeIndex = item->attributeIndex;
 		this->staticBitset = item->staticBitset;
@@ -41,6 +41,8 @@ public:
 	~Item()
 	{}
 
+	static void buildSparseMatrix(SparseBitset& dest, const StaticBitset& src);
+
 	void addClone(const std::shared_ptr<Item>& clone);
 	void setClone();
 	bool isAnOriginal() const;
@@ -51,6 +53,18 @@ public:
 
 	bool operator==(const Item& other);
 };
+
+inline void Item::buildSparseMatrix(SparseBitset& dest, const StaticBitset& bitset)
+{
+	dest.bitset_value.clear();
+	for (unsigned int i = 0; i < bitset.size(); i++)
+	{
+		bool bit = bitset[i];
+		if (bit)
+			dest.bitset_value.emplace_back(i);
+	}
+	dest.bitset_value.sort();
+}
 
 inline void Item::addClone(const std::shared_ptr<Item>& clone)
 {

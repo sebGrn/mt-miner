@@ -150,12 +150,18 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals_task(
 			{
 				assert(j < combinedItemsetList.size());
 				std::shared_ptr<Itemset> toCombinedRight = combinedItemsetList[j];
-				std::shared_ptr<Itemset> combinedItemset = Itemset::combineItemset(toCombinedLeft, toCombinedRight);
+				std::shared_ptr<Itemset> combinedItemset = Itemset::combineItemset(toCombinedLeft, toCombinedRight); 
 
 				// check if combined item is containing a clone (if true, do not compute the minimal transverals) and if combined itemset is essential
+				//bool isEss = binaryRepresentation->isEssential(combinedItemset);
+				//if (isEss != combinedItemset->isEssential)
+				//{
+				//	Itemset::combineItemset(toCombinedLeft, toCombinedRight);
+				//	int k = 0;
+				//}
 				//if (!this->binaryRepresentation->containsAClone(combinedItemset) && binaryRepresentation->isEssential(combinedItemset))
-				//if (!combinedItemset->containsAClone() && combinedItemset->isEssential)
-				if (!combinedItemset->containsAClone() && binaryRepresentation->isEssential(combinedItemset))
+				//if (!combinedItemset->containsAClone() && binaryRepresentation->isEssential(combinedItemset))
+				if (!combinedItemset->containsAClone() && combinedItemset->isEssential)
 					newToTraverse.push_back(combinedItemset);
 			}
 

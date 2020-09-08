@@ -26,15 +26,11 @@ public:
 		this->itemCount = hypergraph->getItemCount();
 		this->objectCount = hypergraph->getObjectCount();
 
-		unsigned int bitsetSize = this->itemCount;
-		if (!hypergraph->getOneBasedIndex())
-			bitsetSize += 1;
-
 		unsigned int index = 0;
 		// build formal context
 		for (unsigned int i = 0, n = hypergraph->getObjectCount(); i < n; i++)
 		{
-			SparseBitset bitset(bitsetSize);
+			SparseBitset bitset;
 						
 			// loop on hyper graph and build formal context
 			std::vector<unsigned int> line = hypergraph->getLine(i);
@@ -50,7 +46,6 @@ public:
 					index = line[j];
 				}
 				assert(index >= 0);
-				assert(index < bitsetSize);
 				bitset.set(index, true);				
 			}
 			// add bitset for this object (line)
@@ -59,11 +54,13 @@ public:
 	};
 
 	void serialize(const std::string& outputile) const
-	{		
+	{
+		unsigned int bitsetSize = this->itemCount;
+
 		std::ofstream fileStream = std::ofstream(outputile, std::ofstream::out);
 		for (auto it = this->formalContext.begin(); it != this->formalContext.end(); it++)
 		{
-			for (int i = 0, n = it->size(); i < n; i++)
+			for (int i = 0, n = bitsetSize; i < n; i++)
 			{
 				fileStream << it->get(i) ? "1" : "0";
 				fileStream << ";";

@@ -1,6 +1,142 @@
 #include "Itemset.h"
+#include <unordered_map>
 
-// ------------------------------------------------------------------------------------------------------------------------- //
+Itemset::Itemset()
+{
+	this->orSupport = 0;
+	this->dirty = true;
+	this->isEssential = false;
+}
+
+Itemset::Itemset(const Itemset* itemset)
+{
+	this->orValue = itemset->orValue;
+	this->orSupport = itemset->orSupport;
+	this->dirty = itemset->dirty;
+	this->isEssential = itemset->isEssential;
+	// copy items
+	for (auto it = itemset->itemset.begin(); it != itemset->itemset.end(); it++)
+		this->itemset.push_back(std::make_shared<Item>(it->get()));
+}
+
+bool Itemset::containsAClone() const
+{
+	for (auto elt : this->itemset)
+	{
+		if (elt->isAClone())
+			return true;
+	}
+	return false;
+}
+
+void Itemset::addItem(const std::shared_ptr<Item>& item)
+{
+	if (this->itemset.size() == 0)
+	{
+		Item::buildSparseMatrix(this->cumulatedMatrix, item->staticBitset);
+
+		for (auto it = item->sparseBitset.bitset_value.begin(); it != item->sparseBitset.bitset_value.end(); it++)
+		{
+			this->minimalTransaction.push_back(std::pair<unsigned int, unsigned int>(*it, 0));
+		}
+
+		this->orValue = item->staticBitset;
+		this->orSupport = this->orValue.count();
+		this->dirty = false;
+		this->isEssential = false;
+	}
+	else
+	{
+		this->orValue = this->orValue | item->staticBitset;
+		this->orSupport = this->orValue.count();
+		UpdateIsEssential(item);
+	}
+	this->itemset.push_back(item);
+}
+
+void Itemset::UpdateIsEssential(const std::shared_ptr<Item>& item)
+{
+	// if isMinimal is false, it means that there is a transaction where '1' is present for each item
+	
+	// loop on bits from item's bitset (check sparse bitset index)
+	// todo : we can here check bitset equality
+	for (auto it_elt = item->sparseBitset.bitset_value.begin(); it_elt != item->sparseBitset.bitset_value.end(); it_elt++)
+	{
+		// the transation (line) number is set
+		unsigned int iTransaction = (*it_elt);
+		bool isMinimal = false;
+		// search if we have a transaction into itemset (for each line) where we have a bit at iTransaction value
+		unsigned int iItem(0);
+		for (auto it_item = this->itemset.begin(); it_item != this->itemset.end(); it_item++, iItem++)
+		{
+			auto it_res = std::find((*it_item)->sparseBitset.bitset_value.begin(), (*it_item)->sparseBitset.bitset_value.end(), iTransaction);
+			isMinimal = (it_res == (*it_item)->sparseBitset.bitset_value.end());
+			
+			if(!isMinimal)
+			{				
+				// find if iTransaction is in minimalTransaction
+				for (auto it_minimalTransaction = this->minimalTransaction.begin(); it_minimalTransaction != this->minimalTransaction.end(); it_minimalTransaction++)
+				{
+					if (iTransaction == (*it_minimalTransaction).first)
+					{
+						// erase the minimal transaction
+						this->minimalTransaction.erase(it_minimalTransaction);
+						break;
+					}
+				}
+				break;
+			}
+		}
+
+		// 
+		if (isMinimal)
+			this->minimalTransaction.push_back(std::pair<unsigned int, unsigned int>(iTransaction, iItem));
+	}
+
+	this->isEssential = true;
+	// check we have only on "1" for each item (column) in minimalTransaction list
+	// add 1 on itemlist size for next item which is not in the list
+	for (unsigned int i = 0, n = this->itemset.size() + 1; i < n; i++)
+	{
+		auto it = std::find_if(this->minimalTransaction.begin(), this->minimalTransaction.end(), [i](const std::pair<unsigned int, unsigned int>& a) {
+			return a.second == i;
+		});
+		if (it == this->minimalTransaction.end())
+		{
+			// an item exists without set bit
+			this->isEssential = false;
+			break;
+		}
+	}
+}
+
+bool Itemset::operator==(const Itemset& other)
+{
+	// first test if support is different, itemsets are differents
+	if ((!this->dirty && !other.dirty) && (this->orSupport != other.orSupport))
+		return false;
+
+	// test each attributeIndex of itemset
+	auto it1 = other.itemset.begin();
+	for (auto it2 = this->itemset.begin(); it2 != this->itemset.end(); it1++, it2++)
+	{
+		if ((*it1)->attributeIndex != (*it2)->attributeIndex)
+			return false;
+	}
+	return true;
+}
+
+void Itemset::replaceItem(unsigned int i, const std::shared_ptr<Item>& item)
+{
+	assert(i < this->itemset.size());
+	if (i < this->itemset.size())
+	{
+		// remove previous element
+		this->itemset.erase(this->itemset.begin() + i);
+		// insert element
+		this->itemset.insert(this->itemset.begin() + i, item);
+	}
+}
 
 std::string Itemset::toString() const
 {
@@ -34,7 +170,9 @@ std::shared_ptr<Itemset> Itemset::combineItemset(const std::shared_ptr<Itemset>&
 	// create a new itemset
 	std::shared_ptr<Itemset> combinedItemset = std::make_shared<Itemset>();
 	// copy left item set into new combined itemset
-	std::copy(itemset_left->itemset.begin(), itemset_left->itemset.end(), std::back_inserter(combinedItemset->itemset));
+	//std::copy(itemset_left->itemset.begin(), itemset_left->itemset.end(), std::back_inserter(combinedItemset->itemset));
+	for (auto it = itemset_left->itemset.begin(); it != itemset_left->itemset.end(); it++)
+		combinedItemset->addItem(*it);
 
 	// 
 	for_each(itemset_right->itemset.begin(), itemset_right->itemset.end(), [&](const std::shared_ptr<Item>& item) {
@@ -51,21 +189,17 @@ std::shared_ptr<Itemset> Itemset::combineItemset(const std::shared_ptr<Itemset>&
 		if (!found)
 		{
 			// didnt find duplicates, we can add the item at the end of the list
-			combinedItemset->itemset.push_back(item);
+			combinedItemset->addItem(item);
 		}
 	});
 
 	// compute OR value from left and right itemsets
-	if (itemset_left->dirty && itemset_right->dirty)
-	{
-		combinedItemset->orValue = itemset_left->orValue | itemset_right->orValue;
-		combinedItemset->orSupport = combinedItemset->orValue.count();
-		combinedItemset->andValue = itemset_left->andValue & itemset_right->andValue;
-		combinedItemset->andSupport = combinedItemset->andValue.count();
-		combinedItemset->dirty = false;
-		if (!combinedItemset->andSupport)
-			combinedItemset->isEssential = true;
-	}
+	//if (itemset_left->dirty && itemset_right->dirty)
+	//{
+	//	combinedItemset->orValue = itemset_left->orValue | itemset_right->orValue;
+	//	combinedItemset->orSupport = combinedItemset->orValue.count();
+	//	combinedItemset->dirty = false;
+	//}
 	return combinedItemset;
 };
 

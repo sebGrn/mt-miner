@@ -46,93 +46,9 @@ void BinaryRepresentation::buildFromFormalContext(const FormalContext& context)
 	std::cout << RED << "sparsity " << (1.0 - sparsity) * 100.0 << "% of bits are sets" << std::endl;
 };
 
-// return true if element is essential
-/*template <class T>
-bool BinaryRepresentation<T>::isEssential(Itemset& itemset)
-{
-	if (itemset.is_essential_computed)
-		return itemset.is_essential;
-		
-	if (itemset.itemset_list.size() == 1)
-	{
-		itemset.is_essential_computed = true;
-		itemset.is_essential = true;
-	}
-	else
-	{
-		// call compute disjonctif support to get or_value of itemset
-		//BinaryRepresentation<T>::computeDisjonctifSupport(itemset);
-
-		// all bitsets have the same size
-		unsigned int bitset_size = getBitsetFromKey(itemset.itemset_list[0]).size();
-
-		// compute sparse bitset of all items from itemset
-		// check if sparse index has a size of 1 and if set indexes are uniques between all sparces indexes
-		// store sparse bitset of itemset
-		// loop on each item 
-		for (int i = 0, n = static_cast<int>(itemset.itemset_list.size()); i != n; i++)
-		{
-			// get bitset from binary representation
-			unsigned int columnKey = itemset.itemset_list[i];
-			T bitset = BinaryRepresentation<T>::getBitsetFromKey(columnKey);
-			// check if bitset is not 0
-			if (bitset.valid())
-			{
-				// convert bitset to sparse bitset and store it
-				SparseIndexBitset sparseBitset(bitset);
-
-			}
-		}
-
-
-
-		//T xor_bitset(bitset_size);
-		std::vector<unsigned int> base_indexes;
-		// loop on each item 
-		for (int i = 0, n = static_cast<int>(itemset.itemset_list.size()); i != n; i++)
-		{
-			// get bitset from binary representation
-			unsigned int columnKey = pattern.itemset_list[i];
-			T bitset = BinaryRepresentation<T>::getBitsetFromKey(columnKey);
-			// check if bitset is not 0
-			if (bitset.valid())
-			{
-				// loop on all bit from the current bitset
-				for (int j = 0; j < bitset_size; j++)
-				{
-					// check if current bit has not been already added
-					if (std::find(base_indexes.begin(), base_indexes.end(), j) != base_indexes.end())
-					{
-						// get bit value
-						bool base_bit = bitset.get(j);
-						if (base_bit)
-						{
-							// if bit value is set, store its indexes 
-							base_indexes.push_back(i);
-							// loop on others bits from the current bitset and check that other bits are not set
-							for (int k = 0; k < bitset_size; k++)
-							{
-								if (k != j)
-								{
-									bool test_bit = bitset.get(j);
-									if (test_bit)
-									{
-										// bit is set, this transaction is a noise, go next
-										break;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	return itemset.is_essential;
-}*/
 
 // return true if element is essential
-bool BinaryRepresentation::isEssential(std::shared_ptr<Itemset>& itemset)
+/*bool BinaryRepresentation::isEssential(std::shared_ptr<Itemset>& itemset)
 {
 	if (itemset->getItemCount() == 1)
 		return true;
@@ -178,7 +94,7 @@ bool BinaryRepresentation::isEssential(std::shared_ptr<Itemset>& itemset)
 		}
 	}
 	return isEssential;
-}
+}*/
 
 unsigned int BinaryRepresentation::computeDisjonctifSupport(std::shared_ptr<Itemset>& pattern)
 {
