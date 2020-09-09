@@ -48,7 +48,7 @@ void BinaryRepresentation::buildFromFormalContext(const FormalContext& context)
 
 
 // return true if element is essential
-/*bool BinaryRepresentation::isEssential(std::shared_ptr<Itemset>& itemset)
+bool BinaryRepresentation::isEssential(std::shared_ptr<Itemset>& itemset)
 {
 	if (itemset->getItemCount() == 1)
 		return true;
@@ -94,7 +94,7 @@ void BinaryRepresentation::buildFromFormalContext(const FormalContext& context)
 		}
 	}
 	return isEssential;
-}*/
+}
 
 unsigned int BinaryRepresentation::computeDisjonctifSupport(std::shared_ptr<Itemset>& pattern)
 {

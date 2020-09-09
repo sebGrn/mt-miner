@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include <deque>
 #include "Bitset.h"
 
 /**
@@ -13,6 +14,7 @@ class SparseBitset
 {
 public:
 	std::list<unsigned int> bitset_value;
+	//std::deque<unsigned int> bitset_value;
 
 public:
 	SparseBitset()
@@ -127,3 +129,4 @@ inline unsigned int SparseBitset::count() const
 //	this->bitset_value = other.bitset_value;
 //	return *this;
 //}
+

@@ -33,7 +33,7 @@ void Itemset::addItem(const std::shared_ptr<Item>& item)
 {
 	if (this->itemset.size() == 0)
 	{
-		Item::buildSparseMatrix(this->cumulatedMatrix, item->staticBitset);
+		//Item::buildSparseMatrix(this->cumulatedMatrix, item->staticBitset);
 
 		for (auto it = item->sparseBitset.bitset_value.begin(); it != item->sparseBitset.bitset_value.end(); it++)
 		{
@@ -57,9 +57,41 @@ void Itemset::addItem(const std::shared_ptr<Item>& item)
 void Itemset::UpdateIsEssential(const std::shared_ptr<Item>& item)
 {
 	// if isMinimal is false, it means that there is a transaction where '1' is present for each item
-	
-	// loop on bits from item's bitset (check sparse bitset index)
-	// todo : we can here check bitset equality
+
+	// 1st step : update minimalTransaction list
+
+	// try with AND operator on static bitset
+	/*unsigned int iItem(0);
+	for (auto it_item = this->itemset.begin(); it_item != this->itemset.end(); it_item++, iItem++)
+	{
+		StaticBitset bitset = (*it_item)->staticBitset & item->staticBitset;
+		for (unsigned int iTransaction = 0, n = bitset.size(); iTransaction < n; iTransaction++)
+		{
+			if (bitset.test(iTransaction))
+			{
+				// erase the minimal transaction at transaction number iTransaction
+				for (auto it_minimalTransaction = this->minimalTransaction.begin(); it_minimalTransaction != this->minimalTransaction.end(); it_minimalTransaction++)
+				{
+					if (iTransaction == (*it_minimalTransaction).first)
+					{
+						this->minimalTransaction.erase(it_minimalTransaction);
+						// transaction has been found, we can leave
+						break;
+					}
+				}
+			}
+			else
+			{
+				if (item->staticBitset.test(iTransaction))
+				{
+					this->minimalTransaction.push_back(std::pair<unsigned int, unsigned int>(iTransaction, iItem + 1));
+				}
+			}
+		}
+	}*/
+
+
+	// loop on bits from item's bitset (check sparse bitset index)	
 	for (auto it_elt = item->sparseBitset.bitset_value.begin(); it_elt != item->sparseBitset.bitset_value.end(); it_elt++)
 	{
 		// the transation (line) number is set
@@ -69,21 +101,34 @@ void Itemset::UpdateIsEssential(const std::shared_ptr<Item>& item)
 		unsigned int iItem(0);
 		for (auto it_item = this->itemset.begin(); it_item != this->itemset.end(); it_item++, iItem++)
 		{
-			auto it_res = std::find((*it_item)->sparseBitset.bitset_value.begin(), (*it_item)->sparseBitset.bitset_value.end(), iTransaction);
-			isMinimal = (it_res == (*it_item)->sparseBitset.bitset_value.end());
+			// very slow !!!
+			// find iTransaction into sparce bitset
+			isMinimal = true;
+			//std::cout << (*it_item)->sparseBitset.bitset_value.size() << std::endl;
+			for (auto it_sparse = (*it_item)->sparseBitset.bitset_value.begin(); it_sparse != (*it_item)->sparseBitset.bitset_value.end(); it_sparse++)
+			{
+				if ((*it_sparse) == iTransaction)
+				{
+					isMinimal = false;
+
+					// find if iTransaction is in minimalTransaction
+					for (auto it_minimalTransaction = this->minimalTransaction.begin(); it_minimalTransaction != this->minimalTransaction.end(); it_minimalTransaction++)
+					{
+						if (iTransaction == (*it_minimalTransaction).first)
+						{
+							// erase the minimal transaction
+							this->minimalTransaction.erase(it_minimalTransaction);
+							break;
+						}
+					}
+					break;
+				}
+			}
+			//auto it_res = std::find((*it_item)->sparseBitset.bitset_value.begin(), (*it_item)->sparseBitset.bitset_value.end(), iTransaction);
+			//isMinimal = (it_res == (*it_item)->sparseBitset.bitset_value.end());
 			
 			if(!isMinimal)
 			{				
-				// find if iTransaction is in minimalTransaction
-				for (auto it_minimalTransaction = this->minimalTransaction.begin(); it_minimalTransaction != this->minimalTransaction.end(); it_minimalTransaction++)
-				{
-					if (iTransaction == (*it_minimalTransaction).first)
-					{
-						// erase the minimal transaction
-						this->minimalTransaction.erase(it_minimalTransaction);
-						break;
-					}
-				}
 				break;
 			}
 		}
@@ -92,6 +137,8 @@ void Itemset::UpdateIsEssential(const std::shared_ptr<Item>& item)
 		if (isMinimal)
 			this->minimalTransaction.push_back(std::pair<unsigned int, unsigned int>(iTransaction, iItem));
 	}
+
+	// 2nd step : check minimalTransaction list and update isEssential
 
 	this->isEssential = true;
 	// check we have only on "1" for each item (column) in minimalTransaction list

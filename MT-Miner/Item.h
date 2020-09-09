@@ -7,7 +7,7 @@
 #include "Bitset.h"
 #include "SparseBitset.h"
 
-typedef std::bitset<1000> StaticBitset;
+typedef std::bitset<4096> StaticBitset;
 
 class Item
 {

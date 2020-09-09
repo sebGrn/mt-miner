@@ -12,7 +12,7 @@ private:
 	std::vector<std::shared_ptr<Item>> itemset;
 	
 	// used to compute isEssential
-	SparseBitset cumulatedMatrix;
+	//SparseBitset cumulatedMatrix;
 
 public:
 	// true if bitset_count & or value has to be computed

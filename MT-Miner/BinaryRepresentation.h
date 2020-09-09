@@ -37,7 +37,7 @@ public:
 	///
 	static unsigned int computeDisjonctifSupport(std::shared_ptr<Itemset>& pattern);
 	/// return true if element is essential
-	//static bool isEssential(std::shared_ptr<Itemset>& itemsOfPattern);
+	static bool isEssential(std::shared_ptr<Itemset>& itemsOfPattern);
 	///
 	static unsigned int buildCloneList();
 	///
