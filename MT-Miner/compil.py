@@ -82,6 +82,8 @@ def run(filename):
     end = perf_counter()
     print("Elapsed time:", end - start, "sec") 
 
+
+# start program
 if(len(sys.argv) != 2):
     print("usage :  python3 ./compil.py \"../data/win800.dat\"")
 else:
