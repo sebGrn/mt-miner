@@ -49,7 +49,7 @@ void Itemset::addItem(const std::shared_ptr<Item>& item)
 	{
 		this->orValue = this->orValue | item->staticBitset;
 		this->orSupport = this->orValue.count();
-		UpdateIsEssential(item);
+		//UpdateIsEssential(item);
 	}
 	this->itemset.push_back(item);
 }

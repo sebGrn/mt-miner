@@ -160,8 +160,8 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals_task(
 				//	int k = 0;
 				//}
 				//if (!this->binaryRepresentation->containsAClone(combinedItemset) && binaryRepresentation->isEssential(combinedItemset))
-				//if (!combinedItemset->containsAClone() && binaryRepresentation->isEssential(combinedItemset))
-				if (!combinedItemset->containsAClone() && combinedItemset->isEssential)
+				if (!combinedItemset->containsAClone() && binaryRepresentation->isEssential(combinedItemset))
+				//if (combinedItemset->isEssential && !combinedItemset->containsAClone())
 					newToTraverse.push_back(combinedItemset);
 			}
 

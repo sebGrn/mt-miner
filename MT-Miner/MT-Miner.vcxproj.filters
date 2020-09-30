@@ -62,9 +62,6 @@
     <ClInclude Include="BinaryRepresentation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Bitset.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>

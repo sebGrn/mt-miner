@@ -2,12 +2,13 @@
 #include <vector>
 #include <algorithm>
 #include <cassert>
+#include <memory>
 
 #include "utils.h"
-#include "Bitset.h"
 #include "SparseBitset.h"
 
-typedef std::bitset<4096> StaticBitset;
+#define BITSET_SIZE 800
+typedef std::bitset<BITSET_SIZE> StaticBitset;
 
 class Item
 {

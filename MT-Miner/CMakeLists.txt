@@ -8,20 +8,21 @@ project (mt_miner)
 # compiler option
 set (CMAKE_CXX_STANDARD 17)
 #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp") 
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread") 
 
 # add include directories
-find_package(Boost REQUIRED) 
+#find_package(Boost REQUIRED) 
 #find_package(OpenMP)
 
 # set sources and headers
-set(SOURCES ${HEADERS} HypergraphParser.h MT_Miner.h utils.h BinaryRepresentation.h FormalContext.h HyperGraph.h Bitset.h TreeNode.h Logger.h Profiler.h JsonTree.h JsonTreeNode.h)
-set(SOURCES ${SOURCES} HypergraphParser.cpp MT_Miner.cpp BinaryRepresentation.cpp TreeNode.cpp Logger.cpp Profiler.cpp JsonTree.cpp JsonTree.cpp Bitset.cpp main.cpp)
+set(SOURCES ${HEADERS} BinaryRepresentation.h FormalContext.h HyperGraph.h HypergraphParser.h Item.h Itemset.h Logger.h MT_Miner.h Profiler.h SparseBitset.h TreeNode.h utils.h)
+set(SOURCES ${SOURCES} BinaryRepresentation.cpp HypergraphParser.cpp Itemset.cpp Logger.cpp MT_Miner.cpp Profiler.cpp TreeNode.cpp main.cpp)
 
 # create static library .a
 add_executable(mt_miner ${SOURCES} ${HEADERS})
 
 #target_link_libraries(mt_miner PUBLIC OpenMP::OpenMP_CXX)
-target_link_libraries(mt_miner PRIVATE ${Boost_LIBRARIES} -pthread)
+#target_link_libraries(mt_miner PRIVATE ${Boost_LIBRARIES} -pthread)
 
 set_property(TARGET mt_miner PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_property(TARGET mt_miner PROPERTY CXX_STANDARD 17)

@@ -65,15 +65,17 @@ bool BinaryRepresentation::isEssential(std::shared_ptr<Itemset>& itemset)
 		{			
 			if (i1 != i2)
 			{
-				unsigned int key2 = itemset->getItem(i2)->attributeIndex;
-				StaticBitset bitset = getItemFromKey(key2)->staticBitset;
+				//unsigned int key2 = itemset->getItem(i2)->attributeIndex;
+				//StaticBitset bitset = getItemFromKey(key2)->staticBitset;
+				StaticBitset bitset = itemset->getItem(i2)->staticBitset;
 				if(!bitset.none())
 					SumOfN_1Items = SumOfN_1Items | bitset;
 			}
 		}
 
-		unsigned int key1 = itemset->getItem(i1)->attributeIndex;
-		StaticBitset bitset = getItemFromKey(key1)->staticBitset;
+		//unsigned int key1 = itemset->getItem(i1)->attributeIndex;
+		//StaticBitset bitset = getItemFromKey(key1)->staticBitset;
+		StaticBitset bitset = itemset->getItem(i1)->staticBitset;
 		for (unsigned int i = 0; i < objectCount; i++)
 		{
 			// compare bit

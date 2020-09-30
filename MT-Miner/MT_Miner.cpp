@@ -17,7 +17,7 @@ bool MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hyp
 {
 	// build formal context from hypergraph
 	FormalContext formalContext(hypergraph);
-	formalContext.serialize("format_context.csv");
+	//formalContext.serialize("format_context.csv");
 
 	//if (formalContext.getObjectCount() >= 32)
 	//{
@@ -81,7 +81,7 @@ std::vector<std::shared_ptr<Itemset>> MT_Miner::computeMinimalTransversals()
 
 	// create a graph, then compute minimal transversal from the binary representation
 	TreeNode rootNode(this->useCloneOptimization);
-
+	
 	// lambda function called during parsing every 20 seconds
 	auto ftr = std::async(std::launch::async, [&rootNode]() {
 		const int secondsToWait = 30;
@@ -100,6 +100,7 @@ std::vector<std::shared_ptr<Itemset>> MT_Miner::computeMinimalTransversals()
 			}			
 		}
 	});
+	
 
 	// compute all minimal transversal from the root node
 	std::vector< std::shared_ptr<Itemset>>&& graph_mt = rootNode.computeMinimalTransversals(toTraverse);
@@ -109,7 +110,7 @@ std::vector<std::shared_ptr<Itemset>> MT_Miner::computeMinimalTransversals()
 	// stop the thread and detach it (dont not wait next n seconds)
 	this->stop = true;
 	ftr.get();
-
+	
 	// print timer
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
 	Logger::log(YELLOW, "computing minimal transversals done in ", duration, " ms\n", RESET);
@@ -132,6 +133,6 @@ std::vector<std::shared_ptr<Itemset>> MT_Miner::computeMinimalTransversals()
 	// write tree into js
 	//JsonTree::writeJsonNode(graph_mt);
 	
-	return graph_mt;
+	return graph_mt;	
 }
 
