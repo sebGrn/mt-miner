@@ -4,7 +4,6 @@
 #include <fstream>
 #include <memory>
 
-#include "Bitset.h"
 #include "SparseBitset.h"
 #include "HyperGraph.h"
 

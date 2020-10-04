@@ -2,7 +2,6 @@
 
 #include <list>
 #include <deque>
-#include "Bitset.h"
 
 /**
 * Sparse Bitset implementation

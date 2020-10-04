@@ -8,7 +8,6 @@
 #include <chrono>
 
 #include "utils.h"
-#include "Bitset.h"
 #include "FormalContext.h"
 #include "HyperGraph.h"
 #include "BinaryRepresentation.h"

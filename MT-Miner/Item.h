@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include <memory>
+#include <bitset>
 
 #include "utils.h"
 #include "SparseBitset.h"
