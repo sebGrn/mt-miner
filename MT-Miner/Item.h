@@ -8,7 +8,7 @@
 #include "utils.h"
 #include "SparseBitset.h"
 
-#define BITSET_SIZE 800
+#define BITSET_SIZE 447
 typedef std::bitset<BITSET_SIZE> StaticBitset;
 
 class Item

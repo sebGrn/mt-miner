@@ -27,7 +27,7 @@ bool HypergraphParser::parse(const std::string& file)
 	unsigned int objectCount = 0;
 	hypergraph = std::make_shared<HyperGraph>();
 		
-	Logger::log(GREEN, "parsing ", file, "\n", RESET);
+	std::cout << GREEN << "parsing " << file << "\n" << RESET;
 	auto beginTime = std::chrono::system_clock::now();
 
 	bool oneIndexedBase = true;
@@ -57,12 +57,12 @@ bool HypergraphParser::parse(const std::string& file)
 	hypergraph->setOneBasedIndex(oneIndexedBase);
 
 	if(!oneIndexedBase)
-		Logger::log(RED, "hypergraph has a zero based index mode\n", RESET);
+		Logger::log("hypergraph has a zero based index mode\n");
 
 	inputStream.close();
 	
 	int64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
-	Logger::log(GREEN, "parsing hypergraph done in ", duration, " ms, found ", maxItemCount, " items (columns) and ", objectCount, " objects (lines)\n\n", RESET);
+	Logger::log("parsing hypergraph done in ", duration, " ms, found ", maxItemCount, " items (lines) and ", objectCount, " objects (columns)\n");
 	
 	return true;
 }

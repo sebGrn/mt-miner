@@ -19,12 +19,6 @@ bool MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hyp
 	FormalContext formalContext(hypergraph);
 	//formalContext.serialize("format_context.csv");
 
-	//if (formalContext.getObjectCount() >= 32)
-	//{
-	//	Logger::log(RED, "Bitset count is superior to 32 bits, cannot manage this context\n", RESET);
-	//	return false;
-	//}
-
 	// build binary representation from formal context
 	BinaryRepresentation::buildFromFormalContext(formalContext);
 	//BinaryRepresentation<bitset_type>::serialize("binary_rep.csv");
@@ -44,9 +38,9 @@ bool MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hyp
 		// explore binary representation to check if we have clone
 		// if we have, memorize the indexes of the original and the cloned
 		// if the cloned bitset index is into a toExplore list, dont compute the mt for the clone but use those from the original
-		Logger::log(GREEN, "computing clones\n", RESET);
+		//Logger::log("computing clones\n");
 		unsigned int cloneListSize = BinaryRepresentation::buildCloneList();
-		Logger::log(GREEN, "found ", cloneListSize, " clones\n", RESET);
+		Logger::log(cloneListSize, " clones found\n");
 
 		if (cloneListSize == 0)
 			this->useCloneOptimization = false;
@@ -82,7 +76,7 @@ std::vector<std::shared_ptr<Itemset>> MT_Miner::computeMinimalTransversals()
 	// create a graph, then compute minimal transversal from the binary representation
 	TreeNode rootNode(this->useCloneOptimization);
 	
-	// lambda function called during parsing every 20 seconds
+	// lambda function called during parsing every 30 seconds
 	auto ftr = std::async(std::launch::async, [&rootNode]() {
 		const int secondsToWait = 30;
 		int n = 1;
@@ -113,22 +107,24 @@ std::vector<std::shared_ptr<Itemset>> MT_Miner::computeMinimalTransversals()
 	
 	// print timer
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
-	Logger::log(YELLOW, "computing minimal transversals done in ", duration, " ms\n", RESET);
-	for(auto it = Profiler::functionDurationMap.begin(); it != Profiler::functionDurationMap.end(); it++)
-		std::cout << CYAN << "total duration of " << it->first << " : " << it->second.count() << " ms" << RESET << std::endl;
+	//Logger::log("Found ", graph_mt.size(), " minimal transverses in ", duration, " ms\n");
+	auto duration2 = duration / 1000.0;
+	Logger::log("Found ", graph_mt.size(), " minimal transverses in ", duration2, " s\n");
 
 	// sort transversals itemset
 	//graph_mt = sortVectorOfItemset(graph_mt);
 
 	// print minimal transversals
-	Logger::log(YELLOW, "\nminimal transversals count : ", graph_mt.size(), "\n", RESET);
-	if (graph_mt.size() > 6)
-	{
-		for_each(graph_mt.begin(), graph_mt.begin() + 5, [&](const std::shared_ptr<Itemset>& elt) { Logger::log(GREEN, elt->toString(), "\n", RESET); });
-		Logger::log(GREEN, "...\n", RESET);
-	}
-	else
-		for_each(graph_mt.begin(), graph_mt.end(), [&](const std::shared_ptr<Itemset>& elt) { Logger::log(GREEN, elt->toString(), "\n", RESET); });
+	//Logger::log("\nminimal transversals count : ", graph_mt.size(), "\n");
+	//if (graph_mt.size() > 6)
+	//{
+	//	for_each(graph_mt.begin(), graph_mt.begin() + 5, [&](const std::shared_ptr<Itemset>& elt) { Logger::log(elt->toString(), "\n"); });
+	//	Logger::log("...\n",);
+	//}
+	//else
+	//	for_each(graph_mt.begin(), graph_mt.end(), [&](const std::shared_ptr<Itemset>& elt) { Logger::log(elt->toString(), "\n"); });
+
+	//Logger::log(RESET);
 
 	// write tree into js
 	//JsonTree::writeJsonNode(graph_mt);

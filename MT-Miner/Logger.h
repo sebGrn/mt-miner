@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <cstdio>
 
 //the following are UBUNTU/LINUX, and MacOS ONLY terminal color codes.
 #define RESET		"\033[0m"
@@ -38,6 +39,7 @@ public:
 
 		if (verboseIntoFile)
 		{
+			//std::remove(filename.c_str());
 			fileStream = std::ofstream(filename, std::ofstream::out);
 		}
 	}

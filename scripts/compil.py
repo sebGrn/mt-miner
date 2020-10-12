@@ -33,7 +33,7 @@ def update_bitset_count(transation_count):
             else:
                 print(line, end='')
 
-                
+
 def run_compilation(transation_count):
     # run cmake and make
     # create .out
@@ -46,13 +46,13 @@ def run_compilation(transation_count):
         p = subprocess.Popen(["cmake", "..", "-DCMAKE_BUILD_TYPE=Release"])
         p.wait()
 
-        p = subprocess.Popen(["make"])
+        p = subprocess.Popen(["make", "--no-print-directory"])
         p.wait()
 
         os.chdir("..")
 
-        
-def run_miner(file, transation_count):
+
+def run_miner(file, transation_count, log_file):
     # run mt miner with file 
     
     folder_path = "build" + str(transation_count)
@@ -62,27 +62,29 @@ def run_miner(file, transation_count):
     
     # verbose : print logs into console
     # log : print logs into file
+    # log-file : print logs into file
     # output : save results into file
     # use clone : use clone optimisation
-    p = subprocess.Popen(["./" + folder_path + "/mt_miner", file, "--verbose=true", "--log=false", "--output=false", "--use-clone=true"])
+    log_file_arg = "--log-file=" + log_file
+    p = subprocess.Popen(["./" + folder_path + "/mt_miner", file, "--verbose=true", "--log=true", log_file_arg, "--output=false", "--use-clone=true"])
     p.wait()
 
 
-def run(filename):
-    start = perf_counter()
-
+def compil_and_run_miner(filename, log_file):
+    
     file = filename
     transaction_count = get_items_count(file)
-    print("items count :", transaction_count)
-
+    
+    print("update bitset count into miner ", transaction_count, "transactions")
     update_bitset_count(transaction_count)
+    print("miner compilation...")
     run_compilation(transaction_count)
-    run_miner(file, transaction_count)
-
-    end = perf_counter()
-    print("Elapsed time:", end - start, "sec") 
+    print("running miner...")
+    run_miner(file, transaction_count, log_file)
 
 
+
+'''
 # start program
 if(len(sys.argv) != 2):
     print("usage :  python3 ./compil.py \"../data/win800.dat\"")
@@ -90,3 +92,4 @@ else:
     filename = str(sys.argv[1])
     print("loading hypergraph from file", filename)
     run(filename)
+'''

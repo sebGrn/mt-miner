@@ -32,6 +32,7 @@ public:
 	enum ParameterType {
 		VERBOSE_MODE,
 		LOG_TO_FILE,
+		FILENAME_OUTPUT_LOG,
 		OUTPUT_TO_FILE,
 		USE_CLONE,
 		NB_PARAM
@@ -44,6 +45,7 @@ public:
 		// give values to arguments
 		argumentValues.push_back(std::pair<ParameterType, std::string>(ParameterType::VERBOSE_MODE, "--verbose"));
 		argumentValues.push_back(std::pair<ParameterType, std::string>(ParameterType::LOG_TO_FILE, "--log"));
+		argumentValues.push_back(std::pair<ParameterType, std::string>(ParameterType::FILENAME_OUTPUT_LOG, "--log-file"));
 		argumentValues.push_back(std::pair<ParameterType, std::string>(ParameterType::OUTPUT_TO_FILE, "--output"));
 		argumentValues.push_back(std::pair<ParameterType, std::string>(ParameterType::USE_CLONE, "--use-clone"));
 	}
@@ -55,6 +57,7 @@ public:
 			<< "\t-h,--help\t\tShow this help message\n"
 			<< "\t--verbose\t\ttrue/false\n"
 			<< "\t--log\t\ttrue/false\n"
+			<< "\t--log-file\t\toutput.txt\n"
 			<< "\t--output\t\ttrue/false\n" 
 			<< RESET << std::endl;
 	}
@@ -63,11 +66,11 @@ public:
 	{
 		std::map<ParameterType, std::string> parameterList;
 		// Parse the command line and the option file
-		if (argc < ParameterType::NB_PARAM)
-		{
-			showUsage(argv[0]);
-		}
-		else
+		//if (argc < ParameterType::NB_PARAM)
+		//{
+		//	showUsage(argv[0]);
+		//}
+		//else
 		{
 			for (int i = 1; i < argc; ++i)
 			{
@@ -88,7 +91,7 @@ public:
 						{
 							parameterList[argument.first] = value;
 						}
-						});
+					});
 				}
 			}
 		}
@@ -98,17 +101,15 @@ public:
 
 // ----------------------------------------------------------------------------------------------------------- //
 
-void runMinimalTransversals(const std::string& file, bool useCloneOptimization, bool verbose, bool useOutputFile, bool useOutputLogFile)
+void runMinimalTransversals(const std::string& file, bool useCloneOptimization, bool verbose, bool useOutputFile, bool useOutputLogFile, const std::string& outputLogFile)
 {
-	std::cout << BOLDYELLOW << "\n***** Running MT Miner *****" << RESET << std::endl << std::endl;
+	//std::cout << BOLDYELLOW << "\n***** Running MT Miner *****" << RESET << std::endl << std::endl;
 
 	unsigned int objectCount = 0;
 	unsigned int itemCount = 0;
 	std::shared_ptr<HyperGraph> hypergraph;
 
-	std::string logFile = file;
-	logFile += ".log";
-	Logger::init(logFile, verbose, useOutputLogFile);
+	Logger::init(outputLogFile, verbose, useOutputLogFile);
 
 	// parser file
 	HypergraphParser parser;
@@ -131,7 +132,7 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 				std::string outFile = file;
 				outFile += ".out";
 
-				Logger::log(GREEN, "saving minimal transversals into file : ", outFile, "\n", RESET);
+				Logger::log("saving minimal transversals into file : ", outFile, "\n");
 				std::ofstream outputStream;
 				outputStream.open(outFile);
 				for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const std::shared_ptr<Itemset>& elt) { outputStream << elt->toString() << std::endl; });
@@ -199,10 +200,22 @@ int main(int argc, char* argv[])
 	parser.buildParameters();
 	std::map<ArgumentParser::ParameterType, std::string> parameterList = parser.extractArguments(argc, argv);
 
-	bool verboseMode = parameterList[ArgumentParser::VERBOSE_MODE] == "true" || parameterList[ArgumentParser::VERBOSE_MODE] == "True" || parameterList[ArgumentParser::VERBOSE_MODE] == "TRUE";
-	bool useOutputLogFile = parameterList[ArgumentParser::LOG_TO_FILE] == "true" || parameterList[ArgumentParser::LOG_TO_FILE] == "True" || parameterList[ArgumentParser::LOG_TO_FILE] == "TRUE";
-	bool useOutputFile = parameterList[ArgumentParser::OUTPUT_TO_FILE] == "true" || parameterList[ArgumentParser::OUTPUT_TO_FILE] == "True" || parameterList[ArgumentParser::OUTPUT_TO_FILE] == "TRUE";
-	bool useCloneOptimization = parameterList[ArgumentParser::USE_CLONE] == "true" || parameterList[ArgumentParser::USE_CLONE] == "True" || parameterList[ArgumentParser::USE_CLONE] == "TRUE";
+	bool verboseMode = true;
+	bool useOutputLog = false;
+	std::string useOutputLogFile = "log.txt";
+	bool useOutputFile = false;
+	bool useCloneOptimization = true;
 
-	runMinimalTransversals(file, useCloneOptimization, verboseMode, useOutputFile, useOutputLogFile);
+	if(parameterList.find(ArgumentParser::VERBOSE_MODE) != parameterList.end())
+		verboseMode = parameterList[ArgumentParser::VERBOSE_MODE] == "true" || parameterList[ArgumentParser::VERBOSE_MODE] == "True" || parameterList[ArgumentParser::VERBOSE_MODE] == "TRUE";
+	if (parameterList.find(ArgumentParser::LOG_TO_FILE) != parameterList.end())
+		useOutputLog = parameterList[ArgumentParser::LOG_TO_FILE] == "true" || parameterList[ArgumentParser::LOG_TO_FILE] == "True" || parameterList[ArgumentParser::LOG_TO_FILE] == "TRUE";
+	if (parameterList.find(ArgumentParser::FILENAME_OUTPUT_LOG) != parameterList.end())
+		useOutputLogFile = parameterList[ArgumentParser::FILENAME_OUTPUT_LOG];
+	if (parameterList.find(ArgumentParser::OUTPUT_TO_FILE) != parameterList.end())
+		useOutputFile = parameterList[ArgumentParser::OUTPUT_TO_FILE] == "true" || parameterList[ArgumentParser::OUTPUT_TO_FILE] == "True" || parameterList[ArgumentParser::OUTPUT_TO_FILE] == "TRUE";
+	if (parameterList.find(ArgumentParser::USE_CLONE) != parameterList.end())
+		useCloneOptimization = parameterList[ArgumentParser::USE_CLONE] == "true" || parameterList[ArgumentParser::USE_CLONE] == "True" || parameterList[ArgumentParser::USE_CLONE] == "TRUE";
+
+	runMinimalTransversals(file, useCloneOptimization, verboseMode, useOutputFile, useOutputLog, useOutputLogFile);
 }

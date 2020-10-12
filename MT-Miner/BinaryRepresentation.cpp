@@ -43,7 +43,7 @@ void BinaryRepresentation::buildFromFormalContext(const FormalContext& context)
 
 	unsigned int nbElement = BinaryRepresentation::itemCount * BinaryRepresentation::objectCount;
 	double sparsity = (nbElement - sum) / static_cast<double>(nbElement);
-	std::cout << RED << "sparsity " << (1.0 - sparsity) * 100.0 << "% of bits are sets" << std::endl;
+	Logger::log((1.0 - sparsity) * 100.0, "% of bits are sets\n");
 };
 
 
