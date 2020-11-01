@@ -4,7 +4,6 @@
 
 #include "BinaryRepresentation.h"
 #include "Logger.h"
-#include "Profiler.h"
 
 unsigned int BinaryRepresentation::objectCount = 0;
 unsigned int BinaryRepresentation::itemCount = 0;
@@ -32,7 +31,7 @@ void BinaryRepresentation::buildFromFormalContext(const FormalContext& context)
 			item->staticBitset.set(i, bit);			
 			if (bit)
 			{
-				item->sparseBitset.set(i, true);
+				//item->sparseBitset.set(i, true);
 				sum++;
 			}
 		}

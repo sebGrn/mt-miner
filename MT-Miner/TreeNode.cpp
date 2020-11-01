@@ -1,6 +1,5 @@
 #include "TreeNode.h"
 #include "Logger.h"
-#include "Profiler.h"
 
 std::atomic_ullong TreeNode::nbTotalChildren(0);
 // to avoid interleaved outputs
@@ -36,9 +35,12 @@ void TreeNode::recurseOnClonedItemset(const std::shared_ptr<Itemset>& currentIte
 				std::shared_ptr<Item> clone = item->getClone(j);
 
 				// call copy constructor to make a new copy of the itemset
-				std::shared_ptr<Itemset> clonedItemset = std::make_shared<Itemset>(currentItemset.get());
-				clonedItemset->replaceItem(i, clone);
+				//std::shared_ptr<Itemset> clonedItemset = std::make_shared<Itemset>(currentItemset.get());
+				//clonedItemset->replaceItem(i, clone);
 
+				// make a copy of currentItemset and replance ith item by clone item
+				std::shared_ptr<Itemset> clonedItemset = currentItemset->createAndReplaceItem(i, clone);
+				
 				graph_mt.push_back(clonedItemset);
 
 				for(unsigned int j = i; j < clonedItemset->getItemCount(); j++)
@@ -116,7 +118,7 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals_task(
 	if (toTraverse.empty())
 		return std::vector<std::shared_ptr<Itemset>>();
 
-	// contains list of itemsets that will be combined to the candidates
+	// contains list of itemsets that will be combined to the candidates, the largest space in which is not possible to find minimal transversals
 	std::vector<std::shared_ptr<Itemset>> maxClique;
 	// contains list of itemsets that are candidates
 	std::vector<std::shared_ptr<Itemset>> toExplore;
@@ -135,22 +137,23 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals_task(
 	{
 		// store toExploreList max index
 		unsigned int lastIndexToTest = static_cast<unsigned int>(toExplore.size());
-		// combine toExplore (left part) with maxClique list (right part) into a combined list
-		std::vector<std::shared_ptr<Itemset>> combinedItemsetList = toExplore;
-		combinedItemsetList.insert(combinedItemsetList.end(), maxClique.begin(), maxClique.end());
+		// combine toExplore (left part) with maxClique list (right part) into a toExplore list
+		toExplore.insert(toExplore.end(), maxClique.begin(), maxClique.end());
 
-		// loop on candidates from toExplore list only
+		// combine each element between [0, lastIndexToTest] with the entire combined itemset list
+		// loop on candidate itemset from initial toExplore list
 		for (unsigned int i = 0; i < lastIndexToTest; i++)
 		{
 			// build newTraverse list
 			std::vector<std::shared_ptr<Itemset>> newToTraverse;
-			std::shared_ptr<Itemset> toCombinedLeft = combinedItemsetList[i];
-			// combine each element between [0, lastIndexToTest] with the entire combined itemset list
-			for (unsigned int j = i + 1; j < combinedItemsetList.size(); j++)
+			auto toCombinedLeft = toExplore[i];
+
+			// loop on next candidate itemset
+			for (unsigned int j = i + 1; j <  toExplore.size(); j++)
 			{
-				assert(j < combinedItemsetList.size());
-				std::shared_ptr<Itemset> toCombinedRight = combinedItemsetList[j];
-				std::shared_ptr<Itemset> combinedItemset = Itemset::combineItemset(toCombinedLeft, toCombinedRight); 
+				assert(j < toExplore.size());
+				auto toCombinedRight = toExplore[j];
+				auto combinedItemset = Itemset::combineItemset(toCombinedLeft, toCombinedRight); 
 
 				// check if combined item is containing a clone (if true, do not compute the minimal transverals) and if combined itemset is essential
 				//bool isEss = binaryRepresentation->isEssential(combinedItemset);
@@ -159,10 +162,12 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals_task(
 				//	Itemset::combineItemset(toCombinedLeft, toCombinedRight);
 				//	int k = 0;
 				//}
-				//if (!this->binaryRepresentation->containsAClone(combinedItemset) && binaryRepresentation->isEssential(combinedItemset))
-				if (!combinedItemset->containsAClone() && binaryRepresentation->isEssential(combinedItemset))
-				//if (combinedItemset->isEssential && !combinedItemset->containsAClone())
+#ifdef NEW_ISESSENTIAL
+				if (combinedItemset->isEssential && !combinedItemset->containsAClone())
+#endif
+				if (!combinedItemset->containsAClone() && binaryRepresentation->isEssential(combinedItemset))				
 					newToTraverse.push_back(combinedItemset);
+
 			}
 
 			if (!newToTraverse.empty())

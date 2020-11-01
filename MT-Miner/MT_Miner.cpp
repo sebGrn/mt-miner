@@ -1,6 +1,5 @@
 #include "MT_Miner.h"
 #include "utils.h"
-#include "Profiler.h"
 
 std::atomic_bool MT_Miner::stop(false);
 
@@ -54,15 +53,22 @@ void MT_Miner::computeInitalToTraverseList(std::vector<std::shared_ptr<Itemset>>
 	for (unsigned int i = 1; i <= BinaryRepresentation::getItemCount(); i++)
 	{
 		std::shared_ptr<Item> item = BinaryRepresentation::getItemFromKey(i);
-		// get itemset from binary representation and store them into lists
-		// these itemsets will be used in the program
-		// we dont need binary representation anymore here
-		std::shared_ptr<Itemset> itemset = std::make_shared<Itemset>();
-		//itemset->itemset.push_back(item);
-		itemset->addItem(item);
-		// dont push clones into initial trasverse list
 		if (!item->isAClone())
+		{
+			// get itemset from binary representation and store them into lists
+			// these itemsets will be used in the program
+			// we dont need binary representation anymore here
+			std::shared_ptr<Itemset> itemset = std::make_shared<Itemset>();
+			
+			itemset->addFirstItem(item);			
+			itemset->orValue = item->staticBitset;
+			itemset->orSupport = itemset->orValue.count();
+			itemset->dirty = false;
+			itemset->isEssential = false;			
+
+			// dont push clones into initial trasverse list		
 			toTraverse.push_back(itemset);
+		}
 	}
 }
 

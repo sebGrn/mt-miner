@@ -11,9 +11,6 @@ class Itemset
 private:
 	std::vector<std::shared_ptr<Item>> itemset;
 	
-	// used to compute isEssential
-	//SparseBitset cumulatedMatrix;
-
 public:
 	// true if bitset_count & or value has to be computed
 	bool dirty; 
@@ -21,6 +18,9 @@ public:
 	StaticBitset orValue;
 	// support of the current itemset (nb 1's bit) of OR computation
 	unsigned int orSupport;
+
+	// true if itemset has at least an item who is a clone
+	bool hasClone;
 
 	//
 	bool isEssential;
@@ -41,22 +41,26 @@ public:
 	Itemset();
 	Itemset(const Itemset* itemset);
 
+	void addFirstItem(const std::shared_ptr<Item>& item);
 	void addItem(const std::shared_ptr<Item>& item);
-	std::string toString() const;
-	//static std::string itemsetListToString(const std::vector<Itemset>& v);
-
+		
 	static std::shared_ptr<Itemset> combineItemset(const std::shared_ptr<Itemset>& str1, const std::shared_ptr<Itemset>& str2);
 
 	unsigned int getItemCount() const;
 	std::shared_ptr<Item> getItem(unsigned int i) const;
+
+	std::shared_ptr<Itemset> createAndReplaceItem(unsigned int i, const std::shared_ptr<Item>& item);
 	void replaceItem(unsigned int i, const std::shared_ptr<Item>& item);
+
+#ifdef NEW_ESSENTIAL
 	void UpdateIsEssential(const std::shared_ptr<Item>& item);
+#endif
 
 	bool containsAClone() const;
 
-	//bool compareItemIndex(const std::pair<unsigned int, unsigned int>& a, const std::pair<unsigned int, unsigned int>& b);
-
 	bool operator==(const Itemset& other);
+
+	std::string toString() const;
 };
 
 inline unsigned int Itemset::getItemCount() const
@@ -69,8 +73,3 @@ inline std::shared_ptr<Item> Itemset::getItem(unsigned int i) const
 	assert(i < this->itemset.size());
 	return this->itemset[i];
 }
-
-//inline bool Itemset::compareItemIndex(const std::pair<unsigned int, unsigned int>& a, const std::pair<unsigned int, unsigned int>& b)
-//{
-//	return a.second == b.second;
-//}

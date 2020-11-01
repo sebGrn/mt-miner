@@ -25,7 +25,7 @@ def update_bitset_count(transation_count):
     # replace BITSET_SIZE with transaction_count into Item.h
     # from https://stackoverflow.com/questions/17140886/how-to-search-and-replace-text-in-a-file
     new_line = "#define BITSET_SIZE " + str(transation_count)
-    filename = "Item.h"
+    filename = "../MT-Miner/Item.h"
     with fileinput.FileInput(filename, inplace=True) as file:
         for line in file:
             if '#define BITSET_SIZE' in line:                
@@ -91,5 +91,5 @@ if(len(sys.argv) != 2):
 else:
     filename = str(sys.argv[1])
     print("loading hypergraph from file", filename)
-    run(filename)
+    compil_and_run_miner(filename, "res.txt")
 '''
