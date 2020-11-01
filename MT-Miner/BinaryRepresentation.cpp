@@ -102,6 +102,8 @@ unsigned int BinaryRepresentation::computeDisjonctifSupport(std::shared_ptr<Item
 	// check if OR operation has already been computed for this itemset
 	if (pattern->dirty)
 	{
+		// never goes here !!
+		std::cout << "have to compute disjonctive support" << std::endl;
 		// all bitsets have the same size
 		StaticBitset SumOfN_1Items;
 		for (size_t i = 0, n = pattern->getItemCount(); i < n; i++)

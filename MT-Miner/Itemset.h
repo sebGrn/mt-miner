@@ -39,7 +39,6 @@ public:
 	
 public:
 	Itemset();
-	Itemset(const Itemset* itemset);
 
 	void addFirstItem(const std::shared_ptr<Item>& item);
 	void addItem(const std::shared_ptr<Item>& item);
@@ -50,7 +49,6 @@ public:
 	std::shared_ptr<Item> getItem(unsigned int i) const;
 
 	std::shared_ptr<Itemset> createAndReplaceItem(unsigned int i, const std::shared_ptr<Item>& item);
-	void replaceItem(unsigned int i, const std::shared_ptr<Item>& item);
 
 #ifdef NEW_ESSENTIAL
 	void UpdateIsEssential(const std::shared_ptr<Item>& item);

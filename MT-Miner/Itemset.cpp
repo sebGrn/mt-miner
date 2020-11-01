@@ -9,18 +9,6 @@ Itemset::Itemset()
 	this->hasClone = false;
 }
 
-Itemset::Itemset(const Itemset* itemset)
-{
-	this->orValue = itemset->orValue;
-	this->orSupport = itemset->orSupport;
-	this->dirty = itemset->dirty;
-	this->isEssential = itemset->isEssential;
-	this->hasClone = itemset->hasClone;
-	// copy items
-	for (auto it = itemset->itemset.begin(); it != itemset->itemset.end(); it++)
-		this->itemset.push_back(std::make_shared<Item>(it->get()));
-}
-
 bool Itemset::containsAClone() const
 {
 	return this->hasClone;
@@ -85,29 +73,6 @@ bool Itemset::operator==(const Itemset& other)
 			return false;
 	}
 	return true;
-}
-
-void Itemset::replaceItem(unsigned int i, const std::shared_ptr<Item>& item)
-{
-	assert(i < this->itemset.size());
-	if (i < this->itemset.size())
-	{
-		// remove previous element
-		this->itemset.erase(this->itemset.begin() + i);
-		// insert element
-		this->itemset.insert(this->itemset.begin() + i, item);
-
-		// an item has changed, compute clone for all item
-		this->hasClone = false;
-		for (auto elt : this->itemset)
-		{
-			if (elt->isAClone())
-			{
-				this->hasClone = true;
-				break;
-			}
-		}
-	}
 }
 
 // make a copy of currentItemset and replance ith item by clone item

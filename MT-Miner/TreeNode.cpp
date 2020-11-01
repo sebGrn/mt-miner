@@ -20,32 +20,31 @@ TreeNode::~TreeNode()
 {
 }
 
-void TreeNode::recurseOnClonedItemset(const std::shared_ptr<Itemset>& currentItemset, unsigned int i, std::vector<std::shared_ptr<Itemset>>& graph_mt)
+void TreeNode::recurseOnClonedItemset(const std::shared_ptr<Itemset>& currentItemset, unsigned int iItem, std::vector<std::shared_ptr<Itemset>>& graph_mt)
 {
-	if (i < currentItemset->getItemCount())
+	assert(iItem < currentItemset->getItemCount()); 
+	
+	std::shared_ptr<Item> item = currentItemset->getItem(iItem);
+
+	// test if current item contains an original for all its items
+	if (item->isAnOriginal())
 	{
-		std::shared_ptr<Item> item = currentItemset->getItem(i);
-
-		// test if current item contains an original for all its items
-		if (item->isAnOriginal())
+		// item is an original
+		// create a new itemset by replacing original with its clone and update graph mt list
+		// then recurse on new itemset
+		for (unsigned int j = 0, cloneCount = item->getCloneCount(); j < cloneCount; j++)
 		{
-			for (unsigned int j = 0, cloneCount = item->getCloneCount(); j < cloneCount; j++)
-			{
-				// get clone index for current itemset
-				std::shared_ptr<Item> clone = item->getClone(j);
+			// get clone index for current itemset
+			std::shared_ptr<Item> clone = item->getClone(j);
 
-				// call copy constructor to make a new copy of the itemset
-				//std::shared_ptr<Itemset> clonedItemset = std::make_shared<Itemset>(currentItemset.get());
-				//clonedItemset->replaceItem(i, clone);
-
-				// make a copy of currentItemset and replance ith item by clone item
-				std::shared_ptr<Itemset> clonedItemset = currentItemset->createAndReplaceItem(i, clone);
+			// make a copy of currentItemset and replace ith item by clone item
+			std::shared_ptr<Itemset> clonedItemset = currentItemset->createAndReplaceItem(iItem, clone);
 				
-				graph_mt.push_back(clonedItemset);
+			graph_mt.push_back(clonedItemset);
 
-				for(unsigned int j = i; j < clonedItemset->getItemCount(); j++)
-					recurseOnClonedItemset(clonedItemset, j, graph_mt);
-			}
+			// recurse on new cloned itemset to replace kth original by 
+			for(unsigned int k = iItem; k < clonedItemset->getItemCount(); k++)
+				recurseOnClonedItemset(clonedItemset, k, graph_mt);
 		}
 	}
 }
