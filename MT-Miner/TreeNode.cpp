@@ -43,7 +43,7 @@ void TreeNode::recurseOnClonedItemset(const std::shared_ptr<Itemset>& currentIte
 			graph_mt.push_back(clonedItemset);
 
 			// recurse on new cloned itemset to replace kth original by 
-			for(unsigned int k = iItem; k < clonedItemset->getItemCount(); k++)
+			for(unsigned int k = iItem, n = clonedItemset->getItemCount(); k < n; k++)
 				recurseOnClonedItemset(clonedItemset, k, graph_mt);
 		}
 	}
@@ -57,50 +57,59 @@ void TreeNode::updateListsFromToTraverse(const std::vector<std::shared_ptr<Items
 	maxClique.clear();
 	toExplore.clear();
 
+	// store object count for optimization
+	unsigned int objectCount = this->binaryRepresentation->getObjectCount();
+	
 	// results of cumulated combined items / must be declared outside of the loop
-	std::shared_ptr<Itemset> previousItem;
+	std::shared_ptr<Itemset> previousItemset;
+
 	// loop on toTraverse list and build maxClique and toExplore lists
-	for (auto it = toTraverse.begin(); it != toTraverse.end(); it++)
+	for (auto currentItemset_it = toTraverse.begin(); currentItemset_it != toTraverse.end(); currentItemset_it++)
 	{
-		//Itemset& currentItem = const_cast<Itemset&>(*it);
-		std::shared_ptr<Itemset> currentItemset = (*it);
-		unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(currentItemset);
-		if (disjSup == this->binaryRepresentation->getObjectCount())
+		// Compute disjunctive support for each itemset of toTraverse list
+		//	if disjunctive support is equal to object count --> add the itemset to graphMt list (then process its clones)
+		unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(*currentItemset_it);
+		if (disjSup == objectCount)
 		{
 			// we have a minimal transversal
-			graph_mt.push_back(currentItemset);
+			graph_mt.push_back((*currentItemset_it));
 
 			if (this->useCloneOptimization)
 			{
-				for (unsigned int i = 0; i < currentItemset->getItemCount(); i++)
-					recurseOnClonedItemset(currentItemset, i, graph_mt);
+				for (unsigned int i = 0, n = (*currentItemset_it)->getItemCount(); i < n; i++)
+					recurseOnClonedItemset((*currentItemset_it), i, graph_mt);
 			}
 		} 
 		else
 		{
-			if ((currentItemset == (*toTraverse.begin())) && currentItemset->getItemCount() == 1)
+			// combine itemset one by one from toTraverse list as combine itemset
+			// if disjunctive support for combined itemset is equal to object count --> add the itemset to toExplore list
+			//	if not --> add the itemset to maxClique list
+
+			// if current itemset is the 1st one, store it into a previous itemset variable and use it later for computing combined itemsets
+			if (((*currentItemset_it) == (*toTraverse.begin())) && (*currentItemset_it)->getItemCount() == 1)
 			{
 				// must be the 1st element with only one element
-				previousItem = currentItemset;
-				maxClique.push_back(currentItemset);
+				previousItemset = (*currentItemset_it);
+				maxClique.push_back((*currentItemset_it));
 			}
 			else
 			{
 				// we can combine with previous element / make a union on 2 elements
-				std::shared_ptr<Itemset> combinedItem;
-				if(previousItem)
-					combinedItem = Itemset::combineItemset(previousItem, currentItemset);
+				std::shared_ptr<Itemset> combinedItemset;
+				if(previousItemset)
+					combinedItemset = Itemset::combineItemset(previousItemset, (*currentItemset_it));
 				else 
-					combinedItem = currentItemset;
-				unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(combinedItem);
-				if (disjSup != this->binaryRepresentation->getObjectCount())
+					combinedItemset = (*currentItemset_it);
+				unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(combinedItemset);
+				if (disjSup != objectCount)
 				{
-					previousItem = combinedItem;
-					maxClique.push_back(currentItemset);
+					previousItemset = combinedItemset;
+					maxClique.push_back((*currentItemset_it));
 				}
 				else
 				{
-					toExplore.push_back(currentItemset);
+					toExplore.push_back((*currentItemset_it));
 				}
 			}
 		}
@@ -139,12 +148,13 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals_task(
 		// combine toExplore (left part) with maxClique list (right part) into a toExplore list
 		toExplore.insert(toExplore.end(), maxClique.begin(), maxClique.end());
 
+		// build newTraverse list
+		std::vector<std::shared_ptr<Itemset>> newToTraverse;
+
 		// combine each element between [0, lastIndexToTest] with the entire combined itemset list
 		// loop on candidate itemset from initial toExplore list
 		for (unsigned int i = 0; i < lastIndexToTest; i++)
 		{
-			// build newTraverse list
-			std::vector<std::shared_ptr<Itemset>> newToTraverse;
 			auto toCombinedLeft = toExplore[i];
 
 			// loop on next candidate itemset
@@ -154,6 +164,7 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals_task(
 				auto toCombinedRight = toExplore[j];
 				auto combinedItemset = Itemset::combineItemset(toCombinedLeft, toCombinedRight); 
 
+#ifdef NEW_ISESSENTIAL
 				// check if combined item is containing a clone (if true, do not compute the minimal transverals) and if combined itemset is essential
 				//bool isEss = binaryRepresentation->isEssential(combinedItemset);
 				//if (isEss != combinedItemset->isEssential)
@@ -161,12 +172,10 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals_task(
 				//	Itemset::combineItemset(toCombinedLeft, toCombinedRight);
 				//	int k = 0;
 				//}
-#ifdef NEW_ISESSENTIAL
 				if (combinedItemset->isEssential && !combinedItemset->containsAClone())
 #endif
 				if (!combinedItemset->containsAClone() && binaryRepresentation->isEssential(combinedItemset))				
 					newToTraverse.push_back(combinedItemset);
-
 			}
 
 			if (!newToTraverse.empty())
@@ -186,6 +195,9 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals_task(
 
 				// modify delay from 1 to 100 to see idle behaviour
 				//std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+				// new list has been managed by the thread, clear it
+				newToTraverse.clear();
 			}
 		}
 	}

@@ -35,7 +35,7 @@ public:
 	/// build binary representation from formal context
 	static void buildFromFormalContext(const FormalContext& context);
 	///
-	static unsigned int computeDisjonctifSupport(std::shared_ptr<Itemset>& pattern);
+	static unsigned int computeDisjunctifSupport(const std::shared_ptr<Itemset>& pattern);
 	/// return true if element is essential
 	static bool isEssential(std::shared_ptr<Itemset>& itemsOfPattern);
 	///

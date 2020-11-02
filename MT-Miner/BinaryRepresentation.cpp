@@ -97,27 +97,28 @@ bool BinaryRepresentation::isEssential(std::shared_ptr<Itemset>& itemset)
 	return isEssential;
 }
 
-unsigned int BinaryRepresentation::computeDisjonctifSupport(std::shared_ptr<Itemset>& pattern)
+unsigned int BinaryRepresentation::computeDisjunctifSupport(const std::shared_ptr<Itemset>& pattern)
 {
-	// check if OR operation has already been computed for this itemset
-	if (pattern->dirty)
-	{
-		// never goes here !!
-		std::cout << "have to compute disjonctive support" << std::endl;
-		// all bitsets have the same size
-		StaticBitset SumOfN_1Items;
-		for (size_t i = 0, n = pattern->getItemCount(); i < n; i++)
-		{
-			unsigned int columnKey = pattern->getItem(i)->attributeIndex;
-			StaticBitset bitset = BinaryRepresentation::getItemFromKey(columnKey)->staticBitset;
-			if(!bitset.none())
-				SumOfN_1Items = SumOfN_1Items | bitset;
-		}
-		unsigned int disSupp = SumOfN_1Items.count();
-		pattern->orSupport = disSupp;
-		pattern->dirty = false;
-		pattern->orValue = SumOfN_1Items;
-	}
+	// OR operation has already been computed for this itemset into combined itemset function
+	assert(pattern->dirty);
+	//if (pattern->dirty)
+	//{
+	//	// never goes here !!
+	//	std::cout << "have to compute disjonctive support" << std::endl;
+	//	// all bitsets have the same size
+	//	StaticBitset SumOfN_1Items;
+	//	for (size_t i = 0, n = pattern->getItemCount(); i < n; i++)
+	//	{
+	//		unsigned int columnKey = pattern->getItem(i)->attributeIndex;
+	//		StaticBitset bitset = BinaryRepresentation::getItemFromKey(columnKey)->staticBitset;
+	//		if(!bitset.none())
+	//			SumOfN_1Items = SumOfN_1Items | bitset;
+	//	}
+	//	unsigned int disSupp = SumOfN_1Items.count();
+	//	pattern->orSupport = disSupp;
+	//	pattern->dirty = false;
+	//	pattern->orValue = SumOfN_1Items;
+	//}
 	return pattern->orSupport;
 };
 
