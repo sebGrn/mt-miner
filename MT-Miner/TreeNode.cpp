@@ -20,35 +20,6 @@ TreeNode::~TreeNode()
 {
 }
 
-void TreeNode::recurseOnClonedItemset(const std::shared_ptr<Itemset>& currentItemset, unsigned int iItem, std::vector<std::shared_ptr<Itemset>>& graph_mt)
-{
-	assert(iItem < currentItemset->getItemCount()); 
-	
-	std::shared_ptr<Item> item = currentItemset->getItem(iItem);
-
-	// test if current item contains an original for all its items
-	if (item->isAnOriginal())
-	{
-		// item is an original
-		// create a new itemset by replacing original with its clone and update graph mt list
-		// then recurse on new itemset
-		for (unsigned int j = 0, cloneCount = item->getCloneCount(); j < cloneCount; j++)
-		{
-			// get clone index for current itemset
-			std::shared_ptr<Item> clone = item->getClone(j);
-
-			// make a copy of currentItemset and replace ith item by clone item
-			std::shared_ptr<Itemset> clonedItemset = currentItemset->createAndReplaceItem(iItem, clone);
-				
-			graph_mt.push_back(clonedItemset);
-
-			// recurse on new cloned itemset to replace kth original by 
-			for(unsigned int k = iItem, n = clonedItemset->getItemCount(); k < n; k++)
-				recurseOnClonedItemset(clonedItemset, k, graph_mt);
-		}
-	}
-}
-
 void TreeNode::updateListsFromToTraverse(const std::vector<std::shared_ptr<Itemset>>& toTraverse,
 										       std::vector<std::shared_ptr<Itemset>>& maxClique, 											
 											   std::vector<std::shared_ptr<Itemset>>& toExplore,
@@ -77,7 +48,7 @@ void TreeNode::updateListsFromToTraverse(const std::vector<std::shared_ptr<Items
 			if (this->useCloneOptimization)
 			{
 				for (unsigned int i = 0, n = (*currentItemset_it)->getItemCount(); i < n; i++)
-					recurseOnClonedItemset((*currentItemset_it), i, graph_mt);
+					(*currentItemset_it)->recurseOnClonedItemset(i, graph_mt);
 			}
 		} 
 		else
@@ -175,7 +146,7 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals_task(
 				//}
 				if (combinedItemset->isEssential && !combinedItemset->containsAClone())
 #endif
-				if (!combinedItemset->containsAClone() && binaryRepresentation->isEssential(combinedItemset))				
+				if (!combinedItemset->containsAClone() && combinedItemset->isEssential(BinaryRepresentation::getObjectCount()))
 					newToTraverse.push_back(combinedItemset);
 			}
 

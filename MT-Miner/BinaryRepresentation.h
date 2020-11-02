@@ -31,8 +31,6 @@ private:
 public:
 	/// build binary representation from formal context
 	static void buildFromFormalContext(const FormalContext& context);
-	/// return true if element is essential
-	static bool isEssential(std::shared_ptr<Itemset>& itemsOfPattern);
 	///
 	static unsigned int buildCloneList();
 

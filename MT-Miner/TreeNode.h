@@ -51,8 +51,6 @@ private:
 										 std::vector<std::shared_ptr<Itemset>>& toExplore,
 										 std::vector<std::shared_ptr<Itemset>>& graph_mt);
 
-	void recurseOnClonedItemset(const std::shared_ptr<Itemset>& currentItemset, unsigned int i, std::vector<std::shared_ptr<Itemset>>& graph_mt);
-
 	std::vector<std::shared_ptr<Itemset>> computeMinimalTransversals_task(const std::vector<std::shared_ptr<Itemset>>& toTraverse);
 	
 public:

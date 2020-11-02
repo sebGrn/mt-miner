@@ -64,7 +64,7 @@ void MT_Miner::computeInitalToTraverseList(std::vector<std::shared_ptr<Itemset>>
 			itemset->orValue = item->staticBitset;
 			itemset->orSupport = itemset->orValue.count();
 			itemset->dirty = false;
-			itemset->isEssential = false;			
+			//itemset->isEssential = false;
 
 			// dont push clones into initial trasverse list		
 			toTraverse.push_back(itemset);

@@ -46,54 +46,6 @@ void BinaryRepresentation::buildFromFormalContext(const FormalContext& context)
 };
 
 
-// return true if element is essential
-bool BinaryRepresentation::isEssential(std::shared_ptr<Itemset>& itemset)
-{
-	if (itemset->getItemCount() == 1)
-		return true;
-	
-	bool isEssential = false;
-	StaticBitset SumOfN_1Items;
-	for (int i1 = 0, n = itemset->getItemCount(); i1 != n; i1++)
-	{		
-		// dont forget to initialize boolean
-		SumOfN_1Items.reset();
-		isEssential = false;
-	
-		for (int i2 = 0; i2 < n; i2++)
-		{			
-			if (i1 != i2)
-			{
-				StaticBitset bitset = itemset->getItem(i2)->staticBitset;
-				if(!bitset.none())
-					SumOfN_1Items = SumOfN_1Items | bitset;
-			}
-		}
-
-		StaticBitset bitset = itemset->getItem(i1)->staticBitset;
-		for (unsigned int i = 0; i < objectCount; i++)
-		{
-			// compare bit
-			bool bit0 = SumOfN_1Items[i];
-			bool bit1 = bitset[i];
-			if (!bit0 && bit1)
-			{
-				// this bitset is essential, check with next bitset
-				isEssential = true;
-				break;
-			}
-		}
-
-		if (!isEssential)
-		{
-			// this bitset is not essential, break the main loop and return false
-			break;
-		}
-	}
-	return isEssential;
-}
-
-
 unsigned int BinaryRepresentation::buildCloneList()
 {
 	unsigned int nbClone = 0;

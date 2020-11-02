@@ -5,7 +5,7 @@ Itemset::Itemset()
 {
 	this->orSupport = 0;
 	this->dirty = true;
-	this->isEssential = false;
+	//this->isEssential = false;
 	this->hasClone = false;
 }
 
@@ -28,7 +28,7 @@ void Itemset::addFirstItem(const std::shared_ptr<Item>& item)
 	this->orValue = item->staticBitset;
 	this->orSupport = this->orValue.count();
 	this->dirty = false;
-	this->isEssential = false;
+	//this->isEssential = false;
 	// update clone
 	if (item->isClone)
 		this->hasClone = true;
@@ -51,7 +51,7 @@ void Itemset::addItem(const std::shared_ptr<Item>& item)
 	this->orValue = item->staticBitset | this->orValue;
 	this->orSupport = this->orValue.count();
 	this->dirty = false;
-	this->isEssential = false;
+	//this->isEssential = false;
 	// update clone
 	if (item->isClone)
 		this->hasClone = true;
@@ -82,7 +82,7 @@ std::shared_ptr<Itemset> Itemset::createAndReplaceItem(unsigned int iToReplace, 
 	clonedItemset->orValue = this->orValue;
 	clonedItemset->orSupport = this->orSupport;
 	clonedItemset->dirty = this->dirty;
-	clonedItemset->isEssential = this->isEssential;
+	//clonedItemset->isEssential = this->isEssential;
 	clonedItemset->hasClone = this->hasClone;
 
 	for (unsigned int i = 0; i < this->getItemCount(); i++)
@@ -97,12 +97,11 @@ std::shared_ptr<Itemset> Itemset::createAndReplaceItem(unsigned int iToReplace, 
 		{
 			//std::shared_ptr<Item> item = this->getItem(i);
 			//this->itemset.push_back(std::make_shared<Item>(item));
-			clonedItemset->itemset.push_back(this->getItem(i));
+			clonedItemset->itemset.push_back(this->itemset[i]);
 		}
 	}
 	return clonedItemset;
 }
-
 
 std::string Itemset::toString() const
 {
@@ -114,6 +113,35 @@ std::string Itemset::toString() const
 	res.pop_back();
 	res += "}";
 	return res;
+}
+
+void Itemset::recurseOnClonedItemset(unsigned int iItem, std::vector<std::shared_ptr<Itemset>>& graph_mt)
+{
+	assert(iItem < this->getItemCount());
+
+	std::shared_ptr<Item> item = this->itemset[iItem];
+
+	// test if current item contains an original for all its items
+	if (item->isAnOriginal())
+	{
+		// item is an original
+		// create a new itemset by replacing original with its clone and update graph mt list
+		// then recurse on new itemset
+		for (unsigned int j = 0, cloneCount = item->getCloneCount(); j < cloneCount; j++)
+		{
+			// get clone index for current itemset
+			std::shared_ptr<Item> clone = item->getClone(j);
+
+			// make a copy of currentItemset and replace ith item by clone item
+			std::shared_ptr<Itemset> clonedItemset = this->createAndReplaceItem(iItem, clone);
+
+			graph_mt.push_back(clonedItemset);
+
+			// recurse on new cloned itemset to replace kth original by 
+			for (unsigned int k = iItem, n = clonedItemset->getItemCount(); k < n; k++)
+				clonedItemset->recurseOnClonedItemset(k, graph_mt);
+		}
+	}
 }
 
 std::shared_ptr<Itemset> Itemset::combineItemset(const std::shared_ptr<Itemset>& itemset_left, const std::shared_ptr<Itemset>& itemset_right)
@@ -157,6 +185,53 @@ std::shared_ptr<Itemset> Itemset::combineItemset(const std::shared_ptr<Itemset>&
 	return combinedItemset;
 };
 
+// return true if element is essential
+bool Itemset::isEssential(unsigned int objectCount)
+{
+	if (this->getItemCount() == 1)
+		return true;
+
+	bool isEssential = false;
+	StaticBitset SumOfN_1Items;
+	for (int i = 0, n = this->getItemCount(); i != n; i++)
+	{
+		// dont forget to initialize boolean
+		SumOfN_1Items.reset();
+		isEssential = false;
+
+		for (int j = 0; j < n; j++)
+		{
+			if (i != j)
+			{
+				StaticBitset bitset = this->itemset[j]->staticBitset;
+				if (!bitset.none())
+					SumOfN_1Items = SumOfN_1Items | bitset;
+			}
+		}
+
+		StaticBitset bitset = this->itemset[i]->staticBitset;
+		for (unsigned int k = 0; k < objectCount; k++)
+		{
+			// compare bit
+			bool bit0 = SumOfN_1Items[k];
+			bool bit1 = bitset[k];
+			if (!bit0 && bit1)
+			{
+				// this bitset is essential, check with next bitset
+				isEssential = true;
+				break;
+			}
+		}
+
+		// one item is not essential, we can return
+		if (!isEssential)
+		{
+			// this bitset is not essential, break the main loop and return false
+			break;
+		}
+	}
+	return isEssential;
+}
 
 #ifdef NEW_ESSENTIAL
 void Itemset::UpdateIsEssential(const std::shared_ptr<Item>& item)

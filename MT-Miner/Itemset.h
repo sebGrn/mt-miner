@@ -23,7 +23,7 @@ public:
 	bool hasClone;
 
 	//
-	bool isEssential;
+	//bool isEssential;
 	// this map contains the transaction index (line number) / item index (column index) of the minimal transaction list
 	//     0 1 2 3 
 	//   ----------
@@ -48,9 +48,11 @@ public:
 	unsigned int getItemCount() const;
 	unsigned int getDisjunctifSupport() const;
 
-	std::shared_ptr<Item> getItem(unsigned int i) const;
+	void recurseOnClonedItemset(unsigned int iItem, std::vector<std::shared_ptr<Itemset>>& graph_mt);
 
 	std::shared_ptr<Itemset> createAndReplaceItem(unsigned int i, const std::shared_ptr<Item>& item);
+
+	bool isEssential(unsigned int objectCount);
 
 #ifdef NEW_ESSENTIAL
 	void UpdateIsEssential(const std::shared_ptr<Item>& item);
@@ -73,11 +75,4 @@ inline unsigned int Itemset::getDisjunctifSupport() const
 	// OR operation has already been computed for this itemset into combined itemset function
 	assert(this->dirty);
 	return this->orSupport;
-
-}
-
-inline std::shared_ptr<Item> Itemset::getItem(unsigned int i) const
-{
-	assert(i < this->itemset.size());
-	return this->itemset[i];
 }
