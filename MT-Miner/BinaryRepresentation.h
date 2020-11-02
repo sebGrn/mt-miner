@@ -28,20 +28,13 @@ private:
 	/// count number of cloned itemsets has been removed from mt computation
 	static unsigned int nbItemsetNotAddedFromClone;
 
-private:
-	//static bool compareItemsets(Itemset& itemset1, Itemset& itemset2);
-
 public:
 	/// build binary representation from formal context
 	static void buildFromFormalContext(const FormalContext& context);
-	///
-	static unsigned int computeDisjunctifSupport(const std::shared_ptr<Itemset>& pattern);
 	/// return true if element is essential
 	static bool isEssential(std::shared_ptr<Itemset>& itemsOfPattern);
 	///
 	static unsigned int buildCloneList();
-	///
-	//static bool containsAClone(const std::shared_ptr<Itemset>& itemset);
 
 	//
 	static void serialize(const std::string& outputile);

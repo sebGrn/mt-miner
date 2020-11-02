@@ -68,7 +68,7 @@ void TreeNode::updateListsFromToTraverse(const std::vector<std::shared_ptr<Items
 	{
 		// Compute disjunctive support for each itemset of toTraverse list
 		//	if disjunctive support is equal to object count --> add the itemset to graphMt list (then process its clones)
-		unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(*currentItemset_it);
+		unsigned int disjSup = (*currentItemset_it)->getDisjunctifSupport();
 		if (disjSup == objectCount)
 		{
 			// we have a minimal transversal
@@ -101,7 +101,8 @@ void TreeNode::updateListsFromToTraverse(const std::vector<std::shared_ptr<Items
 					combinedItemset = Itemset::combineItemset(previousItemset, (*currentItemset_it));
 				else 
 					combinedItemset = (*currentItemset_it);
-				unsigned int disjSup = this->binaryRepresentation->computeDisjonctifSupport(combinedItemset);
+				
+				unsigned int disjSup = combinedItemset->getDisjunctifSupport();
 				if (disjSup != objectCount)
 				{
 					previousItemset = combinedItemset;

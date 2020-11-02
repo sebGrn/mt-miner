@@ -46,6 +46,8 @@ public:
 	static std::shared_ptr<Itemset> combineItemset(const std::shared_ptr<Itemset>& str1, const std::shared_ptr<Itemset>& str2);
 
 	unsigned int getItemCount() const;
+	unsigned int getDisjunctifSupport() const;
+
 	std::shared_ptr<Item> getItem(unsigned int i) const;
 
 	std::shared_ptr<Itemset> createAndReplaceItem(unsigned int i, const std::shared_ptr<Item>& item);
@@ -64,6 +66,14 @@ public:
 inline unsigned int Itemset::getItemCount() const
 {
 	return static_cast<unsigned int>(this->itemset.size());
+}
+
+inline unsigned int Itemset::getDisjunctifSupport() const
+{
+	// OR operation has already been computed for this itemset into combined itemset function
+	assert(this->dirty);
+	return this->orSupport;
+
 }
 
 inline std::shared_ptr<Item> Itemset::getItem(unsigned int i) const

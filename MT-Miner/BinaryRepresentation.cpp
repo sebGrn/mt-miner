@@ -64,16 +64,12 @@ bool BinaryRepresentation::isEssential(std::shared_ptr<Itemset>& itemset)
 		{			
 			if (i1 != i2)
 			{
-				//unsigned int key2 = itemset->getItem(i2)->attributeIndex;
-				//StaticBitset bitset = getItemFromKey(key2)->staticBitset;
 				StaticBitset bitset = itemset->getItem(i2)->staticBitset;
 				if(!bitset.none())
 					SumOfN_1Items = SumOfN_1Items | bitset;
 			}
 		}
 
-		//unsigned int key1 = itemset->getItem(i1)->attributeIndex;
-		//StaticBitset bitset = getItemFromKey(key1)->staticBitset;
 		StaticBitset bitset = itemset->getItem(i1)->staticBitset;
 		for (unsigned int i = 0; i < objectCount; i++)
 		{
@@ -97,53 +93,6 @@ bool BinaryRepresentation::isEssential(std::shared_ptr<Itemset>& itemset)
 	return isEssential;
 }
 
-unsigned int BinaryRepresentation::computeDisjunctifSupport(const std::shared_ptr<Itemset>& pattern)
-{
-	// OR operation has already been computed for this itemset into combined itemset function
-	assert(pattern->dirty);
-	//if (pattern->dirty)
-	//{
-	//	// never goes here !!
-	//	std::cout << "have to compute disjonctive support" << std::endl;
-	//	// all bitsets have the same size
-	//	StaticBitset SumOfN_1Items;
-	//	for (size_t i = 0, n = pattern->getItemCount(); i < n; i++)
-	//	{
-	//		unsigned int columnKey = pattern->getItem(i)->attributeIndex;
-	//		StaticBitset bitset = BinaryRepresentation::getItemFromKey(columnKey)->staticBitset;
-	//		if(!bitset.none())
-	//			SumOfN_1Items = SumOfN_1Items | bitset;
-	//	}
-	//	unsigned int disSupp = SumOfN_1Items.count();
-	//	pattern->orSupport = disSupp;
-	//	pattern->dirty = false;
-	//	pattern->orValue = SumOfN_1Items;
-	//}
-	return pattern->orSupport;
-};
-
-//template <class T>
-//bool BinaryRepresentation<T>::compareItemsets(Itemset& itemset1, Itemset& itemset2)
-//{
-//	bool sameItemset = true;
-//	unsigned int supp1 = computeDisjonctifSupport(itemset1);
-//	unsigned int supp2 = computeDisjonctifSupport(itemset2);
-//	if (supp1 != supp2)
-//		sameItemset = false;
-//	else
-//	{
-//		for (size_t i = 0, n = itemset1.itemset_list.size(); i< n; i++)
-//		{
-//			assert(i < itemset2.itemset_list.size());
-//			unsigned int columnKey_itemset1 = itemset1.itemset_list[i];
-//			unsigned int columnKey_itemset2 = itemset2.itemset_list[i];
-//			T bitset1 = getBitsetFromKey(columnKey_itemset1);
-//			T bitset2 = getBitsetFromKey(columnKey_itemset2);
-//			return bitset1 == bitset2;
-//		}
-//	}
-//	return sameItemset;
-//}
 
 unsigned int BinaryRepresentation::buildCloneList()
 {
@@ -179,16 +128,6 @@ unsigned int BinaryRepresentation::buildCloneList()
 	}
 	return nbClone;
 };
-
-//bool BinaryRepresentation::containsAClone(const std::shared_ptr<Itemset>& itemset)
-//{	
-//	for (auto elt : itemset->itemset)
-//	{
-//		if (elt->isAClone())
-//			return true;
-//	}
-//	return false;
-//}
 
 void BinaryRepresentation::serialize(const std::string& outputile)
 {
