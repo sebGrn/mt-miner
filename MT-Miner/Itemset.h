@@ -23,7 +23,12 @@ public:
 	bool hasClone;
 
 	//
-	//bool isEssential;
+	bool isEssential;
+
+	SparseBitset isEssentialADNBitset;
+	std::list<unsigned int> markedNonEssetialBisetIndex;
+	
+
 	// this map contains the transaction index (line number) / item index (column index) of the minimal transaction list
 	//     0 1 2 3 
 	//   ----------
@@ -37,6 +42,9 @@ public:
 	//                          <4,3> (transaction number 4, set bit is at index number 1)
 	std::vector<std::pair<unsigned int, unsigned int>> minimalTransaction;
 	
+private:
+	void updateIsEssentialSparseMatrix(const std::shared_ptr<Item>& item);
+
 public:
 	Itemset();
 
@@ -52,7 +60,7 @@ public:
 
 	std::shared_ptr<Itemset> createAndReplaceItem(unsigned int i, const std::shared_ptr<Item>& item);
 
-	bool isEssential(unsigned int objectCount);
+	bool computeIsEssential(unsigned int objectCount);
 
 #ifdef NEW_ESSENTIAL
 	void UpdateIsEssential(const std::shared_ptr<Item>& item);
@@ -73,6 +81,6 @@ inline unsigned int Itemset::getItemCount() const
 inline unsigned int Itemset::getDisjunctifSupport() const
 {
 	// OR operation has already been computed for this itemset into combined itemset function
-	assert(this->dirty);
+	assert(!this->dirty);
 	return this->orSupport;
 }

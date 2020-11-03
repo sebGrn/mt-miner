@@ -16,9 +16,11 @@ class Item
 public:
 	unsigned int attributeIndex;
 	StaticBitset staticBitset;
-#ifdef NEW_ESSENTIAL
+
+	// bitset with 1 value
+	//std::list<unsigned int> isEssentialCandidates;
+
 	SparseBitset sparseBitset;
-#endif
 
 	// true if this item is a clone
 	bool isClone;
@@ -39,9 +41,7 @@ public:
 		this->staticBitset = item->staticBitset;
 		this->isClone = item->isClone;
 		this->clones = item->clones;
-#ifdef NEW_ESSENTIAL
 		this->sparseBitset = item->sparseBitset;
-#endif
 	}
 
 	~Item()

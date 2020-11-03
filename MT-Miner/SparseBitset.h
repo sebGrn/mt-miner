@@ -41,7 +41,7 @@ public:
 	{};
 
 	void reset();
-	void set(unsigned int iAttribute, bool b);
+	void set(unsigned int iAttribute);
 	bool get(unsigned int iAttribute) const;
 	unsigned int count() const;
 	
@@ -52,36 +52,38 @@ inline void SparseBitset::reset()
 	this->bitset_value.clear();
 };
 
-inline void SparseBitset::set(unsigned int iAttribute, bool b)
+inline void SparseBitset::set(unsigned int iAttribute)
 {
-	auto it = std::find(this->bitset_value.begin(), this->bitset_value.end(), iAttribute);
-	if (it == this->bitset_value.end())
-	{
-		// didnt found the index in the array, just add it if it's true
-		if (b)
-			this->bitset_value.emplace_back(iAttribute);
-	}
-	else
-	{
-		// index is preset, modify the value or remove it
-		if (b)
-			*it = iAttribute;
-		else
-			this->bitset_value.erase(it);
-	}
-	this->bitset_value.sort();
+	this->bitset_value.emplace_back(iAttribute);
+
+	//auto it = std::find(this->bitset_value.begin(), this->bitset_value.end(), iAttribute);
+	//if (it == this->bitset_value.end())
+	//{
+	//	// didnt found the index in the array, just add it if it's true
+	//	if (b)
+	//		this->bitset_value.emplace_back(iAttribute);
+	//}
+	//else
+	//{
+	//	// index is preset, modify the value or remove it
+	//	if (b)
+	//		*it = iAttribute;
+	//	else
+	//		this->bitset_value.erase(it);
+	//}
+	//this->bitset_value.sort();
 };
 
 inline bool SparseBitset::get(unsigned int iAttribute) const
 {
 	auto it = std::find(this->bitset_value.begin(), this->bitset_value.end(), iAttribute);
 	return (it != this->bitset_value.end());
-}
+};
 
 inline unsigned int SparseBitset::count() const
 {
 	return static_cast<unsigned int>(this->bitset_value.size());
-}
+};
 
 //SparseBitset SparseBitset::operator|(const SparseBitset& other) const
 //{

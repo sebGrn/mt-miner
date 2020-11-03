@@ -45,7 +45,7 @@ public:
 					index = line[j];
 				}
 				assert(index >= 0);
-				bitset.set(index, true);				
+				bitset.set(index);				
 			}
 			// add bitset for this object (line)
 			this->formalContext.push_back(bitset);

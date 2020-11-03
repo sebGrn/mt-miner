@@ -1,11 +1,13 @@
 #include "Itemset.h"
 #include <unordered_map>
+#include "BinaryRepresentation.h"
 
 Itemset::Itemset()
 {
+	// set default value
 	this->orSupport = 0;
 	this->dirty = true;
-	//this->isEssential = false;
+	this->isEssential = true;
 	this->hasClone = false;
 }
 
@@ -28,7 +30,9 @@ void Itemset::addFirstItem(const std::shared_ptr<Item>& item)
 	this->orValue = item->staticBitset;
 	this->orSupport = this->orValue.count();
 	this->dirty = false;
-	//this->isEssential = false;
+	// a itemset with one element is essential
+	this->isEssential = true;
+	this->isEssentialADNBitset = item->sparseBitset;
 	// update clone
 	if (item->isClone)
 		this->hasClone = true;
@@ -51,10 +55,11 @@ void Itemset::addItem(const std::shared_ptr<Item>& item)
 	this->orValue = item->staticBitset | this->orValue;
 	this->orSupport = this->orValue.count();
 	this->dirty = false;
-	//this->isEssential = false;
 	// update clone
 	if (item->isClone)
 		this->hasClone = true;
+	// update is essential value
+	updateIsEssentialSparseMatrix(item);
 	// add item
 	this->itemset.push_back(item);
 }
@@ -82,8 +87,9 @@ std::shared_ptr<Itemset> Itemset::createAndReplaceItem(unsigned int iToReplace, 
 	clonedItemset->orValue = this->orValue;
 	clonedItemset->orSupport = this->orSupport;
 	clonedItemset->dirty = this->dirty;
-	//clonedItemset->isEssential = this->isEssential;
+	clonedItemset->isEssential = this->isEssential;
 	clonedItemset->hasClone = this->hasClone;
+	clonedItemset->isEssentialADNBitset = this->isEssentialADNBitset;
 
 	for (unsigned int i = 0; i < this->getItemCount(); i++)
 	{
@@ -169,6 +175,8 @@ std::shared_ptr<Itemset> Itemset::combineItemset(const std::shared_ptr<Itemset>&
 			// didnt find duplicates, we can add the item at the end of the list
 			// add item into itemset list
 			combinedItemset->itemset.push_back(item);
+			// 
+			combinedItemset->updateIsEssentialSparseMatrix(item);
 			// update disjonctive support
 			combinedItemset->orValue = combinedItemset->orValue | item->staticBitset;
 			// update clone status
@@ -186,10 +194,42 @@ std::shared_ptr<Itemset> Itemset::combineItemset(const std::shared_ptr<Itemset>&
 };
 
 // return true if element is essential
-bool Itemset::isEssential(unsigned int objectCount)
+bool Itemset::computeIsEssential(unsigned int objectCount)
 {
 	if (this->getItemCount() == 1)
-		return true;
+	{
+		this->isEssential = true;
+	}
+	else
+	{
+		// it itemset is not essential, it wont be essential with a new item
+		if (this->isEssential)
+		{
+			this->isEssential = false;
+			for (int i = 0, n = this->getItemCount(); i != n; i++)
+			{
+				bool  found = false;
+				// for each element of sparse matrix of current item, check if they are present in itemset sparse matrix
+				for (auto it = this->itemset[i]->sparseBitset.bitset_value.begin(); it != this->itemset[i]->sparseBitset.bitset_value.end(); it++)
+				{
+					unsigned int iTransaction = (*it);
+					// if iTransaction is not present in this->isEssentialADNBitset, itemset is not essential
+					if (this->isEssentialADNBitset.get(iTransaction))
+					{
+						this->isEssential = true;
+						found = true;
+						break;
+					}
+				}
+				if (!found)
+				{ 
+					this->isEssential = false;
+					break;
+				}
+			}
+		}
+	}
+	return this->isEssential;
 
 	bool isEssential = false;
 	StaticBitset SumOfN_1Items;
@@ -223,14 +263,89 @@ bool Itemset::isEssential(unsigned int objectCount)
 			}
 		}
 
-		// one item is not essential, we can return
+		// one item is not essential, we can return  
 		if (!isEssential)
 		{
 			// this bitset is not essential, break the main loop and return false
 			break;
 		}
 	}
+
+	if (this->isEssential != isEssential)
+	{
+		this->isEssential = false;
+		for (int i = 0, n = this->getItemCount(); i != n; i++)
+		{
+			bool  found = false;
+			// for each element of sparse matrix of current item, check if they are present in itemset sparse matrix
+			for (auto it = this->itemset[i]->sparseBitset.bitset_value.begin(); it != this->itemset[i]->sparseBitset.bitset_value.end(); it++)
+			{
+				unsigned int iTransaction = (*it);
+				// if iTransaction is not present in this->isEssentialADNBitset, itemset is not essential
+				if (this->isEssentialADNBitset.get(iTransaction))
+				{
+					this->isEssential = true;
+					found = true;
+					break;
+				}
+			}
+			if (!found)
+			{
+				this->isEssential = false;
+				break;
+			}
+		}
+	}
+
 	return isEssential;
+}
+
+void Itemset::updateIsEssentialSparseMatrix(const std::shared_ptr<Item>& item)
+{
+	for (auto it = item->sparseBitset.bitset_value.begin(); it != item->sparseBitset.bitset_value.end(); it++)
+	{
+		unsigned int iTransaction = (*it);
+		if (!this->isEssentialADNBitset.get(iTransaction))
+		{
+			auto find = std::find(this->markedNonEssetialBisetIndex.begin(), this->markedNonEssetialBisetIndex.end(), iTransaction);
+			if(find == this->markedNonEssetialBisetIndex.end())
+				this->isEssentialADNBitset.set(iTransaction);
+		}
+		else
+		{
+			auto find = std::find(this->isEssentialADNBitset.bitset_value.begin(), this->isEssentialADNBitset.bitset_value.end(), iTransaction);
+			this->isEssentialADNBitset.bitset_value.erase(find);
+			
+			this->markedNonEssetialBisetIndex.emplace_back(iTransaction);
+		}
+	}
+
+	/*if (!this->isEssential)
+	{
+		for (int i = 0, n = this->getItemCount(); i != n; i++)
+		{
+			for (auto it_elt = item->sparseBitset.bitset_value.begin(); it_elt != item->sparseBitset.bitset_value.end(); it_elt++)
+			{
+				unsigned int iTransaction = (*it_elt);
+				if (this->itemset[i]->sparseBitset.bitset_value[i])
+					this->isEssential = false;
+			}
+		}
+	}*/
+	
+
+	//unsigned int objectCount = BinaryRepresentation::getObjectCount();
+	//this->isEssential = false;
+	//for (unsigned int i = 0; i < objectCount; i++)
+	//{
+	//	bool bit0 = this->orValue[i];
+	//	bool bit1 = item->staticBitset[i];
+	//	if (!bit0 && bit1)
+	//	{
+	//		this->isEssential = true;
+	//		break;
+	//	}
+	//}
 }
 
 #ifdef NEW_ESSENTIAL

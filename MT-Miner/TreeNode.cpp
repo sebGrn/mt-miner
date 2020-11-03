@@ -146,7 +146,7 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals_task(
 				//}
 				if (combinedItemset->isEssential && !combinedItemset->containsAClone())
 #endif
-				if (!combinedItemset->containsAClone() && combinedItemset->isEssential(BinaryRepresentation::getObjectCount()))
+				if (!combinedItemset->containsAClone() && combinedItemset->computeIsEssential(BinaryRepresentation::getObjectCount()))
 					newToTraverse.push_back(combinedItemset);
 			}
 
