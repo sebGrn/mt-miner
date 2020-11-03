@@ -27,20 +27,20 @@ namespace MTMinerUnitTests_test
 			// allocate miner
 			std::shared_ptr<Itemset> item1 = std::make_shared<Itemset>();
 			item1->addItem(BinaryRepresentation::getItemFromKey(1));
-			int disjonctifSupport = BinaryRepresentation::computeDisjonctifSupport(item1);
+			int disjonctifSupport = item1->getDisjunctifSupport();
 			Assert::AreEqual(1, disjonctifSupport);
 
 			std::shared_ptr<Itemset> item2 = std::make_shared<Itemset>();
 			item2->addItem(BinaryRepresentation::getItemFromKey(1));
 			item2->addItem(BinaryRepresentation::getItemFromKey(2));
-			disjonctifSupport = BinaryRepresentation::computeDisjonctifSupport(item2);
+			disjonctifSupport = item2->getDisjunctifSupport();
 			Assert::AreEqual(2, disjonctifSupport);
 
 			std::shared_ptr<Itemset> item3 = std::make_shared<Itemset>();
 			item3->addItem(BinaryRepresentation::getItemFromKey(1));
 			item3->addItem(BinaryRepresentation::getItemFromKey(2));
 			item3->addItem(BinaryRepresentation::getItemFromKey(3));
-			disjonctifSupport = BinaryRepresentation::computeDisjonctifSupport(item3);
+			disjonctifSupport = item3->getDisjunctifSupport();
 			Assert::AreEqual(3, disjonctifSupport);
 
 			std::shared_ptr<Itemset> item4 = std::make_shared<Itemset>();
@@ -48,7 +48,7 @@ namespace MTMinerUnitTests_test
 			item4->addItem(BinaryRepresentation::getItemFromKey(2));
 			item4->addItem(BinaryRepresentation::getItemFromKey(3));
 			item4->addItem(BinaryRepresentation::getItemFromKey(4));
-			disjonctifSupport = BinaryRepresentation::computeDisjonctifSupport(item4);
+			disjonctifSupport = item4->getDisjunctifSupport();
 			Assert::AreEqual(4, disjonctifSupport);
 		}
 
