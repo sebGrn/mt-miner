@@ -28,8 +28,8 @@ void Itemset::addFirstItem(const std::shared_ptr<Item>& item)
 	// a itemset with one element is essential
 #ifndef _OLD_ISESSENTIAL
 	this->isEssential = true;
-	//this->isEssentialADNBitset2 = item->sparseBitset;
-	this->isEssentialADNBitset = item->sparseBitset;
+	this->isEssentialADNBitset_old = item->sparseBitset;
+	this->isEssentialADNBitset = item->staticBitset;
 #endif
 	// update clone
 	if (item->isClone)
@@ -84,6 +84,7 @@ std::shared_ptr<Itemset> Itemset::createAndReplaceItem(unsigned int iToReplace, 
 #ifndef _OLD_ISESSENTIAL
 	clonedItemset->isEssential = this->isEssential;
 	clonedItemset->isEssentialADNBitset = this->isEssentialADNBitset;
+	clonedItemset->isEssentialADNBitset_old = this->isEssentialADNBitset_old;
 #endif
 
 	for (unsigned int i = 0; i < this->getItemCount(); i++)
@@ -205,26 +206,23 @@ bool Itemset::computeIsEssential()
 		// it itemset is not essential, it wont be essential with a new item
 		if (this->isEssential)
 		{
+			// to remove, checking...
+			//for (unsigned int i = 0; i < objectCount; i++)
+			//{
+			//	assert(this->isEssentialADNBitset[i] == this->isEssentialADNBitset_old.get(i));
+			//}
+
 			//is->isEssential = false;
 			for (int i = 0, n = this->getItemCount(); i != n; i++)
 			{
-				bool  found = false;
-				// for each element of sparse matrix of current item, check if they are present in itemset sparse matrix
-				for (auto it = this->itemset[i]->sparseBitset.bitset_value.begin(); it != this->itemset[i]->sparseBitset.bitset_value.end(); it++)
-				{
-					unsigned int iTransaction = (*it);
-					// if iTransaction is not present in this->isEssentialADNBitset, itemset is not essential
-					if (this->isEssentialADNBitset.get(iTransaction))
-					{
-						this->isEssential = true;
-						found = true;
-						break;
-					}
-				}
-
-				//for (unsigned int i = objectCount; i--; )
+				std::shared_ptr<Item> crtItem = this->itemset[i];
+				bool found = false;
+				// for each element of sparse matrix of current item, check if they are present in itemset sparse matrix				
+				//for (auto it = crtItem->sparseBitset.bitset_value.begin(); it != crtItem->sparseBitset.bitset_value.end(); it++)
 				//{
-				//	if (this->isEssentialADNBitset[i])
+				//	unsigned int iTransaction = (*it);
+				//	// if iTransaction is not present in this->isEssentialADNBitset, itemset is not essential
+				//	if (this->isEssentialADNBitset_old.get(iTransaction))
 				//	{
 				//		this->isEssential = true;
 				//		found = true;
@@ -232,6 +230,20 @@ bool Itemset::computeIsEssential()
 				//	}
 				//}
 
+				for (unsigned int j = 0; j < objectCount; j++ )
+				{
+					if (crtItem->staticBitset[j])
+					{
+						if (this->isEssentialADNBitset[j])
+						{
+							this->isEssential = true;
+							found = true;
+							break;
+						}
+					}
+				}
+
+				
 				if (!found)
 				{
 					this->isEssential = false;
@@ -326,24 +338,25 @@ void Itemset::updateIsEssentialSparseMatrix(const std::shared_ptr<Item>& item)
 	{
 		if (item->staticBitset[i])
 		{
-			if (!this->isEssentialADNBitset.get(i))
+			if(!this->isEssentialADNBitset[i])
 			{
 				auto it = std::find(this->markedNonEssetialBisetIndex.begin(), this->markedNonEssetialBisetIndex.end(), i);
 				if (it == this->markedNonEssetialBisetIndex.end())
 				{
-					//->isEssentialADNBitset2.set(i);
-					this->isEssentialADNBitset.set(i);
+					this->isEssentialADNBitset_old.set(i);
+					this->isEssentialADNBitset[i] = true;
 				}
 			}
 			else
 			{
-				auto it = std::find(this->isEssentialADNBitset.bitset_value.begin(), this->isEssentialADNBitset.bitset_value.end(), i);
-				this->isEssentialADNBitset.bitset_value.erase(it);
-				//this->isEssentialADNBitset.set(i, false);
-				this->markedNonEssetialBisetIndex.emplace_back(i);
+				//bool tmp0 = this->isEssentialADNBitset_old.get(i);
+				//bool tmp1 = this->isEssentialADNBitset[i];
 
-				
-				//this->markedNonEssetialBisetIndex.emplace_back(i);
+				auto it = std::find(this->isEssentialADNBitset_old.bitset_value.begin(), this->isEssentialADNBitset_old.bitset_value.end(), i);
+				this->isEssentialADNBitset_old.bitset_value.erase(it);
+				this->isEssentialADNBitset[i] = false;
+
+				this->markedNonEssetialBisetIndex.emplace_back(i);
 			}
 		}
 	}

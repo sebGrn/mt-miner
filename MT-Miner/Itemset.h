@@ -26,8 +26,9 @@ public:
 
 #ifndef _OLD_ISESSENTIAL
 	bool isEssential;
-	//StaticBitset isEssentialADNBitset;
-	SparseBitset isEssentialADNBitset;
+	StaticBitset isEssentialADNBitset;
+	
+	SparseBitset isEssentialADNBitset_old;
 
 	// utiliser un bitset et faire des OR pour tester
 	// 1 dans le bitset --> bit non essentiel
