@@ -6,6 +6,8 @@
 #include "Item.h"
 #include "SparseBitset.h"
 
+#define _OLD_ISESSENTIAL
+
 class Itemset
 {
 private:
@@ -22,12 +24,15 @@ public:
 	// true if itemset has at least an item who is a clone
 	bool hasClone;
 
-	//
+#ifndef _OLD_ISESSENTIAL
 	bool isEssential;
+	StaticBitset isEssentialADNBitset;
+	SparseBitset isEssentialADNBitset2;
 
-	SparseBitset isEssentialADNBitset;
+	// utiliser un bitset et faire des OR pour tester
+	// 1 dans le bitset --> bit non essentiel
 	std::list<unsigned int> markedNonEssetialBisetIndex;
-	
+#endif	
 
 	// this map contains the transaction index (line number) / item index (column index) of the minimal transaction list
 	//     0 1 2 3 
@@ -43,7 +48,10 @@ public:
 	std::vector<std::pair<unsigned int, unsigned int>> minimalTransaction;
 	
 private:
+
+#ifndef _OLD_ISESSENTIAL
 	void updateIsEssentialSparseMatrix(const std::shared_ptr<Item>& item);
+#endif
 
 public:
 	Itemset();
@@ -60,11 +68,7 @@ public:
 
 	std::shared_ptr<Itemset> createAndReplaceItem(unsigned int i, const std::shared_ptr<Item>& item);
 
-	bool computeIsEssential(unsigned int objectCount);
-
-#ifdef NEW_ESSENTIAL
-	void UpdateIsEssential(const std::shared_ptr<Item>& item);
-#endif
+	bool computeIsEssential();
 
 	bool containsAClone() const;
 

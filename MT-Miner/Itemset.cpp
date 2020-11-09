@@ -7,8 +7,10 @@ Itemset::Itemset()
 	// set default value
 	this->orSupport = 0;
 	this->dirty = true;
-	this->isEssential = true;
 	this->hasClone = false;
+#ifndef _OLD_ISESSENTIAL
+	this->isEssential = true;
+#endif
 }
 
 bool Itemset::containsAClone() const
@@ -20,19 +22,15 @@ void Itemset::addFirstItem(const std::shared_ptr<Item>& item)
 {
 	assert(this->itemset.size() == 0);
 
-#ifdef NEW_ESSENTIAL
-	for (auto it = item->sparseBitset.bitset_value.begin(); it != item->sparseBitset.bitset_value.end(); it++)
-	{
-		this->minimalTransaction.push_back(std::pair<unsigned int, unsigned int>(*it, 0));
-	}
-#endif
-
 	this->orValue = item->staticBitset;
 	this->orSupport = this->orValue.count();
 	this->dirty = false;
 	// a itemset with one element is essential
+#ifndef _OLD_ISESSENTIAL
 	this->isEssential = true;
-	this->isEssentialADNBitset = item->sparseBitset;
+	this->isEssentialADNBitset2 = item->sparseBitset;
+	this->isEssentialADNBitset = item->staticBitset;
+#endif
 	// update clone
 	if (item->isClone)
 		this->hasClone = true;
@@ -45,13 +43,6 @@ void Itemset::addItem(const std::shared_ptr<Item>& item)
 {
 	assert(this->itemset.size() == 0);
 
-#ifdef NEW_ESSENTIAL
-	for (auto it = item->sparseBitset.bitset_value.begin(); it != item->sparseBitset.bitset_value.end(); it++)
-	{
-		this->minimalTransaction.push_back(std::pair<unsigned int, unsigned int>(*it, 0));
-	}
-#endif
-
 	this->orValue = item->staticBitset | this->orValue;
 	this->orSupport = this->orValue.count();
 	this->dirty = false;
@@ -59,7 +50,9 @@ void Itemset::addItem(const std::shared_ptr<Item>& item)
 	if (item->isClone)
 		this->hasClone = true;
 	// update is essential value
+#ifndef _OLD_ISESSENTIAL
 	updateIsEssentialSparseMatrix(item);
+#endif
 	// add item
 	this->itemset.push_back(item);
 }
@@ -87,9 +80,11 @@ std::shared_ptr<Itemset> Itemset::createAndReplaceItem(unsigned int iToReplace, 
 	clonedItemset->orValue = this->orValue;
 	clonedItemset->orSupport = this->orSupport;
 	clonedItemset->dirty = this->dirty;
-	clonedItemset->isEssential = this->isEssential;
 	clonedItemset->hasClone = this->hasClone;
+#ifndef _OLD_ISESSENTIAL
+	clonedItemset->isEssential = this->isEssential;
 	clonedItemset->isEssentialADNBitset = this->isEssentialADNBitset;
+#endif
 
 	for (unsigned int i = 0; i < this->getItemCount(); i++)
 	{
@@ -175,8 +170,10 @@ std::shared_ptr<Itemset> Itemset::combineItemset(const std::shared_ptr<Itemset>&
 			// didnt find duplicates, we can add the item at the end of the list
 			// add item into itemset list
 			combinedItemset->itemset.push_back(item);
+#ifndef _OLD_ISESSENTIAL
 			// 
 			combinedItemset->updateIsEssentialSparseMatrix(item);
+#endif
 			// update disjonctive support
 			combinedItemset->orValue = combinedItemset->orValue | item->staticBitset;
 			// update clone status
@@ -193,8 +190,10 @@ std::shared_ptr<Itemset> Itemset::combineItemset(const std::shared_ptr<Itemset>&
 	return combinedItemset;
 };
 
+#ifndef _OLD_ISESSENTIAL
+
 // return true if element is essential
-bool Itemset::computeIsEssential(unsigned int objectCount)
+bool Itemset::computeIsEssential()
 {
 	if (this->getItemCount() == 1)
 	{
@@ -202,10 +201,11 @@ bool Itemset::computeIsEssential(unsigned int objectCount)
 	}
 	else
 	{
+		unsigned int objectCount = BinaryRepresentation::getObjectCount();
 		// it itemset is not essential, it wont be essential with a new item
 		if (this->isEssential)
 		{
-			this->isEssential = false;
+			//is->isEssential = false;
 			for (int i = 0, n = this->getItemCount(); i != n; i++)
 			{
 				bool  found = false;
@@ -214,15 +214,26 @@ bool Itemset::computeIsEssential(unsigned int objectCount)
 				{
 					unsigned int iTransaction = (*it);
 					// if iTransaction is not present in this->isEssentialADNBitset, itemset is not essential
-					if (this->isEssentialADNBitset.get(iTransaction))
+					if (this->isEssentialADNBitset2.get(iTransaction))
 					{
 						this->isEssential = true;
 						found = true;
 						break;
 					}
 				}
+
+				for (unsigned int i = objectCount; i--; )
+				{
+					if (this->isEssentialADNBitset[i])
+					{
+						this->isEssential = true;
+						found = true;
+						break;
+					}
+				}
+
 				if (!found)
-				{ 
+				{
 					this->isEssential = false;
 					break;
 				}
@@ -230,228 +241,115 @@ bool Itemset::computeIsEssential(unsigned int objectCount)
 		}
 	}
 	return this->isEssential;
+}
 
-	bool isEssential = false;
-	StaticBitset SumOfN_1Items;
-	for (int i = 0, n = this->getItemCount(); i != n; i++)
+#else
+
+// return true if element is essential
+bool Itemset::computeIsEssential()
+{
+	if (this->getItemCount() == 1)
 	{
-		// dont forget to initialize boolean
-		SumOfN_1Items.reset();
-		isEssential = false;
-
-		for (int j = 0; j < n; j++)
-		{
-			if (i != j)
-			{
-				StaticBitset bitset = this->itemset[j]->staticBitset;
-				if (!bitset.none())
-					SumOfN_1Items = SumOfN_1Items | bitset;
-			}
-		}
-
-		StaticBitset bitset = this->itemset[i]->staticBitset;
-		for (unsigned int k = 0; k < objectCount; k++)
-		{
-			// compare bit
-			bool bit0 = SumOfN_1Items[k];
-			bool bit1 = bitset[k];
-			if (!bit0 && bit1)
-			{
-				// this bitset is essential, check with next bitset
-				isEssential = true;
-				break;
-			}
-		}
-
-		// one item is not essential, we can return  
-		if (!isEssential)
-		{
-			// this bitset is not essential, break the main loop and return false
-			break;
-		}
+		return true;
 	}
-
-	if (this->isEssential != isEssential)
+	else
 	{
-		this->isEssential = false;
+		unsigned int objectCount = BinaryRepresentation::getObjectCount();
+		bool isEssential = false;
+		StaticBitset SumOfN_1Items;
 		for (int i = 0, n = this->getItemCount(); i != n; i++)
 		{
-			bool  found = false;
-			// for each element of sparse matrix of current item, check if they are present in itemset sparse matrix
-			for (auto it = this->itemset[i]->sparseBitset.bitset_value.begin(); it != this->itemset[i]->sparseBitset.bitset_value.end(); it++)
+			// dont forget to initialize boolean
+			SumOfN_1Items.reset();
+			isEssential = false;
+
+			for (int j = 0; j < n; j++)
 			{
-				unsigned int iTransaction = (*it);
-				// if iTransaction is not present in this->isEssentialADNBitset, itemset is not essential
-				if (this->isEssentialADNBitset.get(iTransaction))
+				if (i != j)
 				{
-					this->isEssential = true;
-					found = true;
+					StaticBitset bitset = this->itemset[j]->staticBitset;
+					if (!bitset.none())
+						SumOfN_1Items = SumOfN_1Items | bitset;
+				}
+			}
+
+			StaticBitset bitset = this->itemset[i]->staticBitset;
+			for (unsigned int k = 0; k < objectCount; k++)
+			{
+				// compare bit
+				bool bit0 = SumOfN_1Items[k];
+				bool bit1 = bitset[k];
+				if (!bit0 && bit1)
+				{
+					// this bitset is essential, check with next bitset
+					isEssential = true;
 					break;
 				}
 			}
-			if (!found)
+
+			// one item is not essential, we can return  
+			if (!isEssential)
 			{
-				this->isEssential = false;
-				break;
+				// this bitset is not essential, break the main loop and return false
+				return false;
+				//break;
 			}
 		}
-	}
-
-	return isEssential;
+		return isEssential;
+	}	
 }
 
+#endif
+
+#ifndef _OLD_ISESSENTIAL
 void Itemset::updateIsEssentialSparseMatrix(const std::shared_ptr<Item>& item)
 {
-	for (auto it = item->sparseBitset.bitset_value.begin(); it != item->sparseBitset.bitset_value.end(); it++)
+	/*for (auto it = item->sparseBitset.bitset_value.begin(); it != item->sparseBitset.bitset_value.end(); it++)
 	{
-		unsigned int iTransaction = (*it);
-		if (!this->isEssentialADNBitset.get(iTransaction))
+		unsigned int i = (*it);
+		if (!this->isEssentialADNBitset2.get(i))
 		{
-			auto find = std::find(this->markedNonEssetialBisetIndex.begin(), this->markedNonEssetialBisetIndex.end(), iTransaction);
-			if(find == this->markedNonEssetialBisetIndex.end())
-				this->isEssentialADNBitset.set(iTransaction);
+			auto find = std::find(this->markedNonEssetialBisetIndex.begin(), this->markedNonEssetialBisetIndex.end(), i);
+			if (find == this->markedNonEssetialBisetIndex.end())
+				this->isEssentialADNBitset2.set(i);
 		}
 		else
 		{
-			auto find = std::find(this->isEssentialADNBitset.bitset_value.begin(), this->isEssentialADNBitset.bitset_value.end(), iTransaction);
-			this->isEssentialADNBitset.bitset_value.erase(find);
-			
-			this->markedNonEssetialBisetIndex.emplace_back(iTransaction);
-		}
-	}
-
-	/*if (!this->isEssential)
-	{
-		for (int i = 0, n = this->getItemCount(); i != n; i++)
-		{
-			for (auto it_elt = item->sparseBitset.bitset_value.begin(); it_elt != item->sparseBitset.bitset_value.end(); it_elt++)
-			{
-				unsigned int iTransaction = (*it_elt);
-				if (this->itemset[i]->sparseBitset.bitset_value[i])
-					this->isEssential = false;
-			}
+			auto find = std::find(this->isEssentialADNBitset2.bitset_value.begin(), this->isEssentialADNBitset2.bitset_value.end(), i);
+			this->isEssentialADNBitset2.bitset_value.erase(find);
+			this->markedNonEssetialBisetIndex.emplace_back(i);
 		}
 	}*/
+
 	
-
-	//unsigned int objectCount = BinaryRepresentation::getObjectCount();
-	//this->isEssential = false;
-	//for (unsigned int i = 0; i < objectCount; i++)
-	//{
-	//	bool bit0 = this->orValue[i];
-	//	bool bit1 = item->staticBitset[i];
-	//	if (!bit0 && bit1)
-	//	{
-	//		this->isEssential = true;
-	//		break;
-	//	}
-	//}
-}
-
-#ifdef NEW_ESSENTIAL
-void Itemset::UpdateIsEssential(const std::shared_ptr<Item>& item)
-{
-	// if isMinimal is false, it means that there is a transaction where '1' is present for each item
-
-	// 1st step : update minimalTransaction list
-
-	// try with AND operator on static bitset
-	/*unsigned int iItem(0);
-	for (auto it_item = this->itemset.begin(); it_item != this->itemset.end(); it_item++, iItem++)
+	for(unsigned int i = 0, n = BinaryRepresentation::getObjectCount(); i < n; i++)
 	{
-		StaticBitset bitset = (*it_item)->staticBitset & item->staticBitset;
-		for (unsigned int iTransaction = 0, n = bitset.size(); iTransaction < n; iTransaction++)
+		if (item->staticBitset[i])
 		{
-			if (bitset.test(iTransaction))
+			if (!this->isEssentialADNBitset[i])
 			{
-				// erase the minimal transaction at transaction number iTransaction
-				for (auto it_minimalTransaction = this->minimalTransaction.begin(); it_minimalTransaction != this->minimalTransaction.end(); it_minimalTransaction++)
+				auto it = std::find(this->markedNonEssetialBisetIndex.begin(), this->markedNonEssetialBisetIndex.end(), i);
+				if (it == this->markedNonEssetialBisetIndex.end())
 				{
-					if (iTransaction == (*it_minimalTransaction).first)
-					{
-						this->minimalTransaction.erase(it_minimalTransaction);
-						// transaction has been found, we can leave
-						break;
-					}
+					this->isEssentialADNBitset2.set(i);
+					this->isEssentialADNBitset.set(i);
 				}
 			}
 			else
 			{
-				if (item->staticBitset.test(iTransaction))
-				{
-					this->minimalTransaction.push_back(std::pair<unsigned int, unsigned int>(iTransaction, iItem + 1));
-				}
+				auto it = std::find(this->isEssentialADNBitset2.bitset_value.begin(), this->isEssentialADNBitset2.bitset_value.end(), i);
+				this->isEssentialADNBitset2.bitset_value.erase(it);
+				this->isEssentialADNBitset.set(i, false);
+				this->markedNonEssetialBisetIndex.emplace_back(i);
+
+				
+				//this->markedNonEssetialBisetIndex.emplace_back(i);
 			}
-		}
-	}*/
-
-
-	// loop on bits from item's bitset (check sparse bitset index)	
-	for (auto it_elt = item->sparseBitset.bitset_value.begin(); it_elt != item->sparseBitset.bitset_value.end(); it_elt++)
-	{
-		// the transation (line) number is set
-		unsigned int iTransaction = (*it_elt);
-		bool isMinimal = false;
-		// search if we have a transaction into itemset (for each line) where we have a bit at iTransaction value
-		unsigned int iItem(0);
-		for (auto it_item = this->itemset.begin(); it_item != this->itemset.end(); it_item++, iItem++)
-		{
-			// very slow !!!
-			// find iTransaction into sparce bitset
-			isMinimal = true;
-			//std::cout << (*it_item)->sparseBitset.bitset_value.size() << std::endl;
-			for (auto it_sparse = (*it_item)->sparseBitset.bitset_value.begin(); it_sparse != (*it_item)->sparseBitset.bitset_value.end(); it_sparse++)
-			{
-				if ((*it_sparse) == iTransaction)
-				{
-					isMinimal = false;
-
-					// find if iTransaction is in minimalTransaction
-					for (auto it_minimalTransaction = this->minimalTransaction.begin(); it_minimalTransaction != this->minimalTransaction.end(); it_minimalTransaction++)
-					{
-						if (iTransaction == (*it_minimalTransaction).first)
-						{
-							// erase the minimal transaction
-							this->minimalTransaction.erase(it_minimalTransaction);
-							break;
-						}
-					}
-					break;
-				}
-			}
-			//auto it_res = std::find((*it_item)->sparseBitset.bitset_value.begin(), (*it_item)->sparseBitset.bitset_value.end(), iTransaction);
-			//isMinimal = (it_res == (*it_item)->sparseBitset.bitset_value.end());
-
-			if (!isMinimal)
-			{
-				break;
-			}
-		}
-
-		// 
-		if (isMinimal)
-			this->minimalTransaction.push_back(std::pair<unsigned int, unsigned int>(iTransaction, iItem));
-	}
-
-	// 2nd step : check minimalTransaction list and update isEssential
-
-	this->isEssential = true;
-	// check we have only on "1" for each item (column) in minimalTransaction list
-	// add 1 on itemlist size for next item which is not in the list
-	for (unsigned int i = 0, n = this->itemset.size() + 1; i < n; i++)
-	{
-		auto it = std::find_if(this->minimalTransaction.begin(), this->minimalTransaction.end(), [i](const std::pair<unsigned int, unsigned int>& a) {
-			return a.second == i;
-			});
-		if (it == this->minimalTransaction.end())
-		{
-			// an item exists without set bit
-			this->isEssential = false;
-			break;
 		}
 	}
 }
 #endif
+
 
 
 //// sort each element of minimalTransversals

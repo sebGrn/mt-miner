@@ -2,6 +2,7 @@
 
 #include <list>
 #include <deque>
+#include <vector>
 
 /**
 * Sparse Bitset implementation
@@ -12,7 +13,8 @@
 class SparseBitset
 {
 public:
-	std::list<unsigned int> bitset_value;
+	std::vector<unsigned int> bitset_value;
+	//std::list<unsigned int> bitset_value;
 	//std::deque<unsigned int> bitset_value;
 
 public:
@@ -54,7 +56,8 @@ inline void SparseBitset::reset()
 
 inline void SparseBitset::set(unsigned int iAttribute)
 {
-	this->bitset_value.emplace_back(iAttribute);
+	//this->bitset_value.emplace_back(iAttribute);
+	this->bitset_value.push_back(iAttribute);
 
 	//auto it = std::find(this->bitset_value.begin(), this->bitset_value.end(), iAttribute);
 	//if (it == this->bitset_value.end())

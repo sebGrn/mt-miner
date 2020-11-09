@@ -8,7 +8,7 @@
 #include "utils.h"
 #include "SparseBitset.h"
 
-#define BITSET_SIZE 6400
+#define BITSET_SIZE 1600
 typedef std::bitset<BITSET_SIZE> StaticBitset;
 
 class Item
@@ -16,10 +16,6 @@ class Item
 public:
 	unsigned int attributeIndex;
 	StaticBitset staticBitset;
-
-	// bitset with 1 value
-	//std::list<unsigned int> isEssentialCandidates;
-
 	SparseBitset sparseBitset;
 
 	// true if this item is a clone
@@ -47,8 +43,6 @@ public:
 	~Item()
 	{}
 
-	//static void buildSparseMatrix(SparseBitset& dest, const StaticBitset& src);
-
 	void addClone(const std::shared_ptr<Item>& clone);
 	void setClone();
 	bool isAnOriginal() const;
@@ -59,18 +53,6 @@ public:
 
 	bool operator==(const Item& other);
 };
-
-//inline void Item::buildSparseMatrix(SparseBitset& dest, const StaticBitset& bitset)
-//{
-//	dest.bitset_value.clear();
-//	for (unsigned int i = 0; i < bitset.size(); i++)
-//	{
-//		bool bit = bitset[i];
-//		if (bit)
-//			dest.bitset_value.emplace_back(i);
-//	}
-//	dest.bitset_value.sort();
-//}
 
 inline void Item::addClone(const std::shared_ptr<Item>& clone)
 {
