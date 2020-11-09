@@ -6,7 +6,7 @@
 #include "Item.h"
 #include "SparseBitset.h"
 
-#define _OLD_ISESSENTIAL
+//#define _OLD_ISESSENTIAL
 
 class Itemset
 {
@@ -26,8 +26,8 @@ public:
 
 #ifndef _OLD_ISESSENTIAL
 	bool isEssential;
-	StaticBitset isEssentialADNBitset;
-	SparseBitset isEssentialADNBitset2;
+	//StaticBitset isEssentialADNBitset;
+	SparseBitset isEssentialADNBitset;
 
 	// utiliser un bitset et faire des OR pour tester
 	// 1 dans le bitset --> bit non essentiel
