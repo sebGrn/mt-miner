@@ -26,13 +26,14 @@ public:
 
 #ifndef _OLD_ISESSENTIAL
 	bool isEssential;
-	StaticBitset isEssentialADNBitset;
-	
-	SparseBitset isEssentialADNBitset_old;
+	StaticBitset isEssentialADNBitset;	
 
 	// utiliser un bitset et faire des OR pour tester
 	// 1 dans le bitset --> bit non essentiel
-	std::list<unsigned int> markedNonEssetialBisetIndex;
+
+	// if ith bit is set, then i index cannot be part of minimal ADN
+	// ie there is at least one set bit at ith index into itemset's bitset
+	StaticBitset markedNonEssetialBisetIndex;
 #endif	
 
 	// this map contains the transaction index (line number) / item index (column index) of the minimal transaction list
