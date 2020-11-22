@@ -68,12 +68,51 @@ void TreeNode::updateListsFromToTraverse(const std::vector<std::shared_ptr<Items
 			{
 				// we can combine with previous element / make a union on 2 elements
 				std::shared_ptr<Itemset> combinedItemset;
-				if(previousItemset)
-					combinedItemset = Itemset::combineItemset(previousItemset, (*currentItemset_it));
-				else 
+				if (previousItemset)
+				{
+					try
+					{
+						combinedItemset = std::make_shared<Itemset>(*previousItemset);
+						combinedItemset->combineItemset(previousItemset, (*currentItemset_it));
+					}
+					catch (std::exception& e)
+					{
+						std::cout << "combined to get lists " << e.what() << std::endl;
+					}
+				}
+				else
+				{
 					combinedItemset = (*currentItemset_it);
+				}
+
+				if (combinedItemset)
+				{
+					unsigned int disjSup = combinedItemset->getDisjunctifSupport();
+					if (disjSup != objectCount)
+					{
+						previousItemset = combinedItemset;
+						maxClique.push_back((*currentItemset_it));
+					}
+					else
+					{
+						toExplore.push_back((*currentItemset_it));
+					}
+				}
+
+				// we can combine with previous element / make a union on 2 elements
+				/*std::shared_ptr<Itemset> combined = std::make_shared<Itemset>(*previousItemset);
+				unsigned int disjSup = 0;
+				if (previousItemset)
+				{
+					combined->combineItemset((*currentItemset_it));
+					disjSup = combined->getDisjunctifSupport();
+				}
+				else
+				{
+					//combinedItemset = (*currentItemset_it);
+					disjSup = (*currentItemset_it)->getDisjunctifSupport();
+				}
 				
-				unsigned int disjSup = combinedItemset->getDisjunctifSupport();
 				if (disjSup != objectCount)
 				{
 					previousItemset = combinedItemset;
@@ -81,8 +120,9 @@ void TreeNode::updateListsFromToTraverse(const std::vector<std::shared_ptr<Items
 				}
 				else
 				{
+					// previousItem has been modified
 					toExplore.push_back((*currentItemset_it));
-				}
+				}*/
 			}
 		}
 	}
@@ -106,6 +146,8 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals_task(
 	std::vector<std::shared_ptr<Itemset>> graph_mt;
 	// update lists from toTraverse
 	this->updateListsFromToTraverse(toTraverse, maxClique, toExplore, graph_mt);
+	
+	//std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 	//Logger::log("toExplore list", ItemsetListToString(toExplore), "\n");
 	//Logger::log("maxClique list", ItemsetListToString(maxClique), "\n");
@@ -127,17 +169,58 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals_task(
 		// loop on candidate itemset from initial toExplore list
 		for (unsigned int i = 0; i < lastIndexToTest; i++)
 		{
-			auto toCombinedLeft = toExplore[i];
+			//auto toCombinedLeft = toExplore[i];  
+			auto toCombinedLeft = toExplore.front();
+			toExplore.erase(toExplore.begin());
+
+			// store data from toCombinedLeft
+			//bool dirty = toCombinedLeft->dirty;
+			//StaticBitset orValue = toCombinedLeft->orValue;
+			//unsigned int orSupport = toCombinedLeft->orSupport;
+			//bool hasClone = toCombinedLeft->hasClone;
+			//std::vector<unsigned int> storedItem;
+			//for (auto it = toCombinedLeft->itemset.begin(); it != toCombinedLeft->itemset.end(); it++)
+			//	storedItem.push_back((*it)->attributeIndex);
 
 			// loop on next candidate itemset
-			for (unsigned int j = i + 1; j <  toExplore.size(); j++)
+			//for (unsigned int j = i + 1; j < toExplore.size(); j++)
+			for (unsigned int j = 0; j < toExplore.size(); j++)
 			{
 				assert(j < toExplore.size());
 				auto toCombinedRight = toExplore[j];
-				auto combinedItemset = Itemset::combineItemset(toCombinedLeft, toCombinedRight); 
+				//std::cout << "Itemset::combineItemset" << toCombinedLeft->size() << " " << toCombinedRight.size() << std::endl;
+				//auto combinedItemset = Itemset::combineItemset_old(toCombinedLeft, toCombinedRight);
+				
+				try
+				{
+					// combine toCombinedRight into toCombinedLeft
+					auto newItemset = std::make_shared<Itemset>(*toCombinedLeft);
+					newItemset->combineItemset(toCombinedLeft, toCombinedRight);
 
-				if (!combinedItemset->containsAClone() && combinedItemset->computeIsEssential())
-					newToTraverse.push_back(combinedItemset);
+					if (!newItemset->containsAClone() && newItemset->computeIsEssential())
+					{
+						// this is a candidate, copy toCombinedLeft into newItemset
+						//auto newItemset = std::make_shared<Itemset>(*toCombinedLeft);
+						newToTraverse.push_back(newItemset);
+					}
+				}
+				catch (std::exception& e)
+				{
+					std::cout << "combined to get newToTraverse " << e.what() << std::endl;
+				}
+
+				// restore toCombinedLeft for next test
+				//toCombinedLeft->dirty = dirty;
+				//toCombinedLeft->orValue = orValue;
+				//toCombinedLeft->orSupport = orSupport;
+				//toCombinedLeft->hasClone = hasClone;
+
+				//while (toCombinedLeft->itemset.back()->toRemove)
+				//{
+				//	toCombinedLeft->itemset.pop_back();
+				//}
+
+				//itemsetTmp = toCombinedLeft;
 			}
 
 			if (!newToTraverse.empty())
@@ -174,6 +257,8 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals_task(
 	}
 	// ## EMIT COMPLETE TASK ##
 
+	//for_each(graph_mt.begin(), graph_mt.end(), [&](const std::shared_ptr<Itemset>& elt) { std::cout << elt->toString() << "\n"; });
+
 	return graph_mt;
 }
 
@@ -196,6 +281,7 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals(std::
 	std::list<std::future<std::vector<std::shared_ptr<Itemset>>>> units;
 	const unsigned int thead_multiplicator = 1;
 	for (auto n = std::thread::hardware_concurrency() * thead_multiplicator; --n;)
+	//for (auto n = 1; --n;)
 	{
 		units.emplace_back(std::async(std::launch::async, [n]()
 		{
@@ -214,6 +300,7 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals(std::
 					lock.unlock(); // unlock while processing task
 					{
 						// process task
+						task.wait();
 						std::vector<std::shared_ptr<Itemset>> mt = task.get();
 						std::copy(mt.begin(), mt.end(), std::back_inserter(result_mt));
 					}
@@ -237,6 +324,7 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals(std::
 	// wait for shutdown
 	for (auto& unit : units)
 	{
+		unit.wait();
 		std::vector<std::shared_ptr<Itemset>> result = unit.get();
 		{
 			const std::lock_guard<std::mutex> lock(output_guard);

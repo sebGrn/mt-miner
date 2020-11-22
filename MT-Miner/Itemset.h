@@ -6,11 +6,12 @@
 #include "Item.h"
 #include "SparseBitset.h"
 
-//#define _OLD_ISESSENTIAL
+#define _OLD_ISESSENTIAL
 
 class Itemset
 {
 private:
+public:
 	std::vector<std::shared_ptr<Item>> itemset;
 	
 public:
@@ -20,7 +21,6 @@ public:
 	StaticBitset orValue;
 	// support of the current itemset (nb 1's bit) of OR computation
 	unsigned int orSupport;
-
 	// true if itemset has at least an item who is a clone
 	bool hasClone;
 
@@ -33,7 +33,9 @@ public:
 
 	// if ith bit is set, then i index cannot be part of minimal ADN
 	// ie there is at least one set bit at ith index into itemset's bitset
-	StaticBitset markedNonEssetialBisetIndex;
+	StaticBitset markedNonEssentialBisetIndex;
+
+	StaticBitset temporaryBitset;
 #endif	
 
 	// this map contains the transaction index (line number) / item index (column index) of the minimal transaction list
@@ -61,7 +63,8 @@ public:
 	void addFirstItem(const std::shared_ptr<Item>& item);
 	void addItem(const std::shared_ptr<Item>& item);
 		
-	static std::shared_ptr<Itemset> combineItemset(const std::shared_ptr<Itemset>& str1, const std::shared_ptr<Itemset>& str2);
+	void combineItemset(const std::shared_ptr<Itemset>& str1, const std::shared_ptr<Itemset>& str2);
+	//static std::shared_ptr<Itemset> combineItemset_old(std::shared_ptr<Itemset>& itemset_left, const std::shared_ptr<Itemset>& itemset_right);
 
 	unsigned int getItemCount() const;
 	unsigned int getDisjunctifSupport() const;

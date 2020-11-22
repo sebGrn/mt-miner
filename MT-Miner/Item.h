@@ -8,7 +8,7 @@
 #include "utils.h"
 #include "SparseBitset.h"
 
-#define BITSET_SIZE 1600
+#define BITSET_SIZE 524288
 typedef std::bitset<BITSET_SIZE> StaticBitset;
 
 class Item
@@ -16,28 +16,22 @@ class Item
 public:
 	unsigned int attributeIndex;
 	StaticBitset staticBitset;
-	SparseBitset sparseBitset;
-
+	
 	// true if this item is a clone
 	bool isClone;
 	
 	// contains a list of clone for this item (same bitset)
 	std::vector<std::shared_ptr<Item>> clones;
 
+
+	bool toRemove;
+
 public:
 	Item(int index, unsigned int bitsetSize)
 	{
 		this->attributeIndex = index;
 		this->isClone = false;
-	}
-
-	Item(const Item* item)
-	{
-		this->attributeIndex = item->attributeIndex;
-		this->staticBitset = item->staticBitset;
-		this->isClone = item->isClone;
-		this->clones = item->clones;
-		this->sparseBitset = item->sparseBitset;
+		this->toRemove = false;
 	}
 
 	~Item()
@@ -94,6 +88,5 @@ inline bool Item::operator==(const Item& other)
 {
 	if(other.attributeIndex == this->attributeIndex)
 		return true;
-	bool res = other.staticBitset == this->staticBitset;
-	return res;
+	return other.staticBitset == this->staticBitset;
 }

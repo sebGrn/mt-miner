@@ -31,7 +31,7 @@ private:
 	static std::mutex task_guard;
 	static std::condition_variable task_signal;
 
-	// egual à la taille des tâches arrêtées
+	// egal à la taille des tâches arrêtées
 	static int pending_task_count;
 	
 	static std::shared_ptr<BinaryRepresentation> binaryRepresentation;

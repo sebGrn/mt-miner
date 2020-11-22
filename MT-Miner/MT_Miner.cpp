@@ -121,14 +121,14 @@ std::vector<std::shared_ptr<Itemset>> MT_Miner::computeMinimalTransversals()
 	//graph_mt = sortVectorOfItemset(graph_mt);
 
 	// print minimal transversals
-	//Logger::log("\nminimal transversals count : ", graph_mt.size(), "\n");
-	//if (graph_mt.size() > 6)
-	//{
-	//	for_each(graph_mt.begin(), graph_mt.begin() + 5, [&](const std::shared_ptr<Itemset>& elt) { Logger::log(elt->toString(), "\n"); });
-	//	Logger::log("...\n",);
-	//}
-	//else
-	//	for_each(graph_mt.begin(), graph_mt.end(), [&](const std::shared_ptr<Itemset>& elt) { Logger::log(elt->toString(), "\n"); });
+	Logger::log("\nminimal transversals count : ", graph_mt.size(), "\n");
+	if (graph_mt.size() > 6)
+	{
+		for_each(graph_mt.begin(), graph_mt.begin() + 5, [&](const std::shared_ptr<Itemset>& elt) { Logger::log(elt->toString(), "\n"); });
+		Logger::log("...\n");
+	}
+	else
+		for_each(graph_mt.begin(), graph_mt.end(), [&](const std::shared_ptr<Itemset>& elt) { Logger::log(elt->toString(), "\n"); });
 
 	//Logger::log(RESET);
 

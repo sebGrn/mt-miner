@@ -31,7 +31,6 @@ void BinaryRepresentation::buildFromFormalContext(const FormalContext& context)
 			item->staticBitset.set(i, bit);			
 			if (bit)
 			{
-				item->sparseBitset.set(i);
 				sum++;
 			}
 		}
