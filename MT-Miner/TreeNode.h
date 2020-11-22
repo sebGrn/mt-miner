@@ -55,6 +55,8 @@ private:
 
 	std::vector<std::shared_ptr<Itemset>> computeMinimalTransversals_task(const std::vector<std::shared_ptr<Itemset>>& toTraverse);
 	
+	void recurseOnClonedItemset(const std::shared_ptr<Itemset>& itemset, unsigned int iItem, std::vector<std::shared_ptr<Itemset>>& graph_mt);
+
 public:
 	TreeNode(bool useCloneOptimization);
 	~TreeNode();

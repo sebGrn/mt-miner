@@ -23,6 +23,40 @@ TreeNode::~TreeNode()
 {
 }
 
+void TreeNode::recurseOnClonedItemset(const std::shared_ptr<Itemset>& itemset, unsigned int iItem, std::vector<std::shared_ptr<Itemset>>& graph_mt)
+{
+	assert(iItem < itemset->getItemCount());
+
+	std::shared_ptr<Item> item = itemset->getItem(iItem);
+
+	// test if current item contains an original for all its items
+	if (item->isAnOriginal())
+	{
+		// item is an original
+		// create a new itemset by replacing original with its clone and update graph mt list
+		// then recurse on new itemset
+		for (unsigned int j = 0, cloneCount = item->getCloneCount(); j < cloneCount; j++)
+		{
+			// get clone index for current itemset
+			std::shared_ptr<Item> clone = item->getClone(j);
+
+			// make a copy of currentItemset and replace ith item by clone item
+			std::shared_ptr<Itemset> clonedItemset = itemset->createAndReplaceItem(iItem, clone);
+
+			graph_mt.push_back(clonedItemset);
+
+			// update info
+			nbTotalMt++;
+			if (clonedItemset->getItemCount() < minimalMt)
+				minimalMt = clonedItemset->getItemCount();
+
+			// recurse on new cloned itemset to replace kth original by 
+			for (unsigned int k = iItem, n = clonedItemset->getItemCount(); k < n; k++)
+				recurseOnClonedItemset(clonedItemset, k, graph_mt);
+		}
+	}
+}
+
 void TreeNode::updateListsFromToTraverse(const std::vector<std::shared_ptr<Itemset>>& toTraverse,
 										       std::vector<std::shared_ptr<Itemset>>& maxClique, 											
 											   std::vector<std::shared_ptr<Itemset>>& toExplore,
@@ -47,14 +81,19 @@ void TreeNode::updateListsFromToTraverse(const std::vector<std::shared_ptr<Items
 		{
 			// we have a minimal transversal
 			graph_mt.push_back((*currentItemset_it));
+			
+			// update info
 			nbTotalMt++;
 			if ((*currentItemset_it)->getItemCount() < minimalMt)
 				minimalMt = (*currentItemset_it)->getItemCount();
 
+			// manage clones
 			if (this->useCloneOptimization)
 			{
+				//for (unsigned int i = 0, n = (*currentItemset_it)->getItemCount(); i < n; i++)
+				//	(*currentItemset_it)->recurseOnClonedItemset(i, graph_mt);
 				for (unsigned int i = 0, n = (*currentItemset_it)->getItemCount(); i < n; i++)
-					(*currentItemset_it)->recurseOnClonedItemset(i, graph_mt);
+					this->recurseOnClonedItemset((*currentItemset_it), i, graph_mt);
 			}
 		} 
 		else
@@ -150,7 +189,6 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals_task(
 		// loop on candidate itemset from initial toExplore list
 		for (unsigned int i = 0; i < lastIndexToTest; i++)
 		{
-			//auto toCombinedLeft = toExplore[i];  
 			auto toCombinedLeft = toExplore.front();
 			toExplore.erase(toExplore.begin());
 

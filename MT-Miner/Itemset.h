@@ -25,19 +25,8 @@ public:
 
 #ifndef _OLD_ISESSENTIAL
 	bool isEssential;
-	StaticBitset isEssentialADNBitset;	
 
-	// utiliser un bitset et faire des OR pour tester
-	// 1 dans le bitset --> bit non essentiel
-
-	// if ith bit is set, then i index cannot be part of minimal ADN
-	// ie there is at least one set bit at ith index into itemset's bitset
-	StaticBitset markedNonEssentialBisetIndex;
-
-	StaticBitset temporaryBitset;
-#endif	
-
-	// this map contains the transaction index (line number) / item index (column index) of the minimal transaction list
+	// this bitset contains the transaction the minimal transaction 
 	//     0 1 2 3 
 	//   ----------
 	// 0 | 1 1 0 0
@@ -48,7 +37,14 @@ public:
 	// minimal transactions are <2,3> (transaction number 2, set bit is at index number 3)
 	//                          <3,0> (transaction number 3, set bit is at index number 0)
 	//                          <4,3> (transaction number 4, set bit is at index number 1)
-	std::vector<std::pair<unsigned int, unsigned int>> minimalTransaction;
+	StaticBitset isEssentialADNBitset;
+
+	// if ith bit is set, then i index cannot be part of minimal ADN
+	// ie there is at least one set bit at ith index into itemset's bitset
+	StaticBitset markedNonEssentialBisetIndex;
+
+	StaticBitset temporaryBitset;
+#endif	
 	
 private:
 
@@ -66,8 +62,7 @@ public:
 	
 	unsigned int getItemCount() const;
 	unsigned int getDisjunctifSupport() const;
-
-	void recurseOnClonedItemset(unsigned int iItem, std::vector<std::shared_ptr<Itemset>>& graph_mt);
+	std::shared_ptr<Item> getItem(unsigned int i) const;
 
 	std::shared_ptr<Itemset> createAndReplaceItem(unsigned int i, const std::shared_ptr<Item>& item);
 
@@ -90,4 +85,10 @@ inline unsigned int Itemset::getDisjunctifSupport() const
 	// OR operation has already been computed for this itemset into combined itemset function
 	assert(!this->dirty);
 	return this->orSupport;
+}
+
+inline std::shared_ptr<Item> Itemset::getItem(unsigned int i) const
+{
+	assert(i < this->itemset.size());
+	return this->itemset[i];
 }

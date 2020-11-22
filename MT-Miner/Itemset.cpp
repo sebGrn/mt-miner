@@ -113,35 +113,6 @@ std::string Itemset::toString() const
 	return res;
 }
 
-void Itemset::recurseOnClonedItemset(unsigned int iItem, std::vector<std::shared_ptr<Itemset>>& graph_mt)
-{
-	assert(iItem < this->getItemCount());
-
-	std::shared_ptr<Item> item = this->itemset[iItem];
-
-	// test if current item contains an original for all its items
-	if (item->isAnOriginal())
-	{
-		// item is an original
-		// create a new itemset by replacing original with its clone and update graph mt list
-		// then recurse on new itemset
-		for (unsigned int j = 0, cloneCount = item->getCloneCount(); j < cloneCount; j++)
-		{
-			// get clone index for current itemset
-			std::shared_ptr<Item> clone = item->getClone(j);
-
-			// make a copy of currentItemset and replace ith item by clone item
-			std::shared_ptr<Itemset> clonedItemset = this->createAndReplaceItem(iItem, clone);
-
-			graph_mt.push_back(clonedItemset);
-
-			// recurse on new cloned itemset to replace kth original by 
-			for (unsigned int k = iItem, n = clonedItemset->getItemCount(); k < n; k++)
-				clonedItemset->recurseOnClonedItemset(k, graph_mt);
-		}
-	}
-}
-
 void Itemset::combineItemset(const std::shared_ptr<Itemset>& itemset_right)
 {
 	// "1" + "2" => "12"
