@@ -2,6 +2,9 @@
 #include "Logger.h"
 
 std::atomic_ullong TreeNode::nbTotalChildren(0);
+std::atomic_ullong TreeNode::nbTotalMt(0);
+std::atomic_ullong TreeNode::minimalMt(9999);
+
 // to avoid interleaved outputs
 std::mutex TreeNode::output_guard;
 // synchro stuff
@@ -44,6 +47,9 @@ void TreeNode::updateListsFromToTraverse(const std::vector<std::shared_ptr<Items
 		{
 			// we have a minimal transversal
 			graph_mt.push_back((*currentItemset_it));
+			nbTotalMt++;
+			if ((*currentItemset_it)->getItemCount() < minimalMt)
+				minimalMt = (*currentItemset_it)->getItemCount();
 
 			if (this->useCloneOptimization)
 			{

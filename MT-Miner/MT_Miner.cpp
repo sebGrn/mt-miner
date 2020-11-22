@@ -93,8 +93,10 @@ std::vector<std::shared_ptr<Itemset>> MT_Miner::computeMinimalTransversals()
 			if(duration > secondsToWait * 1000)
 			{
 				std::cout << CYAN << "computing minimal transversals in progress : " << secondsToWait * n << " seconds, "
-				<< rootNode.nbTotalChildren << " nodes created"
-				<< RESET << std::endl;
+					<< rootNode.nbTotalChildren << " nodes created, " 
+					<< rootNode.nbTotalMt << " minimal transverses found, " 
+					<< "minimal size of minimal transverse is " << rootNode.minimalMt
+					<< RESET << std::endl;
 				n++;
 				beginTime = std::chrono::system_clock::now();
 			}			

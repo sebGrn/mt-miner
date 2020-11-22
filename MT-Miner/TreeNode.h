@@ -42,6 +42,8 @@ private:
 
 public:
 	static std::atomic_ullong nbTotalChildren;
+	static std::atomic_ullong nbTotalMt;
+	static std::atomic_ullong minimalMt;
 
 private: 
 	/// compute maxClique list, toExplore list and mt list
