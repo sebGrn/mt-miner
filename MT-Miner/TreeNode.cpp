@@ -73,7 +73,7 @@ void TreeNode::updateListsFromToTraverse(const std::vector<std::shared_ptr<Items
 					try
 					{
 						combinedItemset = std::make_shared<Itemset>(*previousItemset);
-						combinedItemset->combineItemset(previousItemset, (*currentItemset_it));
+						combinedItemset->combineItemset((*currentItemset_it));
 					}
 					catch (std::exception& e)
 					{
@@ -98,31 +98,6 @@ void TreeNode::updateListsFromToTraverse(const std::vector<std::shared_ptr<Items
 						toExplore.push_back((*currentItemset_it));
 					}
 				}
-
-				// we can combine with previous element / make a union on 2 elements
-				/*std::shared_ptr<Itemset> combined = std::make_shared<Itemset>(*previousItemset);
-				unsigned int disjSup = 0;
-				if (previousItemset)
-				{
-					combined->combineItemset((*currentItemset_it));
-					disjSup = combined->getDisjunctifSupport();
-				}
-				else
-				{
-					//combinedItemset = (*currentItemset_it);
-					disjSup = (*currentItemset_it)->getDisjunctifSupport();
-				}
-				
-				if (disjSup != objectCount)
-				{
-					previousItemset = combinedItemset;
-					maxClique.push_back((*currentItemset_it));
-				}
-				else
-				{
-					// previousItem has been modified
-					toExplore.push_back((*currentItemset_it));
-				}*/
 			}
 		}
 	}
@@ -173,29 +148,17 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals_task(
 			auto toCombinedLeft = toExplore.front();
 			toExplore.erase(toExplore.begin());
 
-			// store data from toCombinedLeft
-			//bool dirty = toCombinedLeft->dirty;
-			//StaticBitset orValue = toCombinedLeft->orValue;
-			//unsigned int orSupport = toCombinedLeft->orSupport;
-			//bool hasClone = toCombinedLeft->hasClone;
-			//std::vector<unsigned int> storedItem;
-			//for (auto it = toCombinedLeft->itemset.begin(); it != toCombinedLeft->itemset.end(); it++)
-			//	storedItem.push_back((*it)->attributeIndex);
-
 			// loop on next candidate itemset
-			//for (unsigned int j = i + 1; j < toExplore.size(); j++)
 			for (unsigned int j = 0; j < toExplore.size(); j++)
 			{
 				assert(j < toExplore.size());
 				auto toCombinedRight = toExplore[j];
-				//std::cout << "Itemset::combineItemset" << toCombinedLeft->size() << " " << toCombinedRight.size() << std::endl;
-				//auto combinedItemset = Itemset::combineItemset_old(toCombinedLeft, toCombinedRight);
 				
 				try
 				{
 					// combine toCombinedRight into toCombinedLeft
 					auto newItemset = std::make_shared<Itemset>(*toCombinedLeft);
-					newItemset->combineItemset(toCombinedLeft, toCombinedRight);
+					newItemset->combineItemset(toCombinedRight);
 
 					if (!newItemset->containsAClone() && newItemset->computeIsEssential())
 					{
@@ -208,19 +171,6 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals_task(
 				{
 					std::cout << "combined to get newToTraverse " << e.what() << std::endl;
 				}
-
-				// restore toCombinedLeft for next test
-				//toCombinedLeft->dirty = dirty;
-				//toCombinedLeft->orValue = orValue;
-				//toCombinedLeft->orSupport = orSupport;
-				//toCombinedLeft->hasClone = hasClone;
-
-				//while (toCombinedLeft->itemset.back()->toRemove)
-				//{
-				//	toCombinedLeft->itemset.pop_back();
-				//}
-
-				//itemsetTmp = toCombinedLeft;
 			}
 
 			if (!newToTraverse.empty())

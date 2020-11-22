@@ -57,14 +57,6 @@ public:
 	TreeNode(bool useCloneOptimization);
 	~TreeNode();
 
-	/// recursive method, going through tree representation 
-	/// computes minimal transversals for binary representation
-	//std::vector<Itemset> computeMinimalTransversals_recursive(const std::vector<Itemset> & toTraverse);
-
-	/// iterative method, for debug purpose only
-	/// computes minimal transversals for binary representation
-	//std::vector<Itemset> computeMinimalTransversals_iterative(const std::vector<Itemset>& toTraverse);
-
 	std::vector<std::shared_ptr<Itemset>> computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>& toTraverse);
 };
 

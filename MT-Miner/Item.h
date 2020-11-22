@@ -23,15 +23,11 @@ public:
 	// contains a list of clone for this item (same bitset)
 	std::vector<std::shared_ptr<Item>> clones;
 
-
-	bool toRemove;
-
 public:
 	Item(int index, unsigned int bitsetSize)
 	{
 		this->attributeIndex = index;
 		this->isClone = false;
-		this->toRemove = false;
 	}
 
 	~Item()

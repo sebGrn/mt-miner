@@ -6,12 +6,11 @@
 #include "Item.h"
 #include "SparseBitset.h"
 
-#define _OLD_ISESSENTIAL
+//#define _OLD_ISESSENTIAL
 
 class Itemset
 {
 private:
-public:
 	std::vector<std::shared_ptr<Item>> itemset;
 	
 public:
@@ -54,7 +53,7 @@ public:
 private:
 
 #ifndef _OLD_ISESSENTIAL
-	void updateIsEssentialSparseMatrix(const std::shared_ptr<Item>& item);
+	void updateIsEssential(const std::shared_ptr<Item>& item);
 #endif
 
 public:
@@ -63,9 +62,8 @@ public:
 	void addFirstItem(const std::shared_ptr<Item>& item);
 	void addItem(const std::shared_ptr<Item>& item);
 		
-	void combineItemset(const std::shared_ptr<Itemset>& str1, const std::shared_ptr<Itemset>& str2);
-	//static std::shared_ptr<Itemset> combineItemset_old(std::shared_ptr<Itemset>& itemset_left, const std::shared_ptr<Itemset>& itemset_right);
-
+	void combineItemset(const std::shared_ptr<Itemset>& str2);
+	
 	unsigned int getItemCount() const;
 	unsigned int getDisjunctifSupport() const;
 
