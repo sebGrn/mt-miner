@@ -309,8 +309,7 @@ void Itemset::updateIsEssential(const std::shared_ptr<Item>& item)
 		M = M & reverseItemBitset;
 	}*/
 	
-	
-	{
+		{
 		int i = 0;
 		int n = BinaryRepresentation::getObjectCount();
 		for (i = 0; i < n; i++)
@@ -335,7 +334,70 @@ void Itemset::updateIsEssential(const std::shared_ptr<Item>& item)
 }
 #endif
 
+unsigned int Itemset::computeDisjunctifSupport(const Itemset& left, const std::shared_ptr<Itemset>& right)
+{
+	StaticBitset res = left.orValue | right->orValue;
+	return res.count();
+}
 
+void Itemset::combineRightIntoLeft(Itemset& itemset_left, const std::shared_ptr<Itemset>& itemset_right)
+{
+	// "1" + "2" => "12"
+	// "71" + "72" => "712"
+	// combine without duplicates
+	for (auto it_item = itemset_right->itemset.begin(); it_item != itemset_right->itemset.end(); it_item++)
+	{
+		// search if right itemset contains current item from left
+		bool found = false;
+		for (auto it = itemset_left.itemset.begin(); it != itemset_left.itemset.end(); it++)
+		{
+			if ((*it)->attributeIndex == (*it_item)->attributeIndex)
+			{
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+		{
+			// didnt find duplicates, we can add the item at the end of the list
+			// add item into itemset list
+			itemset_left.itemset.push_back((*it_item));
+#ifndef _OLD_ISESSENTIAL
+			// update isEssential
+			itemset_left.updateIsEssential((*it_item));
+#endif
+		}
+	}
+	
+	// dont need to loop on all items, just combine itemset properties
+	// update orValue
+	itemset_left.orValue = itemset_left.orValue | itemset_right->orValue;
+	// update orSupport
+	itemset_left.orSupport = itemset_left.orValue.count();
+	// update isClone
+	itemset_left.hasClone = itemset_left.hasClone | itemset_right->hasClone;
+	// itemset is valid
+	itemset_left.dirty = false;
+}
+
+void Itemset::copyRightIntoLeft(Itemset& left, const std::shared_ptr<Itemset>& right)
+{
+	left.itemset.clear();
+	
+	for (auto it = right->itemset.begin(); it != right->itemset.end(); it++)
+		left.itemset.push_back(*it);
+
+	left.dirty = right->dirty;
+	left.orValue = right->orValue;
+	left.orSupport = right->orSupport;
+	left.hasClone = right->hasClone;
+	
+#ifndef _OLD_ISESSENTIAL
+	left.isEssential = right->isEssential;
+	left.isEssentialADNBitset = right->isEssential;
+	left.markedNonEssentialBisetIndex = right->markedNonEssentialBisetIndex;
+#endif	
+}
 
 //// sort each element of minimalTransversals
 //static std::vector<Itemset> sortVectorOfItemset(const std::vector<Itemset>& strVector)

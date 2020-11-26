@@ -11,13 +11,12 @@ namespace MTMinerUnitTests_test
 		
 		TEST_METHOD(TestingDisjonctifSupport)
 		{
-			HypergraphParser parser;
-			bool parserResult = parser.parse("../../data/test.txt");
+			HyperGraph hypergraph;
+			bool parserResult = hypergraph.load("../../data/test.txt");
 			Assert::AreEqual(parserResult, true);
 			
-			std::shared_ptr<HyperGraph> hypergraph = parser.getHypergraph();
-			int objectCount = parser.getObjectCount();
-			int itemCount = parser.getItemCount();
+			int objectCount = hypergraph.getObjectCount();
+			int itemCount = hypergraph.getItemCount();
 			Assert::AreEqual(6, objectCount);
 			Assert::AreEqual(8, itemCount);
 
@@ -54,45 +53,48 @@ namespace MTMinerUnitTests_test
 
 		TEST_METHOD(TestingMinimalTransversalsSize)
 		{
-			HypergraphParser parser;
-			bool parserResult = parser.parse("../../data/test.txt");
+			HyperGraph hypergraph;
+			bool parserResult = hypergraph.load("../../data/test.txt");
 			Assert::AreEqual(true, parserResult);
 
 			MT_Miner miner(true);
-			miner.createBinaryRepresentation(parser.getHypergraph());
+			miner.createBinaryRepresentation(hypergraph);
 
 			// compute minimal transversals
-			std::vector<std::shared_ptr<Itemset>>&& minimalTransversals = miner.computeMinimalTransversals();
+			std::vector< std::shared_ptr<Itemset>> minimalTransversals;
+			miner.computeMinimalTransversals(minimalTransversals);
 			//minimalTransversals = Utils::sortVectorOfItemset(minimalTransversals);
 			Assert::AreEqual(6, static_cast<int>(minimalTransversals.size()));
 		}
 
 		TEST_METHOD(TestingCloneMinimalTransversalsSize_no_clone)
 		{
-			HypergraphParser parser;
-			bool parserResult = parser.parse("../../data/test_clone.txt");
+			HyperGraph hypergraph;
+			bool parserResult = hypergraph.load("../../data/test_clone.txt");
 			Assert::AreEqual(true, parserResult);
 
 			MT_Miner miner(false);
-			miner.createBinaryRepresentation(parser.getHypergraph());
+			miner.createBinaryRepresentation(hypergraph);
 
 			// compute minimal transversals
-			std::vector<std::shared_ptr<Itemset>>&& minimalTransversals = miner.computeMinimalTransversals();
+			std::vector< std::shared_ptr<Itemset>> minimalTransversals;
+			miner.computeMinimalTransversals(minimalTransversals);
 			//minimalTransversals = Utils::sortVectorOfItemset(minimalTransversals);
 			Assert::AreEqual(15, static_cast<int>(minimalTransversals.size()));
 		}
 
 		TEST_METHOD(TestingCloneMinimalTransversalsSize_clone)
 		{
-			HypergraphParser parser;
-			bool parserResult = parser.parse("../../data/test_clone.txt");
+			HyperGraph hypergraph;
+			bool parserResult = hypergraph.load("../../data/test_clone.txt");
 			Assert::AreEqual(true, parserResult);
 
 			MT_Miner miner(true);
-			miner.createBinaryRepresentation(parser.getHypergraph());
+			miner.createBinaryRepresentation(hypergraph);
 
 			// compute minimal transversals
-			std::vector<std::shared_ptr<Itemset>>&& minimalTransversals = miner.computeMinimalTransversals();
+			std::vector< std::shared_ptr<Itemset>> minimalTransversals;
+			miner.computeMinimalTransversals(minimalTransversals);
 			//minimalTransversals = Utils::sortVectorOfItemset(minimalTransversals);
 			Assert::AreEqual(15, static_cast<int>(minimalTransversals.size()));
 		}

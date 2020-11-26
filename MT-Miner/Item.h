@@ -11,9 +11,9 @@
 //#define BITSET_SIZE 32768	// dualmatching30 --> OK, 10 sec
 //#define BITSET_SIZE 65536	// dualmatching32 --> OK, 48 sec
 //#define BITSET_SIZE 131072	// dualmatching34 --> OK, 444 sec
-//#define BITSET_SIZE 262144	// dualmatching36 --> PAS OK, 5 min, 47Go memory
+#define BITSET_SIZE 262144	// dualmatching36 --> PAS OK, 5 min, 47Go memory
 //#define BITSET_SIZE 524288	// dualmatching38
-#define BITSET_SIZE 800
+//#define BITSET_SIZE 1000
 typedef std::bitset<BITSET_SIZE> StaticBitset;
 
 class Item

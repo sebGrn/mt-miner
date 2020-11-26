@@ -13,7 +13,7 @@
 #include "../MT-Miner/FormalContext.h"
 #include "../MT-Miner/HyperGraph.h"
 #include "../MT-Miner/BinaryRepresentation.h"
-#include "../MT-Miner/HypergraphParser.h"
+#include "../MT-Miner/Hypergraph.h"
 #include "../MT-Miner/MT_Miner.h"
 #include "../MT-Miner/TreeNode.h"
 #include "../MT-Miner/Logger.h"

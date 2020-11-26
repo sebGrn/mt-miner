@@ -24,6 +24,7 @@ public:
 	bool hasClone;
 
 #ifndef _OLD_ISESSENTIAL
+	//
 	bool isEssential;
 
 	// this bitset contains the transaction the minimal transaction 
@@ -73,6 +74,11 @@ public:
 	bool operator==(const Itemset& other);
 
 	std::string toString() const;
+
+	static unsigned int computeDisjunctifSupport(const Itemset& left, const std::shared_ptr<Itemset>& right);
+	static void combineRightIntoLeft(Itemset& left, const std::shared_ptr<Itemset>& right);
+	static void copyRightIntoLeft(Itemset& left, const std::shared_ptr<Itemset>& right);
+
 };
 
 inline unsigned int Itemset::getItemCount() const

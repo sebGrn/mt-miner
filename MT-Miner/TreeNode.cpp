@@ -69,7 +69,7 @@ void TreeNode::updateListsFromToTraverse(const std::vector<std::shared_ptr<Items
 	unsigned int objectCount = this->binaryRepresentation->getObjectCount();
 	
 	// results of cumulated combined items / must be declared outside of the loop
-	std::shared_ptr<Itemset> previousItemset;
+	Itemset cumulatedItemset;
 
 	// loop on toTraverse list and build maxClique and toExplore lists
 	for (auto currentItemset_it = toTraverse.begin(); currentItemset_it != toTraverse.end(); currentItemset_it++)
@@ -90,8 +90,6 @@ void TreeNode::updateListsFromToTraverse(const std::vector<std::shared_ptr<Items
 			// manage clones
 			if (this->useCloneOptimization)
 			{
-				//for (unsigned int i = 0, n = (*currentItemset_it)->getItemCount(); i < n; i++)
-				//	(*currentItemset_it)->recurseOnClonedItemset(i, graph_mt);
 				for (unsigned int i = 0, n = (*currentItemset_it)->getItemCount(); i < n; i++)
 					this->recurseOnClonedItemset((*currentItemset_it), i, graph_mt);
 			}
@@ -106,44 +104,23 @@ void TreeNode::updateListsFromToTraverse(const std::vector<std::shared_ptr<Items
 			if (((*currentItemset_it) == (*toTraverse.begin())) && (*currentItemset_it)->getItemCount() == 1)
 			{
 				// must be the 1st element with only one element
-				previousItemset = (*currentItemset_it);
+				//previousItemset = (*currentItemset_it);
+				Itemset::copyRightIntoLeft(cumulatedItemset, (*currentItemset_it));
 				maxClique.push_back((*currentItemset_it));
 			}
 			else
 			{
-				// we can combine with previous element / make a union on 2 elements
-				std::shared_ptr<Itemset> combinedItemset;
-				if (previousItemset)
+				// compute disjunctif support
+				unsigned int disjSup = Itemset::computeDisjunctifSupport(cumulatedItemset, (*currentItemset_it));
+				// test support and add itemset in maxClique or toExplore list
+				if (disjSup != objectCount)
 				{
-					try
-					{
-						combinedItemset = std::make_shared<Itemset>(*previousItemset);
-					}
-					catch (std::exception& e)
-					{
-						std::cout << "during updateListsFromToTraverse " << e.what() << std::endl;
-					}
-
-					if(combinedItemset)
-						combinedItemset->combineItemset((*currentItemset_it));
+					Itemset::combineRightIntoLeft(cumulatedItemset, (*currentItemset_it));
+					maxClique.push_back((*currentItemset_it));
 				}
 				else
 				{
-					combinedItemset = (*currentItemset_it);
-				}
-
-				if (combinedItemset)
-				{
-					unsigned int disjSup = combinedItemset->getDisjunctifSupport();
-					if (disjSup != objectCount)
-					{
-						previousItemset = combinedItemset;
-						maxClique.push_back((*currentItemset_it));
-					}
-					else
-					{
-						toExplore.push_back((*currentItemset_it));
-					}
+					toExplore.push_back((*currentItemset_it));				
 				}
 			}
 		}
@@ -225,7 +202,7 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals_task(
 					if (newItemset)
 					{
 						newItemset->combineItemset(toCombinedRight);
-
+						// TEST PUIS CREATION NUOVEL ITEMSET
 						if (!newItemset->containsAClone() && newItemset->computeIsEssential())
 						{
 							// this is a candidate, copy toCombinedLeft into newItemset

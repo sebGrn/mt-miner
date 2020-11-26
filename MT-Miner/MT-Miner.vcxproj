@@ -146,6 +146,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BinaryRepresentation.cpp" />
+    <ClCompile Include="HeapItemset.cpp" />
     <ClCompile Include="Itemset.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="main.cpp" />
@@ -158,6 +159,7 @@
   <ItemGroup>
     <ClInclude Include="BinaryRepresentation.h" />
     <ClInclude Include="FormalContext.h" />
+    <ClInclude Include="HeapItemset.h" />
     <ClInclude Include="HyperGraph.h" />
     <ClInclude Include="Item.h" />
     <ClInclude Include="Itemset.h" />
