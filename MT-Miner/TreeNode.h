@@ -61,6 +61,6 @@ public:
 	TreeNode(bool useCloneOptimization);
 	~TreeNode();
 
-	std::vector<std::shared_ptr<Itemset>> computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>& toTraverse);
+	bool computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>& graph_mt, std::vector<std::shared_ptr<Itemset>>& toTraverse);
 };
 

@@ -40,8 +40,6 @@ void Itemset::addFirstItem(const std::shared_ptr<Item>& item)
 // not optimized, only for test
 void Itemset::addItem(const std::shared_ptr<Item>& item)
 {
-	assert(this->itemset.size() == 0);
-
 	this->orValue = item->staticBitset | this->orValue;
 	this->orSupport = this->orValue.count();
 	this->dirty = false;
@@ -75,27 +73,38 @@ bool Itemset::operator==(const Itemset& other)
 // make a copy of currentItemset and replance ith item by clone item
 std::shared_ptr<Itemset> Itemset::createAndReplaceItem(unsigned int iToReplace, const std::shared_ptr<Item>& itemToReplace)
 {
-	std::shared_ptr<Itemset> clonedItemset = std::make_shared<Itemset>();
-	clonedItemset->orValue = this->orValue;
-	clonedItemset->orSupport = this->orSupport;
-	clonedItemset->dirty = this->dirty;
-	clonedItemset->hasClone = this->hasClone;
+	std::shared_ptr<Itemset> clonedItemset;
+	try
+	{
+		clonedItemset = std::make_shared<Itemset>();
+	}
+	catch (std::exception& e)
+	{
+		std::cout << "during createAndReplaceItem " << e.what() << std::endl;
+	}
+	if (clonedItemset)
+	{
+		clonedItemset->orValue = this->orValue;
+		clonedItemset->orSupport = this->orSupport;
+		clonedItemset->dirty = this->dirty;
+		clonedItemset->hasClone = this->hasClone;
 #ifndef _OLD_ISESSENTIAL
-	clonedItemset->isEssential = this->isEssential;
-	clonedItemset->isEssentialADNBitset = this->isEssentialADNBitset;
+		clonedItemset->isEssential = this->isEssential;
+		clonedItemset->isEssentialADNBitset = this->isEssentialADNBitset;
 #endif
 
-	for (unsigned int i = 0; i < this->getItemCount(); i++)
-	{
-		if (iToReplace == i)
+		for (unsigned int i = 0; i < this->getItemCount(); i++)
 		{
-			clonedItemset->itemset.push_back(itemToReplace);
-			if(itemToReplace->isAClone())
-				clonedItemset->hasClone = true;
-		}
-		else
-		{
-			clonedItemset->itemset.push_back(this->itemset[i]);
+			if (iToReplace == i)
+			{
+				clonedItemset->itemset.push_back(itemToReplace);
+				if (itemToReplace->isAClone())
+					clonedItemset->hasClone = true;
+			}
+			else
+			{
+				clonedItemset->itemset.push_back(this->itemset[i]);
+			}
 		}
 	}
 	return clonedItemset;

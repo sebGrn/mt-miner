@@ -20,22 +20,22 @@ private:
 	unsigned int objectCount;
 
 public:
-	FormalContext(const std::shared_ptr<HyperGraph>& hypergraph)
+	FormalContext(const HyperGraph& hypergraph)
 	{
-		this->itemCount = hypergraph->getItemCount();
-		this->objectCount = hypergraph->getObjectCount();
+		this->itemCount = hypergraph.getItemCount();
+		this->objectCount = hypergraph.getObjectCount();
 
 		unsigned int index = 0;
+		SparseBitset bitset;
 		// build formal context
-		for (unsigned int i = 0, n = hypergraph->getObjectCount(); i < n; i++)
+		for (unsigned int i = 0, n = hypergraph.getObjectCount(); i < n; i++)
 		{
-			SparseBitset bitset;
-						
+			bitset.reset();						
 			// loop on hyper graph and build formal context
-			std::vector<unsigned int> line = hypergraph->getLine(i);
+			std::vector<unsigned int> line = hypergraph.getLine(i);
 			for (size_t j = 0, k = line.size(); j < k; j++)
 			{
-				if (hypergraph->getOneBasedIndex())
+				if (hypergraph.getOneBasedIndex())
 				{
 					assert(line[j] >= 1);
 					index = line[j] - 1;

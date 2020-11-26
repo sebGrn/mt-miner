@@ -18,7 +18,6 @@
 #include <iomanip>
 
 #include "utils.h"
-#include "HypergraphParser.h"
 #include "MT_Miner.h"
 #include "Logger.h"
 
@@ -104,89 +103,94 @@ public:
 void runMinimalTransversals(const std::string& file, bool useCloneOptimization, bool verbose, bool useOutputFile, bool useOutputLogFile, const std::string& outputLogFile)
 {
 	//std::cout << BOLDYELLOW << "\n***** Running MT Miner *****" << RESET << std::endl << std::endl;
-
+	
 	unsigned int objectCount = 0;
 	unsigned int itemCount = 0;
-	std::shared_ptr<HyperGraph> hypergraph;
-
+	
 	Logger::init(outputLogFile, verbose, useOutputLogFile);
 
 	// parser file
-	HypergraphParser parser;
-	if (parser.parse(file))
+	HyperGraph hypergraph;
+	if (hypergraph.load(file))
 	{
-		// get data from parser
-		hypergraph = parser.getHypergraph();
-		objectCount = parser.getObjectCount();
-		itemCount = parser.getItemCount();
-
-		// allocate miner and compute minimal transversals
+		// allocate miner 
 		MT_Miner miner(useCloneOptimization);
-		if (miner.createBinaryRepresentation(hypergraph))
+		// load hypergraph into formal context, then into binary representation
+		// build clone list if needed
+		miner.createBinaryRepresentation(hypergraph);
+
+		// build formal context from hypergraph
+		FormalContext formalContext(hypergraph);
+		//formalContext.serialize("format_context.csv");
+
+		// build binary representation from formal context
+		BinaryRepresentation::buildFromFormalContext(formalContext);
+		//BinaryRepresentation<bitset_type>::serialize("binary_rep.csv");
+		
+		// compute minimal transverses
+		std::vector<std::shared_ptr<Itemset>> minimalTransversals;
+		miner.computeMinimalTransversals(minimalTransversals);
+
+		// save minimal transversals into a file
+		if (useOutputFile)
 		{
-			std::vector<std::shared_ptr<Itemset>> minimalTransversals = miner.computeMinimalTransversals();
+			std::string outFile = file;
+			outFile += ".out";
 
-			// save minimal transversals into a file
-			if (useOutputFile)
-			{
-				std::string outFile = file;
-				outFile += ".out";
-
-				Logger::log("saving minimal transversals into file : ", outFile, "\n");
-				std::ofstream outputStream;
-				outputStream.open(outFile);
-				for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const std::shared_ptr<Itemset>& elt) { outputStream << elt->toString() << std::endl; });
-				outputStream.close();
-			}
+			Logger::log("saving minimal transversals into file : ", outFile, "\n");
+			std::ofstream outputStream;
+			outputStream.open(outFile);
+			for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const std::shared_ptr<Itemset>& elt) { outputStream << elt->toString() << std::endl; });
+			outputStream.close();			
 		}
 	}
-	Logger::close();
+	Logger::close();	
 }
 
-// ----------------------------------------------------------------------------------------------------------- //
-//
-//void runBitsetBenchmark()
-//{
-//	srand(time(NULL));
-//
-//	std::chrono::high_resolution_clock::time_point tick, tock;
-//
-//	const int bitset_size = 100000;
-//
-//	{
-//		std::bitset<bitset_size> bitset_1, bitset_2, bitset_3;
-//		for (unsigned int num = bitset_size; num--;)
-//		{
-//			bitset_1.set(rand() % bitset_size, rand() % 2);
-//			bitset_2.set(rand() % bitset_size, rand() % 2);
-//		}
-//		tick = std::chrono::high_resolution_clock::now();
-//		bitset_3 = bitset_1 | bitset_2;
-//		tock = std::chrono::high_resolution_clock::now();
-//		std::cout << "std::bitset	OR : " << std::setw(16) << std::chrono::duration_cast<std::chrono::nanoseconds>(tock - tick).count() << " nsecs" << std::endl;
-//	}
-//
-//	{
-//		CustomULBitset bitset_1(bitset_size), bitset_2(bitset_size), bitset_3(bitset_size);
-//		for (unsigned int num = bitset_size; num--;)
-//		{
-//			bitset_1.set(rand() % bitset_size, rand() % 2);
-//			bitset_2.set(rand() % bitset_size, rand() % 2);
-//		}
-//		tick = std::chrono::high_resolution_clock::now();
-//		bitset_3 = bitset_1 | bitset_2;
-//		tock = std::chrono::high_resolution_clock::now();
-//		std::cout << "CustomULBitset	OR : " << std::setw(16) << std::chrono::duration_cast<std::chrono::nanoseconds>(tock - tick).count() << " nsecs" << std::endl;
-//	}
-//}
 
 // ----------------------------------------------------------------------------------------------------------- //
 // ----------------------------------------------------------------------------------------------------------- //
 
 int main(int argc, char* argv[])
  {
+	/*Logger::init("", true, "");
+
+	PROCESS_MEMORY_COUNTERS_EX pmc;
+	GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
+	SIZE_T physMemUsedByMe0 = pmc.WorkingSetSize;
+
+	{
+		HyperGraph hypergrah;
+		bool parserResult = hypergrah.load("../data/dualmatching34.dat");
+
+		// build formal context from hypergraph
+		FormalContext formalContext(hypergrah);
+
+		// build binary representation from formal context
+		BinaryRepresentation::buildFromFormalContext(formalContext);
+
+		unsigned int cloneListSize = BinaryRepresentation::buildCloneList();
+		Logger::log(cloneListSize, " clones found\n");
+
+	}
+
+	//std::shared_ptr<Itemset> tmp = std::make_shared<Itemset>();
+	//tmp->addFirstItem()
+
+	GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
+	SIZE_T physMemUsedByMe1 = pmc.WorkingSetSize;
+
+	std::cout << "allocated memory " << physMemUsedByMe1 - physMemUsedByMe0 << std::endl;
+
+	Logger::close();
+
+	return 0;*/
+
+
+	// --------------------------------------------------------------------------------------------------------- //
+	
+
 	// http://research.nii.ac.jp/~uno/dualization.html
-	//runBitsetBenchmark();
 	
 	if (argc <= 1)
 	{
@@ -218,4 +222,6 @@ int main(int argc, char* argv[])
 		useCloneOptimization = parameterList[ArgumentParser::USE_CLONE] == "true" || parameterList[ArgumentParser::USE_CLONE] == "True" || parameterList[ArgumentParser::USE_CLONE] == "TRUE";
 
 	runMinimalTransversals(file, useCloneOptimization, verboseMode, useOutputFile, useOutputLog, useOutputLogFile);
+
+	return 0;	
 }

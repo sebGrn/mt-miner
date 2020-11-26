@@ -12,7 +12,7 @@ MT_Miner::~MT_Miner()
 {
 }
 
-bool MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hypergraph)
+void MT_Miner::createBinaryRepresentation(const HyperGraph& hypergraph)
 {
 	// build formal context from hypergraph
 	FormalContext formalContext(hypergraph);
@@ -44,7 +44,6 @@ bool MT_Miner::createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hyp
 		if (cloneListSize == 0)
 			this->useCloneOptimization = false;
 	}
-	return true;
 }
 
 void MT_Miner::computeInitalToTraverseList(std::vector<std::shared_ptr<Itemset>>& toTraverse) const
@@ -53,6 +52,7 @@ void MT_Miner::computeInitalToTraverseList(std::vector<std::shared_ptr<Itemset>>
 	for (unsigned int i = 1; i <= BinaryRepresentation::getItemCount(); i++)
 	{
 		std::shared_ptr<Item> item = BinaryRepresentation::getItemFromKey(i);
+		// dont push clones into initial trasverse list
 		if (!item->isAClone())
 		{
 			// get itemset from binary representation and store them into lists
@@ -64,21 +64,21 @@ void MT_Miner::computeInitalToTraverseList(std::vector<std::shared_ptr<Itemset>>
 			itemset->orValue = item->staticBitset;
 			itemset->orSupport = itemset->orValue.count();
 			itemset->dirty = false;
-			//itemset->isEssential = false;
+			itemset->isEssential = true;
 
-			// dont push clones into initial trasverse list		
 			toTraverse.push_back(itemset);
 		}
 	}
 }
 
-std::vector<std::shared_ptr<Itemset>> MT_Miner::computeMinimalTransversals()
+void MT_Miner::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>& mt)
 {
 	auto beginTime = std::chrono::system_clock::now();
-
+	SIZE_T used0 = Utils::printUsedMemoryForCrtProcess();
+	
 	std::vector<std::shared_ptr<Itemset>> toTraverse;
 	computeInitalToTraverseList(toTraverse);
-
+	
 	// create a graph, then compute minimal transversal from the binary representation
 	TreeNode rootNode(this->useCloneOptimization);
 	
@@ -105,38 +105,42 @@ std::vector<std::shared_ptr<Itemset>> MT_Miner::computeMinimalTransversals()
 	
 
 	// compute all minimal transversal from the root node
-	std::vector< std::shared_ptr<Itemset>>&& graph_mt = rootNode.computeMinimalTransversals(toTraverse);
-	//std::vector<Itemset>&& graph_mt = rootNode.computeMinimalTransversals_recursive(toTraverse);
-	//std::vector<Itemset>&& graph_mt = rootNode.computeMinimalTransversals_iterative(toTraverse);
+	rootNode.computeMinimalTransversals(mt, toTraverse);
 	
 	// stop the thread and detach it (dont not wait next n seconds)
 	this->stop = true;
 	ftr.get();
-	
+
+	std::cout << CYAN << rootNode.nbTotalChildren << " nodes created, "
+		<< rootNode.nbTotalMt << " minimal transverses found, "
+		<< "minimal size of minimal transverse is " << rootNode.minimalMt
+		<< RESET << std::endl;
+
 	// print timer
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
 	//Logger::log("Found ", graph_mt.size(), " minimal transverses in ", duration, " ms\n");
 	auto duration2 = duration / 1000.0;
-	Logger::log("Found ", graph_mt.size(), " minimal transverses in ", duration2, " s\n");
+	Logger::log("Found ", mt.size(), " minimal transverses in ", duration2, " s\n");
 
 	// sort transversals itemset
 	//graph_mt = sortVectorOfItemset(graph_mt);
 
 	// print minimal transversals
-	Logger::log("\nminimal transversals count : ", graph_mt.size(), "\n");
-	if (graph_mt.size() > 6)
+	Logger::log("\nminimal transversals count : ", mt.size(), "\n");
+	if (mt.size() > 6)
 	{
-		for_each(graph_mt.begin(), graph_mt.begin() + 5, [&](const std::shared_ptr<Itemset>& elt) { Logger::log(elt->toString(), "\n"); });
+		for_each(mt.begin(), mt.begin() + 5, [&](const std::shared_ptr<Itemset>& elt) { Logger::log(elt->toString(), "\n"); });
 		Logger::log("...\n");
 	}
 	else
-		for_each(graph_mt.begin(), graph_mt.end(), [&](const std::shared_ptr<Itemset>& elt) { Logger::log(elt->toString(), "\n"); });
-
+		for_each(mt.begin(), mt.end(), [&](const std::shared_ptr<Itemset>& elt) { Logger::log(elt->toString(), "\n"); });
+	
 	//Logger::log(RESET);
 
 	// write tree into js
 	//JsonTree::writeJsonNode(graph_mt);
-	
-	return graph_mt;	
+
+	SIZE_T used1 = Utils::printUsedMemoryForCrtProcess();
+	std::cout << "allocated memory " << used1 - used0 << std::endl;
 }
 

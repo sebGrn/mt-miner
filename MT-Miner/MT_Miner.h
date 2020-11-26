@@ -36,9 +36,9 @@ public:
 	~MT_Miner();
 
 	/// this function build a format context from the hypergraph, then build the binary representation
-	bool createBinaryRepresentation(const std::shared_ptr<HyperGraph>& hypergraph);
+	void createBinaryRepresentation(const HyperGraph& hypergraph);
 	
 	///
-	std::vector<std::shared_ptr<Itemset>> computeMinimalTransversals();
+	void computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>& mt);
 };
 

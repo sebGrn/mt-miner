@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="HypergraphParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="MT_Miner.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -41,9 +38,6 @@
     <Text Include="CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="HypergraphParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MT_Miner.h">
       <Filter>Header Files</Filter>
     </ClInclude>

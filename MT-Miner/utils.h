@@ -6,7 +6,12 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include "windows.h"
+#include "psapi.h"
 
+#define NOMINMAX
+#undef max
+#undef min
 
 class Utils
 {
@@ -70,4 +75,28 @@ public:
 	{
 		return ltrim(rtrim(str, chars), chars);
 	}
+
+	// ------------------------------------------------------------------------------------------------------------------------- //
+
+	static void printTotalVirtualMemory()
+	{
+		MEMORYSTATUSEX memInfo;
+		memInfo.dwLength = sizeof(MEMORYSTATUSEX);
+		GlobalMemoryStatusEx(&memInfo);
+		// size of swap file plus installed RAM
+		DWORDLONG totalVirtualMem = memInfo.ullTotalPageFile;
+		std::cout << "size of swap file plus installed RAM " << totalVirtualMem << std::endl;
+		// total virtual memory
+		DWORDLONG totalPhysMem = memInfo.ullTotalPhys;
+		std::cout << "total virtual memory " << totalPhysMem << std::endl;
+	}
+
+	static SIZE_T printUsedMemoryForCrtProcess()
+	{
+		PROCESS_MEMORY_COUNTERS_EX pmc;
+		GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
+		SIZE_T virtualMemUsedByMe = pmc.PrivateUsage;
+		return virtualMemUsedByMe;		
+	}
+
 };
