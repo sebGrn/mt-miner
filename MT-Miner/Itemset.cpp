@@ -285,7 +285,7 @@ void Itemset::updateIsEssential(const std::shared_ptr<Item>& item)
 	//StaticBitset S = item->staticBitset;
 	//StaticBitset R = this->isEssentialADNBitset | this->markedNonEssentialBisetIndex;
 	
-	this->temporaryBitset = this->isEssentialADNBitset | this->markedNonEssentialBisetIndex;
+	//this->temporaryBitset = this->isEssentialADNBitset | this->markedNonEssentialBisetIndex;
 	
 	//this->markedNonEssetialBisetIndex = (this->isEssentialADNBitset & item->staticBitset) | this->markedNonEssetialBisetIndex;
 	//this->isEssentialADNBitset = this->isEssentialADNBitset ^ item->staticBitset;
@@ -316,7 +316,7 @@ void Itemset::updateIsEssential(const std::shared_ptr<Item>& item)
 		{
 			if (item->staticBitset.test(i))
 			{
-				if (temporaryBitset.test(i))
+				if (this->isEssentialADNBitset.test(i) | this->markedNonEssentialBisetIndex.test(i))
 				{
 					// ith bit was already part of minimal ADNx²	
 					// we have to remove it from the minimal ADN and remove ith bit as a candidate for minimal AND index
