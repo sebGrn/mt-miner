@@ -11,16 +11,16 @@
 //#define BITSET_SIZE 32768	// dualmatching30 --> OK, 10 sec
 //#define BITSET_SIZE 65536	// dualmatching32 --> OK, 48 sec
 //#define BITSET_SIZE 131072	// dualmatching34 --> OK, 444 sec
-#define BITSET_SIZE 262144	// dualmatching36 --> PAS OK, 5 min, 47Go memory
-//#define BITSET_SIZE 524288	// dualmatching38
+//#define BITSET_SIZE 262144	// dualmatching36 --> PAS OK, 5 min, 47Go memory
+#define BITSET_SIZE 524288	// dualmatching38
 //#define BITSET_SIZE 1000
 typedef std::bitset<BITSET_SIZE> StaticBitset;
 
 class Item
 {
-public:
+private:
 	unsigned int attributeIndex;
-	StaticBitset staticBitset;
+	StaticBitset* staticBitset;
 	
 	// true if this item is a clone
 	bool isClone;
@@ -31,23 +31,59 @@ public:
 public:
 	Item(int index, unsigned int bitsetSize)
 	{
+		this->staticBitset = new StaticBitset();
+		this->staticBitset->reset();
 		this->attributeIndex = index;
 		this->isClone = false;
 	}
 
 	~Item()
-	{}
+	{
+		if (this->staticBitset)
+			delete this->staticBitset;
+		clones.clear();
+	}
 
+	void set(unsigned int i, bool value);
+	bool get(unsigned int) const;
+	unsigned int count() const;
+	const StaticBitset* value() const;
 	void addClone(const std::shared_ptr<Item>& clone);
 	void setClone();
+	unsigned int getAttributeIndex() const;
 	bool isAnOriginal() const;
 	unsigned int getCloneCount() const;
 	std::shared_ptr<Item> getClone(unsigned int i) const;
 	void resetClonedAttributesIndexes();
-	bool isAClone();
+	bool isAClone() const;
 
-	bool operator==(const Item& other);
+	bool operator==(const Item& other);	
 };
+
+inline unsigned int Item::getAttributeIndex() const
+{
+	return this->attributeIndex;
+}
+
+inline const StaticBitset* Item::value() const
+{
+	return this->staticBitset;
+}
+
+inline void Item::set(unsigned int i, bool value)
+{
+	this->staticBitset->set(i, value);
+}
+
+inline bool Item::get(unsigned int i) const
+{
+	return this->staticBitset->test(i);
+}
+
+inline unsigned int Item::count() const
+{
+	return this->staticBitset->count();
+}
 
 inline void Item::addClone(const std::shared_ptr<Item>& clone)
 {
@@ -80,7 +116,7 @@ inline std::shared_ptr<Item> Item::getClone(unsigned int i) const
 	return this->clones[i];
 }
 
-inline bool Item::isAClone()
+inline bool Item::isAClone() const
 {
 	return this->isClone;
 }
@@ -89,5 +125,5 @@ inline bool Item::operator==(const Item& other)
 {
 	if(other.attributeIndex == this->attributeIndex)
 		return true;
-	return other.staticBitset == this->staticBitset;
+	return (*other.staticBitset) == (*this->staticBitset);
 }

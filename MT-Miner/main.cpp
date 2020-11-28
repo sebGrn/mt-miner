@@ -128,7 +128,7 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 		//BinaryRepresentation<bitset_type>::serialize("binary_rep.csv");
 		
 		// compute minimal transverses
-		std::vector<std::shared_ptr<Itemset>> minimalTransversals;
+		std::vector<Itemset*> minimalTransversals;
 		miner.computeMinimalTransversals(minimalTransversals);
 
 		// save minimal transversals into a file
@@ -140,9 +140,12 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 			Logger::log("saving minimal transversals into file : ", outFile, "\n");
 			std::ofstream outputStream;
 			outputStream.open(outFile);
-			for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const std::shared_ptr<Itemset>& elt) { outputStream << elt->toString() << std::endl; });
+			for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const Itemset* elt) { outputStream << elt->toString() << std::endl; });
 			outputStream.close();			
 		}
+
+		for (auto it = minimalTransversals.begin(); it != minimalTransversals.end(); it++) { delete *it; }
+		minimalTransversals.clear();
 	}
 	Logger::close();	
 }
@@ -153,6 +156,8 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 
 int main(int argc, char* argv[])
  {
+
+
 	/*Logger::init("", true, "");
 
 	PROCESS_MEMORY_COUNTERS_EX pmc;

@@ -46,9 +46,9 @@ void MT_Miner::createBinaryRepresentation(const HyperGraph& hypergraph)
 	}
 }
 
-void MT_Miner::computeInitalToTraverseList(std::vector<std::shared_ptr<Itemset>>& toTraverse) const
+void MT_Miner::computeInitalToTraverseList(std::vector<Itemset*>& toTraverse) const
 {
-	toTraverse.clear();
+	assert(toTraverse.empty());
 	for (unsigned int i = 1; i <= BinaryRepresentation::getItemCount(); i++)
 	{
 		std::shared_ptr<Item> item = BinaryRepresentation::getItemFromKey(i);
@@ -58,25 +58,20 @@ void MT_Miner::computeInitalToTraverseList(std::vector<std::shared_ptr<Itemset>>
 			// get itemset from binary representation and store them into lists
 			// these itemsets will be used in the program
 			// we dont need binary representation anymore here
-			std::shared_ptr<Itemset> itemset = std::make_shared<Itemset>();
-			
-			itemset->addFirstItem(item);			
-			itemset->orValue = item->staticBitset;
-			itemset->orSupport = itemset->orValue.count();
-			itemset->dirty = false;
-			itemset->isEssential = true;
+			Itemset* itemset = new Itemset(item);
 
 			toTraverse.push_back(itemset);
 		}
 	}
 }
 
-void MT_Miner::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>& mt)
+void MT_Miner::computeMinimalTransversals(std::vector<Itemset*>& mt)
 {
 	auto beginTime = std::chrono::system_clock::now();
 	SIZE_T used0 = Utils::printUsedMemoryForCrtProcess();
 	
-	std::vector<std::shared_ptr<Itemset>> toTraverse;
+	// initialise itemset
+	std::vector<Itemset*> toTraverse;
 	computeInitalToTraverseList(toTraverse);
 	
 	// create a graph, then compute minimal transversal from the binary representation
@@ -118,7 +113,6 @@ void MT_Miner::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>&
 
 	// print timer
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
-	//Logger::log("Found ", graph_mt.size(), " minimal transverses in ", duration, " ms\n");
 	auto duration2 = duration / 1000.0;
 	Logger::log("Found ", mt.size(), " minimal transverses in ", duration2, " s\n");
 
@@ -129,11 +123,11 @@ void MT_Miner::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>&
 	Logger::log("\nminimal transversals count : ", mt.size(), "\n");
 	if (mt.size() > 6)
 	{
-		for_each(mt.begin(), mt.begin() + 5, [&](const std::shared_ptr<Itemset>& elt) { Logger::log(elt->toString(), "\n"); });
+		for_each(mt.begin(), mt.begin() + 5, [&](const Itemset* elt) { Logger::log(elt->toString(), "\n"); });
 		Logger::log("...\n");
 	}
 	else
-		for_each(mt.begin(), mt.end(), [&](const std::shared_ptr<Itemset>& elt) { Logger::log(elt->toString(), "\n"); });
+		for_each(mt.begin(), mt.end(), [&](const Itemset* elt) { Logger::log(elt->toString(), "\n"); });
 	
 	//Logger::log(RESET);
 

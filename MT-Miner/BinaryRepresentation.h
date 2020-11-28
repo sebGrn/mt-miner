@@ -33,7 +33,6 @@ public:
 	static void buildFromFormalContext(const FormalContext& context);
 	///
 	static unsigned int buildCloneList();
-
 	//
 	static void serialize(const std::string& outputile);
 
@@ -41,7 +40,14 @@ public:
 	static unsigned int getObjectCount();
 
 	static std::shared_ptr<Item> getItemFromKey(unsigned int key);	
+
+	static void clear();
 };
+
+inline void BinaryRepresentation::clear()
+{
+	binaryRepresentationMap.clear();
+}
 
 inline unsigned int BinaryRepresentation::getItemCount()
 {

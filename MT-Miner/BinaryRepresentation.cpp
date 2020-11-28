@@ -28,7 +28,7 @@ void BinaryRepresentation::buildFromFormalContext(const FormalContext& context)
 		for (unsigned int i = 0; i < BinaryRepresentation::objectCount; i++)		// 6 on test.txt
 		{
 			bool bit = context.getBit(i, j);
-			item->staticBitset.set(i, bit);			
+			item->set(i, bit);			
 			if (bit)
 			{
 				sum++;
@@ -59,7 +59,7 @@ unsigned int BinaryRepresentation::buildCloneList()
 				if (it1 != it2)
 				{
 					// test if bitsets have the same support
-					if (it1->second->staticBitset.count() == it2->second->staticBitset.count())
+					if (it1->second->count() == it2->second->count())
 					{
 						// test if binary representation bitsets are equals (it2 is a clone of it1 ?)
 						if ((*it1->second) == (*it2->second))
@@ -85,11 +85,11 @@ void BinaryRepresentation::serialize(const std::string& outputile)
 	std::ofstream fileStream = std::ofstream(outputile, std::ofstream::out);
 	for (auto it = binaryRepresentationMap.begin(); it != binaryRepresentationMap.end(); it++)
 	{
-		StaticBitset bitset = it->second->staticBitset;
+		//StaticBitset bitset = it->second->staticBitset;
 		//for (int i = 0, n = bitset.size(); i < n; i++)
 		for (int i = 0, n = 32; i < n; i++)
 		{
-			bool bit = bitset[i];
+			bool bit = it->second->get(i);
 			fileStream << bit ? "1" : "0";
 			fileStream << ";";
 		}

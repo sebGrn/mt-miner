@@ -8,7 +8,7 @@ std::atomic_ullong TreeNode::minimalMt(9999);
 // to avoid interleaved outputs
 std::mutex TreeNode::output_guard;
 // synchro stuff
-std::deque<std::future<std::vector<std::shared_ptr<Itemset>>>> TreeNode::task_queue;
+std::deque<std::future<std::vector<Itemset*>>> TreeNode::task_queue;
 std::mutex TreeNode::task_guard;
 std::condition_variable TreeNode::task_signal;
 int TreeNode::pending_task_count(0);
@@ -23,7 +23,7 @@ TreeNode::~TreeNode()
 {
 }
 
-void TreeNode::recurseOnClonedItemset(const std::shared_ptr<Itemset>& itemset, unsigned int iItem, std::vector<std::shared_ptr<Itemset>>& graph_mt)
+void TreeNode::recurseOnClonedItemset(Itemset* itemset, unsigned int iItem, std::vector<Itemset*>& graph_mt)
 {
 	assert(iItem < itemset->getItemCount());
 
@@ -41,7 +41,7 @@ void TreeNode::recurseOnClonedItemset(const std::shared_ptr<Itemset>& itemset, u
 			std::shared_ptr<Item> clone = item->getClone(j);
 
 			// make a copy of currentItemset and replace ith item by clone item
-			std::shared_ptr<Itemset> clonedItemset = itemset->createAndReplaceItem(iItem, clone);
+			Itemset* clonedItemset = itemset->createAndReplaceItem(iItem, clone);
 
 			graph_mt.push_back(clonedItemset);
 
@@ -57,43 +57,46 @@ void TreeNode::recurseOnClonedItemset(const std::shared_ptr<Itemset>& itemset, u
 	}
 }
 
-void TreeNode::updateListsFromToTraverse(const std::vector<std::shared_ptr<Itemset>>& toTraverse,
-										       std::vector<std::shared_ptr<Itemset>>& maxClique, 											
-											   std::vector<std::shared_ptr<Itemset>>& toExplore,
-											   std::vector<std::shared_ptr<Itemset>>& graph_mt)
+void TreeNode::updateListsFromToTraverse(const std::vector<Itemset*>& toTraverse,
+										 std::vector<Itemset*>& maxClique, 											
+										 std::vector<Itemset*>& toExplore,
+										 std::vector<Itemset*>& graph_mt)
 {
-	maxClique.clear();
-	toExplore.clear();
+	assert(maxClique.empty());
+	assert(toExplore.empty());
 
 	// store object count for optimization
 	unsigned int objectCount = this->binaryRepresentation->getObjectCount();
 	
 	// results of cumulated combined items / must be declared outside of the loop
 	Itemset cumulatedItemset;
+	Itemset* crtItemset = nullptr;
 
 	// loop on toTraverse list and build maxClique and toExplore lists
-	for (auto currentItemset_it = toTraverse.begin(); currentItemset_it != toTraverse.end(); currentItemset_it++)
+	for (auto it = toTraverse.begin(); it != toTraverse.end(); it++)
 	{
+		crtItemset = (*it);
+
 		// Compute disjunctive support for each itemset of toTraverse list
 		//	if disjunctive support is equal to object count --> add the itemset to graphMt list (then process its clones)
-		unsigned int disjSup = (*currentItemset_it)->getDisjunctifSupport();
+		unsigned int disjSup = crtItemset->getDisjunctifSupport();
 		if (disjSup == objectCount)
 		{
 			// we have a minimal transversal
-			graph_mt.push_back((*currentItemset_it));
-			
+			graph_mt.push_back(crtItemset);
+
 			// update info
 			nbTotalMt++;
-			if ((*currentItemset_it)->getItemCount() < minimalMt)
-				minimalMt = (*currentItemset_it)->getItemCount();
+			if (crtItemset->getItemCount() < minimalMt)
+				minimalMt = crtItemset->getItemCount();
 
 			// manage clones
 			if (this->useCloneOptimization)
 			{
-				for (unsigned int i = 0, n = (*currentItemset_it)->getItemCount(); i < n; i++)
-					this->recurseOnClonedItemset((*currentItemset_it), i, graph_mt);
+				for (unsigned int i = 0, n = crtItemset->getItemCount(); i < n; i++)
+					this->recurseOnClonedItemset(crtItemset, i, graph_mt);
 			}
-		} 
+		}
 		else
 		{
 			// combine itemset one by one from toTraverse list as combine itemset
@@ -101,26 +104,26 @@ void TreeNode::updateListsFromToTraverse(const std::vector<std::shared_ptr<Items
 			//	if not --> add the itemset to maxClique list
 
 			// if current itemset is the 1st one, store it into a previous itemset variable and use it later for computing combined itemsets
-			if (((*currentItemset_it) == (*toTraverse.begin())) && (*currentItemset_it)->getItemCount() == 1)
+			if ((it == toTraverse.begin()) && crtItemset->getItemCount() == 1)
 			{
 				// must be the 1st element with only one element
 				//previousItemset = (*currentItemset_it);
-				Itemset::copyRightIntoLeft(cumulatedItemset, (*currentItemset_it));
-				maxClique.push_back((*currentItemset_it));
+				Itemset::copyRightIntoLeft(cumulatedItemset, crtItemset);
+				maxClique.push_back(crtItemset);
 			}
 			else
 			{
 				// compute disjunctif support
-				unsigned int disjSup = Itemset::computeDisjunctifSupport(cumulatedItemset, (*currentItemset_it));
+				unsigned int disjSup = Itemset::computeDisjunctifSupport(cumulatedItemset, crtItemset);
 				// test support and add itemset in maxClique or toExplore list
 				if (disjSup != objectCount)
 				{
-					Itemset::combineRightIntoLeft(cumulatedItemset, (*currentItemset_it));
-					maxClique.push_back((*currentItemset_it));
+					Itemset::combineRightIntoLeft(cumulatedItemset, crtItemset);
+					maxClique.push_back(crtItemset);
 				}
 				else
 				{
-					toExplore.push_back((*currentItemset_it));				
+					toExplore.push_back(crtItemset);
 				}
 			}
 		}
@@ -129,7 +132,7 @@ void TreeNode::updateListsFromToTraverse(const std::vector<std::shared_ptr<Items
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
-std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals_task(const std::vector<std::shared_ptr<Itemset>>& toTraverse)
+std::vector<Itemset*> TreeNode::computeMinimalTransversals_task(const std::vector<Itemset*>& toTraverse)
 {
 	// ## START TASK ##
 
@@ -138,18 +141,16 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals_task(
 
 	// test trivial case
 	if (toTraverse.empty())
-		return std::vector<std::shared_ptr<Itemset>>();
-
-	std::vector<std::shared_ptr<Itemset>> newToTraverse;
+		return std::vector<Itemset*>();
 
 	// contains the final minimal transverals for this node
-	std::vector<std::shared_ptr<Itemset>> graph_mt;
+	std::vector<Itemset*> graph_mt;
 	{
 		// contains list of itemsets that will be combined to the candidates, the largest space in which is not possible to find minimal transversals
-		std::vector<std::shared_ptr<Itemset>> maxClique;
+		std::vector<Itemset*> maxClique;
 		// contains list of itemsets that are candidates
-		std::vector<std::shared_ptr<Itemset>> toExplore;
-		// update lists from toTraverse
+		std::vector<Itemset*> toExplore;
+		// update lists from toTraverse, move itemset from toTraverse to maxClique, toExplore or graph_mt
 		this->updateListsFromToTraverse(toTraverse, maxClique, toExplore, graph_mt);
 
 		//SIZE_T used1 = Utils::printUsedMemoryForCrtProcess();
@@ -167,125 +168,85 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals_task(
 		{
 			// store toExploreList max index
 			unsigned int lastIndexToTest = static_cast<unsigned int>(toExplore.size());
-			// combine toExplore (left part) with maxClique list (right part) into a toExplore list
+			// move toExplore (left part) with maxClique list (right part) into a toExplore list
 			toExplore.insert(toExplore.end(), maxClique.begin(), maxClique.end());
-
+			// maxClique can be empty
 			maxClique.clear();
-
-			// build newTraverse list
-			//std::vector<std::vector<std::shared_ptr<Itemset>>> newToTraverseList;
-			//std::vector<std::shared_ptr<Itemset>> newToTraverse;
 
 			// combine each element between [0, lastIndexToTest] with the entire combined itemset list
 			// loop on candidate itemset from initial toExplore list
 			for (unsigned int i = 0; i < lastIndexToTest; i++)
 			{
-				auto toCombinedLeft = toExplore.front();
+				Itemset* toCombinedLeft = toExplore.front();
 				toExplore.erase(toExplore.begin());
+
+				// build newTraverse list
+				std::vector<Itemset*> newToTraverse;
 
 				// loop on next candidate itemset
 				for (unsigned int j = 0; j < toExplore.size(); j++)
 				{
 					assert(j < toExplore.size());
-					auto toCombinedRight = toExplore[j];
+					Itemset* toCombinedRight = toExplore[j];
 
-					std::shared_ptr<Itemset> newItemset;
-					try
+					if (!(toCombinedLeft->containsAClone() || toCombinedRight->containsAClone()))
 					{
-						// combine toCombinedRight into toCombinedLeft
-						newItemset = std::make_shared<Itemset>(*toCombinedLeft);
-					}
-					catch (std::exception& e)
-					{
-						std::cout << "during computeMinimalTransversals_task " << e.what() << std::endl;
-					}
-					if (newItemset)
-					{
-						newItemset->combineItemset(toCombinedRight);
-						// TEST PUIS CREATION NUOVEL ITEMSET
-						if (!newItemset->containsAClone() && newItemset->computeIsEssential())
+						Itemset* newItemset = nullptr;
+						try
 						{
-							// this is a candidate, copy toCombinedLeft into newItemset
-							newToTraverse.push_back(newItemset);
+							// combine toCombinedRight into toCombinedLeft
+							newItemset = new Itemset(toCombinedLeft);
 						}
-						else
+						catch (std::exception& e)
 						{
-							newItemset.reset();
+							std::cout << "during computeMinimalTransversals_task " << e.what() << std::endl;
+						}
+						if (newItemset)
+						{
+							newItemset->combineItemset(toCombinedRight);
+							if (newItemset->computeIsEssential())
+							{
+								// this is a candidate, copy toCombinedLeft into newItemset
+								newToTraverse.push_back(newItemset);
+							}
+							else
+							{
+								delete newItemset;
+								newItemset = nullptr;
+							}
 						}
 					}
 				}
+				
+				delete toCombinedLeft;
+				toCombinedLeft = nullptr;
 
-				//
+				// call process in the loop
 				if (!newToTraverse.empty())
 				{
 					// emit task
 					nbTotalChildren++;
 					// call on the same node, it works because no class members are used except atomics
-					auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(newToTraverse));
+					//auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(newToTraverse));
 
-					// ## SPAWN TASK ##
-					{
-						const std::lock_guard<std::mutex> lock(task_guard);
-						task_queue.emplace_back(std::move(subtask));
-						++pending_task_count;
-					}
-					task_signal.notify_one(); // be sure at least one unit is awaken
+					//// ## SPAWN TASK ##
+					//{
+					//	const std::lock_guard<std::mutex> lock(task_guard);
+					//	task_queue.emplace_back(std::move(subtask));
+					//	++pending_task_count;
+					//}
+					//task_signal.notify_one(); // be sure at least one unit is awaken
 
 					// modify delay from 1 to 100 to see idle behaviour
-					//std::this_thread::sleep_for(std::chrono::milliseconds(1));
+					std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
 					// new list has been managed by the thread, clear it
+					for (auto it = newToTraverse.begin(); it != newToTraverse.end(); it++) { delete *it; }
 					newToTraverse.clear();
 				}
 			}
-
-			/*if (!newToTraverse.empty())
-			{
-				// emit recursive task
-				nbTotalChildren++;
-				// call on the same node, it works because no class members are used except atomics
-				auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(newToTraverse));
-
-				// ## SPAWN TASK ##
-				{
-					const std::lock_guard<std::mutex> lock(task_guard);
-					task_queue.emplace_back(std::move(subtask));
-					++pending_task_count;
-				}
-				task_signal.notify_one(); // be sure at least one unit is awaken
-
-				// modify delay from 1 to 100 to see idle behaviour
-				//std::this_thread::sleep_for(std::chrono::milliseconds(1));
-
-				// new list has been managed by the thread, clear it
-				newToTraverse.clear();
-			}*/
-
-			int k = 0;
 		}
 	}
-	/*for (auto it = newToTraverse.begin(); it != newToTraverse.end(); it++)
-	{
-		// emit task
-		nbTotalChildren++;
-		// call on the same node, it works because no class members are used except atomics
-		auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(*it));
-
-		// ## SPAWN TASK ##
-		{
-			const std::lock_guard<std::mutex> lock(task_guard);
-			task_queue.emplace_back(std::move(subtask));
-			++pending_task_count;
-		}
-		task_signal.notify_one(); // be sure at least one unit is awaken
-
-		// modify delay from 1 to 100 to see idle behaviour
-		//std::this_thread::sleep_for(std::chrono::milliseconds(1));
-
-		// new list has been managed by the thread, clear it
-		(*it).clear();
-	}
-	newToTraverse.clear();*/
 
 	// terminate task
 	const std::lock_guard<std::mutex> lock(task_guard);
@@ -302,7 +263,7 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals_task(
 	return graph_mt;
 }
 
-bool TreeNode::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>& final_mt, std::vector<std::shared_ptr<Itemset>>& toTraverse)
+bool TreeNode::computeMinimalTransversals(std::vector<Itemset*>& final_mt, std::vector<Itemset*>& toTraverse)
 {
 	// ## START system ##
 
@@ -317,14 +278,14 @@ bool TreeNode::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>&
 	}
 
 	// launch processing units
-	std::list<std::future<std::vector<std::shared_ptr<Itemset>>>> units;
+	std::list<std::future<std::vector<Itemset*>>> units;
 	const unsigned int thead_multiplicator = 1;
 	for (auto n = std::thread::hardware_concurrency() * thead_multiplicator; --n;)
 	{
 		units.emplace_back(std::async(std::launch::async, [n]()
 		{
 			// ## LAUNCH task ##
-			std::vector<std::shared_ptr<Itemset>> result_mt;
+			std::vector<Itemset*> result_mt;
 
 			std::unique_lock<std::mutex> lock(task_guard);
 			while (true)
@@ -338,7 +299,7 @@ bool TreeNode::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>&
 					lock.unlock(); // unlock while processing task
 					{
 						// process task
-						std::vector<std::shared_ptr<Itemset>>&& mt = task.get();
+						std::vector<Itemset*>&& mt = task.get();
 						std::copy(mt.begin(), mt.end(), std::back_inserter(result_mt));
 					}
 					lock.lock(); // reacquire lock
@@ -362,7 +323,7 @@ bool TreeNode::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>&
 	for (auto& unit : units)
 	{
 		unit.wait();
-		std::vector<std::shared_ptr<Itemset>> result = unit.get();
+		std::vector<Itemset*> result = unit.get();
 		{
 			const std::lock_guard<std::mutex> lock(output_guard);
 			std::copy(result.begin(), result.end(), std::back_inserter(final_mt));
