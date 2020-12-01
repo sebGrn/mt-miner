@@ -20,7 +20,7 @@ void MT_Miner::createBinaryRepresentation(const HyperGraph& hypergraph)
 
 	// build binary representation from formal context
 	BinaryRepresentation::buildFromFormalContext(formalContext);
-	//BinaryRepresentation<bitset_type>::serialize("binary_rep.csv");
+	BinaryRepresentation::serialize("binary_rep.csv");
 
 	if (this->useCloneOptimization)
 	{
@@ -63,12 +63,14 @@ void MT_Miner::computeInitalToTraverseList(std::vector<Itemset*>& toTraverse) co
 			toTraverse.push_back(itemset);
 		}
 	}
+	// we dont use binary representation anymore
+	BinaryRepresentation::clear();
 }
 
 void MT_Miner::computeMinimalTransversals(std::vector<Itemset*>& mt)
 {
 	auto beginTime = std::chrono::system_clock::now();
-	SIZE_T used0 = Utils::printUsedMemoryForCrtProcess();
+	//SIZE_T used0 = Utils::printUsedMemoryForCrtProcess();
 	
 	// initialise itemset
 	std::vector<Itemset*> toTraverse;
@@ -134,7 +136,7 @@ void MT_Miner::computeMinimalTransversals(std::vector<Itemset*>& mt)
 	// write tree into js
 	//JsonTree::writeJsonNode(graph_mt);
 
-	SIZE_T used1 = Utils::printUsedMemoryForCrtProcess();
-	std::cout << "allocated memory " << used1 - used0 << std::endl;
+	//SIZE_T used1 = Utils::printUsedMemoryForCrtProcess();
+	//std::cout << "allocated memory " << used1 - used0 << std::endl;
 }
 

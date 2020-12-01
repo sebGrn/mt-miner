@@ -24,10 +24,13 @@ class TreeNode
 private:
 	// to avoid interleaved outputs
 	static std::mutex output_guard;
+	static std::mutex print_guard;
+	static std::mutex shared_itemset_guard;
+	static std::mutex shared_minimalTransverse_guard;
 
 	// synchro stuff
 	// https://www.youtube.com/watch?v=2Xad9bCYbJE&list=PL1835A90FC78FF8BE&index=6
-	static std::deque<std::future<std::vector<Itemset*>>> task_queue;
+	static std::deque<std::future<void>> task_queue;
 	static std::mutex task_guard;
 	static std::condition_variable task_signal;
 
@@ -40,27 +43,31 @@ private:
 	/// a clone is an item from binary representation 
 	bool useCloneOptimization;
 
+	std::vector<Itemset*> shared_toTraverse_itemset;
+	std::vector<Itemset*> shared_minimalTransverse;
+
 public:
 	static std::atomic_ullong nbTotalChildren;
 	static std::atomic_ullong nbTotalMt;
 	static std::atomic_ullong minimalMt;
+	static std::atomic_uint nbThread;
+	static std::atomic_uint cptSharedItemsets;
 
 private: 
 	/// compute maxClique list, toExplore list and mt list
 	/// update graph_mt with new minimal transversal itemset
-	void updateListsFromToTraverse( const std::vector<Itemset*>& toTraverse,
-									std::vector<Itemset*>& maxClique,
-									std::vector<Itemset*>& toExplore,
-									std::vector<Itemset*>& graph_mt);
+	//void updateListsFromToTraverse( const std::vector<Itemset*>& toTraverse, std::vector<Itemset*>& maxClique, std::vector<Itemset*>& toExplore, std::vector<Itemset*>& graph_mt);
+	void updateListsFromToTraverse(std::vector<Itemset*>& maxClique, std::vector<Itemset*>& toExplore);
 
 	std::vector<Itemset*> computeMinimalTransversals_task(const std::vector<Itemset*>& toTraverse);
+	void computeMinimalTransversals_task_test();
 	
-	void recurseOnClonedItemset(Itemset* itemset, unsigned int iItem, std::vector<Itemset*>& graph_mt);
+	void recurseOnClonedItemset(Itemset* itemset, unsigned int iItem);
 
 public:
 	TreeNode(bool useCloneOptimization);
 	~TreeNode();
 
-	bool computeMinimalTransversals(std::vector<Itemset*>& graph_mt, std::vector<Itemset*>& toTraverse);
+	void computeMinimalTransversals(std::vector<Itemset*>& graph_mt, std::vector<Itemset*>& toTraverse);
 };
 

@@ -85,9 +85,7 @@ void BinaryRepresentation::serialize(const std::string& outputile)
 	std::ofstream fileStream = std::ofstream(outputile, std::ofstream::out);
 	for (auto it = binaryRepresentationMap.begin(); it != binaryRepresentationMap.end(); it++)
 	{
-		//StaticBitset bitset = it->second->staticBitset;
-		//for (int i = 0, n = bitset.size(); i < n; i++)
-		for (int i = 0, n = 32; i < n; i++)
+		for (int i = 0, n = BinaryRepresentation::itemCount; i < n; i++)
 		{
 			bool bit = it->second->get(i);
 			fileStream << bit ? "1" : "0";

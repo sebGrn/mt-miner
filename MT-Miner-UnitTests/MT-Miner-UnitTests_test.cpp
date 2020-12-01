@@ -24,31 +24,36 @@ namespace MTMinerUnitTests_test
 			miner.createBinaryRepresentation(hypergraph);
 
 			// allocate miner
-			std::shared_ptr<Itemset> item1 = std::make_shared<Itemset>();
+			Itemset* item1 = new Itemset;
 			item1->addItem(BinaryRepresentation::getItemFromKey(1));
 			int disjonctifSupport = item1->getDisjunctifSupport();
 			Assert::AreEqual(1, disjonctifSupport);
 
-			std::shared_ptr<Itemset> item2 = std::make_shared<Itemset>();
+			Itemset* item2 = new Itemset;
 			item2->addItem(BinaryRepresentation::getItemFromKey(1));
 			item2->addItem(BinaryRepresentation::getItemFromKey(2));
 			disjonctifSupport = item2->getDisjunctifSupport();
 			Assert::AreEqual(2, disjonctifSupport);
 
-			std::shared_ptr<Itemset> item3 = std::make_shared<Itemset>();
+			Itemset* item3 = new Itemset;
 			item3->addItem(BinaryRepresentation::getItemFromKey(1));
 			item3->addItem(BinaryRepresentation::getItemFromKey(2));
 			item3->addItem(BinaryRepresentation::getItemFromKey(3));
 			disjonctifSupport = item3->getDisjunctifSupport();
 			Assert::AreEqual(3, disjonctifSupport);
 
-			std::shared_ptr<Itemset> item4 = std::make_shared<Itemset>();
+			Itemset* item4 = new Itemset;
 			item4->addItem(BinaryRepresentation::getItemFromKey(1));
 			item4->addItem(BinaryRepresentation::getItemFromKey(2));
 			item4->addItem(BinaryRepresentation::getItemFromKey(3));
 			item4->addItem(BinaryRepresentation::getItemFromKey(4));
 			disjonctifSupport = item4->getDisjunctifSupport();
 			Assert::AreEqual(4, disjonctifSupport);
+
+			delete item1;
+			delete item2;
+			delete item3;
+			delete item4;
 		}
 
 		TEST_METHOD(TestingMinimalTransversalsSize)
@@ -61,10 +66,11 @@ namespace MTMinerUnitTests_test
 			miner.createBinaryRepresentation(hypergraph);
 
 			// compute minimal transversals
-			std::vector< std::shared_ptr<Itemset>> minimalTransversals;
+			std::vector<Itemset*> minimalTransversals;
 			miner.computeMinimalTransversals(minimalTransversals);
 			//minimalTransversals = Utils::sortVectorOfItemset(minimalTransversals);
 			Assert::AreEqual(6, static_cast<int>(minimalTransversals.size()));
+			for (auto it = minimalTransversals.begin(); it != minimalTransversals.end(); it++) { delete* it; }
 		}
 
 		TEST_METHOD(TestingCloneMinimalTransversalsSize_no_clone)
@@ -77,10 +83,11 @@ namespace MTMinerUnitTests_test
 			miner.createBinaryRepresentation(hypergraph);
 
 			// compute minimal transversals
-			std::vector< std::shared_ptr<Itemset>> minimalTransversals;
+			std::vector<Itemset*> minimalTransversals;
 			miner.computeMinimalTransversals(minimalTransversals);
 			//minimalTransversals = Utils::sortVectorOfItemset(minimalTransversals);
 			Assert::AreEqual(15, static_cast<int>(minimalTransversals.size()));
+			for (auto it = minimalTransversals.begin(); it != minimalTransversals.end(); it++) { delete* it; }
 		}
 
 		TEST_METHOD(TestingCloneMinimalTransversalsSize_clone)
@@ -93,10 +100,11 @@ namespace MTMinerUnitTests_test
 			miner.createBinaryRepresentation(hypergraph);
 
 			// compute minimal transversals
-			std::vector< std::shared_ptr<Itemset>> minimalTransversals;
+			std::vector<Itemset*> minimalTransversals;
 			miner.computeMinimalTransversals(minimalTransversals);
 			//minimalTransversals = Utils::sortVectorOfItemset(minimalTransversals);
 			Assert::AreEqual(15, static_cast<int>(minimalTransversals.size()));
+			for (auto it = minimalTransversals.begin(); it != minimalTransversals.end(); it++) { delete* it; }
 		}
 
 		//TEST_METHOD(TestingIsEssential)

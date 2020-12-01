@@ -119,14 +119,6 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 		// build clone list if needed
 		miner.createBinaryRepresentation(hypergraph);
 
-		// build formal context from hypergraph
-		FormalContext formalContext(hypergraph);
-		//formalContext.serialize("format_context.csv");
-
-		// build binary representation from formal context
-		BinaryRepresentation::buildFromFormalContext(formalContext);
-		//BinaryRepresentation<bitset_type>::serialize("binary_rep.csv");
-		
 		// compute minimal transverses
 		std::vector<Itemset*> minimalTransversals;
 		miner.computeMinimalTransversals(minimalTransversals);
@@ -144,7 +136,14 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 			outputStream.close();			
 		}
 
-		for (auto it = minimalTransversals.begin(); it != minimalTransversals.end(); it++) { delete *it; }
+		for (auto it = minimalTransversals.begin(); it != minimalTransversals.end(); it++)
+		{
+			if (*it)
+			{
+				delete* it;
+				(*it) = nullptr;
+			}
+		}
 		minimalTransversals.clear();
 	}
 	Logger::close();	

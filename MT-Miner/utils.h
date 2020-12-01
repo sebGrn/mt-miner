@@ -96,6 +96,7 @@ public:
 		PROCESS_MEMORY_COUNTERS_EX pmc;
 		GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
 		SIZE_T virtualMemUsedByMe = pmc.PrivateUsage;
+		std::cout << "used memory for tProcess " << virtualMemUsedByMe / 1000000000.0 << " Gb" << std::endl;
 		return virtualMemUsedByMe;		
 	}
 
