@@ -10,7 +10,7 @@ std::atomic_uint TreeNode::cptSharedItemsets(0);
 // to avoid interleaved outputs
 std::mutex TreeNode::output_guard;
 std::mutex TreeNode::print_guard;
-std::mutex TreeNode::shared_itemset_guard;
+//std::mutex TreeNode::shared_toTraverseItemset_guard;
 std::mutex TreeNode::shared_minimalTransverse_guard;
 // synchro stuff
 std::deque<std::future<void>> TreeNode::task_queue;
@@ -26,6 +26,25 @@ TreeNode::TreeNode(bool useCloneOptimization)
 
 TreeNode::~TreeNode()
 {
+	//for (auto it = shared_toTraverse_itemset.begin(); it != shared_toTraverse_itemset.end(); it++)
+	//{
+	//	if (*it)
+	//	{
+	//		delete* it;
+	//		(*it) = nullptr;
+	//	}
+	//}
+	//shared_toTraverse_itemset.clear();
+
+	for (auto it = shared_minimalTransverse.begin(); it != shared_minimalTransverse.end(); it++)
+	{
+		if (*it)
+		{
+			delete* it;
+			(*it) = nullptr;
+		}
+	}
+	shared_minimalTransverse.clear();
 }
 
 void TreeNode::recurseOnClonedItemset(Itemset* itemset, unsigned int iItem)
@@ -63,7 +82,7 @@ void TreeNode::recurseOnClonedItemset(Itemset* itemset, unsigned int iItem)
 }
 
 //void TreeNode::updateListsFromToTraverse(const std::vector<Itemset*>& toTraverse, std::vector<Itemset*>& maxClique, std::vector<Itemset*>& toExplore, std::vector<Itemset*>& graph_mt)
-void TreeNode::updateListsFromToTraverse(std::vector<Itemset*>& maxClique, std::vector<Itemset*>& toExplore)
+void TreeNode::updateListsFromToTraverse(const std::vector<Itemset*>& toTraverse, std::vector<Itemset*>& maxClique, std::vector<Itemset*>& toExplore)
 {
 	assert(maxClique.empty());
 	assert(toExplore.empty());
@@ -76,17 +95,21 @@ void TreeNode::updateListsFromToTraverse(std::vector<Itemset*>& maxClique, std::
 	Itemset* crtItemset = nullptr;
 
 	// loop on toTraverse list and build maxClique and toExplore lists
-	for (auto it = shared_toTraverse_itemset.begin(); it != shared_toTraverse_itemset.end(); it++)
+	//std::unique_lock<std::mutex> lock(shared_toTraverseItemset_guard);
+	for (auto it = toTraverse.begin(); it != toTraverse.end(); it++)
 	{
 		crtItemset = (*it);
+		//std::cout << crtItemset->toString() << std::endl;
 
 		// Compute disjunctive support for each itemset of toTraverse list
 		//	if disjunctive support is equal to object count --> add the itemset to graphMt list (then process its clones)
 		unsigned int disjSup = crtItemset->getDisjunctifSupport();
 		if (disjSup == objectCount)
 		{
+			//std::cout << "add MT" << std::endl;
 			// we have a minimal transversal
-			shared_minimalTransverse.push_back(crtItemset);
+			const std::lock_guard<std::mutex> lock2(shared_minimalTransverse_guard);
+			this->shared_minimalTransverse.push_back(crtItemset);
 
 			// update info
 			nbTotalMt++;
@@ -94,11 +117,11 @@ void TreeNode::updateListsFromToTraverse(std::vector<Itemset*>& maxClique, std::
 				minimalMt = crtItemset->getItemCount();
 
 			// manage clones
-			/*if (this->useCloneOptimization)
+			if (this->useCloneOptimization)
 			{
 				for (unsigned int i = 0, n = crtItemset->getItemCount(); i < n; i++)
 					this->recurseOnClonedItemset(crtItemset, i);
-			}*/
+			}
 		}
 		else
 		{
@@ -107,7 +130,7 @@ void TreeNode::updateListsFromToTraverse(std::vector<Itemset*>& maxClique, std::
 			//	if not --> add the itemset to maxClique list
 
 			// if current itemset is the 1st one, store it into a previous itemset variable and use it later for computing combined itemsets
-			if ((it == shared_toTraverse_itemset.begin()) && crtItemset->getItemCount() == 1)
+			if ((it == toTraverse.begin()) && crtItemset->getItemCount() == 1)
 			{
 				// must be the 1st element with only one element
 				//previousItemset = (*currentItemset_it);
@@ -131,14 +154,15 @@ void TreeNode::updateListsFromToTraverse(std::vector<Itemset*>& maxClique, std::
 			}
 		}
 	}
+	//lock.unlock();
 }
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
-std::vector<Itemset*> TreeNode::computeMinimalTransversals_task(const std::vector<Itemset*>& toTraverse)
+/*std::vector<Itemset*> TreeNode::computeMinimalTransversals_task(const std::vector<Itemset*>& toTraverse)
 {
 	return std::vector<Itemset*>();
-/*
+
 	// ## START TASK ##
 
 	//std::cout << "toTraverse size " << toTraverse.size() << std::endl;
@@ -271,24 +295,22 @@ std::vector<Itemset*> TreeNode::computeMinimalTransversals_task(const std::vecto
 	//for_each(graph_mt.begin(), graph_mt.end(), [&](const std::shared_ptr<Itemset>& elt) { std::cout << elt->toString() << "\n"; });
 
 	return graph_mt;
-*/
-}
+}*/
 
-void TreeNode::computeMinimalTransversals_task_test()
+void TreeNode::computeMinimalTransversals_task_test(const std::vector<Itemset*>& toTraverse)
 {
-	std::unique_lock<std::mutex> lock(shared_itemset_guard);
-		
 	// simulate work in progress
 	// contains list of itemsets that will be combined to the candidates, the largest space in which is not possible to find minimal transversals
 	std::vector<Itemset*> maxClique;
 	// contains list of itemsets that are candidates
 	std::vector<Itemset*> toExplore;
 	// update lists from toTraverse, move itemset from toTraverse to maxClique, toExplore or graph_mt
-	this->updateListsFromToTraverse(maxClique, toExplore);
+	this->updateListsFromToTraverse(toTraverse, maxClique, toExplore);
 
-	shared_toTraverse_itemset.clear();
-	
-	lock.unlock();
+	//std::unique_lock<std::mutex> lock(shared_toTraverseItemset_guard);
+	//const std::lock_guard<std::mutex> lock(shared_toTraverseItemset_guard);
+	//this->shared_toTraverse_itemset.clear();
+	//lock.unlock();
 
 	// build new toTraverse list and explore next branch
 	if (!toExplore.empty())
@@ -306,6 +328,8 @@ void TreeNode::computeMinimalTransversals_task_test()
 		{
 			Itemset* toCombinedLeft = toExplore.front();
 			toExplore.erase(toExplore.begin());
+
+			std::vector<Itemset*> newToTraverse;
 
 			// loop on next candidate itemset
 			for (unsigned int j = 0; j < toExplore.size(); j++)
@@ -330,11 +354,13 @@ void TreeNode::computeMinimalTransversals_task_test()
 						newItemset->combineItemset(toCombinedRight);
 						if (newItemset->computeIsEssential())
 						{
-							std::unique_lock<std::mutex> lock(shared_itemset_guard);
+							//std::unique_lock<std::mutex> lock(shared_toTraverseItemset_guard);
+							//const std::lock_guard<std::mutex> lock(shared_toTraverseItemset_guard);
 							// this is a candidate, copy toCombinedLeft into newItemset
-							shared_toTraverse_itemset.push_back(newItemset);
-
-							lock.unlock();
+							//this->shared_toTraverse_itemset.push_back(newItemset);
+							newToTraverse.push_back(newItemset);
+							//std::cout << "add to shared to traverse list " << newItemset->toString() << std::endl;
+							//lock.unlock();
 						}
 						else
 						{
@@ -348,9 +374,10 @@ void TreeNode::computeMinimalTransversals_task_test()
 			delete toCombinedLeft;
 			toCombinedLeft = nullptr;
 
-			std::unique_lock<std::mutex> lock(shared_itemset_guard);
+			//std::unique_lock<std::mutex> lock(shared_toTraverseItemset_guard);
+			//const std::lock_guard<std::mutex> lock(shared_toTraverseItemset_guard);
 			// call process in the loop
-			if (!shared_toTraverse_itemset.empty())
+			if (!newToTraverse.empty())
 			{
 				// emit task
 				nbTotalChildren++;
@@ -359,10 +386,10 @@ void TreeNode::computeMinimalTransversals_task_test()
 				//const std::lock_guard<std::mutex> lock(print_guard);
 				//Utils::printUsedMemoryForCrtProcess();
 
-				lock.unlock();
+				//lock.unlock();
 
 				// call on the same node, it works because no class members are used except atomics
-				auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task_test, this);
+				auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task_test, this, std::move(newToTraverse));
 
 				// ## SPAWN TASK ##
 				{
@@ -379,7 +406,9 @@ void TreeNode::computeMinimalTransversals_task_test()
 				//for (auto it = newToTraverse.begin(); it != newToTraverse.end(); it++) { delete* it; }
 				//newToTraverse.clear();
 			}
+			//lock.unlock();
 		}
+
 
 		//for (unsigned int m = 10; m--;) 
 		//{
@@ -455,12 +484,12 @@ void TreeNode::computeMinimalTransversals(std::vector<Itemset*>& final_mt, std::
 	nbThread = std::thread::hardware_concurrency() * thead_multiplicator;
 	std::cout << nbThread << std::endl;
 
-	{
-		std::unique_lock<std::mutex> lock(shared_itemset_guard);
-		for (auto it = toTraverse.begin(); it != toTraverse.end(); it++)
-			shared_toTraverse_itemset.push_back(*it);
-		lock.unlock();
-	}
+	//{
+	//	std::unique_lock<std::mutex> lock(shared_toTraverseItemset_guard);
+	//	for (auto it = toTraverse.begin(); it != toTraverse.end(); it++)
+	//		shared_toTraverse_itemset.push_back(*it);
+	//	lock.unlock();
+	//}
 
 	//this->shared_toTraverse_itemset.reserve(100);
 	//for (unsigned int i = 100; i--; )
@@ -469,7 +498,7 @@ void TreeNode::computeMinimalTransversals(std::vector<Itemset*>& final_mt, std::
 	//std::vector<std::shared_ptr<Itemset>> itemsets;
 	// emit initial task
 	//auto task = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(toTraverse));
-	auto task = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task_test, this);
+	auto task = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task_test, this, std::move(toTraverse));
 
 	// ## SPAWN task ##
 	{

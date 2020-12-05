@@ -70,7 +70,7 @@ namespace MTMinerUnitTests_test
 			miner.computeMinimalTransversals(minimalTransversals);
 			//minimalTransversals = Utils::sortVectorOfItemset(minimalTransversals);
 			Assert::AreEqual(6, static_cast<int>(minimalTransversals.size()));
-			for (auto it = minimalTransversals.begin(); it != minimalTransversals.end(); it++) { delete* it; }
+			//for (auto it = minimalTransversals.begin(); it != minimalTransversals.end(); it++) { delete* it; }
 		}
 
 		TEST_METHOD(TestingCloneMinimalTransversalsSize_no_clone)
@@ -87,7 +87,7 @@ namespace MTMinerUnitTests_test
 			miner.computeMinimalTransversals(minimalTransversals);
 			//minimalTransversals = Utils::sortVectorOfItemset(minimalTransversals);
 			Assert::AreEqual(15, static_cast<int>(minimalTransversals.size()));
-			for (auto it = minimalTransversals.begin(); it != minimalTransversals.end(); it++) { delete* it; }
+			//for (auto it = minimalTransversals.begin(); it != minimalTransversals.end(); it++) { delete* it; }
 		}
 
 		TEST_METHOD(TestingCloneMinimalTransversalsSize_clone)
@@ -104,7 +104,7 @@ namespace MTMinerUnitTests_test
 			miner.computeMinimalTransversals(minimalTransversals);
 			//minimalTransversals = Utils::sortVectorOfItemset(minimalTransversals);
 			Assert::AreEqual(15, static_cast<int>(minimalTransversals.size()));
-			for (auto it = minimalTransversals.begin(); it != minimalTransversals.end(); it++) { delete* it; }
+			//for (auto it = minimalTransversals.begin(); it != minimalTransversals.end(); it++) { delete* it; }
 		}
 
 		//TEST_METHOD(TestingIsEssential)

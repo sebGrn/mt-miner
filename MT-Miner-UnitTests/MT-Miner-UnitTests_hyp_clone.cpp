@@ -22,7 +22,7 @@ namespace MTMinerUnitTests_hyp_clone
 			std::vector<Itemset*> minimalTransversals;
 			miner.computeMinimalTransversals(minimalTransversals);
 			Assert::AreEqual(16, static_cast<int>(minimalTransversals.size()));
-			for (auto it = minimalTransversals.begin(); it != minimalTransversals.end(); it++) { delete* it; }
+			//for (auto it = minimalTransversals.begin(); it != minimalTransversals.end(); it++) { delete* it; }
 		}
 
 		TEST_METHOD(TestingMinimalTransversalsSize_hyp2)
@@ -39,7 +39,7 @@ namespace MTMinerUnitTests_hyp_clone
 			std::vector<Itemset*> minimalTransversals;
 			miner.computeMinimalTransversals(minimalTransversals);
 			Assert::AreEqual(68, static_cast<int>(minimalTransversals.size()));
-			for (auto it = minimalTransversals.begin(); it != minimalTransversals.end(); it++) { delete* it; }
+			//for (auto it = minimalTransversals.begin(); it != minimalTransversals.end(); it++) { delete* it; }
 		}
 
 		TEST_METHOD(TestingMinimalTransversalsSize_hyp3)
@@ -56,7 +56,7 @@ namespace MTMinerUnitTests_hyp_clone
 			std::vector<Itemset*> minimalTransversals;
 			miner.computeMinimalTransversals(minimalTransversals);
 			Assert::AreEqual(57, static_cast<int>(minimalTransversals.size()));
-			for (auto it = minimalTransversals.begin(); it != minimalTransversals.end(); it++) { delete* it; }
+			//for (auto it = minimalTransversals.begin(); it != minimalTransversals.end(); it++) { delete* it; }
 		}
 	};
 }

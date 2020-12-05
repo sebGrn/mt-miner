@@ -136,14 +136,14 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 			outputStream.close();			
 		}
 
-		for (auto it = minimalTransversals.begin(); it != minimalTransversals.end(); it++)
-		{
-			if (*it)
-			{
-				delete* it;
-				(*it) = nullptr;
-			}
-		}
+		//for (auto it = minimalTransversals.begin(); it != minimalTransversals.end(); it++)
+		//{
+		//	if (*it)
+		//	{
+		//		delete* it;
+		//		(*it) = nullptr;
+		//	}
+		//}
 		minimalTransversals.clear();
 	}
 	Logger::close();	

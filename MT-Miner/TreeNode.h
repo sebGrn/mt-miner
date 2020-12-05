@@ -25,7 +25,7 @@ private:
 	// to avoid interleaved outputs
 	static std::mutex output_guard;
 	static std::mutex print_guard;
-	static std::mutex shared_itemset_guard;
+	//static std::mutex shared_toTraverseItemset_guard;
 	static std::mutex shared_minimalTransverse_guard;
 
 	// synchro stuff
@@ -43,7 +43,7 @@ private:
 	/// a clone is an item from binary representation 
 	bool useCloneOptimization;
 
-	std::vector<Itemset*> shared_toTraverse_itemset;
+	//std::vector<Itemset*> shared_toTraverse_itemset;
 	std::vector<Itemset*> shared_minimalTransverse;
 
 public:
@@ -57,10 +57,10 @@ private:
 	/// compute maxClique list, toExplore list and mt list
 	/// update graph_mt with new minimal transversal itemset
 	//void updateListsFromToTraverse( const std::vector<Itemset*>& toTraverse, std::vector<Itemset*>& maxClique, std::vector<Itemset*>& toExplore, std::vector<Itemset*>& graph_mt);
-	void updateListsFromToTraverse(std::vector<Itemset*>& maxClique, std::vector<Itemset*>& toExplore);
+	void updateListsFromToTraverse(const std::vector<Itemset*>& toTraverse, std::vector<Itemset*>& maxClique, std::vector<Itemset*>& toExplore);
 
-	std::vector<Itemset*> computeMinimalTransversals_task(const std::vector<Itemset*>& toTraverse);
-	void computeMinimalTransversals_task_test();
+	//std::vector<Itemset*> computeMinimalTransversals_task(const std::vector<Itemset*>& toTraverse);
+	void computeMinimalTransversals_task_test(const std::vector<Itemset*>& toTraverse);
 	
 	void recurseOnClonedItemset(Itemset* itemset, unsigned int iItem);
 
