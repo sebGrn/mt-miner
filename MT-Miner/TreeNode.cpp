@@ -36,6 +36,7 @@ TreeNode::~TreeNode()
 	//}
 	//shared_toTraverse_itemset.clear();
 
+	std::unique_lock<std::mutex> mt_lock(shared_minimalTransverse_guard);
 	for (auto it = shared_minimalTransverse.begin(); it != shared_minimalTransverse.end(); it++)
 	{
 		if (*it)
@@ -45,6 +46,7 @@ TreeNode::~TreeNode()
 		}
 	}
 	shared_minimalTransverse.clear();
+	mt_lock.unlock();
 }
 
 void TreeNode::recurseOnClonedItemset(Itemset* itemset, unsigned int iItem)
@@ -67,7 +69,10 @@ void TreeNode::recurseOnClonedItemset(Itemset* itemset, unsigned int iItem)
 			// make a copy of currentItemset and replace ith item by clone item
 			Itemset* clonedItemset = itemset->createAndReplaceItem(iItem, clone);
 
-			shared_minimalTransverse.push_back(clonedItemset);
+			{
+				const std::lock_guard<std::mutex> mt_lock(shared_minimalTransverse_guard);
+				shared_minimalTransverse.push_back(clonedItemset);
+			}
 
 			// update info
 			nbTotalMt++;
@@ -108,9 +113,10 @@ void TreeNode::updateListsFromToTraverse(const std::vector<Itemset*>& toTraverse
 		{
 			//std::cout << "add MT" << std::endl;
 			// we have a minimal transversal
-			const std::lock_guard<std::mutex> lock2(shared_minimalTransverse_guard);
-			this->shared_minimalTransverse.push_back(crtItemset);
-
+			{
+				const std::lock_guard<std::mutex> mt_lock(shared_minimalTransverse_guard);
+				this->shared_minimalTransverse.push_back(crtItemset);
+			}
 			// update info
 			nbTotalMt++;
 			if (crtItemset->getItemCount() < minimalMt)
@@ -560,5 +566,8 @@ void TreeNode::computeMinimalTransversals(std::vector<Itemset*>& final_mt, std::
 			std::copy(result.begin(), result.end(), std::back_inserter(final_mt));
 		}*/
 	}
-	final_mt = shared_minimalTransverse;
+	{
+		const std::lock_guard<std::mutex> mt_lock(shared_minimalTransverse_guard);
+		final_mt = shared_minimalTransverse;
+	}
 }
