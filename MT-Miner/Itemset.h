@@ -54,8 +54,9 @@ public:
 	Itemset(const Itemset* itemset);
 	~Itemset();
 
-	void addItem(const std::shared_ptr<Item>& item);		
-	void combineItemset(const Itemset* itemset);	
+	void addItem(const std::shared_ptr<Item>& item);
+	void removeAllItems();
+	void combineItemset(const Itemset* itemset);
 	unsigned int getItemCount() const;
 	unsigned int getDisjunctifSupport() const;
 	std::shared_ptr<Item> getItem(unsigned int i) const;

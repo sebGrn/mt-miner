@@ -25,8 +25,12 @@ private:
 	// to avoid interleaved outputs
 	static std::mutex output_guard;
 	static std::mutex print_guard;
-	//static std::mutex shared_toTraverseItemset_guard;
 	static std::mutex shared_minimalTransverse_guard;
+	static std::mutex shared_toTraverseItemset_guard;
+	//static std::mutex shared_toTraverseItemset_guard_thread1;
+	//static std::mutex shared_toTraverseItemset_guard_thread2;
+	//static std::mutex shared_toTraverseItemset_guard_thread3;
+	//static std::mutex shared_toTraverseItemset_guard_thread4;
 
 	// synchro stuff
 	// https://www.youtube.com/watch?v=2Xad9bCYbJE&list=PL1835A90FC78FF8BE&index=6
@@ -43,7 +47,12 @@ private:
 	/// a clone is an item from binary representation 
 	bool useCloneOptimization;
 
-	//std::vector<Itemset*> shared_toTraverse_itemset;
+	//std::vector<Itemset*> shared_toTraverse_itemset_thread1;
+	//std::vector<Itemset*> shared_toTraverse_itemset_thread2;
+	//std::vector<Itemset*> shared_toTraverse_itemset_thread3;
+	//std::vector<Itemset*> shared_toTraverse_itemset_thread4;
+
+	std::vector<Itemset*> shared_toTraverse;
 	std::vector<Itemset*> shared_minimalTransverse;
 
 public:
@@ -53,16 +62,26 @@ public:
 	static std::atomic_uint nbThread;
 	static std::atomic_uint cptSharedItemsets;
 
+	//static std::atomic_uint thread_nb1;
+	//static std::atomic_uint thread_nb2;
+	//static std::atomic_uint thread_nb3;
+	//static std::atomic_uint thread_nb4;
+
+	static std::atomic_uint shared_toTraverse_index_start;
+	static std::atomic_uint shared_toTraverse_index_end;
+
 private: 
 	/// compute maxClique list, toExplore list and mt list
 	/// update graph_mt with new minimal transversal itemset
 	//void updateListsFromToTraverse( const std::vector<Itemset*>& toTraverse, std::vector<Itemset*>& maxClique, std::vector<Itemset*>& toExplore, std::vector<Itemset*>& graph_mt);
-	void updateListsFromToTraverse(const std::vector<Itemset*>& toTraverse, std::vector<Itemset*>& maxClique, std::vector<Itemset*>& toExplore);
 
+	//void updateListsDependingOnProcessUnit(std::vector<Itemset*>& threadList, std::vector<Itemset*>& maxClique, std::vector<Itemset*>& toExplore);
+	void updateListsFromToTraverse(std::vector<Itemset*>& maxClique, std::vector<Itemset*>& toExplore, unsigned int startIndex, unsigned int endIndex);
 	//std::vector<Itemset*> computeMinimalTransversals_task(const std::vector<Itemset*>& toTraverse);
-	void computeMinimalTransversals_task_test(const std::vector<Itemset*>& toTraverse);
-	
+	void computeMinimalTransversals_task_test(unsigned int index_start, unsigned int index_end);
 	void recurseOnClonedItemset(Itemset* itemset, unsigned int iItem);
+	
+	//void setThreadIdentifier();
 
 public:
 	TreeNode(bool useCloneOptimization);
@@ -71,3 +90,21 @@ public:
 	void computeMinimalTransversals(std::vector<Itemset*>& graph_mt, std::vector<Itemset*>& toTraverse);
 };
 
+//inline void TreeNode::setThreadIdentifier()
+//{
+//	//const std::lock_guard<std::mutex> lock(print_guard);
+//	std::cout << GetCurrentProcessorNumber() << std::endl;
+//	if ((thread_nb1 == 0) && (GetCurrentProcessorNumber() != thread_nb2 && GetCurrentProcessorNumber() != thread_nb3 && GetCurrentProcessorNumber() != thread_nb4))
+//		thread_nb1 = GetCurrentProcessorNumber();
+//	else if ((thread_nb2 == 0) && (GetCurrentProcessorNumber() != thread_nb1 && GetCurrentProcessorNumber() != thread_nb3 && GetCurrentProcessorNumber() != thread_nb4))
+//		thread_nb2 = GetCurrentProcessorNumber();
+//	else if ((thread_nb3 == 0) && (GetCurrentProcessorNumber() != thread_nb1 && GetCurrentProcessorNumber() != thread_nb2 && GetCurrentProcessorNumber() != thread_nb4))
+//		thread_nb3 = GetCurrentProcessorNumber();
+//	else if ((thread_nb4 == 0) && (GetCurrentProcessorNumber() != thread_nb1 && GetCurrentProcessorNumber() != thread_nb2 && GetCurrentProcessorNumber() != thread_nb3))
+//		thread_nb4 = GetCurrentProcessorNumber();
+//
+//	std::cout << "thread_nb1 : " << thread_nb1 << std::endl;
+//	std::cout << "thread_nb2 : " << thread_nb2 << std::endl;
+//	std::cout << "thread_nb3 : " << thread_nb3 << std::endl;
+//	std::cout << "thread_nb4 : " << thread_nb4 << std::endl;
+//}

@@ -62,6 +62,8 @@ Itemset::Itemset(const Itemset* itemset)
 
 Itemset::~Itemset()
 {
+	if (this->orValue)
+		delete orValue;
 #ifndef _OLD_ISESSENTIAL
 	if (this->isEssentialADNBitset)
 		delete this->isEssentialADNBitset;
@@ -73,7 +75,6 @@ Itemset::~Itemset()
 	this->itemset.clear();
 }
 
-// not optimized, only for test
 void Itemset::addItem(const std::shared_ptr<Item>& item)
 {
 	(*this->orValue) = (*item->value()) | (*this->orValue);
@@ -81,12 +82,25 @@ void Itemset::addItem(const std::shared_ptr<Item>& item)
 	this->dirty = false;
 	if (item->isAClone())
 		this->hasClone = true;
-
 #ifndef _OLD_ISESSENTIAL
 	updateIsEssential(item);
 #endif
-
 	this->itemset.push_back(item);
+}
+
+void Itemset::removeAllItems()
+{
+	this->itemset.clear();
+	this->dirty = true;
+	this->orValue->reset();
+	this->orSupport = 0;
+	this->hasClone = false;
+#ifndef _OLD_ISESSENTIAL
+	this->isEssential = false;
+	this->isEssentialADNBitset->reset();
+	this->markedNonEssentialBisetIndex->reset();
+	this->temporaryBitset->reset();
+#endif	
 }
 
 bool Itemset::operator==(const Itemset& other)
@@ -354,14 +368,14 @@ void Itemset::copyRightIntoLeft(Itemset& left, const Itemset* right)
 		left.itemset.push_back(*it);
 
 	left.dirty = right->dirty;
-	left.orValue = right->orValue;
+	(*left.orValue) = (*right->orValue);
 	left.orSupport = right->orSupport;
 	left.hasClone = right->hasClone;
 	
 #ifndef _OLD_ISESSENTIAL
 	left.isEssential = right->isEssential;
 	(*left.isEssentialADNBitset) = (*right->isEssentialADNBitset);
-	left.markedNonEssentialBisetIndex = right->markedNonEssentialBisetIndex;
+	(*left.markedNonEssentialBisetIndex) = (*right->markedNonEssentialBisetIndex);
 #endif	
 }
 
