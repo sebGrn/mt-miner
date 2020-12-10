@@ -156,8 +156,6 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 
 int main(int argc, char* argv[])
  {
-
-
 	/*Logger::init("", true, "");
 
 	PROCESS_MEMORY_COUNTERS_EX pmc;

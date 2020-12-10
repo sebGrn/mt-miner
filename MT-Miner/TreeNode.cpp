@@ -227,18 +227,18 @@ std::vector<Itemset*> TreeNode::computeMinimalTransversals_task(const std::vecto
 					// emit task
 					nbTotalChildren++;
 					// call on the same node, it works because no class members are used except atomics
-					//auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(newToTraverse));
+					auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(newToTraverse));
 
-					//// ## SPAWN TASK ##
-					//{
-					//	const std::lock_guard<std::mutex> lock(task_guard);
-					//	task_queue.emplace_back(std::move(subtask));
-					//	++pending_task_count;
-					//}
-					//task_signal.notify_one(); // be sure at least one unit is awaken
+					// ## SPAWN TASK ##
+					{
+						const std::lock_guard<std::mutex> lock(task_guard);
+						task_queue.emplace_back(std::move(subtask));
+						++pending_task_count;
+					}
+					task_signal.notify_one(); // be sure at least one unit is awaken
 
 					// modify delay from 1 to 100 to see idle behaviour
-					std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+					//std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
 					// new list has been managed by the thread, clear it
 					for (auto it = newToTraverse.begin(); it != newToTraverse.end(); it++) { delete *it; }
