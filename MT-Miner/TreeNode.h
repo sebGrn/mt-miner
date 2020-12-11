@@ -47,12 +47,12 @@ private:
 	/// a clone is an item from binary representation 
 	bool useCloneOptimization;
 
-	//std::vector<Itemset*> shared_toTraverse_itemset_thread1;
-	//std::vector<Itemset*> shared_toTraverse_itemset_thread2;
-	//std::vector<Itemset*> shared_toTraverse_itemset_thread3;
-	//std::vector<Itemset*> shared_toTraverse_itemset_thread4;
+	std::vector<Itemset*> shared_toTraverse_itemset_thread1;
+	std::vector<Itemset*> shared_toTraverse_itemset_thread2;
+	std::vector<Itemset*> shared_toTraverse_itemset_thread3;
+	std::vector<Itemset*> shared_toTraverse_itemset_thread4;
 
-	std::vector<Itemset*> shared_toTraverse;
+	//std::vector<Itemset*> shared_toTraverse;
 	std::vector<Itemset*> shared_minimalTransverse;
 
 public:
@@ -61,6 +61,11 @@ public:
 	static std::atomic_ullong minimalMt;
 	static std::atomic_uint nbThread;
 	static std::atomic_uint cptSharedItemsets;
+
+	static std::atomic_bool thread_nb1;
+	static std::atomic_bool thread_nb2;
+	static std::atomic_bool thread_nb3;
+	static std::atomic_bool thread_nb4;
 
 	//static std::atomic_uint thread_nb1;
 	//static std::atomic_uint thread_nb2;

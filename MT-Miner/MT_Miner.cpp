@@ -123,12 +123,12 @@ void MT_Miner::computeMinimalTransversals(std::vector<Itemset*>& mt)
 
 	// print minimal transversals
 	Logger::log("\nminimal transversals count : ", mt.size(), "\n");
-	if (mt.size() > 6)
+	/*if (mt.size() > 6)
 	{
 		for_each(mt.begin(), mt.begin() + 5, [&](const Itemset* elt) { Logger::log(elt->toString(), "\n"); });
 		Logger::log("...\n");
 	}
-	else
+	else*/
 		for_each(mt.begin(), mt.end(), [&](const Itemset* elt) { Logger::log(elt->toString(), "\n"); });
 	
 	//Logger::log(RESET);
