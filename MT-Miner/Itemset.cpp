@@ -42,7 +42,7 @@ Itemset::Itemset(const std::shared_ptr<Item>& item)
 	this->itemset.push_back(item);
 }
 
-Itemset::Itemset(const Itemset* itemset)
+Itemset::Itemset(const std::shared_ptr<Itemset> itemset)
 {
 	assert(this->itemset.empty());
 
@@ -106,46 +106,45 @@ bool Itemset::operator==(const Itemset& other)
 }
 
 // make a copy of currentItemset and replance ith item by clone item
-Itemset* Itemset::createAndReplaceItem(unsigned int iToReplace, const std::shared_ptr<Item>& itemToReplace)
+std::shared_ptr<Itemset> Itemset::createAndReplaceItem(unsigned int iToReplace, const std::shared_ptr<Item>& itemToReplace)
 {
-	Itemset* clonedItemset = nullptr;
 	try
 	{
-		clonedItemset = new Itemset;
+		std::shared_ptr<Itemset> clonedItemset(new Itemset());
+		if (clonedItemset)
+		{
+			(*clonedItemset->orValue) = (*this->orValue);
+			clonedItemset->orSupport = this->orSupport;
+			clonedItemset->dirty = this->dirty;
+			clonedItemset->hasClone = this->hasClone;
+#ifndef _OLD_ISESSENTIAL
+			clonedItemset->isEssential = this->isEssential;
+			(*clonedItemset->isEssentialADNBitset) = (*this->isEssentialADNBitset);
+#endif
+			for (unsigned int i = 0; i < this->getItemCount(); i++)
+			{
+				if (iToReplace == i)
+				{
+					clonedItemset->itemset.push_back(itemToReplace);
+					if (itemToReplace->isAClone())
+						clonedItemset->hasClone = true;
+				}
+				else
+				{
+					clonedItemset->itemset.push_back(this->itemset[i]);
+				}
+			}
+		}
+		return clonedItemset;
 	}
 	catch (std::exception& e)
 	{
 		std::cout << "during createAndReplaceItem " << e.what() << std::endl;
 	}
-	if (clonedItemset)
-	{
-		clonedItemset->orValue = this->orValue;
-		clonedItemset->orSupport = this->orSupport;
-		clonedItemset->dirty = this->dirty;
-		clonedItemset->hasClone = this->hasClone;
-#ifndef _OLD_ISESSENTIAL
-		clonedItemset->isEssential = this->isEssential;
-		(*clonedItemset->isEssentialADNBitset) = (*this->isEssentialADNBitset);
-#endif
-
-		for (unsigned int i = 0; i < this->getItemCount(); i++)
-		{
-			if (iToReplace == i)
-			{
-				clonedItemset->itemset.push_back(itemToReplace);
-				if (itemToReplace->isAClone())
-					clonedItemset->hasClone = true;
-			}
-			else
-			{
-				clonedItemset->itemset.push_back(this->itemset[i]);
-			}
-		}
-	}
-	return clonedItemset;
+	return nullptr;
 }
 
-void Itemset::combineItemset(const Itemset* itemset_right)
+void Itemset::combineItemset(const std::shared_ptr<Itemset> itemset_right)
 {
 	// "1" + "2" => "12"
 	// "71" + "72" => "712"
@@ -301,7 +300,7 @@ void Itemset::updateIsEssential(const std::shared_ptr<Item>& item)
 }
 #endif
 
-unsigned int Itemset::computeDisjunctifSupport(const Itemset& left, const Itemset* right)
+unsigned int Itemset::computeDisjunctifSupport(const Itemset& left, const std::shared_ptr<Itemset> right)
 {
 	StaticBitset* res = new StaticBitset();
 	(*res) = (*left.orValue) | (*right->orValue);
@@ -310,7 +309,7 @@ unsigned int Itemset::computeDisjunctifSupport(const Itemset& left, const Itemse
 	return r;
 }
 
-void Itemset::combineRightIntoLeft(Itemset& itemset_left, const Itemset* itemset_right)
+void Itemset::combineRightIntoLeft(Itemset& itemset_left, const std::shared_ptr<Itemset> itemset_right)
 {
 	// "1" + "2" => "12"
 	// "71" + "72" => "712"
@@ -346,7 +345,7 @@ void Itemset::combineRightIntoLeft(Itemset& itemset_left, const Itemset* itemset
 	itemset_left.dirty = false;
 }
 
-void Itemset::copyRightIntoLeft(Itemset& left, const Itemset* right)
+void Itemset::copyRightIntoLeft(Itemset& left, const std::shared_ptr<Itemset> right)
 {
 	left.itemset.clear();
 	

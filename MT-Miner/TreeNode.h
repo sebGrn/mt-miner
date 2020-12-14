@@ -27,7 +27,7 @@ private:
 
 	// synchro stuff
 	// https://www.youtube.com/watch?v=2Xad9bCYbJE&list=PL1835A90FC78FF8BE&index=6
-	static std::deque<std::future<std::vector<Itemset*>>> task_queue;
+	static std::deque<std::future<std::vector<std::shared_ptr<Itemset>>>> task_queue;
 	static std::mutex task_guard;
 	static std::condition_variable task_signal;
 
@@ -48,19 +48,16 @@ public:
 private: 
 	/// compute maxClique list, toExplore list and mt list
 	/// update graph_mt with new minimal transversal itemset
-	void updateListsFromToTraverse( const std::vector<Itemset*>& toTraverse,
-									std::vector<Itemset*>& maxClique,
-									std::vector<Itemset*>& toExplore,
-									std::vector<Itemset*>& graph_mt);
+	void updateListsFromToTraverse(const std::vector<std::shared_ptr<Itemset>>& toTraverse, std::vector<std::shared_ptr<Itemset>>& maxClique, std::vector< std::shared_ptr<Itemset>>& toExplore, std::vector< std::shared_ptr<Itemset>>& graph_mt);
 
-	std::vector<Itemset*> computeMinimalTransversals_task(const std::vector<Itemset*>& toTraverse);
+	std::vector<std::shared_ptr<Itemset>> computeMinimalTransversals_task(const std::vector<std::shared_ptr<Itemset>>& toTraverse);
 	
-	void recurseOnClonedItemset(Itemset* itemset, unsigned int iItem, std::vector<Itemset*>& graph_mt);
+	void recurseOnClonedItemset(std::shared_ptr<Itemset> itemset, unsigned int iItem, std::vector< std::shared_ptr<Itemset>>& graph_mt);
 
 public:
 	TreeNode(bool useCloneOptimization);
 	~TreeNode();
 
-	bool computeMinimalTransversals(std::vector<Itemset*>& graph_mt, std::vector<Itemset*>& toTraverse);
+	bool computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>& graph_mt, std::vector<std::shared_ptr<Itemset>>& toTraverse);
 };
 

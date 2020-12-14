@@ -8,7 +8,7 @@ std::atomic_ullong TreeNode::minimalMt(9999);
 // to avoid interleaved outputs
 std::mutex TreeNode::output_guard;
 // synchro stuff
-std::deque<std::future<std::vector<Itemset*>>> TreeNode::task_queue;
+std::deque<std::future<std::vector<std::shared_ptr<Itemset>>>> TreeNode::task_queue;
 std::mutex TreeNode::task_guard;
 std::condition_variable TreeNode::task_signal;
 int TreeNode::pending_task_count(0);
@@ -23,7 +23,7 @@ TreeNode::~TreeNode()
 {
 }
 
-void TreeNode::recurseOnClonedItemset(Itemset* itemset, unsigned int iItem, std::vector<Itemset*>& graph_mt)
+void TreeNode::recurseOnClonedItemset(std::shared_ptr<Itemset> itemset, unsigned int iItem, std::vector<std::shared_ptr<Itemset>>& graph_mt)
 {
 	assert(iItem < itemset->getItemCount());
 
@@ -41,7 +41,7 @@ void TreeNode::recurseOnClonedItemset(Itemset* itemset, unsigned int iItem, std:
 			std::shared_ptr<Item> clone = item->getClone(j);
 
 			// make a copy of currentItemset and replace ith item by clone item
-			Itemset* clonedItemset = itemset->createAndReplaceItem(iItem, clone);
+			std::shared_ptr<Itemset> clonedItemset = itemset->createAndReplaceItem(iItem, clone);
 
 			graph_mt.push_back(clonedItemset);
 
@@ -57,10 +57,7 @@ void TreeNode::recurseOnClonedItemset(Itemset* itemset, unsigned int iItem, std:
 	}
 }
 
-void TreeNode::updateListsFromToTraverse(const std::vector<Itemset*>& toTraverse,
-										 std::vector<Itemset*>& maxClique, 											
-										 std::vector<Itemset*>& toExplore,
-										 std::vector<Itemset*>& graph_mt)
+void TreeNode::updateListsFromToTraverse(const std::vector<std::shared_ptr<Itemset>>& toTraverse, std::vector<std::shared_ptr<Itemset>>& maxClique, std::vector<std::shared_ptr<Itemset>>& toExplore, std::vector<std::shared_ptr<Itemset>>& graph_mt)
 {
 	assert(maxClique.empty());
 	assert(toExplore.empty());
@@ -70,7 +67,7 @@ void TreeNode::updateListsFromToTraverse(const std::vector<Itemset*>& toTraverse
 	
 	// results of cumulated combined items / must be declared outside of the loop
 	Itemset cumulatedItemset;
-	Itemset* crtItemset = nullptr;
+	std::shared_ptr<Itemset> crtItemset;
 
 	// loop on toTraverse list and build maxClique and toExplore lists
 	for (auto it = toTraverse.begin(); it != toTraverse.end(); it++)
@@ -132,7 +129,7 @@ void TreeNode::updateListsFromToTraverse(const std::vector<Itemset*>& toTraverse
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
-std::vector<Itemset*> TreeNode::computeMinimalTransversals_task(const std::vector<Itemset*>& toTraverse)
+std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals_task(const std::vector<std::shared_ptr<Itemset>>& toTraverse)
 {
 	// ## START TASK ##
 
@@ -141,27 +138,18 @@ std::vector<Itemset*> TreeNode::computeMinimalTransversals_task(const std::vecto
 
 	// test trivial case
 	if (toTraverse.empty())
-		return std::vector<Itemset*>();
+		return std::vector<std::shared_ptr<Itemset>>();
 
 	// contains the final minimal transverals for this node
-	std::vector<Itemset*> graph_mt;
+	std::vector<std::shared_ptr<Itemset>> graph_mt;
 	{
 		// contains list of itemsets that will be combined to the candidates, the largest space in which is not possible to find minimal transversals
-		std::vector<Itemset*> maxClique;
+		std::vector<std::shared_ptr<Itemset>> maxClique;
 		// contains list of itemsets that are candidates
-		std::vector<Itemset*> toExplore;
+		std::vector<std::shared_ptr<Itemset>> toExplore;
 		// update lists from toTraverse, move itemset from toTraverse to maxClique, toExplore or graph_mt
 		this->updateListsFromToTraverse(toTraverse, maxClique, toExplore, graph_mt);
-
-		//SIZE_T used1 = Utils::printUsedMemoryForCrtProcess();
-		//std::cout << "allocated memory for updateListsFromToTraverse " << used1 - used0 << std::endl;
-
-		//std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-		//Logger::log("toExplore list", ItemsetListToString(toExplore), "\n");
-		//Logger::log("maxClique list", ItemsetListToString(maxClique), "\n");
-		// add json node for js visualisation
-		//JsonTree::addJsonNode(toExplore);
+	
 
 		// build new toTraverse list and explore next branch
 		if (!toExplore.empty())
@@ -177,25 +165,25 @@ std::vector<Itemset*> TreeNode::computeMinimalTransversals_task(const std::vecto
 			// loop on candidate itemset from initial toExplore list
 			for (unsigned int i = 0; i < lastIndexToTest; i++)
 			{
-				Itemset* toCombinedLeft = toExplore.front();
+				std::shared_ptr<Itemset> toCombinedLeft = toExplore.front();
 				toExplore.erase(toExplore.begin());
 
 				// build newTraverse list
-				std::vector<Itemset*> newToTraverse;
+				std::vector<std::shared_ptr<Itemset>> newToTraverse;
 
 				// loop on next candidate itemset
 				for (unsigned int j = 0; j < toExplore.size(); j++)
 				{
 					assert(j < toExplore.size());
-					Itemset* toCombinedRight = toExplore[j];
+					std::shared_ptr<Itemset> toCombinedRight = toExplore[j];
 
 					if (!(toCombinedLeft->containsAClone() || toCombinedRight->containsAClone()))
 					{
-						Itemset* newItemset = nullptr;
+						std::shared_ptr<Itemset> newItemset = nullptr;
 						try
 						{
 							// combine toCombinedRight into toCombinedLeft
-							newItemset = new Itemset(toCombinedLeft);
+							newItemset = std::make_shared<Itemset>(toCombinedLeft);
 						}
 						catch (std::exception& e)
 						{
@@ -211,16 +199,14 @@ std::vector<Itemset*> TreeNode::computeMinimalTransversals_task(const std::vecto
 							}
 							else
 							{
-								delete newItemset;
-								newItemset = nullptr;
+								newItemset.reset();
 							}
 						}
 					}
 				}
 				
-				delete toCombinedLeft;
-				toCombinedLeft = nullptr;
-
+				toCombinedLeft.reset();
+				
 				// call process in the loop
 				if (!newToTraverse.empty())
 				{
@@ -241,7 +227,7 @@ std::vector<Itemset*> TreeNode::computeMinimalTransversals_task(const std::vecto
 					//std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
 					// new list has been managed by the thread, clear it
-					for (auto it = newToTraverse.begin(); it != newToTraverse.end(); it++) { delete *it; }
+					for (auto it = newToTraverse.begin(); it != newToTraverse.end(); it++) { it->reset(); }
 					newToTraverse.clear();
 				}
 			}
@@ -263,7 +249,7 @@ std::vector<Itemset*> TreeNode::computeMinimalTransversals_task(const std::vecto
 	return graph_mt;
 }
 
-bool TreeNode::computeMinimalTransversals(std::vector<Itemset*>& final_mt, std::vector<Itemset*>& toTraverse)
+bool TreeNode::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>& final_mt, std::vector<std::shared_ptr<Itemset>>& toTraverse)
 {
 	// ## START system ##
 
@@ -278,14 +264,14 @@ bool TreeNode::computeMinimalTransversals(std::vector<Itemset*>& final_mt, std::
 	}
 
 	// launch processing units
-	std::list<std::future<std::vector<Itemset*>>> units;
+	std::list<std::future<std::vector<std::shared_ptr<Itemset>>>> units;
 	const unsigned int thead_multiplicator = 1;
 	for (auto n = std::thread::hardware_concurrency() * thead_multiplicator; --n;)
 	{
 		units.emplace_back(std::async(std::launch::async, [n]()
 		{
 			// ## LAUNCH task ##
-			std::vector<Itemset*> result_mt;
+			std::vector<std::shared_ptr<Itemset>> result_mt;
 
 			std::unique_lock<std::mutex> lock(task_guard);
 			while (true)
@@ -299,7 +285,7 @@ bool TreeNode::computeMinimalTransversals(std::vector<Itemset*>& final_mt, std::
 					lock.unlock(); // unlock while processing task
 					{
 						// process task
-						std::vector<Itemset*>&& mt = task.get();
+						std::vector<std::shared_ptr<Itemset>>&& mt = task.get();
 						std::copy(mt.begin(), mt.end(), std::back_inserter(result_mt));
 					}
 					lock.lock(); // reacquire lock
@@ -323,7 +309,7 @@ bool TreeNode::computeMinimalTransversals(std::vector<Itemset*>& final_mt, std::
 	for (auto& unit : units)
 	{
 		unit.wait();
-		std::vector<Itemset*> result = unit.get();
+		std::vector<std::shared_ptr<Itemset>> result = unit.get();
 		{
 			const std::lock_guard<std::mutex> lock(output_guard);
 			std::copy(result.begin(), result.end(), std::back_inserter(final_mt));

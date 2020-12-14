@@ -51,24 +51,24 @@ private:
 public:
 	Itemset();
 	Itemset(const std::shared_ptr<Item>& item);
-	Itemset(const Itemset* itemset);
+	Itemset(const std::shared_ptr<Itemset> itemset);
 	~Itemset();
 
 	void addItem(const std::shared_ptr<Item>& item);		
-	void combineItemset(const Itemset* itemset);	
+	void combineItemset(const std::shared_ptr<Itemset> itemset);
 	unsigned int getItemCount() const;
 	unsigned int getDisjunctifSupport() const;
 	std::shared_ptr<Item> getItem(unsigned int i) const;
-	Itemset* createAndReplaceItem(unsigned int i, const std::shared_ptr<Item>& item);
+	std::shared_ptr<Itemset> createAndReplaceItem(unsigned int i, const std::shared_ptr<Item>& item);
 	bool computeIsEssential();
 	bool containsAClone() const;
 	std::string toString() const;
 
 	bool operator==(const Itemset& other);
 	
-	static unsigned int computeDisjunctifSupport(const Itemset& left, const Itemset* right);
-	static void combineRightIntoLeft(Itemset& left, const Itemset* right);
-	static void copyRightIntoLeft(Itemset& left, const Itemset* right);
+	static unsigned int computeDisjunctifSupport(const Itemset& left, const std::shared_ptr<Itemset> right);
+	static void combineRightIntoLeft(Itemset& left, const std::shared_ptr<Itemset> right);
+	static void copyRightIntoLeft(Itemset& left, const std::shared_ptr<Itemset> right);
 };
 
 inline bool Itemset::containsAClone() const
