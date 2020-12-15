@@ -11,11 +11,13 @@
 class Itemset
 {
 private:
+	friend class Item;
+
 	std::vector<std::shared_ptr<Item>> itemset;
 	// true if bitset_count & or value has to be computed
 	bool dirty; 
 	// stored OR value of all bitset from the item set
-	StaticBitset* orValue;
+	std::unique_ptr<StaticBitset> orValue;
 	// support of the current itemset (nb 1's bit) of OR computation
 	unsigned int orSupport;
 	// true if itemset has at least an item who is a clone
@@ -38,9 +40,9 @@ private:
 	// ie there is at least one set bit at ith index into itemset's bitset
 
 	bool isEssential;
-	StaticBitset* isEssentialADNBitset;
-	StaticBitset* markedNonEssentialBisetIndex;
-	StaticBitset* temporaryBitset;
+	std::unique_ptr<StaticBitset> isEssentialADNBitset;
+	std::unique_ptr<StaticBitset> markedNonEssentialBitsetIndex;
+	std::unique_ptr<StaticBitset> temporaryBitset;
 #endif	
 	
 private:

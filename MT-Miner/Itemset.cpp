@@ -4,18 +4,17 @@
 
 Itemset::Itemset()
 {
-	this->orValue = new StaticBitset();
-	this->orValue->reset();
+	this->orValue = std::make_unique<StaticBitset>();
 	this->orSupport = 0;
 	this->dirty = true;
 	this->hasClone = false;
 #ifndef _OLD_ISESSENTIAL
 	this->isEssential = true;
-	this->isEssentialADNBitset = new StaticBitset();
-	this->markedNonEssentialBisetIndex = new StaticBitset;
-	this->temporaryBitset = new StaticBitset;
+	this->isEssentialADNBitset = std::make_unique<StaticBitset>();
+	this->markedNonEssentialBitsetIndex = std::make_unique<StaticBitset>();
+	this->temporaryBitset = std::make_unique<StaticBitset>();
 	this->isEssentialADNBitset->reset();
-	this->markedNonEssentialBisetIndex->reset();
+	this->markedNonEssentialBitsetIndex->reset();
 	this->temporaryBitset->reset();
 #endif
 }
@@ -24,16 +23,17 @@ Itemset::Itemset(const std::shared_ptr<Item>& item)
 {
 	assert(this->itemset.empty());
 
-	this->orValue = new StaticBitset(*item->value());
+	this->orValue = std::make_unique<StaticBitset>(*item->value());
+	//*this->orValue = *item->value();
 	this->orSupport = item->count();
 	this->dirty = false;
 	this->hasClone = false;
 #ifndef _OLD_ISESSENTIAL
 	this->isEssential = true;
-	this->isEssentialADNBitset = new StaticBitset(*item->value());
-	this->markedNonEssentialBisetIndex = new StaticBitset;
-	this->temporaryBitset = new StaticBitset;
-	this->markedNonEssentialBisetIndex->reset();
+	this->isEssentialADNBitset = std::make_unique<StaticBitset>(*item->value());
+	this->markedNonEssentialBitsetIndex = std::make_unique<StaticBitset>();
+	this->temporaryBitset = std::make_unique<StaticBitset>();
+	this->markedNonEssentialBitsetIndex->reset();
 	this->temporaryBitset->reset();
 #endif
 	if (item->isAClone())
@@ -46,29 +46,26 @@ Itemset::Itemset(const std::shared_ptr<Itemset> itemset)
 {
 	assert(this->itemset.empty());
 
-	this->orValue = new StaticBitset(*itemset->orValue);
+	this->orValue = std::make_unique<StaticBitset>(*itemset->orValue);
 	this->orSupport = itemset->orSupport;
 	this->dirty = itemset->dirty;
 	this->hasClone = itemset->hasClone;
 #ifndef _OLD_ISESSENTIAL
 	this->isEssential = itemset->isEssential;
-	this->isEssentialADNBitset = new StaticBitset(*itemset->isEssentialADNBitset);
-	this->markedNonEssentialBisetIndex = new StaticBitset(*itemset->markedNonEssentialBisetIndex);
-	this->temporaryBitset = new StaticBitset;
-	this->temporaryBitset->reset();
+	this->isEssentialADNBitset = std::make_unique<StaticBitset>(*itemset->isEssentialADNBitset);
+	this->markedNonEssentialBitsetIndex = std::make_unique<StaticBitset>(*itemset->markedNonEssentialBitsetIndex);
+	this->temporaryBitset = std::make_unique<StaticBitset>();
 #endif
-	std::copy(itemset->itemset.begin(), itemset->itemset.end(), std::back_inserter(this->itemset));
+	std::copy(itemset->itemset.begin(), itemset->itemset.end(), std::back_inserter(this->itemset));	
 }
 
 Itemset::~Itemset()
 {
 #ifndef _OLD_ISESSENTIAL
-	if (this->isEssentialADNBitset)
-		delete this->isEssentialADNBitset;
-	if (this->markedNonEssentialBisetIndex)
-		delete this->markedNonEssentialBisetIndex;
-	if (this->temporaryBitset)
-		delete this->temporaryBitset;
+	this->isEssentialADNBitset.reset();
+	this->markedNonEssentialBitsetIndex.reset();
+	this->markedNonEssentialBitsetIndex.reset();
+	this->temporaryBitset.reset();
 #endif
 	this->itemset.clear();
 }
@@ -275,7 +272,7 @@ bool Itemset::computeIsEssential()
 #ifndef _OLD_ISESSENTIAL
 void Itemset::updateIsEssential(const std::shared_ptr<Item>& item)
 {
-	(*this->temporaryBitset) = (*this->isEssentialADNBitset) | (*this->markedNonEssentialBisetIndex);
+	(*this->temporaryBitset) = (*this->isEssentialADNBitset) | (*this->markedNonEssentialBitsetIndex);
 	
 	int i = 0;
 	int n = BinaryRepresentation::getObjectCount();
@@ -288,12 +285,12 @@ void Itemset::updateIsEssential(const std::shared_ptr<Item>& item)
 				// ith bit was already part of minimal ADN	
 				// we have to remove it from the minimal ADN and remove ith bit as a candidate for minimal AND index
 				this->isEssentialADNBitset->set(i, false);
-				this->markedNonEssentialBisetIndex->set(i, true);
+				this->markedNonEssentialBitsetIndex->set(i, true);
 			}
 			else 
 			{
 				this->isEssentialADNBitset->set(i, true);
-				this->markedNonEssentialBisetIndex->set(i, false);
+				this->markedNonEssentialBitsetIndex->set(i, false);
 			}
 		}
 	}
@@ -353,14 +350,14 @@ void Itemset::copyRightIntoLeft(Itemset& left, const std::shared_ptr<Itemset> ri
 		left.itemset.push_back(*it);
 
 	left.dirty = right->dirty;
-	left.orValue = right->orValue;
+	*left.orValue = *right->orValue;
 	left.orSupport = right->orSupport;
 	left.hasClone = right->hasClone;
 	
 #ifndef _OLD_ISESSENTIAL
 	left.isEssential = right->isEssential;
-	(*left.isEssentialADNBitset) = (*right->isEssentialADNBitset);
-	left.markedNonEssentialBisetIndex = right->markedNonEssentialBisetIndex;
+	*left.isEssentialADNBitset = *right->isEssentialADNBitset;
+	*left.markedNonEssentialBitsetIndex = *right->markedNonEssentialBitsetIndex;
 #endif	
 }
 

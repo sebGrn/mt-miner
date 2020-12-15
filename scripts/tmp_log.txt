@@ -1,0 +1,4 @@
+parsing hypergraph done in 1 ms, found 64 items (lines) and 1039 objects (columns)
+5.88456% of bits are sets
+0 clones found
+Found 447 minimal transverses in 0.508 s

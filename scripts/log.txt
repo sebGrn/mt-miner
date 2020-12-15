@@ -1,0 +1,57 @@
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+processing data file:../data/ac_130k-out.txt
+
+Miner execution...
+parsing hypergraph done in 1 ms, found 81 items (lines) and 1916 objects (columns)
+5.24627% of bits are sets
+0 clones found
+Found 990 minimal transverses in 2.126 s
+
+SHD execution...
+Elapsed time for SHD:0.07621319999998377sec
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+processing data file:../data/ac_130k.dat
+
+Miner execution...
+parsing hypergraph done in 3 ms, found 81 items (lines) and 990 objects (columns)
+89.9376% of bits are sets
+50 clones found
+Found 1916 minimal transverses in 0.065 s
+
+SHD execution...
+Elapsed time for SHD:0.022422100000767387sec
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+processing data file:../data/ac_150-out.txt
+
+Miner execution...
+parsing hypergraph done in 0 ms, found 64 items (lines) and 1039 objects (columns)
+5.88456% of bits are sets
+0 clones found
+Found 447 minimal transverses in 0.48 s
+
+SHD execution...
+Elapsed time for SHD:0.03230660000008356sec
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+processing data file:../data/ac_150-out2.txt
+
+Miner execution...
+parsing hypergraph done in 1 ms, found 64 items (lines) and 1039 objects (columns)
+5.88456% of bits are sets
+0 clones found
+Found 447 minimal transverses in 0.508 s
+
+SHD execution...
+Elapsed time for SHD:0.02586440000050061sec
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+processing data file:../data/ac_150k.dat
+
+Miner execution...
