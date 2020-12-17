@@ -37,6 +37,9 @@ def update_bitset_count(transation_count):
 def run_compilation(transation_count):
     # run cmake and make
     # create .out
+
+    os.chdir("../MT-Miner/")
+
     folder_path = "build" + str(transation_count)
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
@@ -81,8 +84,6 @@ def compil_and_run_miner(filename, log_file):
     run_compilation(transaction_count)
     print("running miner...")
     run_miner(file, transaction_count, log_file)
-
-
 
 '''
 # start program

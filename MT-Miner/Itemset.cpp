@@ -23,14 +23,13 @@ Itemset::Itemset(const std::shared_ptr<Item>& item)
 {
 	assert(this->itemset.empty());
 
-	this->orValue = std::make_unique<StaticBitset>(*item->value());
-	//*this->orValue = *item->value();
+	this->orValue = std::make_unique<StaticBitset>(*item->staticBitset);
 	this->orSupport = item->count();
 	this->dirty = false;
 	this->hasClone = false;
 #ifndef _OLD_ISESSENTIAL
 	this->isEssential = true;
-	this->isEssentialADNBitset = std::make_unique<StaticBitset>(*item->value());
+	this->isEssentialADNBitset = std::make_unique<StaticBitset>(*this->orValue);
 	this->markedNonEssentialBitsetIndex = std::make_unique<StaticBitset>();
 	this->temporaryBitset = std::make_unique<StaticBitset>();
 	this->markedNonEssentialBitsetIndex->reset();
@@ -73,7 +72,8 @@ Itemset::~Itemset()
 // not optimized, only for test
 void Itemset::addItem(const std::shared_ptr<Item>& item)
 {
-	(*this->orValue) = (*item->value()) | (*this->orValue);
+	//(*this->orValue) = (*item->value()) | (*this->orValue);
+	(*this->orValue) = (*item->staticBitset) | (*this->orValue);
 	this->orSupport = (*this->orValue).count();
 	this->dirty = false;
 	if (item->isAClone())
@@ -169,7 +169,7 @@ void Itemset::combineItemset(const std::shared_ptr<Itemset> itemset_right)
 			updateIsEssential((*it_item));
 #endif
 			// update disjonctive support
-			(*this->orValue) = (*this->orValue) | (*(*it_item)->value());
+			(*this->orValue) = (*(*it_item)->staticBitset) | (*this->orValue);
 			// update clone status
 			if ((*it_item)->isAClone())
 				this->hasClone = true;
@@ -198,7 +198,7 @@ bool Itemset::computeIsEssential()
 			for (int i = 0, n = this->getItemCount(); i != n; i++)
 			{
 				// test for each bits AND operator between current bitset and ADN bitset holder
-				(*this->temporaryBitset) = (*this->itemset[i]->value()) & (*this->isEssentialADNBitset);
+				(*this->temporaryBitset) = (*this->itemset[i]->staticBitset) & (*this->isEssentialADNBitset);
 				this->isEssential = temporaryBitset->any();
 				if(!this->isEssential)
 				{

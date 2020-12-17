@@ -67,7 +67,7 @@ void MT_Miner::computeInitalToTraverseList(std::vector<std::shared_ptr<Itemset>>
 void MT_Miner::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>& mt)
 {
 	auto beginTime = std::chrono::system_clock::now();
-	SIZE_T used0 = Utils::printUsedMemoryForCrtProcess();
+	//SIZE_T used0 = Utils::printUsedMemoryForCrtProcess();
 	
 	// initialise itemset
 	std::vector<std::shared_ptr<Itemset>> toTraverse;
@@ -87,25 +87,25 @@ void MT_Miner::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>&
 			if(duration > secondsToWait * 1000)
 			{
 				std::cout << CYAN << "computing minimal transversals in progress : " << secondsToWait * n << " seconds, "
-					<< rootNode.nbTotalChildren << " nodes created, " 
+					<< rootNode.nbTasks << " tasks created, "
 					<< rootNode.nbTotalMt << " minimal transverses found, " 
 					<< "minimal size of minimal transverse is " << rootNode.minimalMt
 					<< RESET << std::endl;
 				n++;
 				beginTime = std::chrono::system_clock::now();
-			}			
+			}
 		}
 	});
 	
 
 	// compute all minimal transversal from the root node
-	rootNode.computeMinimalTransversals(mt, toTraverse);
+	mt = rootNode.computeMinimalTransversals(std::move(toTraverse));
 	
 	// stop the thread and detach it (dont not wait next n seconds)
 	this->stop = true;
 	ftr.get();
 
-	std::cout << CYAN << rootNode.nbTotalChildren << " nodes created, "
+	std::cout << CYAN << rootNode.nbTasks << " tasks created, "
 		<< rootNode.nbTotalMt << " minimal transverses found, "
 		<< "minimal size of minimal transverse is " << rootNode.minimalMt
 		<< RESET << std::endl;
@@ -133,7 +133,7 @@ void MT_Miner::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>&
 	// write tree into js
 	//JsonTree::writeJsonNode(graph_mt);
 
-	SIZE_T used1 = Utils::printUsedMemoryForCrtProcess();
-	std::cout << "allocated memory " << used1 - used0 << std::endl;
+	//SIZE_T used1 = Utils::printUsedMemoryForCrtProcess();
+	//std::cout << "allocated memory " << used1 - used0 << std::endl;
 }
 

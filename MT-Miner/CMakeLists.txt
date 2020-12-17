@@ -16,8 +16,8 @@ set(CMAKE_VERBOSE_MAKEFILE OFF)
 #find_package(OpenMP)
 
 # set sources and headers
-set(SOURCES ${HEADERS} BinaryRepresentation.h FormalContext.h HyperGraph.h HypergraphParser.h Item.h Itemset.h Logger.h MT_Miner.h SparseBitset.h TreeNode.h utils.h)
-set(SOURCES ${SOURCES} BinaryRepresentation.cpp HypergraphParser.cpp Itemset.cpp Logger.cpp MT_Miner.cpp TreeNode.cpp main.cpp)
+set(SOURCES ${HEADERS} BinaryRepresentation.h FormalContext.h HyperGraph.h Item.h Itemset.h Logger.h MT_Miner.h SparseBitset.h TreeNode.h utils.h)
+set(SOURCES ${SOURCES} BinaryRepresentation.cpp Itemset.cpp Logger.cpp MT_Miner.cpp TreeNode.cpp main.cpp)
 
 # create static library .a
 add_executable(mt_miner ${SOURCES} ${HEADERS})

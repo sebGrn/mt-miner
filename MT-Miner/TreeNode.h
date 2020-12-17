@@ -44,16 +44,16 @@ private:
 	std::vector<std::shared_ptr<Itemset>> minimalTransverse;
 
 public:
-	static std::atomic_ullong nbTotalChildren;
+	static std::atomic_ullong nbTasks;
 	static std::atomic_ullong nbTotalMt;
 	static std::atomic_ullong minimalMt;
 
 private: 
 	/// compute maxClique list, toExplore list and mt list
 	/// update graph_mt with new minimal transversal itemset
-	void updateListsFromToTraverse(const std::vector<std::shared_ptr<Itemset>>& toTraverse, std::vector<std::shared_ptr<Itemset>>& maxClique, std::vector< std::shared_ptr<Itemset>>& toExplore);
+	void updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&& toTraverse, std::deque<std::shared_ptr<Itemset>>&& maxClique, std::deque< std::shared_ptr<Itemset>>&& toExplore);
 
-	void computeMinimalTransversals_task(const std::vector<std::shared_ptr<Itemset>>& toTraverse);
+	void computeMinimalTransversals_task(std::vector<std::shared_ptr<Itemset>>&& toTraverse);
 	
 	void recurseOnClonedItemset(std::shared_ptr<Itemset> itemset, unsigned int iItem);
 
@@ -61,6 +61,6 @@ public:
 	TreeNode(bool useCloneOptimization);
 	~TreeNode();
 
-	bool computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>& graph_mt, std::vector<std::shared_ptr<Itemset>>& toTraverse);
+	std::vector<std::shared_ptr<Itemset>> computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>&& toTraverse);
 };
 

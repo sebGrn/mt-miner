@@ -6,12 +6,15 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+
+#ifndef __linux__
 #include "windows.h"
 #include "psapi.h"
 
 #define NOMINMAX
 #undef max
 #undef min
+#endif
 
 class Utils
 {
@@ -78,6 +81,7 @@ public:
 
 	// ------------------------------------------------------------------------------------------------------------------------- //
 
+#ifndef __linux__
 	static void printTotalVirtualMemory()
 	{
 		MEMORYSTATUSEX memInfo;
@@ -98,5 +102,5 @@ public:
 		SIZE_T virtualMemUsedByMe = pmc.PrivateUsage;
 		return virtualMemUsedByMe;		
 	}
-
+#endif
 };

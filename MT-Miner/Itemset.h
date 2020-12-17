@@ -11,8 +11,7 @@
 class Itemset
 {
 private:
-	friend class Item;
-
+	//
 	std::vector<std::shared_ptr<Item>> itemset;
 	// true if bitset_count & or value has to be computed
 	bool dirty; 

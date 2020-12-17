@@ -8,20 +8,22 @@
 #include "utils.h"
 #include "SparseBitset.h"
 
-//#define BITSET_SIZE 32768	// dualmatching30 --> OK, 10 sec
-//#define BITSET_SIZE 65536	// dualmatching32 --> OK, 48 sec
-//#define BITSET_SIZE 131072	// dualmatching34 --> OK, 444 sec
-//#define BITSET_SIZE 262144	// dualmatching36 --> PAS OK, 5 min, 47Go memory
-//#define BITSET_SIZE 524288	// dualmatching38
-#define BITSET_SIZE 1000
+// 32768	// dualmatching30 --> OK, 10 sec
+// 65536	// dualmatching32 --> OK, 48 sec
+// 131072	// dualmatching34 --> OK, 444 sec
+// 262144	// dualmatching36 --> PAS OK, 5 min, 47Go memory
+// 524288	// dualmatching38
+#define BITSET_SIZE 65536
 typedef std::bitset<BITSET_SIZE> StaticBitset;
 
 class Item
 {
+	// Class Itemset has access to all private members of an item
+	friend class Itemset;
+
 private:
-//public:
 	unsigned int attributeIndex;
-	std::shared_ptr<StaticBitset> staticBitset;
+	std::unique_ptr<StaticBitset> staticBitset;
 	
 	// true if this item is a clone
 	bool isClone;
@@ -32,7 +34,7 @@ private:
 public:
 	Item(int index, unsigned int bitsetSize)
 	{
-		this->staticBitset = std::make_shared<StaticBitset>();
+		this->staticBitset = std::make_unique<StaticBitset>();
 		this->attributeIndex = index;
 		this->isClone = false;
 	}
@@ -40,12 +42,12 @@ public:
 	~Item()
 	{
 		clones.clear();
+		staticBitset.reset();
 	}
 
 	void set(unsigned int i, bool value);
 	bool get(unsigned int) const;
 	unsigned int count() const;
-	std::shared_ptr<StaticBitset> value() const;
 	void addClone(const std::shared_ptr<Item>& clone);
 	void setClone();
 	unsigned int getAttributeIndex() const;
@@ -56,16 +58,13 @@ public:
 	bool isAClone() const;
 
 	bool operator==(const Item& other);	
+	//StaticBitset operator|(const StaticBitset& other);
+	//StaticBitset operator&(const StaticBitset& other);
 };
 
 inline unsigned int Item::getAttributeIndex() const
 {
 	return this->attributeIndex;
-}
-
-inline std::shared_ptr<StaticBitset> Item::value() const
-{
-	return this->staticBitset;
 }
 
 inline void Item::set(unsigned int i, bool value)
@@ -125,3 +124,13 @@ inline bool Item::operator==(const Item& other)
 		return true;
 	return (*other.staticBitset) == (*this->staticBitset);
 }
+
+//inline StaticBitset Item::operator|(const StaticBitset& other)
+//{
+//	return *this->staticBitset.get() | other;
+//}
+//
+//inline StaticBitset Item::operator&(const StaticBitset& other)
+//{
+//	return *this->staticBitset.get() & other;
+//}
