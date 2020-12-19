@@ -19,7 +19,7 @@ Itemset::Itemset()
 #endif
 }
 
-Itemset::Itemset(const std::shared_ptr<Item>& item)
+Itemset::Itemset(Item* item)
 {
 	assert(this->itemset.empty());
 
@@ -69,10 +69,8 @@ Itemset::~Itemset()
 	this->itemset.clear();
 }
 
-// not optimized, only for test
-void Itemset::addItem(const std::shared_ptr<Item>& item)
+/*void Itemset::addItem(const std::shared_ptr<Item>& item)
 {
-	//(*this->orValue) = (*item->value()) | (*this->orValue);
 	(*this->orValue) = (*item->staticBitset) | (*this->orValue);
 	this->orSupport = (*this->orValue).count();
 	this->dirty = false;
@@ -84,7 +82,7 @@ void Itemset::addItem(const std::shared_ptr<Item>& item)
 #endif
 
 	this->itemset.push_back(item);
-}
+}*/
 
 bool Itemset::operator==(const Itemset& other)
 {
@@ -103,7 +101,7 @@ bool Itemset::operator==(const Itemset& other)
 }
 
 // make a copy of currentItemset and replance ith item by clone item
-std::shared_ptr<Itemset> Itemset::createAndReplaceItem(unsigned int iToReplace, const std::shared_ptr<Item>& itemToReplace)
+std::shared_ptr<Itemset> Itemset::createAndReplaceItem(unsigned int iToReplace, Item* itemToReplace)
 {
 	try
 	{
@@ -235,23 +233,24 @@ bool Itemset::computeIsEssential()
 			{
 				if (i != j)
 				{
-					StaticBitset bitset = this->itemset[j]->staticBitset;
+					StaticBitset bitset = *this->itemset[j]->staticBitset;
 					if (!bitset.none())
 						SumOfN_1Items = SumOfN_1Items | bitset;
 				}
 			}
 
-			StaticBitset bitset = this->itemset[i]->staticBitset;
-			for (unsigned int k = 0; k < objectCount; k++)
+			StaticBitset bitset = *this->itemset[i]->staticBitset;
+			if (bitset.count())
 			{
-				// compare bit
-				bool bit0 = SumOfN_1Items[k];
-				bool bit1 = bitset[k];
-				if (!bit0 && bit1)
+				for (unsigned int k = 0; k < objectCount; k++)
 				{
-					// this bitset is essential, check with next bitset
-					isEssential = true;
-					break;
+					// compare bit
+					if (!SumOfN_1Items.test(k) && bitset.test(k))
+					{
+						// this bitset is essential, check with next bitset
+						isEssential = true;
+						break;
+					}
 				}
 			}
 
@@ -273,24 +272,27 @@ bool Itemset::computeIsEssential()
 void Itemset::updateIsEssential(const std::shared_ptr<Item>& item)
 {
 	(*this->temporaryBitset) = (*this->isEssentialADNBitset) | (*this->markedNonEssentialBitsetIndex);
-	
+
 	int i = 0;
 	int n = BinaryRepresentation::getObjectCount();
-	for (i = 0; i < n; i++)
+	if (item->count())
 	{
-		if (item->get(i))
+		for (i = 0; i < n; i++)
 		{
-			if (this->temporaryBitset->test(i))
+			if (item->staticBitset->test(i))
 			{
-				// ith bit was already part of minimal ADN	
-				// we have to remove it from the minimal ADN and remove ith bit as a candidate for minimal AND index
-				this->isEssentialADNBitset->set(i, false);
-				this->markedNonEssentialBitsetIndex->set(i, true);
-			}
-			else 
-			{
-				this->isEssentialADNBitset->set(i, true);
-				this->markedNonEssentialBitsetIndex->set(i, false);
+				if (this->temporaryBitset->test(i))
+				{
+					// ith bit was already part of minimal ADN	
+					// we have to remove it from the minimal ADN and remove ith bit as a candidate for minimal AND index
+					this->isEssentialADNBitset->set(i, false);
+					this->markedNonEssentialBitsetIndex->set(i, true);
+				}
+				else
+				{
+					this->isEssentialADNBitset->set(i, true);
+					this->markedNonEssentialBitsetIndex->set(i, false);
+				}
 			}
 		}
 	}
@@ -364,7 +366,7 @@ void Itemset::copyRightIntoLeft(Itemset& left, const std::shared_ptr<Itemset> ri
 std::string Itemset::toString() const
 {
 	std::string res = "{";
-	for_each(this->itemset.begin(), this->itemset.end(), [&](const std::shared_ptr<Item>& item) {
+	for_each(this->itemset.begin(), this->itemset.end(), [&](const Item* item) {
 		res += std::to_string(item->getAttributeIndex());
 		res += ",";
 		});

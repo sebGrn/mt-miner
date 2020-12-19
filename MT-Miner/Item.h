@@ -13,7 +13,7 @@
 // 131072	// dualmatching34 --> OK, 444 sec
 // 262144	// dualmatching36 --> PAS OK, 5 min, 47Go memory
 // 524288	// dualmatching38
-#define BITSET_SIZE 65536
+#define BITSET_SIZE 524288
 typedef std::bitset<BITSET_SIZE> StaticBitset;
 
 class Item
@@ -29,7 +29,7 @@ private:
 	bool isClone;
 	
 	// contains a list of clone for this item (same bitset)
-	std::vector<std::shared_ptr<Item>> clones;
+	std::vector<Item*> clones;
 
 public:
 	Item(int index, unsigned int bitsetSize)
@@ -48,12 +48,12 @@ public:
 	void set(unsigned int i, bool value);
 	bool get(unsigned int) const;
 	unsigned int count() const;
-	void addClone(const std::shared_ptr<Item>& clone);
+	void addClone(Item* clone);
 	void setClone();
 	unsigned int getAttributeIndex() const;
 	bool isAnOriginal() const;
 	unsigned int getCloneCount() const;
-	std::shared_ptr<Item> getClone(unsigned int i) const;
+	Item* getClone(unsigned int i) const;
 	void resetClonedAttributesIndexes();
 	bool isAClone() const;
 
@@ -82,7 +82,7 @@ inline unsigned int Item::count() const
 	return this->staticBitset->count();
 }
 
-inline void Item::addClone(const std::shared_ptr<Item>& clone)
+inline void Item::addClone(Item* clone)
 {
 	this->clones.push_back(clone);
 }
@@ -107,7 +107,7 @@ inline unsigned int Item::getCloneCount() const
 	return static_cast<unsigned int>(this->clones.size());
 }
 
-inline std::shared_ptr<Item> Item::getClone(unsigned int i) const
+inline Item* Item::getClone(unsigned int i) const
 {
 	assert(i < this->clones.size());
 	return this->clones[i];

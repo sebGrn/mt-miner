@@ -66,7 +66,7 @@ unsigned int BinaryRepresentation::buildCloneList()
 						{
 							// bitset it1 is an original and bitset it2 is its clone
 							// store cloned index from it2 into it1
-							it1->second->addClone(it2->second);
+							it1->second->addClone(it2->second.get());
 							// set it2 as a clone
 							it2->second->setClone();
 							// inc nb clone

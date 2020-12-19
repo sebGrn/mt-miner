@@ -27,7 +27,7 @@ void TreeNode::recurseOnClonedItemset(std::shared_ptr<Itemset> itemset, unsigned
 {
 	assert(iItem < itemset->getItemCount());
 
-	std::shared_ptr<Item> item = itemset->getItem(iItem);
+	Item* item = itemset->getItem(iItem);
 
 	// test if current item contains an original for all its items
 	if (item->isAnOriginal())
@@ -38,7 +38,7 @@ void TreeNode::recurseOnClonedItemset(std::shared_ptr<Itemset> itemset, unsigned
 		for (unsigned int j = 0, cloneCount = item->getCloneCount(); j < cloneCount; j++)
 		{
 			// get clone index for current itemset
-			std::shared_ptr<Item> clone = item->getClone(j);
+			Item* clone = item->getClone(j);
 
 			// make a copy of currentItemset and replace ith item by clone item
 			std::shared_ptr<Itemset> clonedItemset = itemset->createAndReplaceItem(iItem, clone);
@@ -146,9 +146,15 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 		std::deque<std::shared_ptr<Itemset>> maxClique;
 		// contains list of itemsets that are candidates
 		std::deque<std::shared_ptr<Itemset>> toExplore;
+
+		// !!! to reserve maxClique and fit/pack (set capacity à la taille correcte, voir les fonctions)
+		// !!! to reserve toExplore and fit/pack
 		
 		// push elements from toTraverse into maxClique, toExplore or minimal transverse
 		this->updateListsFromToTraverse(std::move(toTraverse), std::move(maxClique), std::move(toExplore));
+
+		// virer maxClique et toExplore
+		// garder toTraverse et le trier
 
 		// we don't need toTraverse anymore, remove references		
 		toTraverse.clear();
@@ -187,7 +193,6 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 					// loop on next candidate itemset
 					for_each(toExplore.begin(), toExplore.end(), [&newToTraverse, &toCombinedLeft](auto toCombinedRight) {
 
-						assert(j < toExplore.size());
 						if (!toCombinedRight->containsAClone())
 						{
 							// combine toCombinedRight into toCombinedLeft
@@ -214,12 +219,25 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 				{
 					// emit task
 					nbTasks++;
+					
 					// call on the same node, it works because no class members are used except atomics
+
+					// !!! utilisation d'un "fichier mappé" pour écrire / lire les liste d'itemset dans un fichier (mapped file)
+					//std::file_mapping
+
 					auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(newToTraverse));
 					//tasks_to_proceed.emplace_back(std::move(subtask));
 
 					// ## SPAWN TASK ##
 					{
+						// !!! ne pas ajouter la tâche dans le tableau systématiquement
+						// !!! donner une taille max à task_queue avec un atomic
+						// !!! définir un ID pour cq tâche, pour faire en sorte qu'une tâche parente ne soit pas bloquée par ses tâches filles
+						// !!! ajouter memory_signal de type condition_variable_any
+						// !!! utiliser http://www.cplusplus.com/reference/condition_variable/condition_variable_any/wait/
+						// !!! memory_signal.wait(lock, fct)
+						// !!! utiliser nbTasks pour tester le nb de tâches pour savoir si on en ajoute 
+						
 						const std::lock_guard<std::mutex> lock(task_guard);
 						task_queue.emplace_back(std::move(subtask));
 						++pending_task_count;						
@@ -298,7 +316,11 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals(std::
 					// pick a task
 					auto task = std::move(task_queue.front());
 					task_queue.pop_front();
-						
+
+					// notifie qu'une tâche a été dépilé --> on peut en rajouter une
+					// analyser la taille de la task_queue, si < seuil alors memory_task.notify_one()
+					// utiliser un compteur d'"impacts de tâche" qui compte la mémoire de cq tâche en fonction du nombre d'itemset
+
 					lock.unlock(); // unlock while processing task
 					{
 						// process task

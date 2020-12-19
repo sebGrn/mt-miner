@@ -58,7 +58,7 @@ void MT_Miner::computeInitalToTraverseList(std::vector<std::shared_ptr<Itemset>>
 			// get itemset from binary representation and store them into lists
 			// these itemsets will be used in the program
 			// we dont need binary representation anymore here
-			std::shared_ptr<Itemset> itemset(new Itemset(item));
+			std::shared_ptr<Itemset> itemset(new Itemset(item.get()));
 			toTraverse.push_back(itemset);
 		}
 	}

@@ -6,13 +6,14 @@
 #include "Item.h"
 #include "SparseBitset.h"
 
-//#define _OLD_ISESSENTIAL
+#define _OLD_ISESSENTIAL
 
 class Itemset
 {
 private:
-	//
-	std::vector<std::shared_ptr<Item>> itemset;
+	std::vector<Item*> itemset;
+	//std::vector<std::shared_ptr<Item>> itemset;
+
 	// true if bitset_count & or value has to be computed
 	bool dirty; 
 	// stored OR value of all bitset from the item set
@@ -51,16 +52,16 @@ private:
 
 public:
 	Itemset();
-	Itemset(const std::shared_ptr<Item>& item);
+	Itemset(Item* item);
 	Itemset(const std::shared_ptr<Itemset> itemset);
 	~Itemset();
 
-	void addItem(const std::shared_ptr<Item>& item);		
+	//void addItem(const std::shared_ptr<Item>& item);		
 	void combineItemset(const std::shared_ptr<Itemset> itemset);
 	unsigned int getItemCount() const;
 	unsigned int getDisjunctifSupport() const;
-	std::shared_ptr<Item> getItem(unsigned int i) const;
-	std::shared_ptr<Itemset> createAndReplaceItem(unsigned int i, const std::shared_ptr<Item>& item);
+	Item* getItem(unsigned int i) const;
+	std::shared_ptr<Itemset> createAndReplaceItem(unsigned int i, Item* item);
 	bool computeIsEssential();
 	bool containsAClone() const;
 	std::string toString() const;
@@ -89,7 +90,7 @@ inline unsigned int Itemset::getDisjunctifSupport() const
 	return this->orSupport;
 }
 
-inline std::shared_ptr<Item> Itemset::getItem(unsigned int i) const
+inline Item* Itemset::getItem(unsigned int i) const
 {
 	assert(i < this->itemset.size());
 	return this->itemset[i];
