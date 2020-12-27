@@ -138,6 +138,28 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 
 	//std::cout << "toTraverse size " << toTraverse.size() << std::endl;
 	//SIZE_T used0 = Utils::printUsedMemoryForCrtProcess();
+	//{
+	//	const std::lock_guard<std::mutex> lock(task_guard);
+	//	std::ifstream input(file, std::ios::binary);
+	//	std::string str;
+	//	std::string delim = ",";
+	//	std::getline(input, str, ';');
+	//	do {
+	//		//std::cout << str << std::endl;
+	//		auto start = 0U;
+	//		auto end = str.find(delim);
+	//		auto size = str.size();
+	//		while (start < size) 
+	//		{
+	//			StaticBitset b(str.substr(start, end - start));
+	//			//std::cout << b.to_string() << std::endl;
+	//			start = end + delim.length();
+	//			end = str.find(delim, start);
+	//		}
+	//			
+	//	} while (std::getline(input, str, ';'));
+	//	input.close();		
+	//}
 
 	// test trivial case
 	if (!toTraverse.empty())
@@ -153,8 +175,8 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 		// push elements from toTraverse into maxClique, toExplore or minimal transverse
 		this->updateListsFromToTraverse(std::move(toTraverse), std::move(maxClique), std::move(toExplore));
 
-		// virer maxClique et toExplore
-		// garder toTraverse et le trier
+		// !!! virer maxClique et toExplore
+		// !!! garder toTraverse et le trier
 
 		// we don't need toTraverse anymore, remove references		
 		toTraverse.clear();
@@ -168,9 +190,6 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 			toExplore.insert(toExplore.end(), maxClique.begin(), maxClique.end());
 			// we don't need maxClique anymore, remove references		
 			maxClique.clear();
-
-			// temporary list of future
-			//std::deque<std::future<void>> tasks_to_proceed;
 
 			// combine each element between [0, lastIndexToTest] with the entire combined itemset list
 			// loop on candidate itemset from initial toExplore list
@@ -219,14 +238,23 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 				{
 					// emit task
 					nbTasks++;
-					
-					// call on the same node, it works because no class members are used except atomics
 
 					// !!! utilisation d'un "fichier mappé" pour écrire / lire les liste d'itemset dans un fichier (mapped file)
 					//std::file_mapping
+					// write itemset into file
+					//std::string file = std::to_string(nbTasks);
+					//file += ".bin";
+					//{
+					//	std::cout << "writing into " << file << std::endl;
+					//	std::ofstream output(file, std::ios::binary);
+					//	for_each(newToTraverse.begin(), newToTraverse.end(), [&output](auto itemset) {
+					//		itemset->writeToBinaryFile(output);
+					//	});
+					//	newToTraverse.clear();
+					//}
 
+					unsigned int taskId = nbTasks;
 					auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(newToTraverse));
-					//tasks_to_proceed.emplace_back(std::move(subtask));
 
 					// ## SPAWN TASK ##
 					{
@@ -256,21 +284,6 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 
 			toExplore.clear();
 
-			// ## SPAWN TASK ##
-			/*while (!tasks_to_proceed.empty())
-			{
-				auto task = std::move(tasks_to_proceed.front());
-				tasks_to_proceed.pop_front();
-
-				const std::lock_guard<std::mutex> lock(task_guard);
-				task_queue.emplace_back(std::move(task));
-				++pending_task_count;
-
-				task_signal.notify_one(); // be sure at least one unit is awaken
-
-				// modify delay from 1 to 100 to see idle behaviour
-				std::this_thread::sleep_for(std::chrono::milliseconds(1));
-			}*/
 		}
 	}
 
@@ -289,6 +302,18 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>&& toTraverse)
 {
 	// ## START system ##
+	//std::string file = std::to_string(nbTasks);
+	//file += ".bin";
+	//{
+	//	std::cout << "writing into " << file << std::endl;
+	//	std::ofstream output(file, std::ios::out | std::ios::binary);
+	//	for_each(toTraverse.begin(), toTraverse.end(), [&output](auto itemset) {
+	//		itemset->writeToBinaryFile(output);
+	//		output << ";";
+	//		});
+	//	output.close();
+	//	toTraverse.clear();
+	//}
 
 	// emit initial task
 	auto task = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(toTraverse));
@@ -317,9 +342,9 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals(std::
 					auto task = std::move(task_queue.front());
 					task_queue.pop_front();
 
-					// notifie qu'une tâche a été dépilé --> on peut en rajouter une
-					// analyser la taille de la task_queue, si < seuil alors memory_task.notify_one()
-					// utiliser un compteur d'"impacts de tâche" qui compte la mémoire de cq tâche en fonction du nombre d'itemset
+					// !!! notifie qu'une tâche a été dépilé --> on peut en rajouter une
+					// !!! analyser la taille de la task_queue, si < seuil alors memory_task.notify_one()
+					// !!! utiliser un compteur d'"impacts de tâche" qui compte la mémoire de cq tâche en fonction du nombre d'itemset
 
 					lock.unlock(); // unlock while processing task
 					{

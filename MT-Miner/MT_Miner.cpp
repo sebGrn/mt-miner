@@ -20,7 +20,7 @@ void MT_Miner::createBinaryRepresentation(const HyperGraph& hypergraph)
 
 	// build binary representation from formal context
 	BinaryRepresentation::buildFromFormalContext(formalContext);
-	//BinaryRepresentation<bitset_type>::serialize("binary_rep.csv");
+	BinaryRepresentation::serialize("binary_rep.csv");
 
 	if (this->useCloneOptimization)
 	{

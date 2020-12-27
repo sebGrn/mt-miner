@@ -9,7 +9,7 @@ namespace MTMinerUnitTests_test
 	{
 	public:
 		
-		TEST_METHOD(TestingDisjonctifSupport)
+		/*TEST_METHOD(TestingDisjonctifSupport)
 		{
 			HyperGraph hypergraph;
 			bool parserResult = hypergraph.load("../../data/test.txt");
@@ -49,7 +49,7 @@ namespace MTMinerUnitTests_test
 			item4->addItem(BinaryRepresentation::getItemFromKey(4));
 			disjonctifSupport = item4->getDisjunctifSupport();
 			Assert::AreEqual(4, disjonctifSupport);
-		}
+		}*/
 
 		TEST_METHOD(TestingMinimalTransversalsSize)
 		{

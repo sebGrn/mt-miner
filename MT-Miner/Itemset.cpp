@@ -375,6 +375,23 @@ std::string Itemset::toString() const
 	return res;
 }
 
+void Itemset::writeToBinaryFile(std::ofstream& output)
+{
+	//std::cout << "writing into " << this->toString() << std::endl;
+	for_each(this->itemset.begin(), this->itemset.end(), [&output] (Item* item) {
+		//std::string tmp = item->staticBitset->to_string();
+		output << item->staticBitset->to_string() << ",";
+	});
+}
+
+void Itemset::readFromBinaryFile(std::ifstream& input)
+{
+	unsigned long n;
+	input.read(reinterpret_cast<char*>(&n), sizeof(n));
+	StaticBitset bitset = n;
+	int k = 0;
+}
+
 //// sort each element of minimalTransversals
 //static std::vector<Itemset> sortVectorOfItemset(const std::vector<Itemset>& strVector)
 //{

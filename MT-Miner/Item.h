@@ -13,7 +13,7 @@
 // 131072	// dualmatching34 --> OK, 444 sec
 // 262144	// dualmatching36 --> PAS OK, 5 min, 47Go memory
 // 524288	// dualmatching38
-#define BITSET_SIZE 524288
+#define BITSET_SIZE 10
 typedef std::bitset<BITSET_SIZE> StaticBitset;
 
 class Item
@@ -22,6 +22,7 @@ class Item
 	friend class Itemset;
 
 private:
+public:
 	unsigned int attributeIndex;
 	std::unique_ptr<StaticBitset> staticBitset;
 	

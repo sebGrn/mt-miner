@@ -103,7 +103,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;$(SolutionDir)MT-Miner\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Itemset.obj;BinaryRepresentation.obj;TreeNode.obj;MT_Miner.obj;HypergraphParser.obj;Logger.obj</AdditionalDependencies>
+      <AdditionalDependencies>Itemset.obj;BinaryRepresentation.obj;TreeNode.obj;MT_Miner.obj;Logger.obj</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

@@ -11,9 +11,9 @@
 class Itemset
 {
 private:
+public:
 	std::vector<Item*> itemset;
-	//std::vector<std::shared_ptr<Item>> itemset;
-
+	
 	// true if bitset_count & or value has to be computed
 	bool dirty; 
 	// stored OR value of all bitset from the item set
@@ -65,6 +65,9 @@ public:
 	bool computeIsEssential();
 	bool containsAClone() const;
 	std::string toString() const;
+
+	void writeToBinaryFile(std::ofstream& output);
+	void readFromBinaryFile(std::ifstream& output);
 
 	bool operator==(const Itemset& other);
 	
