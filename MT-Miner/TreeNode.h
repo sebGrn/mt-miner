@@ -30,8 +30,10 @@ private:
 	static std::mutex task_guard;
 	static std::condition_variable task_signal;
 
+	//static std::condition_variable_any memory_signal;
+
 	// egal à la taille des tâches arrêtées
-	static int pending_task_count;
+	static std::atomic_uint pending_task_count;
 	
 	static std::shared_ptr<BinaryRepresentation> binaryRepresentation;
 
@@ -51,6 +53,7 @@ private:
 	/// compute maxClique list, toExplore list and mt list
 	/// update graph_mt with new minimal transversal itemset
 	void updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&& toTraverse, std::deque<std::shared_ptr<Itemset>>&& maxClique, std::deque< std::shared_ptr<Itemset>>&& toExplore);
+	void createNewProcess(std::vector<std::shared_ptr<Itemset>>&& toTraverse);
 
 	void computeMinimalTransversals_task(std::vector<std::shared_ptr<Itemset>>&& toTraverse);
 	

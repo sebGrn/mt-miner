@@ -11,7 +11,8 @@ std::mutex TreeNode::output_guard;
 std::deque<std::future<void>> TreeNode::task_queue;
 std::mutex TreeNode::task_guard;
 std::condition_variable TreeNode::task_signal;
-int TreeNode::pending_task_count(0);
+//std::condition_variable_any TreeNode::memory_signal;
+std::atomic_uint TreeNode::pending_task_count(0);
 std::shared_ptr<BinaryRepresentation> TreeNode::binaryRepresentation = std::make_shared<BinaryRepresentation>();
 
 TreeNode::TreeNode(bool useCloneOptimization)
@@ -84,6 +85,8 @@ void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&&
 			{
 				const std::lock_guard<std::mutex> minimalTransverse_guard(task_guard);
 				this->minimalTransverse.push_back(crtItemset);
+				//std::cout << "MT added, awaken one thread" << std::endl;
+				//memory_signal.notify_one();
 			}
 
 			// update info
@@ -130,6 +133,71 @@ void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&&
 	});
 }
 
+void TreeNode::createNewProcess(std::vector<std::shared_ptr<Itemset>>&& toTraverse)
+{
+	assert(!toTraverse.empty());
+	{
+		// emit task
+		nbTasks++;
+
+		// !!! utilisation d'un "fichier mappé" pour écrire / lire les liste d'itemset dans un fichier (mapped file)
+		//std::file_mapping
+		// write itemset into file
+		//std::string file = std::to_string(nbTasks);
+		//file += ".bin";
+		//{
+		//	std::cout << "writing into " << file << std::endl;
+		//	std::ofstream output(file, std::ios::binary);
+		//	for_each(newToTraverse.begin(), newToTraverse.end(), [&output](auto itemset) {
+		//		itemset->writeToBinaryFile(output);
+		//	});
+		//	newToTraverse.clear();
+		//}
+
+		unsigned int taskId = nbTasks;
+		auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(toTraverse));
+
+
+		// ## SPAWN TASK ##
+		{
+			// !!! ne pas ajouter la tâche dans le tableau systématiquement
+			// !!! donner une taille max à task_queue avec un atomic
+			// !!! définir un ID pour cq tâche, pour faire en sorte qu'une tâche parente ne soit pas bloquée par ses tâches filles
+			// !!! ajouter memory_signal de type condition_variable_any
+			// !!! utiliser http://www.cplusplus.com/reference/condition_variable/condition_variable_any/wait/
+			// !!! memory_signal.wait(lock, fct)
+			// !!! utiliser nbTasks pour tester le nb de tâches pour savoir si on en ajoute
+			// !!! laisser toujours une tâche en cours, si la tâche est une feuille de l'arbre, on la bloque pas, on bloque ses frères
+
+			std::unique_lock<std::mutex> lock(task_guard);
+			//if (i != 0 && pending_task_count > 2)
+			//{
+			//	std::cout << "lock this thread for task " << taskId << ", dont add the task" << std::endl;
+			//	memory_signal.wait(lock);
+			//}
+
+			//std::cout << pending_task_count << std::endl;
+			//std::cout << "lock this thread for task " << taskId << " ? " << std::endl;
+			//memory_signal.wait(lock, [] {	return (pending_task_count < 1); });
+
+			//std::cout << "add this task for another thread " << taskId << ", add the task" << std::endl;
+			task_queue.emplace_back(std::move(subtask));
+			++pending_task_count;
+			lock.unlock();
+		}
+
+		// be sure at least one unit is awaken
+		task_signal.notify_one();
+
+		// modify delay from 1 to 100 to see idle behaviour
+		//std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+		// new list has been managed by the thread, clear it
+		//for (auto it = newToTraverse.begin(); it != newToTraverse.end(); it++) { it->reset(); }
+		//newToTraverse.clear();
+	}
+}
+
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
 void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Itemset>>&& toTraverse)
@@ -162,7 +230,13 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 	//}
 
 	// test trivial case
-	if (!toTraverse.empty())
+	if (toTraverse.empty())
+	{
+		//const std::lock_guard<std::mutex> lock(task_guard);
+		//std::cout << "toTraverse is empty, awaken one thread" << std::endl;
+		//memory_signal.notify_one();
+	}
+	else
 	{
 		// contains list of itemsets that will be combined to the candidates, the largest space in which is not possible to find minimal transversals
 		std::deque<std::shared_ptr<Itemset>> maxClique;
@@ -174,6 +248,14 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 		
 		// push elements from toTraverse into maxClique, toExplore or minimal transverse
 		this->updateListsFromToTraverse(std::move(toTraverse), std::move(maxClique), std::move(toExplore));
+
+
+		// task is terminated
+		// combine element and go for next task 
+		//if(pending_task_count > 0)
+		//	--pending_task_count; 
+		//memory_signal.notify_one();
+		
 
 		// !!! virer maxClique et toExplore
 		// !!! garder toTraverse et le trier
@@ -233,67 +315,30 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 				// we can free toCombined
 				toCombinedLeft.reset();
 
+				// be sure at least one unit is awaken
+				task_signal.notify_one();
+
+				// modify delay from 1 to 100 to see idle behaviour
+				//std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
 				// call process in the loop
 				if (!newToTraverse.empty())
 				{
-					// emit task
-					nbTasks++;
-
-					// !!! utilisation d'un "fichier mappé" pour écrire / lire les liste d'itemset dans un fichier (mapped file)
-					//std::file_mapping
-					// write itemset into file
-					//std::string file = std::to_string(nbTasks);
-					//file += ".bin";
-					//{
-					//	std::cout << "writing into " << file << std::endl;
-					//	std::ofstream output(file, std::ios::binary);
-					//	for_each(newToTraverse.begin(), newToTraverse.end(), [&output](auto itemset) {
-					//		itemset->writeToBinaryFile(output);
-					//	});
-					//	newToTraverse.clear();
-					//}
-
-					unsigned int taskId = nbTasks;
-					auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(newToTraverse));
-
-					// ## SPAWN TASK ##
-					{
-						// !!! ne pas ajouter la tâche dans le tableau systématiquement
-						// !!! donner une taille max à task_queue avec un atomic
-						// !!! définir un ID pour cq tâche, pour faire en sorte qu'une tâche parente ne soit pas bloquée par ses tâches filles
-						// !!! ajouter memory_signal de type condition_variable_any
-						// !!! utiliser http://www.cplusplus.com/reference/condition_variable/condition_variable_any/wait/
-						// !!! memory_signal.wait(lock, fct)
-						// !!! utiliser nbTasks pour tester le nb de tâches pour savoir si on en ajoute 
-						
-						const std::lock_guard<std::mutex> lock(task_guard);
-						task_queue.emplace_back(std::move(subtask));
-						++pending_task_count;						
-					}
-					// be sure at least one unit is awaken
-					task_signal.notify_one(); 
-
-					// modify delay from 1 to 100 to see idle behaviour
-					//std::this_thread::sleep_for(std::chrono::milliseconds(1));
-
-					// new list has been managed by the thread, clear it
-					//for (auto it = newToTraverse.begin(); it != newToTraverse.end(); it++) { it->reset(); }
-					//newToTraverse.clear();
+					createNewProcess(std::move(newToTraverse));
 				}
 			}
-
 			toExplore.clear();
-
 		}
 	}
 
 	// terminate task
-	const std::lock_guard<std::mutex> lock(task_guard);
+	//const std::lock_guard<std::mutex> lock(task_guard);
 	if (!--pending_task_count)
 	{
 		// ## EMIT SHUTDOWN SIGNAL ##
 		// awake all idle units for auto-shutdown
 		task_signal.notify_all();
+		//memory_signal.notify_one();
 	}
 	// ## EMIT COMPLETE TASK ##
 
@@ -342,7 +387,7 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals(std::
 					auto task = std::move(task_queue.front());
 					task_queue.pop_front();
 
-					// !!! notifie qu'une tâche a été dépilé --> on peut en rajouter une
+					// !!! notifie qu'une tâche a été dépilée --> on peut en rajouter une
 					// !!! analyser la taille de la task_queue, si < seuil alors memory_task.notify_one()
 					// !!! utiliser un compteur d'"impacts de tâche" qui compte la mémoire de cq tâche en fonction du nombre d'itemset
 
@@ -352,6 +397,8 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals(std::
 						task.wait();
 					}
 					lock.lock(); // reacquire lock
+				
+					//memory_signal.notify_one();
 				}
 				else if (!pending_task_count)
 					break;
