@@ -26,21 +26,30 @@ private:
 
 	// synchro stuff
 	// https://www.youtube.com/watch?v=2Xad9bCYbJE&list=PL1835A90FC78FF8BE&index=6
+	// task queue, contains all task to be processed by threads
 	static std::deque<std::future<void>> task_queue;
+
+	// used to lock tasks execution from task queue
 	static std::mutex task_guard;
+	// used to pause / unpause thread before tasks in process units
 	static std::condition_variable task_signal;
 
+	// used to lock tasks before being put in the task queue (in order to not have a huge task queue)
 	static std::mutex memory_guard;
-	//static std::condition_variable_any memory_signal;
+	// used to pause / unpause thread
 	static std::condition_variable memory_signal;
+
+	// blocked tasks, waiting to bepending_memory_task_count unlock, memory is locked
 	static std::atomic_uint pending_memory_task_count;
 
-	// egal à la taille des tâches arrêtées
-	static std::atomic_uint previous_pending_task_count;
+	// stored tasks in the list, waiting to be managed, memory consuming
 	static std::atomic_uint pending_task_count;
+	// threshold who can vary
 	static std::atomic_uint max_pending_task_count;
+	// if true, a thread is checking if all tasks are pending to adapt inc/dec max_pending_task_count
 	static std::atomic_bool pending_task_checker;
 	
+	// binary representation from the transactional base
 	static std::shared_ptr<BinaryRepresentation> binaryRepresentation;
 
 	/// true if we want to use clone optimization
@@ -60,7 +69,7 @@ private:
 	/// update graph_mt with new minimal transversal itemset
 	void updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&& toTraverse, std::deque<std::shared_ptr<Itemset>>&& maxClique, std::deque< std::shared_ptr<Itemset>>&& toExplore);
 	
-	void addTasksForNextCandidates(std::vector<std::shared_ptr<Itemset>>&& toTraverse);
+	void addTaskIntoQueue(std::vector<std::shared_ptr<Itemset>>&& toTraverse);
 
 	void computeMinimalTransversals_task(std::vector<std::shared_ptr<Itemset>>&& toTraverse);
 	
