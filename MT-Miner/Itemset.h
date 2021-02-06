@@ -47,7 +47,7 @@ public:
 	
 private:
 #ifndef _OLD_ISESSENTIAL
-	void updateIsEssential(const std::shared_ptr<Item>& item);
+	void updateIsEssential(Item* item);
 #endif
 
 public:

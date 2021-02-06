@@ -269,7 +269,7 @@ bool Itemset::computeIsEssential()
 #endif
 
 #ifndef _OLD_ISESSENTIAL
-void Itemset::updateIsEssential(const std::shared_ptr<Item>& item)
+void Itemset::updateIsEssential(Item* item)
 {
 	(*this->temporaryBitset) = (*this->isEssentialADNBitset) | (*this->markedNonEssentialBitsetIndex);
 
