@@ -245,7 +245,7 @@ bool Itemset::computeIsEssential()
 				for (unsigned int k = 0; k < objectCount; k++)
 				{
 					// compare bit
-					if (!SumOfN_1Items.test(k) && bitset.test(k))
+					if (bitset.test(k) && !SumOfN_1Items.test(k))
 					{
 						// this bitset is essential, check with next bitset
 						isEssential = true;

@@ -13,9 +13,15 @@ std::mutex TreeNode::task_guard;
 std::condition_variable TreeNode::task_signal;
 
 std::mutex TreeNode::memory_guard;
-std::condition_variable_any TreeNode::memory_signal;
+//std::condition_variable_any TreeNode::memory_signal;
 
+std::condition_variable TreeNode::memory_signal;
+std::atomic_uint TreeNode::pending_memory_task_count(0);
+
+std::atomic_uint TreeNode::previous_pending_task_count(0);
 std::atomic_uint TreeNode::pending_task_count(0);
+std::atomic_uint TreeNode::max_pending_task_count(1000);
+std::atomic_bool TreeNode::pending_task_checker(true);
 
 std::shared_ptr<BinaryRepresentation> TreeNode::binaryRepresentation = std::make_shared<BinaryRepresentation>();
 
@@ -66,7 +72,7 @@ void TreeNode::recurseOnClonedItemset(std::shared_ptr<Itemset> itemset, unsigned
 	}
 }
 
-void TreeNode::updateListsFromToTraverse(bool& lock_memory_signal, std::vector<std::shared_ptr<Itemset>>&& toTraverse, std::deque<std::shared_ptr<Itemset>>&& maxClique, std::deque<std::shared_ptr<Itemset>>&& toExplore)
+void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&& toTraverse, std::deque<std::shared_ptr<Itemset>>&& maxClique, std::deque<std::shared_ptr<Itemset>>&& toExplore)
 {
 	assert(maxClique.empty());
 	assert(toExplore.empty());
@@ -87,11 +93,14 @@ void TreeNode::updateListsFromToTraverse(bool& lock_memory_signal, std::vector<s
 		{
 			// lock thread and add minimal transverse
 			{
-				const std::lock_guard<std::mutex> minimalTransverse_guard(task_guard);
+				const std::lock_guard<std::mutex> guard(task_guard);
 				this->minimalTransverse.push_back(crtItemset);
-				lock_memory_signal = false;
-				std::cout << "MT added " << crtItemset->toString() << std::endl;
 			}
+			//{
+			//	const std::lock_guard<std::mutex> guard(memory_guard);
+			//	lock_memory_signal = false;
+			//	std::cout << "MT added " << crtItemset->toString() << std::endl;
+			//}
 
 			// update info
 			nbTotalMt++;
@@ -105,7 +114,7 @@ void TreeNode::updateListsFromToTraverse(bool& lock_memory_signal, std::vector<s
 					this->recurseOnClonedItemset(crtItemset, i);
 			}
 
-			memory_signal.notify_one();
+			//memory_signal.notify_one();
 		}
 		else
 		{
@@ -232,13 +241,19 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 	if (toTraverse.empty())
 	{
 		const std::lock_guard<std::mutex> lock(task_guard);
-		std::cout << "toTraverse is empty, awaken one thread" << std::endl;
-		memory_signal.notify_one();
+		//std::cout << "toExplore is empty, unlock a task, pending memory task : " << pending_memory_task_count << std::endl;
+		if (pending_memory_task_count)
+		{
+			memory_signal.notify_one();
+			pending_memory_task_count--;
+		}
+		else
+		{
+			memory_signal.notify_all();
+		}
 	}
 	else
 	{
-		bool lock_memory_signal = true;
-
 		// contains list of itemsets that will be combined to the candidates, the largest space in which is not possible to find minimal transversals
 		std::deque<std::shared_ptr<Itemset>> maxClique;
 		// contains list of itemsets that are candidates
@@ -248,7 +263,7 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 		// !!! to reserve toExplore and fit/pack
 		
 		// push elements from toTraverse into maxClique, toExplore or minimal transverse
-		this->updateListsFromToTraverse(lock_memory_signal, std::move(toTraverse), std::move(maxClique), std::move(toExplore));
+		this->updateListsFromToTraverse(std::move(toTraverse), std::move(maxClique), std::move(toExplore));
 
 		// task is terminated
 		// combine element and go for next task 
@@ -266,8 +281,16 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 		if (toExplore.empty())
 		{
 			const std::lock_guard<std::mutex> lock(task_guard);
-			std::cout << "toExplore is empty, awaken one thread" << std::endl;
-			memory_signal.notify_one();
+			//std::cout << "toExplore is empty, unlock a task, pending memory task : " << pending_memory_task_count << std::endl;
+			if (pending_memory_task_count)
+			{
+				memory_signal.notify_one();
+				pending_memory_task_count--;				
+			}
+			else
+			{
+				memory_signal.notify_all();
+			}
 		}
 		else
 		{
@@ -326,14 +349,24 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 				if (!newToTraverse.empty())
 				{
 					std::unique_lock<std::mutex> lock(memory_guard);
-					if (i != 0)
+					//std::cout << "\ntask " << nbTasks << ", i " << i << std::endl;
+					//std::cout << "stored tasks in the list, waiting to be managed : " << pending_task_count << " - blocked tasks, waiting to be unlock : " << pending_memory_task_count << std::endl;
+					// pending_task_count : stored tasks in the list, waiting to be managed, memory consuming
+					// pending_memory_task_count : blocked tasks, waiting to be unlock, memory is locked
+					//if (pending_task_count > max_pending_task_count && pending_memory_task_count < 0)
+					if (pending_task_count > max_pending_task_count)
 					{
-						if (lock_memory_signal)
-						{
-							std::cout << "lock this thread for task " << nbTasks << ", dont add the task " << lock_memory_signal << std::endl;
-							memory_signal.wait(lock , [lock_memory_signal] {	return lock_memory_signal; });
-						}
+						/// ! ajout d'un thread qui vérifie que pending_task_count n'est pas toujours identique
+
+						pending_memory_task_count++;
+						//std::cout << "### lock task" << std::endl;
+						//memory_signal.wait(lock , [] {	return !lock_memory_signal; });
+						memory_signal.wait(lock);
+						//std::cout << "task unlocked" << std::endl;						
 					}
+
+					//std::cout << "process task" << std::endl;
+					lock.unlock();
 
 					addTasksForNextCandidates(std::move(newToTraverse));
 				}
@@ -355,6 +388,10 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 
 }
 
+void TreeNode::launchPendingTasksChecking()
+{
+}
+
 std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>&& toTraverse)
 {
 	// ## START system ##
@@ -370,6 +407,51 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals(std::
 	//	output.close();
 	//	toTraverse.clear();
 	//}
+	
+	// lambda function called during parsing every 30 seconds
+	auto ftr = std::async(std::launch::async, []() {
+
+		const int msToWait = 5;
+		auto beginTime = std::chrono::system_clock::now();
+		while (pending_task_checker)
+		{
+			//auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
+			//if (duration > msToWait)
+			{
+				//std::unique_lock<std::mutex> lock(memory_guard);
+				//std::cout << pending_task_count << " tasks stored in the list, waiting to be managed - " 
+				//	      << pending_memory_task_count << " blocked tasks, waiting to be unlock - "
+				//		  << max_pending_task_count << " max pending tasks" << std::endl;
+				// pending_task_count : stored tasks in the list, waiting to be managed, memory consuming
+				// pending_memory_task_count : blocked tasks, waiting to be unlock, memory is locked				
+				
+				if (pending_task_count >= max_pending_task_count)
+				{
+					max_pending_task_count++;
+
+					memory_signal.notify_one();
+					if(pending_memory_task_count)
+						pending_memory_task_count--;
+				}
+				else 
+				{
+					if (max_pending_task_count >= 1000)
+					{
+						max_pending_task_count--;
+					}
+				}
+
+				//unsigned int crtPendingCount = pending_task_count;
+				//previous_pending_task_count = crtPendingCount;
+
+				//std::cout << "process task" << std::endl;
+				//lock.unlock();
+				//beginTime = std::chrono::system_clock::now();
+			}
+		}
+	});
+
+
 
 	// emit initial task
 	auto task = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(toTraverse));
@@ -430,6 +512,9 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals(std::
 	{
 		unit.wait();
 	}
+
+	this->pending_task_checker = false;
+	ftr.get();	
 
 	return this->minimalTransverse;
 }
