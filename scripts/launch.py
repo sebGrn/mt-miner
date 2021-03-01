@@ -1,68 +1,91 @@
 import subprocess
 import sys
 import os
+import pandas as pd
+from numpy import nan as Nan
+import time
 from time import perf_counter
 
 import compil as cp
 
-if(len(sys.argv) != 3):
-    print("usage :  python3 ./launch.py \"../data/\" log.txt")
-else:
-    dataset_folder = str(sys.argv[1])
-    log_file = str(sys.argv[2])
-    cpp_log_file = "tmp_log.txt"
-
-    #if os.path.exists(log_file):
-    #    os.remove(log_file)
-
+def compare_shd_miner(dataset_folder, cpp_log_file, shd_log_file):
     onlyfiles = [f for f in os.listdir(dataset_folder) if os.path.isfile(os.path.join(dataset_folder, f))]
     if(len(onlyfiles) == 0):
         print("no dataset in ", dataset_folder)
     else:        
         current_path = os.getcwd()
-        log_file = os.path.join(current_path, log_file)
-        cpp_log_file = os.path.join(current_path, cpp_log_file)
         
-        with open(log_file, "w") as writer:
+        cpp_log_file = os.path.join(current_path, cpp_log_file)
+        if os.path.isfile(cpp_log_file):
+            os.remove(cpp_log_file)
+                
+        shd_log_file = os.path.join(current_path, shd_log_file)
+        if os.path.isfile(shd_log_file):
+            os.remove(shd_log_file)
+        
+        for file in onlyfiles:
+            if file.lower().endswith(('.txt', '.dat')):
+                fullpath = os.path.join(dataset_folder, file)
 
-            for file in onlyfiles:
-                if file.lower().endswith(('.txt', '.dat')):
-                    fullpath = os.path.join(dataset_folder, file)
+                print("processing data file:", fullpath)
+                
+                print("Miner execution...")
+                os.chdir("../MT-Miner")
+                start = perf_counter()            
+                cp.compil_and_run_miner(fullpath, cpp_log_file)
+                #time.sleep(0.25)
+                end = perf_counter()
+                print("Elapsed time for compilation and Miner execution: ", end - start, " sec")
+                print("\n")
 
-                    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-                    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
-                    print("processing data file:", fullpath)
-                    writer.write("--------------------------------------------------------------------------------\n")
-                    writer.write("--------------------------------------------------------------------------------\n\n")
-                    writer.write("processing data file:" + fullpath + "\n")
-                    writer.write("\nMiner execution...\n")
+        os.chdir(current_path)
+
+        df_cpp = pd.read_csv(cpp_log_file, delimiter=';', header=None)
+        df_cpp.columns = ['filename', 'sparcity', 'cloneCount', 'itemCount', 'objectCount', 'minerMinimalTrasverseCount', 'minimalSizeOfTrasverse', 'minerTime']
+        df_cpp.index = df_cpp["filename"]
+        df_cpp.index.name = "filename"
+        #df = df.drop(["filename"], axis=1)
+        df_cpp.to_csv(cpp_log_file, sep=';')
+
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+        
+        data_shd = []  
+        for file in onlyfiles:
+            if file.lower().endswith(('.txt', '.dat')):
+                fullpath = os.path.join(dataset_folder, file)
+
+                print("processing data file:", fullpath)
+
+                print("SHD execution...")                    
+                os.chdir("../shd")
+                start = perf_counter()
+                res = subprocess.run(["./shd", "0", fullpath], stdout=subprocess.PIPE)
+                res = str(res).split()[4]
+                res = res[res.find('\'')+1:res.find('\\')]
+                #time.sleep(0.5)
+                end = perf_counter()
+                total = end - start
+                print("Elapsed time for SHD execution:", total, " sec")
+                print("\n")
                     
-                    print("Miner execution...")
-                    os.chdir("../MT-Miner")
-                    start = perf_counter()            
-                    cp.compil_and_run_miner(fullpath, cpp_log_file)
-                    end = perf_counter()
-                    #print("Elapsed time for compilation and Miner execution:", end - start, "sec")
-                    print("\n")
-                    
-                    os.chdir(current_path)
+                # append shd value
+                data_shd.append([fullpath, int(res), total])        
+        
+        os.chdir(current_path)
 
-                    # open log from cpp and append to python log file
-                    f = open(cpp_log_file)
-                    writer.write(f.read())
+        df_shd = pd.DataFrame(data_shd, columns=['filename', 'shdMinimalTrasverseCount', 'shdTime'])
+        df_shd.index = df_shd["filename"]
+        df_shd.index.name = "filename"
+        df_shd.to_csv(shd_log_file, sep=';')
+                
 
-                    print("SHD execution...")
-                    writer.write("\nSHD execution...\n")
-                    os.chdir("../shd")
-                    start = perf_counter()
-                    subprocess.run(["./shd", "0", fullpath])
-                    end = perf_counter()
-                    total = end - start
-                    writer.write("Elapsed time for SHD:" + str(total) + "sec\n") 
-                    print("Elapsed time for SHD:", total, "sec") 
-                    print("\n")
-                    writer.write("\n")
-                    
-                    os.chdir(current_path)
+if(len(sys.argv) != 2):
+    print("usage :  python3 ./launch.py \"../data/\" ")
+else:
+    dataset_folder = str(sys.argv[1])
 
-                    
+    cpp_log_file = "cpp_log.csv"
+    shd_log_file = "shd_log.csv"
+
+    compare_shd_miner(dataset_folder, cpp_log_file, shd_log_file)

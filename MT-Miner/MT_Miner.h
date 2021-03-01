@@ -26,13 +26,14 @@ private:
 	static std::atomic_bool stop;
 	///
 	bool useCloneOptimization;
+	bool useMinimalSizeOnly;
 	
 private:
 	/// return the minimal transversals miner
 	void computeInitalToTraverseList(std::vector<std::shared_ptr<Itemset>>& toTraverse) const;
 
 public:
-	MT_Miner(bool useCloneOptimization = true);
+	MT_Miner(bool useCloneOptimization = true, bool useMinimalSizeOnly = false);
 	~MT_Miner();
 
 	/// this function build a format context from the hypergraph, then build the binary representation

@@ -42,12 +42,12 @@ private:
 	// blocked tasks, waiting to bepending_memory_task_count unlock, memory is locked
 	static std::atomic_uint pending_memory_task_count;
 
-	// stored tasks in the list, waiting to be managed, memory consuming
-	static std::atomic_uint pending_task_count;
 	// threshold who can vary
 	static std::atomic_uint max_pending_task_count;
 	// if true, a thread is checking if all tasks are pending to adapt inc/dec max_pending_task_count
 	static std::atomic_bool pending_task_checker;
+
+	static std::atomic_bool only_minimal;
 	
 	// binary representation from the transactional base
 	static std::shared_ptr<BinaryRepresentation> binaryRepresentation;
@@ -60,8 +60,11 @@ private:
 	std::vector<std::shared_ptr<Itemset>> minimalTransverse;
 
 public:
-	static std::atomic_ullong nbTasks;
+	// stored tasks in the list, waiting to be managed, memory consuming
+	static std::atomic_uint pending_task_count;
+	//
 	static std::atomic_ullong nbTotalMt;
+	// minimal size of the minimal transverse
 	static std::atomic_ullong minimalMt;
 
 private: 
@@ -78,7 +81,7 @@ private:
 	void launchPendingTasksChecking();
 
 public:
-	TreeNode(bool useCloneOptimization);
+	TreeNode(bool useCloneOptimization, bool only_minimal);
 	~TreeNode();
 
 	std::vector<std::shared_ptr<Itemset>> computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>&& toTraverse);

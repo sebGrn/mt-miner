@@ -132,12 +132,14 @@ public:
 		this->setOneBasedIndex(oneIndexedBase);
 
 		if (!oneIndexedBase)
-			Logger::log("hypergraph has a zero based index mode\n");
+			std::cout << RED << "hypergraph has a zero based index mode\n" << RESET;
 
 		inputStream.close();
 
 		int64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
-		Logger::log("parsing hypergraph done in ", duration, " ms, found ", maxItemCount, " items (lines) and ", objectCount, " objects (columns)\n");
+		std::cout << GREEN << "parsing hypergraph done in " << duration << " ms, found " << maxItemCount << " items (lines) and " << objectCount << " objects (columns)\n" << RESET;
+		Logger::dataset.itemCount = maxItemCount;
+		Logger::dataset.objectCount = objectCount;
 
 		return true;
 	};

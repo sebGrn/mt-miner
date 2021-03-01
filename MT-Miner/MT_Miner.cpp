@@ -3,9 +3,10 @@
 
 std::atomic_bool MT_Miner::stop(false);
 
-MT_Miner::MT_Miner(bool useCloneOptimization)
+MT_Miner::MT_Miner(bool useCloneOptimization, bool useMinimalSizeOnly)
 {
-	this->useCloneOptimization = useCloneOptimization;		
+	this->useCloneOptimization = useCloneOptimization;
+	this->useMinimalSizeOnly = useMinimalSizeOnly;
 }
 
 MT_Miner::~MT_Miner()
@@ -20,7 +21,7 @@ void MT_Miner::createBinaryRepresentation(const HyperGraph& hypergraph)
 
 	// build binary representation from formal context
 	BinaryRepresentation::buildFromFormalContext(formalContext);
-	BinaryRepresentation::serialize("binary_rep.csv");
+	//BinaryRepresentation::serialize("binary_rep.csv");
 
 	if (this->useCloneOptimization)
 	{
@@ -39,7 +40,8 @@ void MT_Miner::createBinaryRepresentation(const HyperGraph& hypergraph)
 		// if the cloned bitset index is into a toExplore list, dont compute the mt for the clone but use those from the original
 		//Logger::log("computing clones\n");
 		unsigned int cloneListSize = BinaryRepresentation::buildCloneList();
-		Logger::log(cloneListSize, " clones found\n");
+		std::cout << cloneListSize << " clones found\n";
+		Logger::dataset.cloneCount = cloneListSize;
 
 		if (cloneListSize == 0)
 			this->useCloneOptimization = false;
@@ -67,14 +69,13 @@ void MT_Miner::computeInitalToTraverseList(std::vector<std::shared_ptr<Itemset>>
 void MT_Miner::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>& mt)
 {
 	auto beginTime = std::chrono::system_clock::now();
-	//SIZE_T used0 = Utils::printUsedMemoryForCrtProcess();
 	
 	// initialise itemset
 	std::vector<std::shared_ptr<Itemset>> toTraverse;
 	computeInitalToTraverseList(toTraverse);
 	
 	// create a graph, then compute minimal transversal from the binary representation
-	TreeNode rootNode(this->useCloneOptimization);
+	TreeNode rootNode(this->useCloneOptimization, this->useMinimalSizeOnly);
 	
 	// lambda function called during parsing every 30 seconds
 	auto ftr = std::async(std::launch::async, [&rootNode]() {
@@ -87,7 +88,7 @@ void MT_Miner::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>&
 			if(duration > secondsToWait * 1000)
 			{
 				std::cout << CYAN << "computing minimal transversals in progress : " << secondsToWait * n << " seconds, "
-					<< rootNode.nbTasks << " tasks created, "
+					<< rootNode.pending_task_count << " pending tasks, "
 					<< rootNode.nbTotalMt << " minimal transverses found, " 
 					<< "minimal size of minimal transverse is " << rootNode.minimalMt
 					<< RESET << std::endl;
@@ -97,7 +98,6 @@ void MT_Miner::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>&
 		}
 	});
 	
-
 	// compute all minimal transversal from the root node
 	mt = rootNode.computeMinimalTransversals(std::move(toTraverse));
 	
@@ -105,35 +105,32 @@ void MT_Miner::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>&
 	this->stop = true;
 	ftr.get();
 
-	std::cout << CYAN << rootNode.nbTasks << " tasks created, "
-		<< rootNode.nbTotalMt << " minimal transverses found, "
-		<< "minimal size of minimal transverse is " << rootNode.minimalMt
-		<< RESET << std::endl;
-
 	// print timer
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
 	auto duration2 = duration / 1000.0;
-	Logger::log("Found ", mt.size(), " minimal transverses in ", duration2, " s\n");
+	Logger::dataset.computeTime = duration2;
+	Logger::dataset.minimalTransverseCount = mt.size();
+	Logger::dataset.minimalSizeOfTransverse = rootNode.minimalMt;
+	std::cout << GREEN << "\nFound " << mt.size() << " minimal transverses in " << duration2 << " s, minimal size is " << rootNode.minimalMt << "\n";
+
+	Logger::log();
 
 	// sort transversals itemset
 	//graph_mt = sortVectorOfItemset(graph_mt);
 
 	// print minimal transversals
-	Logger::log("\nminimal transversals count : ", mt.size(), "\n");
+	std::cout << "\nminimal transversals count : " << mt.size() << "\n";
 	if (mt.size() > 6)
 	{
-		for_each(mt.begin(), mt.begin() + 5, [&](const std::shared_ptr<Itemset> elt) { Logger::log(elt->toString(), "\n"); });
-		Logger::log("...\n");
+		for_each(mt.begin(), mt.begin() + 5, [&](const std::shared_ptr<Itemset> elt) { std::cout << elt->toString(), "\n"; });
+		std::cout << "...\n";
 	}
 	else
-		for_each(mt.begin(), mt.end(), [&](const std::shared_ptr<Itemset> elt) { Logger::log(elt->toString(), "\n"); });
-	
-	//Logger::log(RESET);
+		for_each(mt.begin(), mt.end(), [&](const std::shared_ptr<Itemset> elt) { std::cout << elt->toString() << "\n"; });
 
+	std::cout << RESET;
+	
 	// write tree into js
 	//JsonTree::writeJsonNode(graph_mt);
-
-	//SIZE_T used1 = Utils::printUsedMemoryForCrtProcess();
-	//std::cout << "allocated memory " << used1 - used0 << std::endl;
 }
 

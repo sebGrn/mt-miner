@@ -1,11 +1,12 @@
 #include "TreeNode.h"
-#include "Logger.h"
 
 #define MAX_PENDING_TASKS_START 1000
+#define MAX_MINIMAL_TRAVERSE_SIZE 9999
 
-std::atomic_ullong TreeNode::nbTasks(0);
 std::atomic_ullong TreeNode::nbTotalMt(0);
-std::atomic_ullong TreeNode::minimalMt(9999);
+std::atomic_ullong TreeNode::minimalMt(MAX_MINIMAL_TRAVERSE_SIZE);
+
+std::atomic_bool TreeNode::only_minimal(true);
 
 // to avoid interleaved outputs
 std::mutex TreeNode::output_guard;
@@ -25,9 +26,10 @@ std::atomic_bool TreeNode::pending_task_checker(true);
 
 std::shared_ptr<BinaryRepresentation> TreeNode::binaryRepresentation = std::make_shared<BinaryRepresentation>();
 
-TreeNode::TreeNode(bool useCloneOptimization)
+TreeNode::TreeNode(bool useCloneOptimization, bool only_minimal)
 {
 	this->useCloneOptimization = useCloneOptimization;
+	TreeNode::only_minimal = only_minimal;
 }
 
 TreeNode::~TreeNode()
@@ -92,21 +94,23 @@ void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&&
 		if (disjSup == objectCount)
 		{
 			// lock thread and add minimal transverse
+			if (!only_minimal || minimalMt >= MAX_MINIMAL_TRAVERSE_SIZE || crtItemset->getItemCount() <= minimalMt)
 			{
 				const std::lock_guard<std::mutex> guard(task_guard);
 				this->minimalTransverse.push_back(crtItemset);
-			}
+				//std::cout << "new minimal traverse found " << crtItemset->toString() << std::endl;
 
-			// update info
-			nbTotalMt++;
-			if (crtItemset->getItemCount() < minimalMt)
-				minimalMt = crtItemset->getItemCount();
+				// update info
+				nbTotalMt++;
+				if (crtItemset->getItemCount() < minimalMt)
+					minimalMt = crtItemset->getItemCount();
 
-			// manage clones
-			if (this->useCloneOptimization)
-			{
-				for (unsigned int i = 0, n = crtItemset->getItemCount(); i < n; i++)
-					this->recurseOnClonedItemset(crtItemset, i);
+				// manage clones
+				if (this->useCloneOptimization)
+				{
+					for (unsigned int i = 0, n = crtItemset->getItemCount(); i < n; i++)
+						this->recurseOnClonedItemset(crtItemset, i);
+				}
 			}
 		}
 		else
@@ -121,6 +125,7 @@ void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&&
 				// must be the 1st element with only one element
 				Itemset::copyRightIntoLeft(cumulatedItemset, crtItemset);
 				maxClique.emplace_back(crtItemset);
+				//std::cout << "add item to maxClique list " << crtItemset->toString() << std::endl;
 			}
 			else
 			{
@@ -131,10 +136,12 @@ void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&&
 				{
 					Itemset::combineRightIntoLeft(cumulatedItemset, crtItemset);
 					maxClique.emplace_back(crtItemset);
+					//std::cout << "add item to maxClique list " << crtItemset->toString() << std::endl;
 				}
 				else
 				{
 					toExplore.emplace_back(crtItemset);
+					//std::cout << "add item to toExplore list " << crtItemset->toString() << std::endl;
 				}
 			}
 		}
@@ -144,9 +151,8 @@ void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&&
 void TreeNode::addTaskIntoQueue(std::vector<std::shared_ptr<Itemset>>&& toTraverse)
 {
 	assert(!toTraverse.empty());
-	// emit task
-	nbTasks++;
 
+	// emit task
 	auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(toTraverse));
 
 	// ## SPAWN TASK ##
@@ -157,10 +163,10 @@ void TreeNode::addTaskIntoQueue(std::vector<std::shared_ptr<Itemset>>&& toTraver
 		// !!! ajouter memory_signal de type condition_variable_any
 		// !!! utiliser http://www.cplusplus.com/reference/condition_variable/condition_variable_any/wait/
 		// !!! memory_signal.wait(lock, fct)
-		// !!! utiliser nbTasks pour tester le nb de tâches pour savoir si on en ajoute
 		// !!! laisser toujours une tâche en cours, si la tâche est une feuille de l'arbre, on la bloque pas, on bloque ses frères
 
 		// lock to add task into task_queue
+		//std::cout << "create a new task" << std::endl;
 		std::unique_lock<std::mutex> lock(task_guard);
 		task_queue.emplace_back(std::move(subtask));
 		++pending_task_count;
@@ -179,6 +185,9 @@ void TreeNode::addTaskIntoQueue(std::vector<std::shared_ptr<Itemset>>&& toTraver
 void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Itemset>>&& toTraverse)
 {
 	// ## START TASK ##
+	//std::cout << "\nNew task with itemset list : ";
+	//for_each(toTraverse.begin(), toTraverse.end(), [&](const std::shared_ptr<Itemset> elt) { std::cout << elt->toString(), "\n"; });
+	//std::cout << std::endl;
 
 	// test trivial case
 	if (toTraverse.empty())
@@ -244,6 +253,13 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 			{
 				std::shared_ptr<Itemset> toCombinedLeft = toExplore.front();
 				toExplore.pop_front();
+
+				if (only_minimal && toCombinedLeft->getItemCount() > minimalMt)
+				{
+					// this itemset is bigger than the minimal size of found minimal traverse
+					// we dont need to explore this one
+					break;
+				}
 				
 				if (toCombinedLeft->containsAClone())
 				{
@@ -264,8 +280,10 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 							// combine toCombinedRight into toCombinedLeft
 							std::shared_ptr<Itemset> newItemset = std::make_shared<Itemset>(toCombinedLeft);
 							newItemset->combineItemset(toCombinedRight);
+							//std::cout << "combine item sets " << toCombinedLeft->toString() << " and " << toCombinedRight->toString() << " into " << newItemset->toString() << std::endl;
 							if (newItemset->computeIsEssential())
 							{
+								//std::cout << "this combined itemset is essential, added to new toTraverse list" << std::endl;
 								// this is a candidate for next iteration
 								newToTraverse.push_back(newItemset);
 							}
@@ -284,7 +302,6 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 				if (!newToTraverse.empty())
 				{
 					std::unique_lock<std::mutex> lock(memory_guard);
-					//std::cout << "\ntask " << nbTasks << ", i " << i << std::endl;
 					//std::cout << "stored tasks in the list, waiting to be managed : " << pending_task_count << " - blocked tasks, waiting to be unlock : " << pending_memory_task_count << std::endl;
 					
 					// check if we have too much tasks waiting to be managed by the process units in the task queue

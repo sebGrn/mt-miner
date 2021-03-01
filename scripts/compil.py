@@ -69,7 +69,8 @@ def run_miner(file, transation_count, log_file):
     # output : save results into file
     # use clone : use clone optimisation
     log_file_arg = "--log-file=" + log_file
-    p = subprocess.Popen(["./" + folder_path + "/mt_miner", file, "--verbose=true", "--log=true", log_file_arg, "--output=false", "--use-clone=true"])
+    print(log_file_arg)
+    p = subprocess.Popen(["./" + folder_path + "/mt_miner", file, "--log=true", log_file_arg, "--use-clone=true", "--m=false"])
     p.wait()
 
 

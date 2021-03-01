@@ -25,64 +25,98 @@
 
 class Logger
 {
-	static bool verbose;
-	static bool verboseIntoFile;
 	static std::string filename;
-	static std::ofstream fileStream;
 
 public:
-	static void init(const std::string& _filename, bool _verbose, bool _verboseToFile)
+	struct dataset_row
+	{
+		std::string filename;
+		double computeTime;
+		double sparcity;
+		unsigned int cloneCount;
+		unsigned int itemCount;
+		unsigned int objectCount;
+		unsigned int minimalTransverseCount;
+		unsigned int minimalSizeOfTransverse;
+	};
+	static dataset_row dataset;
+
+public:
+	static void init(const std::string& _filename, bool _verboseToScreen = false)
 	{
 		filename = _filename;
-		verbose = _verbose;
-		verboseIntoFile = _verboseToFile;
-
-		if (verboseIntoFile)
-		{
-			//std::remove(filename.c_str());
-			fileStream = std::ofstream(filename, std::ofstream::out);
-		}
 	}
-		
-	static void setVerbose(bool _verbose)
+
+	static void setFilename(const std::string& filename)
 	{
-		verbose = _verbose;
+		dataset.filename = filename;
 	}
 
-	static void close()
+	/*static void setComputeTime(double time)
 	{
-		if (verboseIntoFile)
-		{
-			fileStream.close();
-		}
+		dataset.computeTime = time;
 	}
 
-	template <typename T>
-	static void log(T t)
+	static void setSparcity(double sparcity)
 	{
-		if (verbose)
-		{
-			std::cout << t;
-		}
-		if (verboseIntoFile)
-		{
-			fileStream << t;
-		}
+		dataset.sparcity = sparcity;
 	}
 
-	// recursive variadic function with beautiful templates
-	template<typename T, typename... Args>
-	static void log(T t, Args... args)
+	static void setCloneCount(double cloneCount)
 	{
-		if (verbose)
-		{
-			std::cout << t;
-		}
-		if (verboseIntoFile)
-		{
-			fileStream << t;
-		}
-
-		log(args...);
+		dataset.cloneCount = cloneCount;
 	}
+
+	static void setItemCount(double itemCount)
+	{
+		dataset.itemCount = itemCount;
+	}
+
+	static void setObjectCount(double objectCount)
+	{
+		dataset.objectCount = objectCount;
+	}*/
+
+	static void log()
+	{
+		std::ofstream fileStream = std::ofstream(filename, std::ofstream::out | std::ofstream::app);
+
+		fileStream << dataset.filename << ";"
+			<< dataset.sparcity << ";"
+			<< dataset.cloneCount << ";"
+			<< dataset.itemCount << ";"
+			<< dataset.objectCount << ";"
+			<< dataset.minimalTransverseCount << ";"
+			<< dataset.minimalSizeOfTransverse << ";"
+			<< dataset.computeTime << std::endl;
+		fileStream.close();
+	}
+
+	//template <typename T>
+	//static void log(T t)
+	//{
+	//	if (verboseToScreen)
+	//	{
+	//		std::cout << t;
+	//	}
+	//	if (verboseIntoFile)
+	//	{
+	//		fileStream << t;
+	//	}
+	//}
+
+	//// recursive variadic function with beautiful templates
+	//template<typename T, typename... Args>
+	//static void log(T t, Args... args)
+	//{
+	//	if (verboseToScreen)
+	//	{
+	//		std::cout << t;
+	//	}
+	//	if (verboseIntoFile)
+	//	{
+	//		fileStream << t;
+	//	}
+	//	log(args...);
+	//}
 };
