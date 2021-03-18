@@ -127,7 +127,10 @@ public:
 				objectCount++;
 			}
 		}
-		this->setItemCount(maxItemCount);
+		if(oneIndexedBase)
+			this->setItemCount(maxItemCount);
+		else
+			this->setItemCount(maxItemCount + 1);
 		this->setObjectCount(objectCount);
 		this->setOneBasedIndex(oneIndexedBase);
 
@@ -137,9 +140,9 @@ public:
 		inputStream.close();
 
 		int64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
-		std::cout << GREEN << "parsing hypergraph done in " << duration << " ms, found " << maxItemCount << " items (lines) and " << objectCount << " objects (columns)\n" << RESET;
-		Logger::dataset.itemCount = maxItemCount;
-		Logger::dataset.objectCount = objectCount;
+		std::cout << GREEN << "parsing hypergraph done in " << duration << " ms, found " << this->getItemCount() << " items (lines) and " << this->getObjectCount() << " objects (columns)\n" << RESET;
+		Logger::dataset.itemCount = this->getItemCount();
+		Logger::dataset.objectCount = this->getObjectCount();
 
 		return true;
 	};

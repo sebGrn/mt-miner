@@ -260,6 +260,8 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 					// we dont need to explore this one
 					break;
 				}
+
+				// if toCombinedLeft->disjonctifSupport == object count) --> add toCombined into minitransverse list				
 				
 				if (toCombinedLeft->containsAClone())
 				{
