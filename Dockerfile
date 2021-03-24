@@ -47,11 +47,17 @@ WORKDIR /
 RUN mkdir app/data/
 
 WORKDIR /app/scripts
-CMD ["python3", "./launch.py", "../data"]
-#ENTRYPOINT [ "python3", "./launch.py"]
+ENTRYPOINT [ "python3", "./launch.py", "../data/"]
+CMD ["false"]
+
+#CMD ["python3", "./launch.py", "../data"]
+
 
 # docker build -t miner . 
-# docker run -v d:\dev\repository\MT-Miner\data:/app/data miner
-# docker run -v /home/sebastien.gerin/miner/compare_shd_miner/data:./app/data miner
+# docker run -v d:\dev\repository\MT-Miner\data:/app/data miner true
+# docker run -v d:\dev\repository\MT-Miner\data:/app/data miner false
+
+# docker run -v /home/sebastien.gerin/miner/compare_shd_miner/data:./app/data miner true
+# docker run -v /home/sebastien.gerin/miner/compare_shd_miner/data:./app/data miner false
 
 # docker run -it miner ../data/

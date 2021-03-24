@@ -8,7 +8,7 @@ from shutil import copyfile
 
 import compil as cp
 
-def run_miner(dataset_folder, cpp_log_file):
+def run_miner(dataset_folder, cpp_log_file, minimal_option):
     onlyfiles = [f for f in os.listdir(dataset_folder) if os.path.isfile(os.path.join(dataset_folder, f))]
     if(len(onlyfiles) == 0):
         print("no dataset in ", dataset_folder)
@@ -23,14 +23,12 @@ def run_miner(dataset_folder, cpp_log_file):
             if file.lower().endswith(('.txt', '.dat')):
                 fullpath = os.path.join(dataset_folder, file)
 
-                print("processing data file:", fullpath)
-                
-                print("Miner execution...")
-                print(os.getcwd())
+                print("processing data file:", fullpath)                
+                print("Miner execution...")                
 
                 os.chdir("../MT-Miner")
                 start = perf_counter()            
-                cp.compil_and_run_miner(fullpath, cpp_log_file)
+                cp.compil_and_run_miner(fullpath, cpp_log_file, minimal_option)
                 #time.sleep(0.25)
                 end = perf_counter()
                 print("Elapsed time for compilation and Miner execution: ", end - start, " sec")
@@ -87,12 +85,13 @@ def run_shd(dataset_folder, shd_log_file):
         df_shd.to_csv(shd_log_file, sep=';')
                 
 
-if(len(sys.argv) != 2):
-    print("usage :  python3 ./launch.py \"../data/\" ")
+if(len(sys.argv) != 3):
+    print("usage :  python3 ./launch.py \"../data/\" \"true/false\" ")
 else:
     dataset_folder = str(sys.argv[1])
+    minimal_option = str(sys.argv[2])
 
-    run_miner(dataset_folder, "cpp_log.csv")
+    run_miner(dataset_folder, "cpp_log.csv", minimal_option)
     copyfile("cpp_log.csv", "../data/cpp_log.csv")
     #run_shd(dataset_folder, "shd_log_file")
 

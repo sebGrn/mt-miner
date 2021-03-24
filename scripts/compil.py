@@ -55,7 +55,7 @@ def run_compilation(transation_count):
         os.chdir("..")
 
 
-def run_miner(file, transation_count, log_file):
+def run_miner(file, transation_count, log_file, minimal_option):
     # run mt miner with file 
     
     folder_path = "build" + str(transation_count)
@@ -69,12 +69,12 @@ def run_miner(file, transation_count, log_file):
     # output : save results into file
     # use clone : use clone optimisation
     log_file_arg = "--log-file=" + log_file
-    print(log_file_arg)
-    p = subprocess.Popen(["./" + folder_path + "/mt_miner", file, "--log=true", log_file_arg, "--use-clone=true", "--m=false"])
+    minimal_cut = "--m=" + minimal_option
+    p = subprocess.Popen(["./" + folder_path + "/mt_miner", file, "--log=true", log_file_arg, "--use-clone=true", minimal_cut])
     p.wait()
 
 
-def compil_and_run_miner(filename, log_file):
+def compil_and_run_miner(filename, log_file, minimal_option):
     
     file = filename
     transaction_count = get_items_count(file)
@@ -84,7 +84,7 @@ def compil_and_run_miner(filename, log_file):
     print("miner compilation...")
     run_compilation(transaction_count)
     print("running miner...")
-    run_miner(file, transaction_count, log_file)
+    run_miner(file, transaction_count, log_file, minimal_option)
 
 '''
 # start program
