@@ -86,12 +86,11 @@ def run_shd(dataset_folder, shd_log_file):
                 
 
 if(len(sys.argv) != 3):
-    print("usage :  python3 ./launch.py \"../data/\" \"true/false\" ")
+    print("usage :  python3 ./launch.py \"../data/\"")
 else:
     dataset_folder = str(sys.argv[1])
-    minimal_option = str(sys.argv[2])
 
-    run_miner(dataset_folder, "cpp_log.csv", minimal_option)
-    copyfile("cpp_log.csv", "../data/cpp_log.csv")
-    #run_shd(dataset_folder, "shd_log_file")
+    run_miner(dataset_folder, "cpp_log_all.csv", "false")
+    run_miner(dataset_folder, "cpp_log_cut.csv", "true")
+    run_shd(dataset_folder, "shd_log_file.csv")    
 
