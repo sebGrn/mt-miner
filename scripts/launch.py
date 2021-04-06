@@ -90,7 +90,10 @@ if(len(sys.argv) != 3):
 else:
     dataset_folder = str(sys.argv[1])
 
+    # compute all minimal transverses with miner
     run_miner(dataset_folder, "cpp_log_all.csv", "false")
+    # compute only minimal transverses with minimal size with miner
     run_miner(dataset_folder, "cpp_log_cut.csv", "true")
+    # compute all minimal transverses with shd
     run_shd(dataset_folder, "shd_log_file.csv")    
 

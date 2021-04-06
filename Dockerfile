@@ -47,17 +47,20 @@ WORKDIR /
 RUN mkdir app/data/
 
 WORKDIR /app/scripts
-ENTRYPOINT [ "python3", "./launch.py", "../data/"]
-CMD ["false"]
+
+# run launch.py script on startup
+# minimal transverse from hypergraphs located in ../data folder will be computed
+# results output in cpp_log_all.csv, cpp_log_cut.csv and shd_log_file.csv
+ENTRYPOINT ["python3", "./launch.py"]
+CMD ["../data/"]
 
 #CMD ["python3", "./launch.py", "../data"]
 
-
 # docker build -t miner . 
-# docker run -v d:\dev\repository\MT-Miner\data:/app/data miner true
-# docker run -v d:\dev\repository\MT-Miner\data:/app/data miner false
+# docker run -v d:\dev\repository\MT-Miner\data:/app/data miner
+# docker run -v d:\dev\repository\MT-Miner\data:/app/data miner
 
-# docker run -v /home/sebastien.gerin/miner/compare_shd_miner/data:./app/data miner true
-# docker run -v /home/sebastien.gerin/miner/compare_shd_miner/data:./app/data miner false
+# docker run -v /home/sebastien.gerin/miner/compare_shd_miner/data:./app/data miner
+# docker run -v /home/sebastien.gerin/miner/compare_shd_miner/data:./app/data miner
 
 # docker run -it miner ../data/
