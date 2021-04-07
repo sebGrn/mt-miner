@@ -5,7 +5,7 @@ import pandas as pd
 import time
 from time import perf_counter
 from shutil import copyfile
-
+import fileinput
 import compil as cp
 
 def run_miner(dataset_folder, cpp_log_file, minimal_option):
@@ -83,7 +83,51 @@ def run_shd(dataset_folder, shd_log_file):
         df_shd.index = df_shd["filename"]
         df_shd.index.name = "filename"
         df_shd.to_csv(shd_log_file, sep=';')
+
+def run_pmmcs(dataset_folder, log_file):
+    onlyfiles = [f for f in os.listdir(dataset_folder) if os.path.isfile(os.path.join(dataset_folder, f))]
+    if(len(onlyfiles) == 0):
+        print("no dataset in ", dataset_folder)
+    else:        
+        current_path = os.getcwd()
+
+        log_file = os.path.join(current_path, log_file)
+        if os.path.isfile(log_file):
+            os.remove(log_file)
+
+        data_pmmcs = []  
+        for file in onlyfiles:
+            if file.lower().endswith(('.txt', '.dat')):
+                fullpath = os.path.join(dataset_folder, file)
+
+                print("processing data file:", fullpath)
+
+                print("pMMCS execution...")                    
+                os.chdir("../Minimal-Hitting-Set-Algorithms")
+                start = perf_counter()
+                res = subprocess.run(["./agdmhs", fullpath, "out.dat", "-a", "pmmcs"], stdout=subprocess.PIPE)
                 
+                cpt = 0
+                with fileinput.FileInput("out.dat") as file:
+                    for line in file:
+                        cpt = cpt+1
+
+                #time.sleep(0.5)
+                end = perf_counter()
+                total = end - start
+                print("Elapsed time for pMMCS execution:", total, " sec")
+                print("\n")
+                    
+                # append shd value
+                data_pmmcs.append([fullpath, cpt, total])        
+        
+        os.chdir(current_path)
+
+        df_pmmcs = pd.DataFrame(data_pmmcs, columns=['filename', 'pMMCSMinimalTransverseCount', 'pMMCSTime'])
+        df_pmmcs.index = df_pmmcs["filename"]
+        df_pmmcs.index.name = "filename"
+        df_pmmcs.to_csv(log_file, sep=';')
+
 
 print("usage :  python3 ./launch.py \"../data/\" <all/all_miner/min_miner/shd>")
 print("<all> : compute all minimal transverses with miner, then compute only minimal transverses with minimal size with miner, then compute all minimal transverses with shd")
@@ -114,4 +158,10 @@ else:
         run_shd(dataset_folder, "shd_log_file.csv")
         output = dataset_folder + "shd_log_file.csv"   
         copyfile("shd_log_file.csv", output) 
+
+    if option == "all" or option == "pmmcs":
+        print("compute all minimal transverses with pMMCS")
+        run_pmmcs(dataset_folder, "pmmcs_log_file.csv")
+        output = dataset_folder + "pmmcs_log_file.csv"   
+        copyfile("pmmcs_log_file.csv", output) 
 
