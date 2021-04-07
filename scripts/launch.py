@@ -85,15 +85,33 @@ def run_shd(dataset_folder, shd_log_file):
         df_shd.to_csv(shd_log_file, sep=';')
                 
 
+print("usage :  python3 ./launch.py \"../data/\" <all/all_miner/min_miner/shd>")
+print("<all> : compute all minimal transverses with miner, then compute only minimal transverses with minimal size with miner, then compute all minimal transverses with shd")
+print("<all_miner> : compute all minimal transverses with miner only")
+print("<min_miner> : compute only minimal transverses with minimal size with miner only")
+print("<shd> : compute all minimal transverses with shd only")
+
 if(len(sys.argv) != 3):
-    print("usage :  python3 ./launch.py \"../data/\"")
+    print("usage :  python3 ./launch.py \"../data/\" <all/all_miner/min_miner/shd>")
 else:
     dataset_folder = str(sys.argv[1])
+    option = str(sys.argv[2])
 
-    # compute all minimal transverses with miner
-    run_miner(dataset_folder, "cpp_log_all.csv", "false")
-    # compute only minimal transverses with minimal size with miner
-    run_miner(dataset_folder, "cpp_log_cut.csv", "true")
-    # compute all minimal transverses with shd
-    run_shd(dataset_folder, "shd_log_file.csv")    
+    if option == "all" or option == "all_miner":
+        print("compute all minimal transverses with miner")
+        run_miner(dataset_folder, "cpp_log_all.csv", "false")
+        output = dataset_folder + "cpp_log_all.csv"
+        copyfile("cpp_log_all.csv", output)
+
+    if option == "all" or option == "min_miner":
+        print("compute only minimal transverses with minimal size with miner")
+        run_miner(dataset_folder, "cpp_log_cut.csv", "true")
+        output = dataset_folder + "cpp_log_all.csv"
+        copyfile("cpp_log_cut.csv", output)
+
+    if option == "all" or option == "shd":    
+        print("compute all minimal transverses with shd")
+        run_shd(dataset_folder, "shd_log_file.csv")
+        output = dataset_folder + "shd_log_file.csv"   
+        copyfile("shd_log_file.csv", output) 
 
