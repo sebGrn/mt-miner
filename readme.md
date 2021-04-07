@@ -35,23 +35,19 @@ A formal context is a triple K = (G, M, I), where G is a set of objects (lines),
 ```
 ## use
 
-```
 use python scripts located in script folder
 put the files you want to analyze in your data folder
 to build the image container:
-- docker build -t miner . 
+```docker build -t miner . ```
 to compute all minimal transverses with mt-miner:
-- docker run -v <your_data_folder_path>:/app/data miner all_miner
+```docker run -v <your_data_folder_path>:/app/data miner all_miner```
 to compute only minimal transverses with minimal size with mt-miner:
-- docker run -v <your_data_folder_path>:/app/data miner min_miner
+```docker run -v <your_data_folder_path>:/app/data miner min_miner```
 to compute all minimal transverses with shd:
-- docker run -v <your_data_folder_path>:/app/data miner shd
+```docker run -v <your_data_folder_path>:/app/data miner shd```
 to use 3 methods:
-- docker run -v <your_data_folder_path>:/app/data miner all
-
+```docker run -v <your_data_folder_path>:/app/data miner all```
 outputs log files (cpp_log_all.csv, cpp_log_cut.csv and shd_log_file.csv) will be located in your data folder 
-```
-
 
 ## Options
 - *--log* : write log into *outputfile.csv* file
