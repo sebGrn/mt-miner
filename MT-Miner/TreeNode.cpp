@@ -55,11 +55,11 @@ void TreeNode::recurseOnClonedItemset(std::shared_ptr<Itemset> itemset, unsigned
 
 			// make a copy of currentItemset and replace ith item by clone item
 			std::shared_ptr<Itemset> clonedItemset = itemset->createAndReplaceItem(iItem, clone);
-
-			// lock thread and add minimal transverse
 			{
+				// lock thread and add minimal transverse			
 				const std::lock_guard<std::mutex> minimalTransverse_guard(task_guard);
 				this->minimalTransverse.push_back(clonedItemset);
+				//std::cout << "new minimal traverse found from clone " << clonedItemset->toString() << std::endl;
 			}
 
 			// update info
@@ -90,15 +90,25 @@ void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&&
 
 		// Compute disjunctive support for each itemset of toTraverse list
 		//	if disjunctive support is equal to object count --> add the itemset to graphMt list (then process its clones)
-		unsigned int disjSup = crtItemset->getDisjunctifSupport();
-		if (disjSup == objectCount)
+		unsigned int support = crtItemset->getSupport();
+
+		// check if itemset is a minimal transverse depending on disjunctive or consjonctive (with dual) method
+		bool isMinimalTransverse = false;
+		if (Itemset::itemsetType == Itemset::ItemsetType::DISJUNCTIVE)
+			isMinimalTransverse = (support == objectCount);
+		else
+			isMinimalTransverse = (support == 0);
+		
+		if (isMinimalTransverse)
 		{
 			// lock thread and add minimal transverse
 			if (!only_minimal || minimalMt >= MAX_MINIMAL_TRAVERSE_SIZE || crtItemset->getItemCount() <= minimalMt)
 			{
-				const std::lock_guard<std::mutex> guard(task_guard);
-				this->minimalTransverse.push_back(crtItemset);
-				//std::cout << "new minimal traverse found " << crtItemset->toString() << std::endl;
+				{
+					const std::lock_guard<std::mutex> guard(task_guard);
+					this->minimalTransverse.push_back(crtItemset);
+					//std::cout << "new minimal traverse found " << crtItemset->toString() << std::endl;
+				}
 
 				// update info
 				nbTotalMt++;
@@ -129,10 +139,16 @@ void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&&
 			}
 			else
 			{
-				// compute disjunctif support
-				unsigned int disjSup = Itemset::computeDisjunctifSupport(cumulatedItemset, crtItemset);
 				// test support and add itemset in maxClique or toExplore list
-				if (disjSup != objectCount)
+				unsigned int support = Itemset::computeSupport(cumulatedItemset, crtItemset);
+
+				bool isMaxClique = false;
+				if (Itemset::itemsetType == Itemset::ItemsetType::DISJUNCTIVE)
+					isMaxClique = (support != objectCount);
+				else
+					isMaxClique = (support != 0);
+
+				if (isMaxClique)
 				{
 					Itemset::combineRightIntoLeft(cumulatedItemset, crtItemset);
 					maxClique.emplace_back(crtItemset);
@@ -206,6 +222,8 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 	}
 	else
 	{
+		//std::cout << "computeMinimalTransversals_task " << toTraverse.size() << std::endl;
+
 		// contains list of itemsets that will be combined to the candidates, the largest space in which is not possible to find minimal transversals
 		std::deque<std::shared_ptr<Itemset>> maxClique;
 		// contains list of itemsets that are candidates
@@ -221,6 +239,8 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 
 		// we don't need toTraverse anymore, remove references		
 		toTraverse.clear();
+
+		//std::cout << "updateListsFromToTraverse " << toExplore.size() << std::endl;
 
 		if (toExplore.empty())
 		{
@@ -262,7 +282,6 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 				}
 
 				// if toCombinedLeft->disjonctifSupport == object count) --> add toCombined into minitransverse list				
-				
 				if (toCombinedLeft->containsAClone())
 				{
 					toCombinedLeft.reset();
@@ -281,7 +300,7 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 						{
 							// combine toCombinedRight into toCombinedLeft
 							std::shared_ptr<Itemset> newItemset = std::make_shared<Itemset>(toCombinedLeft);
-							newItemset->combineItemset(toCombinedRight);
+							newItemset->combineItemset(toCombinedRight.get());
 							//std::cout << "combine item sets " << toCombinedLeft->toString() << " and " << toCombinedRight->toString() << " into " << newItemset->toString() << std::endl;
 							if (newItemset->computeIsEssential())
 							{
@@ -303,6 +322,8 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 				// call process in the loop
 				if (!newToTraverse.empty())
 				{
+					//std::cout << "newToTraverse " << newToTraverse.size() << std::endl;
+
 					std::unique_lock<std::mutex> lock(memory_guard);
 					//std::cout << "stored tasks in the list, waiting to be managed : " << pending_task_count << " - blocked tasks, waiting to be unlock : " << pending_memory_task_count << std::endl;
 					
@@ -336,10 +357,6 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 	}
 	// ## EMIT COMPLETE TASK ##
 
-}
-
-void TreeNode::launchPendingTasksChecking()
-{
 }
 
 std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>&& toTraverse)

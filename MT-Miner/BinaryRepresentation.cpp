@@ -13,19 +13,19 @@ std::unordered_map<unsigned int, std::shared_ptr<Item>> BinaryRepresentation::bi
 /// build binary representation from formal context
 void BinaryRepresentation::buildFromFormalContext(const FormalContext& context)
 {
-	BinaryRepresentation::objectCount = context.getObjectCount();	// 800
-	BinaryRepresentation::itemCount = context.getItemCount();		// 77
+	BinaryRepresentation::objectCount = context.getObjectCount();
+	BinaryRepresentation::itemCount = context.getItemCount();
 	BinaryRepresentation::nbItemsetNotAddedFromClone = 0;
 	BinaryRepresentation::binaryRepresentationMap.clear();
 	
 	std::shared_ptr<Item> item;
 	unsigned int sum = 0;
-	for (unsigned int j = 0; j < BinaryRepresentation::itemCount; j++)			// 8 on test.txt
+	for (unsigned int j = 0; j < BinaryRepresentation::itemCount; j++)
 	{
 		unsigned int currentKey = j + 1;
 		item = std::make_shared<Item>(currentKey, BinaryRepresentation::objectCount);
 		// allocate bitset with object count bit (formal context column size)
-		for (unsigned int i = 0; i < BinaryRepresentation::objectCount; i++)		// 6 on test.txt
+		for (unsigned int i = 0; i < BinaryRepresentation::objectCount; i++)
 		{
 			bool bit = context.getBit(i, j);
 			item->set(i, bit);			
@@ -38,10 +38,11 @@ void BinaryRepresentation::buildFromFormalContext(const FormalContext& context)
 		// set a critical section to allow multiple thread to write in size_tuples vector		
 		BinaryRepresentation::binaryRepresentationMap[currentKey] = item;
 	}
-
+	
 	unsigned int nbElement = BinaryRepresentation::itemCount * BinaryRepresentation::objectCount;
 	double sparsity = (nbElement - sum) / static_cast<double>(nbElement);
 	Logger::dataset.sparcity = ((1.0 - sparsity) * 100.0);
+	std::cout << "sparcity " << Logger::dataset.sparcity << std::endl;
 };
 
 

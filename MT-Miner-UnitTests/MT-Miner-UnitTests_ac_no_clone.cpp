@@ -19,7 +19,7 @@ namespace MTMinerUnitTests_ac_no_clone
 			miner.createBinaryRepresentation(hypergraph);
 			
 			// compute minimal transversals
-			std::vector< std::shared_ptr<Itemset>> minimalTransversals;
+			std::vector<std::shared_ptr<Itemset>> minimalTransversals;
 			miner.computeMinimalTransversals(minimalTransversals);
 			Assert::AreEqual(1916, static_cast<int>(minimalTransversals.size()));
 		}

@@ -13,7 +13,7 @@
 // 131072	// dualmatching34 --> OK, 444 sec --> 159 sec
 // 262144	// dualmatching36 --> CRASH, 5 min, 47Go memory --> 5 min, 15Go memory
 // 524288	// dualmatching38
-#define BITSET_SIZE 81
+#define BITSET_SIZE 990
 typedef std::bitset<BITSET_SIZE> StaticBitset;
 
 class Item
@@ -22,7 +22,6 @@ class Item
 	friend class Itemset;
 
 private:
-public:
 	unsigned int attributeIndex;
 	std::unique_ptr<StaticBitset> staticBitset;
 	
@@ -59,8 +58,6 @@ public:
 	bool isAClone() const;
 
 	bool operator==(const Item& other);	
-	//StaticBitset operator|(const StaticBitset& other);
-	//StaticBitset operator&(const StaticBitset& other);
 };
 
 inline unsigned int Item::getAttributeIndex() const
@@ -125,13 +122,3 @@ inline bool Item::operator==(const Item& other)
 		return true;
 	return (*other.staticBitset) == (*this->staticBitset);
 }
-
-//inline StaticBitset Item::operator|(const StaticBitset& other)
-//{
-//	return *this->staticBitset.get() | other;
-//}
-//
-//inline StaticBitset Item::operator&(const StaticBitset& other)
-//{
-//	return *this->staticBitset.get() & other;
-//}

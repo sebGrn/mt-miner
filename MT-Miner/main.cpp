@@ -33,6 +33,7 @@ public:
 		FILENAME_OUTPUT_LOG,
 		USE_CLONE,
 		MINIMAL_SIZE,
+		USE_CONSJONCTIVE,
 		NB_PARAM
 	};
 
@@ -45,6 +46,7 @@ public:
 		argumentValues.push_back(std::pair<ParameterType, std::string>(ParameterType::LOG_TO_FILE, "--log"));
 		argumentValues.push_back(std::pair<ParameterType, std::string>(ParameterType::FILENAME_OUTPUT_LOG, "--log-file"));
 		argumentValues.push_back(std::pair<ParameterType, std::string>(ParameterType::USE_CLONE, "--use-clone"));
+		argumentValues.push_back(std::pair<ParameterType, std::string>(ParameterType::USE_CONSJONCTIVE, "--consjonctiv"));
 	}
 
 	void showUsage(const std::string& name)
@@ -97,15 +99,19 @@ public:
 
 // ----------------------------------------------------------------------------------------------------------- //
 
-void runMinimalTransversals(const std::string& file, bool useCloneOptimization, bool verbose, bool useOutputFile, bool useOutputLogFile, const std::string& outputLogFile, bool useMinimalSizeOnly)
+void runMinimalTransversals(const std::string& file, bool useCloneOptimization, bool verbose, bool useOutputFile, bool useOutputLogFile, const std::string& outputLogFile, bool useMinimalSizeOnly, bool useConsjonctive)
 {
 	//std::cout << BOLDYELLOW << "\n***** Running MT Miner *****" << RESET << std::endl << std::endl;
-	
 	unsigned int objectCount = 0;
 	unsigned int itemCount = 0;
 	
 	Logger::init(outputLogFile, verbose);
 	Logger::setFilename(file);
+
+	if (useConsjonctive)
+		Itemset::itemsetType = Itemset::ItemsetType::CONSJONCTIVE;
+	else
+		Itemset::itemsetType = Itemset::ItemsetType::DISJUNCTIVE;
 
 	// parser file
 	HyperGraph hypergraph;
@@ -113,18 +119,10 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 	{
 		// allocate miner 
 		MT_Miner miner(useCloneOptimization, useMinimalSizeOnly);
+
 		// load hypergraph into formal context, then into binary representation
-		// build clone list if needed
 		miner.createBinaryRepresentation(hypergraph);
-
-		// build formal context from hypergraph
-		FormalContext formalContext(hypergraph);
-		//formalContext.serialize("format_context.csv");
-
-		// build binary representation from formal context
-		BinaryRepresentation::buildFromFormalContext(formalContext);
-		//BinaryRepresentation<bitset_type>::serialize("binary_rep.csv");
-		
+	
 		// compute minimal transverses
 		std::vector<std::shared_ptr<Itemset>> minimalTransversals;
 		miner.computeMinimalTransversals(minimalTransversals);
@@ -152,7 +150,7 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 // ----------------------------------------------------------------------------------------------------------- //
 
 int main(int argc, char* argv[])
- {
+{
 	// http://research.nii.ac.jp/~uno/dualization.html
 	if (argc <= 1)
 	{
@@ -172,6 +170,7 @@ int main(int argc, char* argv[])
 	bool useOutputFile = false;
 	bool useCloneOptimization = true;
 	bool useMinimalSizeOnly = false;
+	bool useConsjonctive = false;
 	
 	if (parameterList.find(ArgumentParser::MINIMAL_SIZE) != parameterList.end())
 		useMinimalSizeOnly = parameterList[ArgumentParser::MINIMAL_SIZE] == "true" || parameterList[ArgumentParser::MINIMAL_SIZE] == "True" || parameterList[ArgumentParser::MINIMAL_SIZE] == "TRUE";
@@ -181,8 +180,10 @@ int main(int argc, char* argv[])
 		useOutputLogFile = parameterList[ArgumentParser::FILENAME_OUTPUT_LOG];
 	if (parameterList.find(ArgumentParser::USE_CLONE) != parameterList.end())
 		useCloneOptimization = parameterList[ArgumentParser::USE_CLONE] == "true" || parameterList[ArgumentParser::USE_CLONE] == "True" || parameterList[ArgumentParser::USE_CLONE] == "TRUE";
+	if (parameterList.find(ArgumentParser::USE_CONSJONCTIVE) != parameterList.end())
+		useConsjonctive = parameterList[ArgumentParser::USE_CONSJONCTIVE] == "true" || parameterList[ArgumentParser::USE_CONSJONCTIVE] == "True" || parameterList[ArgumentParser::USE_CONSJONCTIVE] == "TRUE";
 
-	runMinimalTransversals(file, useCloneOptimization, verboseMode, useOutputFile, useOutputLog, useOutputLogFile, useMinimalSizeOnly);
+	runMinimalTransversals(file, useCloneOptimization, verboseMode, useOutputFile, useOutputLog, useOutputLogFile, useMinimalSizeOnly, useConsjonctive);
 
 	return 0;	
 }

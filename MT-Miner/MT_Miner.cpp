@@ -50,6 +50,11 @@ void MT_Miner::createBinaryRepresentation(const HyperGraph& hypergraph)
 
 void MT_Miner::computeInitalToTraverseList(std::vector<std::shared_ptr<Itemset>>& toTraverse) const
 {
+	if (Itemset::itemsetType == Itemset::CONSJONCTIVE)
+		std::cout << "use of CONSJONCTIVE support (AND) with dual context" << std::endl;
+	else
+		std::cout << "use of DISJONCTIVE support (OR)" << std::endl;
+
 	assert(toTraverse.empty());
 	for (unsigned int i = 1; i <= BinaryRepresentation::getItemCount(); i++)
 	{
@@ -61,6 +66,7 @@ void MT_Miner::computeInitalToTraverseList(std::vector<std::shared_ptr<Itemset>>
 			// these itemsets will be used in the program
 			// we dont need binary representation anymore here
 			std::shared_ptr<Itemset> itemset(new Itemset(item.get()));
+			itemset->flip();
 			toTraverse.push_back(itemset);
 		}
 	}

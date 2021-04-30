@@ -107,6 +107,8 @@ public:
 
 		bool oneIndexedBase = true;
 
+		//std::vector<unsigned int> minimal_transactions;
+
 		std::string line;
 		while (std::getline(inputStream, line))
 		{
@@ -114,17 +116,23 @@ public:
 			{
 				line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
 				line = Utils::trim(line);
+
 				std::vector<unsigned int> data = Utils::splitToVectorOfInt(line, ' ');
 				maxItemCount = std::max(*std::max_element(data.begin(), data.end()), maxItemCount);
 
 				this->addLine(data);
 
+				//std::copy(data.begin(), data.end(), std::back_inserter(minimal_transactions));
+					
 				// check if file is zero indexed
 				if (oneIndexedBase && (std::find(data.begin(), data.end(), 0) != data.end()))
 					oneIndexedBase = false;
 
 				// as many items as lines in the file
 				objectCount++;
+
+				//if (objectCount > 500)
+				//	break;
 			}
 		}
 		if(oneIndexedBase)
@@ -143,6 +151,9 @@ public:
 		std::cout << GREEN << "parsing hypergraph done in " << duration << " ms, found " << this->getItemCount() << " items (lines) and " << this->getObjectCount() << " objects (columns)\n" << RESET;
 		Logger::dataset.itemCount = this->getItemCount();
 		Logger::dataset.objectCount = this->getObjectCount();
+
+		//std::sort(minimal_transactions.begin(), minimal_transactions.end());
+		//minimal_transactions.erase(std::unique(minimal_transactions.begin(), minimal_transactions.end()), minimal_transactions.end());
 
 		return true;
 	};
