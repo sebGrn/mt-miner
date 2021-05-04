@@ -1,5 +1,6 @@
 #include "Itemset.h"
 #include <unordered_map>
+#include <bit>
 #include "BinaryRepresentation.h"
 
 Itemset::ItemsetType Itemset::itemsetType = Itemset::ItemsetType::DISJUNCTIVE;
@@ -82,37 +83,37 @@ void Itemset::combineItemset(const Itemset* itemset_right)
 	// "71" + "72" => "712"
 	for (auto it_item = itemset_right->itemset.begin(); it_item != itemset_right->itemset.end(); it_item++)
 	{
-		// search if right itemset contains current item from left
-		bool found = false;
-		for (auto it = this->itemset.begin(); it != this->itemset.end(); it++)
-		{
-			if ((*it)->getAttributeIndex() == (*it_item)->getAttributeIndex())
-			{
-				found = true;
-				break;
-			}
-		}
-		if (!found)
-		{
-			// didnt find duplicates, we can add the item at the end of the list
-			// add item into itemset list
-			this->itemset.push_back((*it_item));
+// search if right itemset contains current item from left
+bool found = false;
+for (auto it = this->itemset.begin(); it != this->itemset.end(); it++)
+{
+	if ((*it)->getAttributeIndex() == (*it_item)->getAttributeIndex())
+	{
+		found = true;
+		break;
+	}
+}
+if (!found)
+{
+	// didnt find duplicates, we can add the item at the end of the list
+	// add item into itemset list
+	this->itemset.push_back((*it_item));
 
-			// update support
-			if (itemsetType == CONSJONCTIVE)
-				(*this->value) = (*(*it_item)->staticBitset) & (*this->value);
-			else
-				(*this->value) = (*(*it_item)->staticBitset) | (*this->value);
+	// update support
+	if (itemsetType == CONSJONCTIVE)
+		(*this->value) = (*(*it_item)->staticBitset) & (*this->value);
+	else
+		(*this->value) = (*(*it_item)->staticBitset) | (*this->value);
 
-			// update clone status
-			if ((*it_item)->isAClone())
-				this->hasClone = true;
-		}
+	// update clone status
+	if ((*it_item)->isAClone())
+		this->hasClone = true;
+}
 
-		// update support
-		this->support = (*this->value).count();
-		// combined item set is not dirty, all values have been computed
-		this->dirty = false;
+// update support
+this->support = (*this->value).count();
+// combined item set is not dirty, all values have been computed
+this->dirty = false;
 	}
 };
 
@@ -129,7 +130,7 @@ bool Itemset::computeIsEssential()
 		for (int i = 0, n = this->getItemCount(); i != n; i++)
 		{
 			// dont forget to initialize boolean
-			if(itemsetType == CONSJONCTIVE)
+			if (itemsetType == CONSJONCTIVE)
 				SumOfN_1Items.set();
 			else
 				SumOfN_1Items.reset();
@@ -159,27 +160,119 @@ bool Itemset::computeIsEssential()
 
 			if (bitset.count())
 			{
-				for (unsigned int k = 0; k < BITSET_SIZE; k++)
+				if (itemsetType == CONSJONCTIVE)
 				{
-					// compare bit
-					if (itemsetType == CONSJONCTIVE)
+					StaticBitset res = bitset ^ SumOfN_1Items;
+					if (res.count())
 					{
-						if (!bitset.test(k) && SumOfN_1Items.test(k))
+						StaticBitset res2 = SumOfN_1Items & res;
+						if (res2.count())
 						{
-							// this bitset is essential, check with next bitset
 							isEssential = true;
-							break;
 						}
 					}
-					else
+					//for (unsigned int k = BITSET_SIZE; k--; )
+					//{
+					//	// compare bit
+					//	if (!bitset.test(k) && SumOfN_1Items.test(k))
+					//	{
+					//		// this bitset is essential, check with next bitset
+					//		isEssential = true;
+					//		break;
+					//	}
+					//}
+				}
+				else
+				{
+					// disjonctive (OR)
+					//bool b1 = false;
+					StaticBitset res = bitset ^ SumOfN_1Items;					
+					if (res.count())
+					{
+						StaticBitset res2 = bitset & res;
+						if (res2.count())
+						{
+							isEssential = true;
+						}
+
+
+						//for (unsigned int k = BITSET_SIZE; k--; )
+						//{
+						//	if (res[k])
+						//	{
+						//		if (bitset[k])
+						//		{
+						//			isEssential = true;
+						//			break;
+						//		}
+						//	}
+						//}
+
+
+						//std::string str = res.to_string();
+						//std::reverse(str.begin(), str.end());
+						//std::size_t pos = str.find('1');
+						//while (!isEssential && pos != std::string::npos)
+						//{
+						//	if (bitset.test(pos) && !SumOfN_1Items.test(pos))
+						//	{
+						//		b1 = true;
+						//		isEssential = true;
+						//		break;
+						//	}
+						//	pos = str.find('1', pos + 1);
+						//}
+
+						//unsigned int k = BITSET_SIZE / 64;
+						//if (BITSET_SIZE % 64)
+						//	k++;
+						//for (unsigned int j = 0; j < k; j++)
+						//{
+						//	std::bitset<64> bss1(str.substr(j*64, 64));
+
+						//	unsigned long long n = bss1.to_ullong();
+
+						//	unsigned i = 1, pos = 1;
+						//	while (pos <= 64)
+						//	{
+						//		while ((!(i & n)) && (pos <= 64))
+						//		{
+						//			// Unset current bit and set the next bit in 'i'
+						//			i = i << 1;
+						//			// increment position
+						//			++pos;
+						//		}
+						//		if (pos > 0)
+						//		{
+						//			if (bitset.test(pos - 1) && !SumOfN_1Items.test(pos - 1))
+						//			{
+						//				b1 = true;
+						//				break;
+						//			}
+						//			else
+						//			{
+						//				i = i << 1;
+						//				pos++;
+						//			}
+						//		}
+						//	}
+						//}
+					}
+
+					/*bool b2 = false;
+					for (unsigned int k = BITSET_SIZE; k--; )
 					{
 						if (bitset.test(k) && !SumOfN_1Items.test(k))
 						{
+							b2 = true;
 							// this bitset is essential, check with next bitset
 							isEssential = true;
 							break;
 						}
 					}
+
+					if (b1 != b2)
+						int k = 0;*/
 				}
 			}
 

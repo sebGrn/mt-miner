@@ -297,7 +297,7 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 							std::shared_ptr<Itemset> newItemset = std::make_shared<Itemset>(toCombinedLeft);
 							newItemset->combineItemset(toCombinedRight.get());
 							//std::cout << "combine item sets " << toCombinedLeft->toString() << " and " << toCombinedRight->toString() << " into " << newItemset->toString() << std::endl;
-							//if (newItemset->computeIsEssential())
+							if (newItemset->computeIsEssential())
 							{
 								//std::cout << "this combined itemset is essential, added to new toTraverse list" << std::endl;
 								// this is a candidate for next iteration
