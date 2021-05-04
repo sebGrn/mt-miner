@@ -17,7 +17,7 @@ void MT_Miner::createBinaryRepresentation(const HyperGraph& hypergraph)
 {
 	// build formal context from hypergraph
 	FormalContext formalContext(hypergraph);
-	//formalContext.serialize("format_context.csv");
+	formalContext.serialize("format_context.csv");
 
 	// build binary representation from formal context
 	BinaryRepresentation::buildFromFormalContext(formalContext);
@@ -74,11 +74,32 @@ void MT_Miner::computeInitalToTraverseList(std::vector<std::shared_ptr<Itemset>>
 
 void MT_Miner::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>& mt)
 {
+	std::cout << "items count : " << BinaryRepresentation::getItemCount() << std::endl;
+
 	auto beginTime = std::chrono::system_clock::now();
 	
 	// initialise itemset
 	std::vector<std::shared_ptr<Itemset>> toTraverse;
 	computeInitalToTraverseList(toTraverse);
+
+	std::cout << "totraverse size : " << toTraverse.size() << std::endl;
+
+
+	/*std::shared_ptr<Itemset> cumulated = std::make_shared<Itemset>();
+	for_each(toTraverse.begin(), toTraverse.end(), [&](auto element) {
+
+		std::shared_ptr<Itemset> itemset = std::make_shared<Itemset>(cumulated);
+		itemset->combineItemset(element.get());
+		if (itemset->computeIsEssential())
+		{
+			cumulated->combineItemset(element.get());
+		}
+		//std::cout << "combine item sets " << toCombinedLeft->toString() << " and " << toCombinedRight->toString() << " into " << newItemset->toString() << std::endl;
+		});
+	
+	std::cout << "support " << cumulated->getSupport() << std::endl;*/
+
+
 	
 	// create a graph, then compute minimal transversal from the binary representation
 	TreeNode rootNode(this->useCloneOptimization, this->useMinimalSizeOnly);

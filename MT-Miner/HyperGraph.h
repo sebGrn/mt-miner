@@ -128,7 +128,7 @@ public:
 				if (oneIndexedBase && (std::find(data.begin(), data.end(), 0) != data.end()))
 					oneIndexedBase = false;
 
-				// as many items as lines in the file
+				// as many objects as lines in the file
 				objectCount++;
 
 				//if (objectCount > 500)
@@ -148,7 +148,7 @@ public:
 		inputStream.close();
 
 		int64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - beginTime).count();
-		std::cout << GREEN << "parsing hypergraph done in " << duration << " ms, found " << this->getItemCount() << " items (lines) and " << this->getObjectCount() << " objects (columns)\n" << RESET;
+		std::cout << GREEN << "parsing hypergraph done in " << duration << " ms, found " << this->getItemCount() << " items (columns) and " << this->getObjectCount() << " objects (lines)\n" << RESET;
 		Logger::dataset.itemCount = this->getItemCount();
 		Logger::dataset.objectCount = this->getObjectCount();
 

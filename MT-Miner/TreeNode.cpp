@@ -91,6 +91,7 @@ void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&&
 		// Compute disjunctive support for each itemset of toTraverse list
 		//	if disjunctive support is equal to object count --> add the itemset to graphMt list (then process its clones)
 		unsigned int support = crtItemset->getSupport();
+		
 
 		// check if itemset is a minimal transverse depending on disjunctive or consjonctive (with dual) method
 		bool isMinimalTransverse = false;
@@ -131,6 +132,7 @@ void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&&
 
 			// if current itemset is the 1st one, store it into a previous itemset variable and use it later for computing combined itemsets
 			if ((crtItemset == *toTraverse.begin()) && crtItemset->getItemCount() == 1)
+			//if(!cumulatedItemset.getItemCount())
 			{
 				// must be the 1st element with only one element
 				Itemset::copyRightIntoLeft(cumulatedItemset, crtItemset);
@@ -280,13 +282,6 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 					// we dont need to explore this one
 					break;
 				}
-
-				// if toCombinedLeft->disjonctifSupport == object count) --> add toCombined into minitransverse list				
-				if (toCombinedLeft->containsAClone())
-				{
-					toCombinedLeft.reset();
-					break;
-				}
 				
 				// build newTraverse list, reserve with max possible size
 				std::vector<std::shared_ptr<Itemset>> newToTraverse;
@@ -302,7 +297,7 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 							std::shared_ptr<Itemset> newItemset = std::make_shared<Itemset>(toCombinedLeft);
 							newItemset->combineItemset(toCombinedRight.get());
 							//std::cout << "combine item sets " << toCombinedLeft->toString() << " and " << toCombinedRight->toString() << " into " << newItemset->toString() << std::endl;
-							if (newItemset->computeIsEssential())
+							//if (newItemset->computeIsEssential())
 							{
 								//std::cout << "this combined itemset is essential, added to new toTraverse list" << std::endl;
 								// this is a candidate for next iteration

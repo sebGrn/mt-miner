@@ -88,6 +88,8 @@ inline void Itemset::flip()
 		{
 			(*elt).staticBitset->flip();
 		}
-		this->dirty = false;
+		this->value->flip();
+		this->support = (*this->value).count();
+		this->dirty = true;
 	}
 }

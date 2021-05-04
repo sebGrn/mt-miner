@@ -40,7 +40,7 @@ Itemset::~Itemset()
 	this->itemset.clear();
 }
 
-// make a copy of currentItemset and replance ith item by clone item
+// make a copy of currentItemset and replace ith item by clone item
 std::shared_ptr<Itemset> Itemset::createAndReplaceItem(unsigned int iToReplace, Item* itemToReplace)
 {
 	try
@@ -124,7 +124,6 @@ bool Itemset::computeIsEssential()
 	}
 	else
 	{
-		unsigned int objectCount = BinaryRepresentation::getObjectCount();
 		bool isEssential = false;
 		StaticBitset SumOfN_1Items;
 		for (int i = 0, n = this->getItemCount(); i != n; i++)
@@ -160,7 +159,7 @@ bool Itemset::computeIsEssential()
 
 			if (bitset.count())
 			{
-				for (unsigned int k = 0; k < objectCount; k++)
+				for (unsigned int k = 0; k < BITSET_SIZE; k++)
 				{
 					// compare bit
 					if (itemsetType == CONSJONCTIVE)

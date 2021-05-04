@@ -70,7 +70,7 @@ def run_miner(file, transation_count, log_file, minimal_option, consjonctive_opt
     # use clone : use clone optimisation
     log_file_arg = "--log-file=" + log_file
     minimal_cut = "--m=" + minimal_option
-    consjonctive = "--consjonctive=" + consjonctive_option
+    consjonctive = "--consjonctiv=" + consjonctive_option
     p = subprocess.Popen(["./" + folder_path + "/mt_miner", file, "--log=true", log_file_arg, "--use-clone=true", minimal_cut, consjonctive])
     p.wait()
 

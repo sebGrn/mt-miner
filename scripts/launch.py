@@ -209,10 +209,18 @@ else:
         if os.path.isfile(output):
             copyfile(log_file, output)
 
-    if option == "all" or option == "all_miner":
+    if option == "all" or option == "consj_miner":
         print("compute all minimal transverses with miner")
         log_file = "miner_log_all_consjonctive.csv"
         run_miner(dataset_folder, log_file, "false", "true")
+        output = dataset_folder + log_file
+        if os.path.isfile(output):
+            copyfile(log_file, output)
+
+    if option == "all" or option == "consj_min_miner":
+        print("compute all minimal transverses with miner")
+        log_file = "miner_log_min_consjonctive.csv"
+        run_miner(dataset_folder, log_file, "true", "true")
         output = dataset_folder + log_file
         if os.path.isfile(output):
             copyfile(log_file, output)

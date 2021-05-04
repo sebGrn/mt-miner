@@ -20,6 +20,8 @@
  */
 class TreeNode
 {
+	//static std::atomic<double> timer_recurseOnClone;
+
 private:
 	// to avoid interleaved outputs
 	static std::mutex output_guard;
