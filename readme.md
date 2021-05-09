@@ -55,14 +55,14 @@ A formal context is a triple K = (G, M, I), where G is a set of objects (lines),
 2. lauch python script ```python3 ./launch.py <data_folder> <algo_to_use> <threshold>```
  - data_folder : folder containing transactional bases (.dat or .txt files), all files will be parsed
  - algo_to_use :
- -- all : compute all minimal traverses with miner, then compute only minimal traverses with minimal size with miner, then compute all minimal traverses with shd
- -- disj_miner : compute all minimal traverses with miner only, disjonctive mode
- -- disj_min_miner : compute only minimal traverses with minimal size with miner only
- -- consj_miner : compute all minimal traverses with miner only, consjonctive mode
- -- consj_min_miner : compute only minimal traverses with minimal size with miner only, consjonctive mode
- -- shd : compute all minimal traverses with shd only
- -- pmmcs : compute all minimal traverses with pmmcs only
- -- prs : compute all minimal traverses with prs only
+   - all : compute all minimal traverses with miner, then compute only minimal traverses with minimal size with miner, then compute all minimal traverses with shd
+   - disj_miner : compute all minimal traverses with miner only, disjonctive mode
+   - disj_min_miner : compute only minimal traverses with minimal size with miner only
+   - consj_miner : compute all minimal traverses with miner only, consjonctive mode
+   - consj_min_miner : compute only minimal traverses with minimal size with miner only, consjonctive mode
+   - shd : compute all minimal traverses with shd only
+   - pmmcs : compute all minimal traverses with pmmcs only
+   - prs : compute all minimal traverses with prs only
  - threshhold : double value, percent threshold to cover
 
  ex : ```python3 ./launch.py ./data disj_miner 1.0```
