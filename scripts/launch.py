@@ -199,7 +199,7 @@ else:
 
     if option == "all" or option == "disj_miner":
         print("compute all minimal transverses with miner")
-        log_file = "miner_log_all.csv"
+        log_file = "disj_miner.csv"
         run_miner(dataset_folder, log_file, "false", "false", threshold)
         output = dataset_folder + log_file
         if os.path.isfile(output):
@@ -207,7 +207,7 @@ else:
 
     if option == "all" or option == "disj_min_miner":
         print("compute only minimal transverses with minimal size with miner")
-        log_file = "miner_log_cut.csv"
+        log_file = "disj_min_miner.csv"
         run_miner(dataset_folder, log_file, "true", "false", threshold)
         output = dataset_folder + log_file
         if os.path.isfile(output):
@@ -215,7 +215,7 @@ else:
 
     if option == "all" or option == "consj_miner":
         print("compute all minimal transverses with miner")
-        log_file = "miner_log_all_consjonctive.csv"
+        log_file = "consj_miner.csv"
         run_miner(dataset_folder, log_file, "false", "true", threshold)
         output = dataset_folder + log_file
         if os.path.isfile(output):
@@ -223,7 +223,7 @@ else:
 
     if option == "all" or option == "consj_min_miner":
         print("compute all minimal transverses with miner")
-        log_file = "miner_log_min_consjonctive.csv"
+        log_file = "consj_min_miner.csv"
         run_miner(dataset_folder, log_file, "true", "true", threshold)
         output = dataset_folder + log_file
         if os.path.isfile(output):
@@ -231,7 +231,7 @@ else:
 
     if option == "all" or option == "shd":    
         print("compute all minimal transverses with shd")
-        log_file = "shd_log_file.csv"
+        log_file = "shd.csv"
         run_shd(dataset_folder, log_file)
         output = dataset_folder + log_file
         if os.path.isfile(output):
@@ -239,7 +239,7 @@ else:
 
     if option == "all" or option == "pmmcs":
         print("compute all minimal transverses with pMMCS")
-        log_file = "pmmcs_log_file.csv"
+        log_file = "pmmcs.csv"
         run_pmmcs(dataset_folder, log_file)
         output = dataset_folder + log_file
         if os.path.isfile(output):
@@ -247,7 +247,7 @@ else:
 
     if option == "all" or option == "prs":
         print("compute all minimal transverses with prs")
-        log_file = "prs_log_file.csv"
+        log_file = "prs.csv"
         run_pmmcs(dataset_folder, log_file)
         output = dataset_folder + log_file
         if os.path.isfile(output):
