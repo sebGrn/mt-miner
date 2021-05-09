@@ -3,10 +3,11 @@
 
 std::atomic_bool MT_Miner::stop(false);
 
-MT_Miner::MT_Miner(bool useCloneOptimization, bool useMinimalSizeOnly)
+MT_Miner::MT_Miner(bool useCloneOptimization, bool useMinimalSizeOnly, float threshold)
 {
 	this->useCloneOptimization = useCloneOptimization;
 	this->useMinimalSizeOnly = useMinimalSizeOnly;
+	this->threshold = threshold;
 }
 
 MT_Miner::~MT_Miner()
@@ -17,7 +18,7 @@ void MT_Miner::createBinaryRepresentation(const HyperGraph& hypergraph)
 {
 	// build formal context from hypergraph
 	FormalContext formalContext(hypergraph);
-	formalContext.serialize("format_context.csv");
+	//formalContext.serialize("format_context.csv");
 
 	// build binary representation from formal context
 	BinaryRepresentation::buildFromFormalContext(formalContext);
@@ -102,7 +103,7 @@ void MT_Miner::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>&
 
 	
 	// create a graph, then compute minimal transversal from the binary representation
-	TreeNode rootNode(this->useCloneOptimization, this->useMinimalSizeOnly);
+	TreeNode rootNode(this->useCloneOptimization, this->useMinimalSizeOnly, this->threshold);
 	
 	// lambda function called during parsing every 30 seconds
 	auto ftr = std::async(std::launch::async, [&rootNode]() {

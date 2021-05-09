@@ -50,6 +50,8 @@ private:
 	static std::atomic_bool pending_task_checker;
 
 	static std::atomic_bool only_minimal;
+
+	static std::atomic_uint threshold;
 	
 	// binary representation from the transactional base
 	static std::shared_ptr<BinaryRepresentation> binaryRepresentation;
@@ -83,7 +85,7 @@ private:
 	void launchPendingTasksChecking();
 
 public:
-	TreeNode(bool useCloneOptimization, bool only_minimal);
+	TreeNode(bool useCloneOptimization, bool only_minimal, float threshold);
 	~TreeNode();
 
 	std::vector<std::shared_ptr<Itemset>> computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>&& toTraverse);

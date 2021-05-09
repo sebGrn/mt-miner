@@ -34,6 +34,7 @@ public:
 		USE_CLONE,
 		MINIMAL_SIZE,
 		USE_CONSJONCTIVE,
+		USE_THRESHOLD,
 		NB_PARAM
 	};
 
@@ -47,6 +48,7 @@ public:
 		argumentValues.push_back(std::pair<ParameterType, std::string>(ParameterType::FILENAME_OUTPUT_LOG, "--log-file"));
 		argumentValues.push_back(std::pair<ParameterType, std::string>(ParameterType::USE_CLONE, "--use-clone"));
 		argumentValues.push_back(std::pair<ParameterType, std::string>(ParameterType::USE_CONSJONCTIVE, "--consjonctiv"));
+		argumentValues.push_back(std::pair<ParameterType, std::string>(ParameterType::USE_THRESHOLD, "--threshold"));
 	}
 
 	void showUsage(const std::string& name)
@@ -99,7 +101,8 @@ public:
 
 // ----------------------------------------------------------------------------------------------------------- //
 
-void runMinimalTransversals(const std::string& file, bool useCloneOptimization, bool verbose, bool useOutputFile, bool useOutputLogFile, const std::string& outputLogFile, bool useMinimalSizeOnly, bool useConsjonctive)
+void runMinimalTransversals(const std::string& file, bool useCloneOptimization, bool verbose, bool useOutputFile, 
+	bool useOutputLogFile, const std::string& outputLogFile, bool useMinimalSizeOnly, bool useConsjonctive, float threshold)
 {
 	//std::cout << BOLDYELLOW << "\n***** Running MT Miner *****" << RESET << std::endl << std::endl;
 	unsigned int objectCount = 0;
@@ -118,7 +121,7 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 	if (hypergraph.load(file))
 	{
 		// allocate miner 
-		MT_Miner miner(useCloneOptimization, useMinimalSizeOnly);
+		MT_Miner miner(useCloneOptimization, useMinimalSizeOnly, threshold);
 
 		// load hypergraph into formal context, then into binary representation
 		miner.createBinaryRepresentation(hypergraph);
@@ -171,6 +174,7 @@ int main(int argc, char* argv[])
 	bool useCloneOptimization = true;
 	bool useMinimalSizeOnly = false;
 	bool useConsjonctive = false;
+	float threshold = 1.0;
 	
 	if (parameterList.find(ArgumentParser::MINIMAL_SIZE) != parameterList.end())
 		useMinimalSizeOnly = parameterList[ArgumentParser::MINIMAL_SIZE] == "true" || parameterList[ArgumentParser::MINIMAL_SIZE] == "True" || parameterList[ArgumentParser::MINIMAL_SIZE] == "TRUE";
@@ -182,8 +186,10 @@ int main(int argc, char* argv[])
 		useCloneOptimization = parameterList[ArgumentParser::USE_CLONE] == "true" || parameterList[ArgumentParser::USE_CLONE] == "True" || parameterList[ArgumentParser::USE_CLONE] == "TRUE";
 	if (parameterList.find(ArgumentParser::USE_CONSJONCTIVE) != parameterList.end())
 		useConsjonctive = parameterList[ArgumentParser::USE_CONSJONCTIVE] == "true" || parameterList[ArgumentParser::USE_CONSJONCTIVE] == "True" || parameterList[ArgumentParser::USE_CONSJONCTIVE] == "TRUE";
+	if (parameterList.find(ArgumentParser::USE_THRESHOLD) != parameterList.end())
+		threshold = std::stof(parameterList[ArgumentParser::USE_THRESHOLD]);
 
-	runMinimalTransversals(file, useCloneOptimization, verboseMode, useOutputFile, useOutputLog, useOutputLogFile, useMinimalSizeOnly, useConsjonctive);
+	runMinimalTransversals(file, useCloneOptimization, verboseMode, useOutputFile, useOutputLog, useOutputLogFile, useMinimalSizeOnly, useConsjonctive, threshold);
 
 	return 0;	
 }

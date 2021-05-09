@@ -171,16 +171,6 @@ bool Itemset::computeIsEssential()
 							isEssential = true;
 						}
 					}
-					//for (unsigned int k = BITSET_SIZE; k--; )
-					//{
-					//	// compare bit
-					//	if (!bitset.test(k) && SumOfN_1Items.test(k))
-					//	{
-					//		// this bitset is essential, check with next bitset
-					//		isEssential = true;
-					//		break;
-					//	}
-					//}
 				}
 				else
 				{
@@ -194,34 +184,6 @@ bool Itemset::computeIsEssential()
 						{
 							isEssential = true;
 						}
-
-
-						//for (unsigned int k = BITSET_SIZE; k--; )
-						//{
-						//	if (res[k])
-						//	{
-						//		if (bitset[k])
-						//		{
-						//			isEssential = true;
-						//			break;
-						//		}
-						//	}
-						//}
-
-
-						//std::string str = res.to_string();
-						//std::reverse(str.begin(), str.end());
-						//std::size_t pos = str.find('1');
-						//while (!isEssential && pos != std::string::npos)
-						//{
-						//	if (bitset.test(pos) && !SumOfN_1Items.test(pos))
-						//	{
-						//		b1 = true;
-						//		isEssential = true;
-						//		break;
-						//	}
-						//	pos = str.find('1', pos + 1);
-						//}
 
 						//unsigned int k = BITSET_SIZE / 64;
 						//if (BITSET_SIZE % 64)

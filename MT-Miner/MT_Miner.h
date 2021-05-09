@@ -27,13 +27,14 @@ private:
 	///
 	bool useCloneOptimization;
 	bool useMinimalSizeOnly;
+	float threshold;
 	
 private:
 	/// return the minimal transversals miner
 	void computeInitalToTraverseList(std::vector<std::shared_ptr<Itemset>>& toTraverse) const;
 
 public:
-	MT_Miner(bool useCloneOptimization = true, bool useMinimalSizeOnly = false);
+	MT_Miner(bool useCloneOptimization = true, bool useMinimalSizeOnly = false, float threshold = 1.0f);
 	~MT_Miner();
 
 	/// this function build a format context from the hypergraph, then build the binary representation

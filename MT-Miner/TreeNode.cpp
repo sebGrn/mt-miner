@@ -7,6 +7,7 @@ std::atomic_ullong TreeNode::nbTotalMt(0);
 std::atomic_ullong TreeNode::minimalMt(MAX_MINIMAL_TRAVERSE_SIZE);
 
 std::atomic_bool TreeNode::only_minimal(true);
+std::atomic_uint TreeNode::threshold(1);
 
 // to avoid interleaved outputs
 std::mutex TreeNode::output_guard;
@@ -26,10 +27,11 @@ std::atomic_bool TreeNode::pending_task_checker(true);
 
 std::shared_ptr<BinaryRepresentation> TreeNode::binaryRepresentation = std::make_shared<BinaryRepresentation>();
 
-TreeNode::TreeNode(bool useCloneOptimization, bool only_minimal)
+TreeNode::TreeNode(bool useCloneOptimization, bool only_minimal, float threshold)
 {
 	this->useCloneOptimization = useCloneOptimization;
 	TreeNode::only_minimal = only_minimal;
+	TreeNode::threshold = static_cast<unsigned int>(threshold * 100.0f);
 }
 
 TreeNode::~TreeNode()
@@ -90,15 +92,16 @@ void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&&
 
 		// Compute disjunctive support for each itemset of toTraverse list
 		//	if disjunctive support is equal to object count --> add the itemset to graphMt list (then process its clones)
-		unsigned int support = crtItemset->getSupport();
-		
+		unsigned int support = crtItemset->getSupport();		
 
 		// check if itemset is a minimal transverse depending on disjunctive or consjonctive (with dual) method
 		bool isMinimalTransverse = false;
 		if (Itemset::itemsetType == Itemset::ItemsetType::DISJUNCTIVE)
-			isMinimalTransverse = (support == objectCount);
+			//isMinimalTransverse = (support == objectCount);
+			isMinimalTransverse = ((100 * support) >= (objectCount * TreeNode::threshold));
 		else
-			isMinimalTransverse = (support == 0);
+			//isMinimalTransverse = (support == 0);
+			isMinimalTransverse = ((100 * support) <= (objectCount * (100 - TreeNode::threshold)));
 		
 		if (isMinimalTransverse)
 		{

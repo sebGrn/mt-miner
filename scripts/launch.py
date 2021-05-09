@@ -8,7 +8,7 @@ from shutil import copyfile
 import fileinput
 import compil as cp
 
-def run_miner(dataset_folder, cpp_log_file, minimal_option, consjonctive_option):
+def run_miner(dataset_folder, cpp_log_file, minimal_option, consjonctive_option, threshold):
     onlyfiles = [f for f in os.listdir(dataset_folder) if os.path.isfile(os.path.join(dataset_folder, f))]
     if(len(onlyfiles) == 0):
         print("no dataset in ", dataset_folder)
@@ -28,7 +28,7 @@ def run_miner(dataset_folder, cpp_log_file, minimal_option, consjonctive_option)
 
                 os.chdir("../MT-Miner")
                 start = perf_counter()            
-                cp.compil_and_run_miner(fullpath, cpp_log_file, minimal_option, consjonctive_option)
+                cp.compil_and_run_miner(fullpath, cpp_log_file, minimal_option, consjonctive_option, threshold)
                 #time.sleep(0.25)
                 end = perf_counter()
                 print("Elapsed time for compilation and Miner execution: ", end - start, " sec")
@@ -181,30 +181,34 @@ def run_prs(dataset_folder, log_file):
 
 print("usage :  python3 ./launch.py \"../data/\" <all/all_miner/min_miner/shd>")
 print("<all> : compute all minimal transverses with miner, then compute only minimal transverses with minimal size with miner, then compute all minimal transverses with shd")
-print("<all_miner> : compute all minimal transverses with miner only")
-print("<min_miner> : compute only minimal transverses with minimal size with miner only")
+print("<disj_miner> : compute all minimal transverses with miner only, disjonctive mode")
+print("<disj_min_miner> : compute only minimal transverses with minimal size with miner only")
+print("<consj_miner> : compute all minimal transverses with miner only, consjonctive mode")
+print("<consj_min_miner> : compute only minimal transverses with minimal size with miner only, consjonctive mode")
 print("<shd> : compute all minimal transverses with shd only")
 print("<pmmcs> : compute all minimal transverses with pmmcs only")
 print("<prs> : compute all minimal transverses with prs only")
+print("<threshold> : minimal transverse threshold")
 
-if(len(sys.argv) != 3):
-    print("usage :  python3 ./launch.py \"../data/\" <all/all_miner/min_miner/shd>")
+if(len(sys.argv) != 4):
+    print("usage :  python3 ./launch.py \"../data/\" <all> 1.0")
 else:
     dataset_folder = str(sys.argv[1])
     option = str(sys.argv[2])
+    threshold = float(sys.argv[3])
 
-    if option == "all" or option == "all_miner":
+    if option == "all" or option == "disj_miner":
         print("compute all minimal transverses with miner")
         log_file = "miner_log_all.csv"
-        run_miner(dataset_folder, log_file, "false", "false")
+        run_miner(dataset_folder, log_file, "false", "false", threshold)
         output = dataset_folder + log_file
         if os.path.isfile(output):
             copyfile(log_file, output)
 
-    if option == "all" or option == "min_miner":
+    if option == "all" or option == "disj_min_miner":
         print("compute only minimal transverses with minimal size with miner")
         log_file = "miner_log_cut.csv"
-        run_miner(dataset_folder, log_file, "true", "false")
+        run_miner(dataset_folder, log_file, "true", "false", threshold)
         output = dataset_folder + log_file
         if os.path.isfile(output):
             copyfile(log_file, output)
@@ -212,7 +216,7 @@ else:
     if option == "all" or option == "consj_miner":
         print("compute all minimal transverses with miner")
         log_file = "miner_log_all_consjonctive.csv"
-        run_miner(dataset_folder, log_file, "false", "true")
+        run_miner(dataset_folder, log_file, "false", "true", threshold)
         output = dataset_folder + log_file
         if os.path.isfile(output):
             copyfile(log_file, output)
@@ -220,7 +224,7 @@ else:
     if option == "all" or option == "consj_min_miner":
         print("compute all minimal transverses with miner")
         log_file = "miner_log_min_consjonctive.csv"
-        run_miner(dataset_folder, log_file, "true", "true")
+        run_miner(dataset_folder, log_file, "true", "true", threshold)
         output = dataset_folder + log_file
         if os.path.isfile(output):
             copyfile(log_file, output)
