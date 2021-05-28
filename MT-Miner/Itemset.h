@@ -45,7 +45,6 @@ public:
 	
 	std::shared_ptr<Itemset> createAndReplaceItem(unsigned int i, Item* item);
 	void combineItemset(const Itemset* itemset);
-	//bool computeIsEssential();	
 	
 	unsigned int getSupport() const;
 	
@@ -54,9 +53,8 @@ public:
 	void writeToBinaryFile(std::ofstream& output);
 	void readFromBinaryFile(std::ifstream& output);
 
-	static bool computeIsEssential(const std::shared_ptr<Itemset>& left, const std::shared_ptr<Itemset> right);
+	static bool computeIsEssential(const std::shared_ptr<Itemset>& left, const std::shared_ptr<Itemset>& right);
 	static unsigned int computeSupport(const Itemset& left, const std::shared_ptr<Itemset>& right);
-	static void combineRightIntoLeft(Itemset& left, const std::shared_ptr<Itemset>& right);
 	static void copyRightIntoLeft(Itemset& left, const std::shared_ptr<Itemset>& right);
 };
 

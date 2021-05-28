@@ -138,7 +138,9 @@ void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&&
 			//if(!cumulatedItemset.getItemCount())
 			{
 				// must be the 1st element with only one element
-				Itemset::copyRightIntoLeft(cumulatedItemset, crtItemset);
+				//Itemset::copyRightIntoLeft(cumulatedItemset, crtItemset);
+				Itemset* itemsetPtr = crtItemset.get();
+				cumulatedItemset.combineItemset(itemsetPtr);
 				maxClique.emplace_back(crtItemset);
 				//std::cout << "add item to maxClique list " << crtItemset->toString() << std::endl;
 			}
@@ -155,7 +157,9 @@ void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&&
 
 				if (isMaxClique)
 				{
-					Itemset::combineRightIntoLeft(cumulatedItemset, crtItemset);
+					//Itemset::combineRightIntoLeft(cumulatedItemset, crtItemset);
+					Itemset* itemsetPtr = crtItemset.get();
+					cumulatedItemset.combineItemset(itemsetPtr);
 					maxClique.emplace_back(crtItemset);
 					//std::cout << "add item to maxClique list " << crtItemset->toString() << std::endl;
 				}

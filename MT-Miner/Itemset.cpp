@@ -193,98 +193,112 @@ bool Itemset::computeIsEssential()
 // 1 0 0
 // 0 1 0
 // 0 0 1
-bool Itemset::computeIsEssential(const std::shared_ptr<Itemset>& left, const std::shared_ptr<Itemset> right)
+bool Itemset::computeIsEssential(const std::shared_ptr<Itemset>& left, const std::shared_ptr<Itemset>& right)
 {
-	StaticBitset tmp_xor = (*left->supportBitset) ^ (*right->supportBitset);
-	if (!tmp_xor.count())
+	// first test : or(left) xor or(right)
 	{
-		// all bits from left and right are "1", this is not essential
-		// we dont have here a potentiel candidate for is essential
-		return false;
+		StaticBitset tmp_xor = (*left->supportBitset) ^ (*right->supportBitset);
+		if (!tmp_xor.count())
+		{
+			// all bits from left and right are "1", this is not essential
+			// we dont have here a potentiel candidate for is essential
+			return false;
+		}
 	}
-	else
+
+	auto it_item = right->itemset.end() - 1;
+
+	// second test support of or(left) xor right
+	{		
+		// if support < left.size() + 1, combined itemset wont be essential
+		StaticBitset res = (*left->supportBitset) ^ (*(*it_item)->staticBitset);
+		unsigned int support_res = res.count();
+		if (support_res < (left->getItemCount() + 1))
+			return false;
+	}
+
+	// compute if all left itemsets is still essential after adding itemsetToCombineIt
 	{
 		bool isEssential = false;
+
 		// create another list to compute essentiality
 		std::vector<Item*> itemsetList;
 		std::copy(left->itemset.begin(), left->itemset.end(), std::back_inserter(itemsetList));
-		itemsetList.push_back(*(right->itemset.end() - 1));
-		
-		// compute if all left itemsets is still essential after adding itemsetToCombineIt
+		itemsetList.push_back(*it_item);
+
+		// compute essentiality 
+		StaticBitset SumOfN_1Items;
+		for (int i = 0, n = itemsetList.size(); i != n; i++)
 		{
-			// compute essentiality 
-			StaticBitset SumOfN_1Items;
-			for (int i = 0, n = itemsetList.size(); i != n; i++)
+			// dont forget to initialize boolean
+			if (itemsetType == CONSJONCTIVE)
+				SumOfN_1Items.set();
+			else
+				SumOfN_1Items.reset();
+			isEssential = false;
+
+			for (int j = 0; j < n; j++)
 			{
-				// dont forget to initialize boolean
-				if (itemsetType == CONSJONCTIVE)
-					SumOfN_1Items.set();
-				else
-					SumOfN_1Items.reset();
-				isEssential = false;
-
-				for (int j = 0; j < n; j++)
+				if (i != j)
 				{
-					if (i != j)
-					{
-						//StaticBitset bitset = *BinaryRepresentation::getItemFromKey(j)->staticBitset;
-						StaticBitset bitset = *itemsetList[j]->staticBitset;
-						if (itemsetType == CONSJONCTIVE)
-						{
-							if (!bitset.none())
-								SumOfN_1Items = SumOfN_1Items & bitset;
-						}
-						else
-						{
-							if (!bitset.none())
-								SumOfN_1Items = SumOfN_1Items | bitset;
-						}
-					}
-				}
-
-				//StaticBitset bitset_tmp = *BinaryRepresentation::getItemFromKey(i)->staticBitset;
-				StaticBitset bitset = *itemsetList[i]->staticBitset;
-				if (bitset.count())
-				{
+					//StaticBitset bitset = *BinaryRepresentation::getItemFromKey(j)->staticBitset;
+					StaticBitset bitset = *itemsetList[j]->staticBitset;
 					if (itemsetType == CONSJONCTIVE)
 					{
-						StaticBitset res = bitset ^ SumOfN_1Items;
-						if (res.count())
-						{
-							StaticBitset res2 = SumOfN_1Items & res;
-							if (res2.count())
-							{
-								isEssential = true;
-							}
-						}
+						if (!bitset.none())
+							SumOfN_1Items = SumOfN_1Items & bitset;
 					}
 					else
 					{
-						// disjonctive (OR)
-						//bool b1 = false;
-						StaticBitset res = bitset ^ SumOfN_1Items;
-						if (res.count())
+						if (!bitset.none())
+							SumOfN_1Items = SumOfN_1Items | bitset;
+					}
+				}
+			}
+
+			//StaticBitset bitset_tmp = *BinaryRepresentation::getItemFromKey(i)->staticBitset;
+			StaticBitset bitset = *itemsetList[i]->staticBitset;
+			if (bitset.count())
+			{
+				if (itemsetType == CONSJONCTIVE)
+				{
+					StaticBitset res = bitset ^ SumOfN_1Items;
+					if (res.count())
+					{
+						StaticBitset res2 = SumOfN_1Items & res;
+						if (res2.count())
 						{
-							StaticBitset res2 = bitset & res;
-							if (res2.count())
-							{
-								isEssential = true;
-							}
+							isEssential = true;
 						}
 					}
 				}
-
-				// one item is not essential, we can return  
-				if (!isEssential)
+				else
 				{
-					// this bitset is not essential, break the main loop and return false
-					isEssential = false;
-					break;
+					// disjonctive (OR)
+					//bool b1 = false;
+					StaticBitset res = bitset ^ SumOfN_1Items;
+					if (res.count())
+					{
+						StaticBitset res2 = bitset & res;
+						if (res2.count())
+						{
+							isEssential = true;
+						}
+					}
 				}
+			}
+
+			// one combined item is not essential, we can return  
+			if (!isEssential)
+			{
+				// this bitset is not essential, break the main loop and return false
+				return false;
 			}
 		}
 		return isEssential;
 	}
+}
+	
 			
 
 
@@ -367,7 +381,7 @@ bool Itemset::computeIsEssential(const std::shared_ptr<Itemset>& left, const std
 	
 	//}
 	
-}
+
 
 
 
@@ -455,41 +469,6 @@ void Itemset::readFromBinaryFile(std::ifstream& input)
 	input.read(reinterpret_cast<char*>(&n), sizeof(n));
 	StaticBitset bitset = n;
 	int k = 0;
-}
-
-void Itemset::combineRightIntoLeft(Itemset& itemset_left, const std::shared_ptr<Itemset>& itemset_right)
-{
-	// "1" + "2" => "12"
-	// "71" + "72" => "712"
-	// combine without duplicates
-	for (auto it_item = itemset_right->itemset.begin(); it_item != itemset_right->itemset.end(); it_item++)
-	{
-		// search if right itemset contains current item from left
-		bool found = false;
-		for (auto it = itemset_left.itemset.begin(); it != itemset_left.itemset.end(); it++)
-		{
-			if ((*it)->getAttributeIndex() == (*it_item)->getAttributeIndex())
-			{
-				found = true;
-				break;
-			}
-		}
-		if (!found)
-		{
-			// didnt find duplicates, we can add the item at the end of the list
-			// add item into itemset list
-			itemset_left.itemset.push_back((*it_item));
-		}
-	}
-
-	// dont need to loop on all items, just combine itemset properties
-	if(itemset_left.itemsetType == CONSJONCTIVE)
-		*(itemset_left.supportBitset) = (*itemset_left.supportBitset) & (*itemset_right->supportBitset);
-	else
-		*(itemset_left.supportBitset) = (*itemset_left.supportBitset) | (*itemset_right->supportBitset);		
-	itemset_left.supportValue = (*itemset_left.supportBitset).count();
-	itemset_left.hasClone = itemset_left.hasClone | itemset_right->hasClone;
-	itemset_left.dirty = false;
 }
 
 void Itemset::copyRightIntoLeft(Itemset& left, const std::shared_ptr<Itemset>& right)
