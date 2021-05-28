@@ -131,17 +131,17 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 		miner.computeMinimalTransversals(minimalTransversals);
 
 		// save minimal transversals into a file
-		//if (useOutputFile)
-		//{
-		//	std::string outFile = file;
-		//	outFile += ".out";
+		if (useOutputFile)
+		{
+			std::string outFile = file;
+			outFile += ".out";
 
-		//	Logger::log("saving minimal transversals into file : ", outFile, "\n");
-		//	std::ofstream outputStream;
-		//	outputStream.open(outFile);
-		//	for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const std::shared_ptr<Itemset> elt) { outputStream << elt->toString() << std::endl; });
-		//	outputStream.close();			
-		//}
+			std::cout << "saving minimal transversals into file : " << outFile << "\n";
+			std::ofstream outputStream;
+			outputStream.open(outFile);
+			for_each(minimalTransversals.begin(), minimalTransversals.end(), [&](const std::shared_ptr<Itemset> elt) { outputStream << elt->toString() << std::endl; });
+			outputStream.close();			
+		}
 
 		for (auto it = minimalTransversals.begin(); it != minimalTransversals.end(); it++) { it->reset(); }
 		minimalTransversals.clear();

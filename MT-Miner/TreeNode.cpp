@@ -245,7 +245,11 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 		// we don't need toTraverse anymore, remove references		
 		toTraverse.clear();
 
-		//std::cout << "updateListsFromToTraverse " << toExplore.size() << std::endl;
+
+		//std::cout << "updateListsFromToTraverse, toExplore size : " << toExplore.size() << ", maxclique size : " << maxClique.size() << std::endl;
+		//std::cout << "toExplore size : ";
+		//for_each(toExplore.begin(), toExplore.end(), [&](const std::shared_ptr<Itemset> elt) { std::cout << elt->toString(); });
+		//std::cout << std::endl;
 
 		if (toExplore.empty())
 		{
@@ -296,18 +300,19 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 
 						if (!toCombinedRight->containsAClone())
 						{
-							// combine toCombinedRight into toCombinedLeft
-							std::shared_ptr<Itemset> newItemset = std::make_shared<Itemset>(toCombinedLeft);
-							newItemset->combineItemset(toCombinedRight.get());
-							//std::cout << "combine item sets " << toCombinedLeft->toString() << " and " << toCombinedRight->toString() << " into " << newItemset->toString() << std::endl;
-							if (newItemset->computeIsEssential())
+							/// TEST ISESSENTIAL TOUT EN COMBINANT
+							bool isEssential = Itemset::computeIsEssential(toCombinedLeft, toCombinedRight);
+							if (isEssential)
 							{
+								// combine toCombinedRight into toCombinedLeft							
+								std::shared_ptr<Itemset> newItemset = std::make_shared<Itemset>(toCombinedLeft);
+								newItemset->combineItemset(toCombinedRight.get());
 								//std::cout << "this combined itemset is essential, added to new toTraverse list" << std::endl;
 								// this is a candidate for next iteration
 								newToTraverse.push_back(newItemset);
 							}
 						}
-					});
+					});	
 				}
 				catch (std::exception& e)
 				{

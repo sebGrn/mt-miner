@@ -27,10 +27,10 @@ private:
 
 	// disjunctive support : computed with OR
 	// consjonctive support : computed with AND
-	std::unique_ptr<StaticBitset> value;
-	unsigned int support;
+	std::unique_ptr<StaticBitset> supportBitset;
+	unsigned int supportValue;
 
-public:
+public:	
 	Itemset();
 	Itemset(Item* item);
 	Itemset(const std::shared_ptr<Itemset> itemset);
@@ -45,7 +45,7 @@ public:
 	
 	std::shared_ptr<Itemset> createAndReplaceItem(unsigned int i, Item* item);
 	void combineItemset(const Itemset* itemset);
-	bool computeIsEssential();
+	//bool computeIsEssential();	
 	
 	unsigned int getSupport() const;
 	
@@ -54,14 +54,15 @@ public:
 	void writeToBinaryFile(std::ofstream& output);
 	void readFromBinaryFile(std::ifstream& output);
 
-	static unsigned int computeSupport(const Itemset& left, const std::shared_ptr<Itemset> right);
-	static void combineRightIntoLeft(Itemset& left, const std::shared_ptr<Itemset> right);
-	static void copyRightIntoLeft(Itemset& left, const std::shared_ptr<Itemset> right);
+	static bool computeIsEssential(const std::shared_ptr<Itemset>& left, const std::shared_ptr<Itemset> right);
+	static unsigned int computeSupport(const Itemset& left, const std::shared_ptr<Itemset>& right);
+	static void combineRightIntoLeft(Itemset& left, const std::shared_ptr<Itemset>& right);
+	static void copyRightIntoLeft(Itemset& left, const std::shared_ptr<Itemset>& right);
 };
 
 inline unsigned int Itemset::getSupport() const
 {
-	return support;
+	return supportValue;
 }
 
 inline bool Itemset::containsAClone() const
@@ -88,8 +89,8 @@ inline void Itemset::flip()
 		{
 			(*elt).staticBitset->flip();
 		}
-		this->value->flip();
-		this->support = (*this->value).count();
+		this->supportBitset->flip();
+		this->supportValue = (*this->supportBitset).count();
 		this->dirty = true;
 	}
 }
