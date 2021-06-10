@@ -202,6 +202,7 @@ bool Itemset::computeIsEssential(const std::shared_ptr<Itemset>& left, const std
 		{
 			// all bits from left and right are "1", this is not essential
 			// we dont have here a potentiel candidate for is essential
+			//std::cout << "OPTIMIZED XOR 1" << std::endl;
 			return false;
 		}
 	}
@@ -214,7 +215,15 @@ bool Itemset::computeIsEssential(const std::shared_ptr<Itemset>& left, const std
 		StaticBitset res = (*left->supportBitset) ^ (*(*it_item)->staticBitset);
 		unsigned int support_res = res.count();
 		if (support_res < (left->getItemCount() + 1))
+		{
+			//std::cout << "OPTIMIZED XOR 2" << std::endl;
 			return false;
+		}
+		else if (support_res == (left->getItemCount() + 1))
+		{
+			//std::cout << "OPTIMIZED XOR 3" << std::endl;
+			return true;
+		}
 	}
 
 	// compute if all left itemsets is still essential after adding itemsetToCombineIt
@@ -298,121 +307,6 @@ bool Itemset::computeIsEssential(const std::shared_ptr<Itemset>& left, const std
 		return isEssential;
 	}
 }
-	
-			
-
-
-			// we know that left itemset are already essentials
-
-			/*for (unsigned int i = BITSET_SIZE; i--; )
-			{
-				bool leftBit = tmp_xor[i];
-				bool rightBit = (*(*itemsetToCombineIt)->staticBitset)[i];
-
-				// first essentiality test
-				if ((leftBit == false) && (rightBit == true))
-				{
-					isEssential = true;
-					break;
-				}
-			}
-
-			if(isEssential)
-			{ 
-
-				// didnt find duplicates, we can add the item at the end of the list
-				combinedItemset->itemset.push_back((*itemsetToCombineIt));
-
-				// update support
-				if (itemsetType == CONSJONCTIVE)
-					(*combinedItemset->supportBitset) = (*(*itemsetToCombineIt)->staticBitset) & (*combinedItemset->supportBitset);
-				else
-					(*combinedItemset->supportBitset) = (*(*itemsetToCombineIt)->staticBitset) | (*combinedItemset->supportBitset);
-
-				// update clone status
-				if ((*itemsetToCombineIt)->isAClone())
-					combinedItemset->hasClone = true;
-
-				return true;
-			}*/
-		//}
-
-
-		
-		
-		// test essentiality on (*it_item) and left itemset
-		/*unsigned int nbEssentialCandidate = 0;
-		for (unsigned int i = BITSET_SIZE; i--; )
-		{
-			// if sum ith line of 1st itemset is '0' and ith line is '1', we may have an essential combined itemset
-			// if not the combined itemset is not essential
-			bool sumOfLeftItemset = (*left->supportBitset)[i];
-			bool rightsupportBitset = (*(*it_item)->staticBitset)[i];
-			if (((sumOfLeftItemset == false) && (rightsupportBitset == true)) == false)
-			{
-				return false;
-			}
-			//if (((sumOfLeftItemset == true) && (rightsupportBitset == false)) == true)
-			//{
-			//	nbEssentialCandidate++;
-			//}
-			//else
-			//{
-			//	return false;
-			//}
-		}*/
-		//if (nbEssentialCandidate < right->getItemCount())
-		//{
-		//	return false;
-		//}
-	
-		// didnt find duplicates, we can add the item at the end of the list
-		/*combinedItemset->itemset.push_back((*it_item));
-	
-		// update support
-		if (itemsetType == CONSJONCTIVE)
-			(*combinedItemset->supportBitset) = (*(*it_item)->staticBitset) & (*combinedItemset->supportBitset);
-		else
-			(*combinedItemset->supportBitset) = (*(*it_item)->staticBitset) | (*combinedItemset->supportBitset);
-	
-		// update clone status
-		if ((*it_item)->isAClone())
-			combinedItemset->hasClone = true;*/
-	
-	//}
-	
-
-
-
-
-
-
-
-		/*
-		// left itemset is essential
-		// right itemset is essential
-		// we can evaluate minimum adn on their supportBitsets
-		bool candidate_l = false;
-		bool candidate_r = false;
-		for (unsigned int i = BinaryRepresentation::getObjectCount(); i--; )
-		{
-			if (!candidate_l && tmp_xor[i] && (*left->supportBitset)[i])
-			{
-				candidate_l = true;
-			}
-			if (!candidate_r && tmp_xor[i] && (*right->supportBitset)[i])
-			{
-				candidate_r = true;
-			}
-			if (candidate_l && candidate_r)
-				return true;
-		}*/
-
-		//StaticBitset tmp_and = tmp_xor & (*right->supportBitset);
-		//if (tmp_and.count())
-		//{
-		//	return true;
-		//}		
 
 unsigned int Itemset::computeSupport(const Itemset& left, const std::shared_ptr<Itemset>& right)
 {

@@ -1,5 +1,7 @@
 #include "TreeNode.h"
 
+#define TRACE
+
 #define MAX_PENDING_TASKS_START 1000
 #define MAX_MINIMAL_TRAVERSE_SIZE 9999
 
@@ -61,7 +63,9 @@ void TreeNode::recurseOnClonedItemset(std::shared_ptr<Itemset> itemset, unsigned
 				// lock thread and add minimal transverse			
 				const std::lock_guard<std::mutex> minimalTransverse_guard(task_guard);
 				this->minimalTransverse.push_back(clonedItemset);
-				//std::cout << "new minimal traverse found from clone " << clonedItemset->toString() << std::endl;
+#ifdef TRACE
+				std::cout << "new minimal traverse found from clone " << clonedItemset->toString() << std::endl;
+#endif
 			}
 
 			// update info
@@ -111,7 +115,9 @@ void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&&
 				{
 					const std::lock_guard<std::mutex> guard(task_guard);
 					this->minimalTransverse.push_back(crtItemset);
-					//std::cout << "new minimal traverse found " << crtItemset->toString() << std::endl;
+#ifdef TRACE
+					std::cout << "new minimal traverse found " << crtItemset->toString() << std::endl;
+#endif
 				}
 
 				// update info
@@ -142,7 +148,9 @@ void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&&
 				Itemset* itemsetPtr = crtItemset.get();
 				cumulatedItemset.combineItemset(itemsetPtr);
 				maxClique.emplace_back(crtItemset);
-				//std::cout << "add item to maxClique list " << crtItemset->toString() << std::endl;
+#ifdef TRACE
+				std::cout << "add item to maxClique list " << crtItemset->toString() << std::endl;
+#endif
 			}
 			else
 			{
@@ -161,12 +169,16 @@ void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&&
 					Itemset* itemsetPtr = crtItemset.get();
 					cumulatedItemset.combineItemset(itemsetPtr);
 					maxClique.emplace_back(crtItemset);
-					//std::cout << "add item to maxClique list " << crtItemset->toString() << std::endl;
+#ifdef TRACE
+					std::cout << "add item to maxClique list " << crtItemset->toString() << std::endl;
+#endif
 				}
 				else
 				{
 					toExplore.emplace_back(crtItemset);
-					//std::cout << "add item to toExplore list " << crtItemset->toString() << std::endl;
+#ifdef TRACE
+					std::cout << "add item to toExplore list " << crtItemset->toString() << std::endl;
+#endif
 				}
 			}
 		}
@@ -249,11 +261,12 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 		// we don't need toTraverse anymore, remove references		
 		toTraverse.clear();
 
-
-		//std::cout << "updateListsFromToTraverse, toExplore size : " << toExplore.size() << ", maxclique size : " << maxClique.size() << std::endl;
-		//std::cout << "toExplore size : ";
-		//for_each(toExplore.begin(), toExplore.end(), [&](const std::shared_ptr<Itemset> elt) { std::cout << elt->toString(); });
-		//std::cout << std::endl;
+#ifdef TRACE
+		std::cout << "updateListsFromToTraverse, toExplore size : " << toExplore.size() << ", maxclique size : " << maxClique.size() << std::endl;
+		std::cout << "toExplore size : ";
+		for_each(toExplore.begin(), toExplore.end(), [&](const std::shared_ptr<Itemset> elt) { std::cout << elt->toString(); });
+		std::cout << std::endl;
+#endif
 
 		if (toExplore.empty())
 		{
