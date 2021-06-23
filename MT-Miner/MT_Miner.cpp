@@ -148,7 +148,7 @@ void MT_Miner::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>&
 
 	// print minimal transversals
 	std::cout << "\nminimal transversals count : " << mt.size() << "\n";
-	if (mt.size() > 6)
+	if (mt.size() > 10)
 	{
 		for_each(mt.begin(), mt.begin() + 5, [&](const std::shared_ptr<Itemset> elt) { std::cout << elt->toString(), "\n"; });
 		std::cout << "...\n";

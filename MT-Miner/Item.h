@@ -9,11 +9,11 @@
 #include "SparseBitset.h"
 
 // 32768	// dualmatching30 --> OK, 10 sec --> 6 sec
-// 65536	// dualmatching32 --> OK, 48 sec --> 28 sec
-// 131072	// dualmatching34 --> OK, 444 sec --> 159 sec
+// 65536	// dualmatching32 --> OK, 48 sec --> 28 sec --> 5 sec
+// 131072	// dualmatching34 --> OK, 444 sec --> 159 sec --> 114 sec (max 14.5go)
 // 262144	// dualmatching36 --> CRASH, 5 min, 47Go memory --> 5 min, 15Go memory
 // 524288	// dualmatching38
-#define BITSET_SIZE 1600
+#define BITSET_SIZE 6
 typedef std::bitset<BITSET_SIZE> StaticBitset;
 
 class Item

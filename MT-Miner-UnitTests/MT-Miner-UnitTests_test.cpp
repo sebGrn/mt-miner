@@ -9,52 +9,24 @@ namespace MTMinerUnitTests_test
 	{
 	public:
 		
-		/*TEST_METHOD(TestingDisjonctifSupport)
+		TEST_METHOD(TestingMinimalTransversalsSize_accident)
 		{
 			HyperGraph hypergraph;
-			bool parserResult = hypergraph.load("../../data/test.txt");
-			Assert::AreEqual(parserResult, true);
-			
-			int objectCount = hypergraph.getObjectCount();
-			int itemCount = hypergraph.getItemCount();
-			Assert::AreEqual(6, objectCount);
-			Assert::AreEqual(8, itemCount);
+			bool parserResult = hypergraph.load("../../data/accident/ac.150k.dat");
+			Assert::AreEqual(true, parserResult);
 
 			MT_Miner miner(true);
 			miner.createBinaryRepresentation(hypergraph);
 
-			// allocate miner
-			std::shared_ptr<Itemset> item1 = std::make_shared<Itemset>();
-			item1->addItem(BinaryRepresentation::getItemFromKey(1));
-			int disjonctifSupport = item1->getDisjunctifSupport();
-			Assert::AreEqual(1, disjonctifSupport);
-
-			std::shared_ptr<Itemset> item2 = std::make_shared<Itemset>();
-			item2->addItem(BinaryRepresentation::getItemFromKey(1));
-			item2->addItem(BinaryRepresentation::getItemFromKey(2));
-			disjonctifSupport = item2->getDisjunctifSupport();
-			Assert::AreEqual(2, disjonctifSupport);
-
-			std::shared_ptr<Itemset> item3 = std::make_shared<Itemset>();
-			item3->addItem(BinaryRepresentation::getItemFromKey(1));
-			item3->addItem(BinaryRepresentation::getItemFromKey(2));
-			item3->addItem(BinaryRepresentation::getItemFromKey(3));
-			disjonctifSupport = item3->getDisjunctifSupport();
-			Assert::AreEqual(3, disjonctifSupport);
-
-			std::shared_ptr<Itemset> item4 = std::make_shared<Itemset>();
-			item4->addItem(BinaryRepresentation::getItemFromKey(1));
-			item4->addItem(BinaryRepresentation::getItemFromKey(2));
-			item4->addItem(BinaryRepresentation::getItemFromKey(3));
-			item4->addItem(BinaryRepresentation::getItemFromKey(4));
-			disjonctifSupport = item4->getDisjunctifSupport();
-			Assert::AreEqual(4, disjonctifSupport);
-		}*/
-
+			// compute minimal transversals
+			std::vector< std::shared_ptr<Itemset>> minimalTransversals;
+			miner.computeMinimalTransversals(minimalTransversals);
+			Assert::AreEqual(1039, static_cast<int>(minimalTransversals.size()));
+		}
 		TEST_METHOD(TestingMinimalTransversalsSize)
 		{
 			HyperGraph hypergraph;
-			bool parserResult = hypergraph.load("../../data/test.txt");
+			bool parserResult = hypergraph.load("../../data/simple.txt");
 			Assert::AreEqual(true, parserResult);
 
 			MT_Miner miner(true);

@@ -30,10 +30,19 @@ private:
 	std::unique_ptr<StaticBitset> supportBitset;
 	unsigned int supportValue;
 
+	//std::unique_ptr<StaticBitset> onlyOneBitset;
+	std::unique_ptr<StaticBitset> xorSupportBitset;
+	std::unique_ptr<StaticBitset> noiseBitset;
+
+	//std:vector<unsigned int> isEssentialIndexes;
+
+private:
+	//bool isEssential(Itemset* left, Itemset* right);
+
 public:	
 	Itemset();
 	Itemset(Item* item);
-	Itemset(const std::shared_ptr<Itemset> itemset);
+	Itemset(const std::shared_ptr<Itemset>& itemset);
 	~Itemset();
 	
 	void flip();
@@ -53,6 +62,8 @@ public:
 	void writeToBinaryFile(std::ofstream& output);
 	void readFromBinaryFile(std::ifstream& output);
 
+	
+	static bool computeIsEssential_old(const std::shared_ptr<Itemset>& left, const std::shared_ptr<Itemset>& right);
 	static bool computeIsEssential(const std::shared_ptr<Itemset>& left, const std::shared_ptr<Itemset>& right);
 	static unsigned int computeSupport(const Itemset& left, const std::shared_ptr<Itemset>& right);
 	static void copyRightIntoLeft(Itemset& left, const std::shared_ptr<Itemset>& right);

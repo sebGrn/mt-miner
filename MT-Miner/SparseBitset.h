@@ -9,6 +9,7 @@
 * Use sparsity property of bitsets
 * Stores a vector of indexes
 * an index is a reference to the ith element corresponding to set bit from the original bitset
+* use to store formal context
 */
 class SparseBitset
 {

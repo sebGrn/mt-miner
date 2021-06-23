@@ -131,7 +131,7 @@ public:
 				// as many objects as lines in the file
 				objectCount++;
 
-				//if (objectCount > 500)
+				//if (objectCount > 10)
 				//	break;
 			}
 		}

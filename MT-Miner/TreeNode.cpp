@@ -64,10 +64,9 @@ void TreeNode::recurseOnClonedItemset(std::shared_ptr<Itemset> itemset, unsigned
 				const std::lock_guard<std::mutex> minimalTransverse_guard(task_guard);
 				this->minimalTransverse.push_back(clonedItemset);
 #ifdef TRACE
-				std::cout << "new minimal traverse found from clone " << clonedItemset->toString() << std::endl;
+				std::cout << "new minimal traverse found from clone " << clonedItemset->toString() << "kk" << std::endl;
 #endif
 			}
-
 			// update info
 			nbTotalMt++;
 			if (clonedItemset->getItemCount() < minimalMt)
@@ -319,6 +318,12 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 						{
 							/// TEST ISESSENTIAL TOUT EN COMBINANT
 							bool isEssential = Itemset::computeIsEssential(toCombinedLeft, toCombinedRight);
+							//bool isEssential2 = Itemset::computeIsEssential_old(toCombinedLeft, toCombinedRight);
+							//if(isEssential2 != isEssential)
+							//{
+							//	bool isEssential3 = Itemset::computeIsEssential(toCombinedLeft, toCombinedRight);
+							//	bool isEssential4 = Itemset::computeIsEssential_old(toCombinedLeft, toCombinedRight);
+							//}
 							if (isEssential)
 							{
 								// combine toCombinedRight into toCombinedLeft							
