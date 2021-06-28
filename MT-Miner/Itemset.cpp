@@ -8,9 +8,10 @@ Itemset::ItemsetType Itemset::itemsetType = Itemset::ItemsetType::DISJUNCTIVE;
 Itemset::Itemset()
 {
 	this->supportBitset = std::make_unique<StaticBitset>();
+#ifndef ISESSENTIAL_ON_TOEXPLORE
 	this->xorSupportBitset = std::make_unique<StaticBitset>();
-	//this->onlyOneBitset = std::make_unique<StaticBitset>();	
 	this->noiseBitset = std::make_unique<StaticBitset>();
+#endif
 	this->supportValue = 0;
 	this->dirty = true;
 	this->hasClone = false;	
@@ -20,9 +21,10 @@ Itemset::Itemset(Item* item)
 {
 	assert(this->itemset.empty());
 	this->supportBitset = std::make_unique<StaticBitset>(*item->staticBitset);
+#ifndef ISESSENTIAL_ON_TOEXPLORE
 	this->xorSupportBitset = std::make_unique<StaticBitset>(*item->staticBitset);
-	//this->onlyOneBitset = std::make_unique<StaticBitset>(*item->staticBitset);
 	this->noiseBitset = std::make_unique<StaticBitset>();
+#endif
 	this->supportValue = item->count();
 	this->dirty = false;
 	this->hasClone = false;
@@ -36,9 +38,10 @@ Itemset::Itemset(const std::shared_ptr<Itemset>& itemset)
 {
 	assert(this->itemset.empty());
 	this->supportBitset = std::make_unique<StaticBitset>(*itemset->supportBitset);
+#ifndef ISESSENTIAL_ON_TOEXPLORE
 	this->xorSupportBitset = std::make_unique<StaticBitset>(*itemset->xorSupportBitset);
-	//this->onlyOneBitset = std::make_unique<StaticBitset>(*itemset->onlyOneBitset);
 	this->noiseBitset = std::make_unique<StaticBitset>(*itemset->noiseBitset);
+#endif
 	this->supportValue = itemset->supportValue;
 	this->dirty = itemset->dirty;
 	this->hasClone = itemset->hasClone;
@@ -59,9 +62,10 @@ std::shared_ptr<Itemset> Itemset::createAndReplaceItem(unsigned int iToReplace, 
 		if (clonedItemset)
 		{
 			(*clonedItemset->supportBitset) = (*this->supportBitset);
+#ifndef ISESSENTIAL_ON_TOEXPLORE
 			(*clonedItemset->xorSupportBitset) = (*this->xorSupportBitset);
-			//(*clonedItemset->onlyOneBitset) = (*this->onlyOneBitset);
 			(*clonedItemset->noiseBitset) = (*this->noiseBitset);
+#endif
 			clonedItemset->supportValue = this->supportValue;
 			clonedItemset->dirty = this->dirty;
 			clonedItemset->hasClone = this->hasClone;
@@ -96,32 +100,16 @@ void Itemset::combineItemset(const Itemset* itemset_right)
 	// we can always add the last one
 	auto itItemToAdd = itemset_right->itemset.end() - 1;
 
-	//if ((this->itemset.size() == 2) && (this->itemset[0]->attributeIndex == 32) && (this->itemset[1]->attributeIndex == 25))
-	//	int k = 0;
-
-	//if ((*itItemToAdd)->attributeIndex == 25 && (this->itemset.size() == 1) && (this->itemset[0]->attributeIndex == 32))
-	//	int k = 0;
-
 	// update support
 	if (itemsetType == CONSJONCTIVE)
 		(*this->supportBitset) = (*(*itItemToAdd)->staticBitset) & (*this->supportBitset);
 	else
 		(*this->supportBitset) = (*(*itItemToAdd)->staticBitset) | (*this->supportBitset);
-
-	//(*this->onlyOneBitset) = (*(*it_item)->staticBitset) ^ (*this->onlyOneBitset);
-	//(*this->noiseBitset) = (*(*it_item)->staticBitset) & (*this->noiseBitset);
-	//(*this->noiseBitset) = (*(*it_item)->staticBitset) & (*this->noiseBitset);
-
-	//(*this->onlyOneBitset) = (*this->onlyOneBitset) & (*this->noiseBitset);
-	//(*this->xorSupportBitset) = (*(*it_item)->staticBitset) ^ (*this->supportBitset);
-
-	//StaticBitset tmp = (*(*itItemToAdd)->staticBitset) ^ (*this->xorSupportBitset);
-	//(*this->noiseBitset) = (*this->noiseBitset) | (((*this->xorSupportBitset) ^ tmp) & (*this->xorSupportBitset));
-	//(*this->xorSupportBitset) = tmp;
-
-	//(*this->noiseBitset) = (*this->noiseBitset) | ( ((*this->xorSupportBitset) ^ ((*(*itItemToAdd)->staticBitset) ^ (*this->xorSupportBitset))) & (*this->xorSupportBitset) );
+	
+#ifndef ISESSENTIAL_ON_TOEXPLORE
 	(*this->noiseBitset) = (*this->noiseBitset) | ((*this->xorSupportBitset) & (*(*itItemToAdd)->staticBitset) ^ (*this->xorSupportBitset) ^ (*this->xorSupportBitset) );
 	(*this->xorSupportBitset) = (*(*itItemToAdd)->staticBitset) ^ (*this->xorSupportBitset);
+#endif
 
 	// update clone status
 	if ((*itItemToAdd)->isAClone())
@@ -136,91 +124,8 @@ void Itemset::combineItemset(const Itemset* itemset_right)
 	this->itemset.push_back(*itItemToAdd);
 };
 
-/*
-bool Itemset::computeIsEssential()
-{
-	/// d'abord tester le XOR sur la combinaison des itemset , si différent de 1, on ne teste pas la suite
-	/// isEssential, utiliser les anciens itemset
-	if (this->getItemCount() == 1)
-	{
-		return true;
-	}
-	else
-	{
-		bool isEssential = false;
-		StaticBitset SumOfN_1Items;
-		for (int i = 0, n = this->getItemCount(); i != n; i++)
-		{
-			// dont forget to initialize boolean
-			if (itemsetType == CONSJONCTIVE)
-				SumOfN_1Items.set();
-			else
-				SumOfN_1Items.reset();
-			isEssential = false;
+#ifndef ISESSENTIAL_ON_TOEXPLORE
 
-			for (int j = 0; j < n; j++)
-			{
-				if (i != j)
-				{
-					//StaticBitset bitset = *BinaryRepresentation::getItemFromKey(j)->staticBitset;
-					StaticBitset bitset = *this->itemset[j]->staticBitset;
-					if (itemsetType == CONSJONCTIVE)
-					{
-						if (!bitset.none())
-							SumOfN_1Items = SumOfN_1Items & bitset;
-					}
-					else
-					{
-						if (!bitset.none())
-							SumOfN_1Items = SumOfN_1Items | bitset;
-					}
-				}
-			}
-
-			//StaticBitset bitset_tmp = *BinaryRepresentation::getItemFromKey(i)->staticBitset;
-			StaticBitset bitset = *this->itemset[i]->staticBitset;
-
-			if (bitset.count())
-			{
-				if (itemsetType == CONSJONCTIVE)
-				{
-					StaticBitset res = bitset ^ SumOfN_1Items;
-					if (res.count())
-					{
-						StaticBitset res2 = SumOfN_1Items & res;
-						if (res2.count())
-						{
-							isEssential = true;
-						}
-					}
-				}
-				else
-				{
-					// disjonctive (OR)
-					//bool b1 = false;
-					StaticBitset res = bitset ^ SumOfN_1Items;					
-					if (res.count())
-					{
-						StaticBitset res2 = bitset & res;
-						if (res2.count())
-						{
-							isEssential = true;
-						}
-					}
-				}
-			}
-
-			// one item is not essential, we can return  
-			if (!isEssential)
-			{
-				// this bitset is not essential, break the main loop and return false
-				return false;
-			}
-		}
-		return isEssential;
-	}
-}
-*/
 // itemset is essential if and only if we have this pattern
 // 0 1
 // 1 0
@@ -230,6 +135,11 @@ bool Itemset::computeIsEssential()
 // 0 0 1
 bool Itemset::computeIsEssential(const std::shared_ptr<Itemset>& left, const std::shared_ptr<Itemset>& right)
 {
+	if (left->getItemCount() == 2)
+	{
+		int k = 0;
+	}
+
 	// first test : or(left) xor or(right)
 	{
 		StaticBitset tmp_xor = (*left->supportBitset) ^ (*right->supportBitset);
@@ -237,35 +147,13 @@ bool Itemset::computeIsEssential(const std::shared_ptr<Itemset>& left, const std
 		{
 			// all bits from left and right are "1", this is not essential
 			// we dont have here a potentiel candidate for is essential
-			//std::cout << "OPTIMIZED XOR 1" << std::endl;
 			return false;
 		}
-
 	}
 
 	auto it_item = right->itemset.end() - 1;
 	StaticBitset bitsetToAdd = (*(*it_item)->staticBitset);
-
-	// second test support of or(left) xor right
 	{
-		// if support < left.size() + 1, combined itemset wont be essential
-		//StaticBitset res = (*left->supportBitset) ^ bitsetToAdd;
-		//unsigned int support_res = res.count();
-		//if (support_res < (left->getItemCount() + 1))
-		//{
-		//	//std::cout << "OPTIMIZED XOR 2" << std::endl;
-		//	return false;
-		//}
-		//else if (support_res == (left->getItemCount() + 1))
-		//{
-		//	//std::cout << "OPTIMIZED XOR 3" << std::endl;
-		//	return true;
-		//}
-	}
-
-	// third test, compare xor from left with xor frm left + right
-	{
-		//StaticBitset xorBitset = (*left->onlyOneBitset) ^ bitsetToAdd;
 		StaticBitset xorBitset = (*left->xorSupportBitset) ^ bitsetToAdd;
 		unsigned int support_xor = xorBitset.count();
 		if (support_xor < (left->getItemCount() + 1))
@@ -291,33 +179,75 @@ bool Itemset::computeIsEssential(const std::shared_ptr<Itemset>& left, const std
 			}
 			return true;
 		}
-		//else if (support_xor == (left->getItemCount() + 1))
-		//{
-		//	//std::cout << "OPTIMIZED XOR 5" << std::endl;
-		//	return true;
-		//}
-		//else
-		//{
-		//	for (int i = 0, n = left->getItemCount(); i != n; i++)
-		//	{
-		//		StaticBitset xorBitset = (*left->itemset[i]->staticBitset) ^ bitsetToAdd;
-		//		StaticBitset res1 = xorBitset & bitsetToAdd;
-		//		if (!res1.count())
-		//			return false;
-		//		StaticBitset res2 = xorBitset & (*left->itemset[i]->staticBitset);
-		//		if (!res2.count())
-		//			return false;
-		//		StaticBitset res = res1 | res2;
-		//		if (res.count() < 2)
-		//			return false;
-		//	}
-		//	return true;
-		//}
 	}
-
 }
 
-bool Itemset::computeIsEssential_old(const std::shared_ptr<Itemset>& left, const std::shared_ptr<Itemset>& right)
+#else
+
+bool Itemset::computeIsEssential(const std::shared_ptr<Itemset>& itemset)
+{
+	if (itemset->getItemCount() == 0)
+	{
+		return false;
+	}
+	else if (itemset->getItemCount() == 1)
+	{
+		return true;
+	}
+	else
+	{
+		// build and itemset without the last item (ie item do add)
+		std::vector<Item*> itemsetList;
+		std::copy(itemset->itemset.begin(), itemset->itemset.end() - 1, std::back_inserter(itemsetList));
+
+		// compute cumulated xor for itemsetList
+		StaticBitset cumulatedXorbitset;
+		StaticBitset noiseBitset;
+		if (itemsetList.size() == 1)
+		{
+			cumulatedXorbitset = (*itemsetList[0]->staticBitset);
+		}
+		else
+		{
+			for_each(itemsetList.begin(), itemsetList.end(), [&cumulatedXorbitset, &noiseBitset](Item* item) {
+				noiseBitset = noiseBitset | ((cumulatedXorbitset & ((*item->staticBitset) ^ cumulatedXorbitset)) ^ cumulatedXorbitset);
+				cumulatedXorbitset = cumulatedXorbitset ^ (*item->staticBitset);
+				});
+		}
+
+		Item* right = *(itemset->itemset.end() - 1);
+
+		StaticBitset bitsetToAdd = (*right->staticBitset);
+		{
+			StaticBitset xorBitset = cumulatedXorbitset ^ bitsetToAdd;
+			unsigned int support_xor = xorBitset.count();
+			if (support_xor < (itemsetList.size() + 1))
+			{
+				return false;
+			}
+			else
+			{
+				// create another list to compute essentiality, pick the last one from right list
+				itemsetList.push_back(right);
+
+				StaticBitset validatorBitset = noiseBitset;
+				validatorBitset = validatorBitset.flip() & xorBitset;
+
+				for (int i = 0, n = itemsetList.size(); i != n; i++)
+				{
+					StaticBitset res = (*itemsetList[i]->staticBitset) & validatorBitset;
+					if (res.none())
+						return false;
+				}
+				return true;
+			}
+		}
+	}
+}
+
+#endif
+
+/*bool Itemset::computeIsEssential_old(const std::shared_ptr<Itemset>& left, const std::shared_ptr<Itemset>& right)
 {
 	// compute if all left itemsets is still essential after adding itemsetToCombineIt
 	auto it_item = right->itemset.end() - 1;
@@ -400,89 +330,8 @@ bool Itemset::computeIsEssential_old(const std::shared_ptr<Itemset>& left, const
 		}
 		return isEssential;
 	}
-}
-/*
-bool Itemset::isEssential(Itemset* left, Itemset* right)
-{
-	// compute if all left itemsets is still essential after adding itemsetToCombineIt
-	bool isEssential = false;
-
-	// create another list to compute essentiality
-	std::vector<Item*> itemsetList;
-	itemsetList.push_back(left)	
-	itemsetList.push_back(right);
-
-	// compute essentiality 
-	StaticBitset SumOfN_1Items;
-	for (int i = 0, n = itemsetList.size(); i != n; i++)
-	{
-		// dont forget to initialize boolean
-		if (itemsetType == CONSJONCTIVE)
-			SumOfN_1Items.set();
-		else
-			SumOfN_1Items.reset();
-		isEssential = false;
-
-		for (int j = 0; j < n; j++)
-		{
-			if (i != j)
-			{
-				//StaticBitset bitset = *BinaryRepresentation::getItemFromKey(j)->staticBitset;
-				StaticBitset bitset = *itemsetList[j]->staticBitset;
-				if (itemsetType == CONSJONCTIVE)
-				{
-					if (!bitset.none())
-						SumOfN_1Items = SumOfN_1Items & bitset;
-				}
-				else
-				{
-					if (!bitset.none())
-						SumOfN_1Items = SumOfN_1Items | bitset;
-				}
-			}
-		}
-
-		//StaticBitset bitset_tmp = *BinaryRepresentation::getItemFromKey(i)->staticBitset;
-		StaticBitset bitset = *itemsetList[i]->staticBitset;
-		if (bitset.count())
-		{
-			if (itemsetType == CONSJONCTIVE)
-			{
-				StaticBitset res = bitset ^ SumOfN_1Items;
-				if (res.count())
-				{
-					StaticBitset res2 = SumOfN_1Items & res;
-					if (res2.count())
-					{
-						isEssential = true;
-					}
-				}
-			}
-			else
-			{
-				// disjonctive (OR)
-				//bool b1 = false;
-				StaticBitset res = bitset ^ SumOfN_1Items;
-				if (res.count())
-				{
-					StaticBitset res2 = bitset & res;
-					if (res2.count())
-					{
-						isEssential = true;
-					}
-				}
-			}
-		}
-
-		// one combined item is not essential, we can return  
-		if (!isEssential)
-		{
-			// this bitset is not essential, break the main loop and return false
-			return false;
-		}
-	}
-	return isEssential;
 }*/
+
 
 unsigned int Itemset::computeSupport(const Itemset& left, const std::shared_ptr<Itemset>& right)
 {

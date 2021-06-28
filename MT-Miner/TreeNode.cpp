@@ -1,6 +1,6 @@
 #include "TreeNode.h"
 
-#define TRACE
+//#define TRACE
 
 #define MAX_PENDING_TASKS_START 1000
 #define MAX_MINIMAL_TRAVERSE_SIZE 9999
@@ -108,27 +108,33 @@ void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&&
 		
 		if (isMinimalTransverse)
 		{
-			// lock thread and add minimal transverse
-			if (!only_minimal || minimalMt >= MAX_MINIMAL_TRAVERSE_SIZE || crtItemset->getItemCount() <= minimalMt)
-			{
-				{
-					const std::lock_guard<std::mutex> guard(task_guard);
-					this->minimalTransverse.push_back(crtItemset);
-#ifdef TRACE
-					std::cout << "new minimal traverse found " << crtItemset->toString() << std::endl;
+#ifdef ISESSENTIAL_ON_TOEXPLORE
+			bool isEssential = Itemset::computeIsEssential(crtItemset);
+			if (isEssential)
 #endif
-				}
-
-				// update info
-				nbTotalMt++;
-				if (crtItemset->getItemCount() < minimalMt)
-					minimalMt = crtItemset->getItemCount();
-
-				// manage clones
-				if (this->useCloneOptimization)
+			{
+				// lock thread and add minimal transverse
+				if (!only_minimal || minimalMt >= MAX_MINIMAL_TRAVERSE_SIZE || crtItemset->getItemCount() <= minimalMt)
 				{
-					for (unsigned int i = 0, n = crtItemset->getItemCount(); i < n; i++)
-						this->recurseOnClonedItemset(crtItemset, i);
+					{
+						const std::lock_guard<std::mutex> guard(task_guard);
+						this->minimalTransverse.push_back(crtItemset);
+#ifdef TRACE
+						std::cout << "new minimal traverse found " << crtItemset->toString() << std::endl;
+#endif
+					}
+
+					// update info
+					nbTotalMt++;
+					if (crtItemset->getItemCount() < minimalMt)
+						minimalMt = crtItemset->getItemCount();
+
+					// manage clones
+					if (this->useCloneOptimization)
+					{
+						for (unsigned int i = 0, n = crtItemset->getItemCount(); i < n; i++)
+							this->recurseOnClonedItemset(crtItemset, i);
+					}
 				}
 			}
 		}
@@ -174,7 +180,13 @@ void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&&
 				}
 				else
 				{
-					toExplore.emplace_back(crtItemset);
+#ifdef ISESSENTIAL_ON_TOEXPLORE
+					bool isEssential = Itemset::computeIsEssential(crtItemset);
+					if (isEssential)
+#endif
+					{
+						toExplore.emplace_back(crtItemset);
+					}
 #ifdef TRACE
 					std::cout << "add item to toExplore list " << crtItemset->toString() << std::endl;
 #endif
@@ -316,15 +328,10 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 
 						if (!toCombinedRight->containsAClone())
 						{
-							/// TEST ISESSENTIAL TOUT EN COMBINANT
+#ifndef ISESSENTIAL_ON_TOEXPLORE
 							bool isEssential = Itemset::computeIsEssential(toCombinedLeft, toCombinedRight);
-							//bool isEssential2 = Itemset::computeIsEssential_old(toCombinedLeft, toCombinedRight);
-							//if(isEssential2 != isEssential)
-							//{
-							//	bool isEssential3 = Itemset::computeIsEssential(toCombinedLeft, toCombinedRight);
-							//	bool isEssential4 = Itemset::computeIsEssential_old(toCombinedLeft, toCombinedRight);
-							//}
 							if (isEssential)
+#endif
 							{
 								// combine toCombinedRight into toCombinedLeft							
 								std::shared_ptr<Itemset> newItemset = std::make_shared<Itemset>(toCombinedLeft);

@@ -6,11 +6,12 @@
 #include "Item.h"
 #include "SparseBitset.h"
 
+
+#define ISESSENTIAL_ON_TOEXPLORE
+
 class Itemset
 {
 public:
-	//friend class ConjunctiveItemset;
-	//friend class DisjunctiveItemset;
 	enum ItemsetType {
 		CONSJONCTIVE,	// AND
 		DISJUNCTIVE		// OR
@@ -30,14 +31,10 @@ private:
 	std::unique_ptr<StaticBitset> supportBitset;
 	unsigned int supportValue;
 
-	//std::unique_ptr<StaticBitset> onlyOneBitset;
+#ifndef ISESSENTIAL_ON_TOEXPLORE
 	std::unique_ptr<StaticBitset> xorSupportBitset;
 	std::unique_ptr<StaticBitset> noiseBitset;
-
-	//std:vector<unsigned int> isEssentialIndexes;
-
-private:
-	//bool isEssential(Itemset* left, Itemset* right);
+#endif
 
 public:	
 	Itemset();
@@ -62,9 +59,12 @@ public:
 	void writeToBinaryFile(std::ofstream& output);
 	void readFromBinaryFile(std::ifstream& output);
 
-	
-	static bool computeIsEssential_old(const std::shared_ptr<Itemset>& left, const std::shared_ptr<Itemset>& right);
+	//static bool computeIsEssential_old(const std::shared_ptr<Itemset>& left, const std::shared_ptr<Itemset>& right);
+#ifndef ISESSENTIAL_ON_TOEXPLORE
 	static bool computeIsEssential(const std::shared_ptr<Itemset>& left, const std::shared_ptr<Itemset>& right);
+#else
+	static bool computeIsEssential(const std::shared_ptr<Itemset>& itemset);
+#endif
 	static unsigned int computeSupport(const Itemset& left, const std::shared_ptr<Itemset>& right);
 	static void copyRightIntoLeft(Itemset& left, const std::shared_ptr<Itemset>& right);
 };
