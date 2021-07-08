@@ -13,7 +13,7 @@
 // 131072	// dualmatching34 --> OK, 444 sec --> 159 sec --> 114 sec (max 14.5go)
 // 262144	// dualmatching36 --> CRASH, 5 min, 47Go memory --> 5 min, 15Go memory
 // 524288	// dualmatching38
-#define BITSET_SIZE 16635
+#define BITSET_SIZE 990
 
 typedef std::bitset<BITSET_SIZE> StaticBitset;
 

@@ -34,6 +34,10 @@ private:
 #ifndef ISESSENTIAL_ON_TOEXPLORE
 	std::unique_ptr<StaticBitset> xorSupportBitset;
 	std::unique_ptr<StaticBitset> noiseBitset;
+#else
+	bool isEssential;
+	std::unique_ptr<StaticBitset> cumulatedXorbitset;
+	std::unique_ptr<StaticBitset> noiseBitset;
 #endif
 
 public:	
@@ -63,7 +67,7 @@ public:
 #ifndef ISESSENTIAL_ON_TOEXPLORE
 	static bool computeIsEssential(const std::shared_ptr<Itemset>& left, const std::shared_ptr<Itemset>& right);
 #else
-	static bool computeIsEssential(const std::shared_ptr<Itemset>& itemset);
+	static bool computeIsEssential(const std::shared_ptr<Itemset>& itemset, bool mtComputation = false);
 #endif
 	static unsigned int computeSupport(const Itemset& left, const std::shared_ptr<Itemset>& right);
 	static void copyRightIntoLeft(Itemset& left, const std::shared_ptr<Itemset>& right);

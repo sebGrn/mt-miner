@@ -109,7 +109,7 @@ void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&&
 		if (isMinimalTransverse)
 		{
 #ifdef ISESSENTIAL_ON_TOEXPLORE
-			bool isEssential = Itemset::computeIsEssential(crtItemset);
+			bool isEssential = Itemset::computeIsEssential(crtItemset, true);
 			if (isEssential)
 #endif
 			{
