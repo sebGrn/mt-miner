@@ -82,25 +82,6 @@ void MT_Miner::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>&
 	// initialise itemset
 	std::vector<std::shared_ptr<Itemset>> toTraverse;
 	computeInitalToTraverseList(toTraverse);
-
-	std::cout << "totraverse size : " << toTraverse.size() << std::endl;
-
-
-	/*std::shared_ptr<Itemset> cumulated = std::make_shared<Itemset>();
-	for_each(toTraverse.begin(), toTraverse.end(), [&](auto element) {
-
-		std::shared_ptr<Itemset> itemset = std::make_shared<Itemset>(cumulated);
-		itemset->combineItemset(element.get());
-		if (itemset->computeIsEssential())
-		{
-			cumulated->combineItemset(element.get());
-		}
-		//std::cout << "combine item sets " << toCombinedLeft->toString() << " and " << toCombinedRight->toString() << " into " << newItemset->toString() << std::endl;
-		});
-	
-	std::cout << "support " << cumulated->getSupport() << std::endl;*/
-
-
 	
 	// create a graph, then compute minimal transversal from the binary representation
 	TreeNode rootNode(this->useCloneOptimization, this->useMinimalSizeOnly, this->threshold);
@@ -140,6 +121,8 @@ void MT_Miner::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>&
 	Logger::dataset.minimalTransverseCount = mt.size();
 	Logger::dataset.minimalSizeOfTransverse = rootNode.minimalMt;
 	std::cout << GREEN << "\nFound " << mt.size() << " minimal transverses in " << duration2 << " s, minimal size is " << rootNode.minimalMt << "\n";
+
+	std::cout << GREEN << "\rtasks created " << rootNode.cpt << "\n";
 
 	Logger::log();
 

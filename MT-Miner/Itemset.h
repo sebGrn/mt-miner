@@ -6,8 +6,9 @@
 #include "Item.h"
 #include "SparseBitset.h"
 
+/// TEST WITH TO EXPLORE
 
-#define ISESSENTIAL_ON_TOEXPLORE
+//#define ISESSENTIAL_ON_TOEXPLORE
 
 class Itemset
 {
@@ -20,7 +21,12 @@ public:
 
 private:
 	/// list of item
+
+
+	/// USEFULL ??? VIRER LE TABLEAU
 	std::vector<Item*> itemset;
+
+
 	/// true if bitset_count & or value has to be computed
 	bool dirty; 
 	/// true if itemset has at least an item which is a clone
@@ -31,14 +37,14 @@ private:
 	std::unique_ptr<StaticBitset> supportBitset;
 	unsigned int supportValue;
 
-#ifndef ISESSENTIAL_ON_TOEXPLORE
-	std::unique_ptr<StaticBitset> xorSupportBitset;
-	std::unique_ptr<StaticBitset> noiseBitset;
-#else
+#ifdef ISESSENTIAL_ON_TOEXPLORE
 	bool isEssential;
+#endif
 	std::unique_ptr<StaticBitset> cumulatedXorbitset;
 	std::unique_ptr<StaticBitset> noiseBitset;
-#endif
+
+private:
+	static bool computeIsEssentialParameters(const std::shared_ptr<Itemset>& itemset, StaticBitset& cumulatedXorbitset, StaticBitset& noiseBitset);
 
 public:	
 	Itemset();
@@ -54,14 +60,12 @@ public:
 	std::string toString() const;
 	
 	std::shared_ptr<Itemset> createAndReplaceItem(unsigned int i, Item* item);
+	
 	void combineItemset(const Itemset* itemset);
 	
 	unsigned int getSupport() const;
 	
 	bool operator==(const Itemset& other);
-
-	void writeToBinaryFile(std::ofstream& output);
-	void readFromBinaryFile(std::ifstream& output);
 
 	//static bool computeIsEssential_old(const std::shared_ptr<Itemset>& left, const std::shared_ptr<Itemset>& right);
 #ifndef ISESSENTIAL_ON_TOEXPLORE
@@ -70,7 +74,9 @@ public:
 	static bool computeIsEssential(const std::shared_ptr<Itemset>& itemset, bool mtComputation = false);
 #endif
 	static unsigned int computeSupport(const Itemset& left, const std::shared_ptr<Itemset>& right);
-	static void copyRightIntoLeft(Itemset& left, const std::shared_ptr<Itemset>& right);
+	//static void copyRightIntoLeft(Itemset& left, const std::shared_ptr<Itemset>& right);
+
+	static bool isEssentialRapid(std::shared_ptr<Itemset>& left, std::shared_ptr<Itemset>& right);
 };
 
 inline unsigned int Itemset::getSupport() const

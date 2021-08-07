@@ -27,6 +27,8 @@ std::atomic_uint TreeNode::pending_task_count(0);
 std::atomic_uint TreeNode::max_pending_task_count(MAX_PENDING_TASKS_START);
 std::atomic_bool TreeNode::pending_task_checker(true);
 
+std::atomic_uint TreeNode::cpt(0);
+
 std::shared_ptr<BinaryRepresentation> TreeNode::binaryRepresentation = std::make_shared<BinaryRepresentation>();
 
 TreeNode::TreeNode(bool useCloneOptimization, bool only_minimal, float threshold)
@@ -64,7 +66,10 @@ void TreeNode::recurseOnClonedItemset(std::shared_ptr<Itemset> itemset, unsigned
 				const std::lock_guard<std::mutex> minimalTransverse_guard(task_guard);
 				this->minimalTransverse.push_back(clonedItemset);
 #ifdef TRACE
-				std::cout << "new minimal traverse found from clone " << clonedItemset->toString() << "kk" << std::endl;
+				{
+					const std::lock_guard<std::mutex> guard(task_guard);
+					std::cout << "new minimal traverse found from clone " << clonedItemset->toString() << "kk" << std::endl;
+				}
 #endif
 			}
 			// update info
@@ -80,7 +85,7 @@ void TreeNode::recurseOnClonedItemset(std::shared_ptr<Itemset> itemset, unsigned
 }
 
 void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&& toTraverse, std::deque<std::shared_ptr<Itemset>>&& maxClique, std::deque<std::shared_ptr<Itemset>>&& toExplore)
-{
+{	
 	assert(maxClique.empty());
 	assert(toExplore.empty());
 
@@ -108,19 +113,22 @@ void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&&
 		
 		if (isMinimalTransverse)
 		{
-#ifdef ISESSENTIAL_ON_TOEXPLORE
-			bool isEssential = Itemset::computeIsEssential(crtItemset, true);
-			if (isEssential)
-#endif
+			// lock thread and add minimal transverse
+			if (!only_minimal || minimalMt >= MAX_MINIMAL_TRAVERSE_SIZE || crtItemset->getItemCount() <= minimalMt)
 			{
-				// lock thread and add minimal transverse
-				if (!only_minimal || minimalMt >= MAX_MINIMAL_TRAVERSE_SIZE || crtItemset->getItemCount() <= minimalMt)
+#ifdef ISESSENTIAL_ON_TOEXPLORE
+				bool isEssential = Itemset::computeIsEssential(crtItemset, true);
+				if (isEssential)
+#endif
 				{
 					{
 						const std::lock_guard<std::mutex> guard(task_guard);
 						this->minimalTransverse.push_back(crtItemset);
 #ifdef TRACE
-						std::cout << "new minimal traverse found " << crtItemset->toString() << std::endl;
+						{
+							const std::lock_guard<std::mutex> guard(task_guard);
+							std::cout << "new minimal traverse found " << crtItemset->toString() << std::endl;
+						}
 #endif
 					}
 
@@ -154,7 +162,10 @@ void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&&
 				cumulatedItemset.combineItemset(itemsetPtr);
 				maxClique.emplace_back(crtItemset);
 #ifdef TRACE
-				std::cout << "add item to maxClique list " << crtItemset->toString() << std::endl;
+				{
+					const std::lock_guard<std::mutex> guard(task_guard);
+					std::cout << "add item to maxClique list " << crtItemset->toString() << std::endl;
+				}
 #endif
 			}
 			else
@@ -175,7 +186,10 @@ void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&&
 					cumulatedItemset.combineItemset(itemsetPtr);
 					maxClique.emplace_back(crtItemset);
 #ifdef TRACE
-					std::cout << "add item to maxClique list " << crtItemset->toString() << std::endl;
+					{
+						const std::lock_guard<std::mutex> guard(task_guard);
+						std::cout << "add item to maxClique list " << crtItemset->toString() << std::endl;
+					}
 #endif
 				}
 				else
@@ -188,7 +202,10 @@ void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&&
 						toExplore.emplace_back(crtItemset);
 					}
 #ifdef TRACE
-					std::cout << "add item to toExplore list " << crtItemset->toString() << std::endl;
+					{
+						const std::lock_guard<std::mutex> guard(task_guard);
+						std::cout << "add item to toExplore list " << crtItemset->toString() << std::endl;
+					}
 #endif
 				}
 			}
@@ -263,7 +280,7 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 
 		// !!! to reserve maxClique and fit/pack (set capacity à la taille correcte, voir les fonctions)
 		// !!! to reserve toExplore and fit/pack
-		
+
 		// push elements from toTraverse into maxClique, toExplore or minimal transverse
 		// !!! virer maxClique et toExplore
 		// !!! garder toTraverse et le trier
@@ -273,10 +290,13 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 		toTraverse.clear();
 
 #ifdef TRACE
-		std::cout << "updateListsFromToTraverse, toExplore size : " << toExplore.size() << ", maxclique size : " << maxClique.size() << std::endl;
-		std::cout << "toExplore size : ";
-		for_each(toExplore.begin(), toExplore.end(), [&](const std::shared_ptr<Itemset> elt) { std::cout << elt->toString(); });
-		std::cout << std::endl;
+		{
+			const std::lock_guard<std::mutex> guard(task_guard);
+			std::cout << "updateListsFromToTraverse, toExplore size : " << toExplore.size() << ", maxclique size : " << maxClique.size() << std::endl;
+			std::cout << "toExplore size : ";
+			for_each(toExplore.begin(), toExplore.end(), [&](const std::shared_ptr<Itemset> elt) { std::cout << elt->toString(); });
+			std::cout << std::endl;
+		}
 #endif
 
 		if (toExplore.empty())
@@ -328,17 +348,28 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 
 						if (!toCombinedRight->containsAClone())
 						{
-#ifndef ISESSENTIAL_ON_TOEXPLORE
-							bool isEssential = Itemset::computeIsEssential(toCombinedLeft, toCombinedRight);
-							if (isEssential)
-#endif
+							if(Itemset::isEssentialRapid(toCombinedLeft, toCombinedRight))
 							{
-								// combine toCombinedRight into toCombinedLeft							
-								std::shared_ptr<Itemset> newItemset = std::make_shared<Itemset>(toCombinedLeft);
-								newItemset->combineItemset(toCombinedRight.get());
-								//std::cout << "this combined itemset is essential, added to new toTraverse list" << std::endl;
-								// this is a candidate for next iteration
-								newToTraverse.push_back(newItemset);
+#ifndef ISESSENTIAL_ON_TOEXPLORE
+								if (Itemset::computeIsEssential(toCombinedLeft, toCombinedRight))
+#endif
+								{
+									/// 71 75 ==> 715
+									/// 71 76 ==> 716
+
+									/// --> new task --> 715
+
+									/// TEST IF 715 IS USEFULL BEFORE CREATING NEW TASK
+									/// CREER UNE TACHE POUR LES ELEMENTS DE TO EXPLORE
+
+									// combine toCombinedRight into toCombinedLeft
+									std::shared_ptr<Itemset> newItemset = std::make_shared<Itemset>(toCombinedLeft);
+									newItemset->combineItemset(toCombinedRight.get());
+
+									//std::cout << "this combined itemset is essential, added to new toTraverse list" << std::endl;
+									// this is a candidate for next iteration
+									newToTraverse.push_back(newItemset);
+								}
 							}
 						}
 					});	
@@ -371,6 +402,8 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 
 					// memory signal has been notified, we can add the task to task queue
 					lock.unlock();
+
+					cpt++;
 
 					// pending task
 					addTaskIntoQueue(std::move(newToTraverse));

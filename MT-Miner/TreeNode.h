@@ -20,7 +20,8 @@
  */
 class TreeNode
 {
-	//static std::atomic<double> timer_recurseOnClone;
+public:
+	static std::atomic_uint cpt;
 
 private:
 	// to avoid interleaved outputs
@@ -52,7 +53,8 @@ private:
 	static std::atomic_bool only_minimal;
 
 	static std::atomic_uint threshold;
-	
+
+
 	// binary representation from the transactional base
 	static std::shared_ptr<BinaryRepresentation> binaryRepresentation;
 
