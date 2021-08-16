@@ -19,11 +19,12 @@ Itemset::Itemset()
 	this->hasClone = false;	
 }
 
-Itemset::Itemset(Item* item)
+Itemset::Itemset(Item* item, unsigned int binaryRepIndex)
 {
 	assert(this->itemset.empty());
+	// update member for minimal transverse computation
 	this->supportBitset = std::make_unique<StaticBitset>(*item->staticBitset);
-
+	// update member for isEssential and combine computation
 	this->cumulatedXorbitset = std::make_unique<StaticBitset>(*item->staticBitset);
 	this->noiseBitset = std::make_unique<StaticBitset>();
 
@@ -37,7 +38,8 @@ Itemset::Itemset(Item* item)
 	if (item->isAClone())
 		this->hasClone = true;
 
-	this->itemset.push_back(item);
+	this->itemsetVector.push_back(item);
+	this->itemsetIndexVector.push_back(binaryRepIndex);
 }
 
 Itemset::Itemset(const std::shared_ptr<Itemset>& itemset)
@@ -54,13 +56,18 @@ Itemset::Itemset(const std::shared_ptr<Itemset>& itemset)
 	this->dirty = itemset->dirty;
 	this->hasClone = itemset->hasClone;
 
-	this->itemset.reserve(itemset->itemset.size());
-	std::copy(itemset->itemset.begin(), itemset->itemset.end(), std::back_inserter(this->itemset));	
+	this->itemsetVector.reserve(itemset->itemsetVector.size());
+	std::copy(itemset->itemsetVector.begin(), itemset->itemsetVector.end(), std::back_inserter(this->itemsetVector));
+
+
+	this->itemsetIndexVector.reserve(itemset->itemsetIndexVector.size());
+	std::copy(itemset->itemsetIndexVector.begin(), itemset->itemsetIndexVector.end(), std::back_inserter(this->itemsetIndexVector));
 }
 
 Itemset::~Itemset()
 {
-	this->itemset.clear();
+	this->itemsetVector.clear();
+	this->itemsetIndexVector.clear();
 }
 
 // make a copy of currentItemset and replace ith item by clone item
@@ -86,13 +93,13 @@ std::shared_ptr<Itemset> Itemset::createAndReplaceItem(unsigned int iToReplace, 
 			{
 				if (iToReplace == i)
 				{
-					clonedItemset->itemset.push_back(itemToReplace);
+					clonedItemset->itemsetVector.push_back(itemToReplace);
 					if (itemToReplace->isAClone())
 						clonedItemset->hasClone = true;
 				}
 				else
 				{
-					clonedItemset->itemset.push_back(this->itemset[i]);
+					clonedItemset->itemsetVector.push_back(this->itemsetVector[i]);
 				}
 			}
 		}
@@ -107,7 +114,7 @@ std::shared_ptr<Itemset> Itemset::createAndReplaceItem(unsigned int iToReplace, 
 
 bool Itemset::isEssentialRapid(std::shared_ptr<Itemset>& left, std::shared_ptr<Itemset>& right)
 {
-	auto itItemToAdd = right->itemset.end() - 1;
+	auto itItemToAdd = right->itemsetVector.end() - 1;
 	
 	StaticBitset combined_bitset;
 	if (itemsetType == CONSJONCTIVE)
@@ -167,7 +174,7 @@ void Itemset::combineItemset(const Itemset* itemset_right)
 	// "1" + "2" => "12"
 	// "71" + "72" => "712"
 	// we can always add the last one
-	auto itItemToAdd = itemset_right->itemset.end() - 1;
+	auto itItemToAdd = itemset_right->itemsetVector.end() - 1;
 
 	// update support
 	if (itemsetType == CONSJONCTIVE)
@@ -190,7 +197,7 @@ void Itemset::combineItemset(const Itemset* itemset_right)
 	this->dirty = false;
 
 	// finally add the last item
-	this->itemset.push_back(*itItemToAdd);
+	this->itemsetVector.push_back(*itItemToAdd);
 };
 
 #ifndef ISESSENTIAL_ON_TOEXPLORE
@@ -206,7 +213,7 @@ void Itemset::combineItemset(const Itemset* itemset_right)
 // called every time on combine
 bool Itemset::computeIsEssential(const std::shared_ptr<Itemset>& left, const std::shared_ptr<Itemset>& right)
 {
-	auto it_item = right->itemset.end() - 1;
+	auto it_item = right->itemsetVector.end() - 1;
 	StaticBitset bitsetToAdd = (*(*it_item)->staticBitset);
 	{
 		StaticBitset xorBitset = (*left->cumulatedXorbitset) ^ bitsetToAdd;
@@ -223,21 +230,21 @@ bool Itemset::computeIsEssential(const std::shared_ptr<Itemset>& left, const std
 			//itemsetList.push_back(*it_item);
 
 			// add item on left list then pop it (avoid to create another list)
-			left->itemset.push_back(*it_item);
+			left->itemsetVector.push_back(*it_item);
 
 			StaticBitset validatorBitset = (*left->noiseBitset);
 			validatorBitset = validatorBitset.flip() & xorBitset;
 
-			for (int i = 0, n = left->itemset.size(); i != n; i++)
+			for (int i = 0, n = left->itemsetVector.size(); i != n; i++)
 			{
-				StaticBitset res = (*left->itemset[i]->staticBitset) & validatorBitset;
+				StaticBitset res = (*left->itemsetVector[i]->staticBitset) & validatorBitset;
 				if (res.none())
 				{
-					left->itemset.pop_back();
+					left->itemsetVector.pop_back();
 					return false;
 				}
 			}
-			left->itemset.pop_back();
+			left->itemsetVector.pop_back();
 			return true;
 		}
 	}
@@ -383,8 +390,8 @@ bool Itemset::operator==(const Itemset& other)
 		return false;
 
 	// test each attributeIndex of itemset
-	auto it1 = other.itemset.begin();
-	for (auto it2 = this->itemset.begin(); it2 != this->itemset.end(); it1++, it2++)
+	auto it1 = other.itemsetVector.begin();
+	for (auto it2 = this->itemsetVector.begin(); it2 != this->itemsetVector.end(); it1++, it2++)
 	{
 		if ((*it1)->getAttributeIndex() != (*it2)->getAttributeIndex())
 			return false;
@@ -395,7 +402,7 @@ bool Itemset::operator==(const Itemset& other)
 std::string Itemset::toString() const
 {
 	std::string res = "{";
-	for_each(this->itemset.begin(), this->itemset.end(), [&](const Item* item) {
+	for_each(this->itemsetVector.begin(), this->itemsetVector.end(), [&](const Item* item) {
 		res += std::to_string(item->getAttributeIndex());
 		res += ",";
 		});
@@ -403,16 +410,3 @@ std::string Itemset::toString() const
 	res += "}";
 	return res;
 }
-
-/*void Itemset::copyRightIntoLeft(Itemset& left, const std::shared_ptr<Itemset>& right)
-{
-	left.itemset.clear();
-
-	for (auto it = right->itemset.begin(); it != right->itemset.end(); it++)
-		left.itemset.push_back(*it);
-
-	left.dirty = right->dirty;
-	*(left.supportBitset) = *(right->supportBitset);
-	left.supportValue = right->supportValue;
-	left.hasClone = right->hasClone;
-}*/

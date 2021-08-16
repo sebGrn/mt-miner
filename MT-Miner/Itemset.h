@@ -24,7 +24,8 @@ private:
 
 
 	/// USEFULL ??? VIRER LE TABLEAU
-	std::vector<Item*> itemset;
+	std::vector<Item*> itemsetVector;
+	std::vector<unsigned int> itemsetIndexVector;
 
 
 	/// true if bitset_count & or value has to be computed
@@ -48,7 +49,7 @@ private:
 
 public:	
 	Itemset();
-	Itemset(Item* item);
+	Itemset(Item* item, unsigned int binaryRepIndex);
 	Itemset(const std::shared_ptr<Itemset>& itemset);
 	~Itemset();
 	
@@ -74,8 +75,7 @@ public:
 	static bool computeIsEssential(const std::shared_ptr<Itemset>& itemset, bool mtComputation = false);
 #endif
 	static unsigned int computeSupport(const Itemset& left, const std::shared_ptr<Itemset>& right);
-	//static void copyRightIntoLeft(Itemset& left, const std::shared_ptr<Itemset>& right);
-
+	
 	static bool isEssentialRapid(std::shared_ptr<Itemset>& left, std::shared_ptr<Itemset>& right);
 };
 
@@ -91,20 +91,20 @@ inline bool Itemset::containsAClone() const
 
 inline unsigned int Itemset::getItemCount() const
 {
-	return static_cast<unsigned int>(this->itemset.size());
+	return static_cast<unsigned int>(this->itemsetVector.size());
 }
 
 inline Item* Itemset::getItem(unsigned int i) const
 {
-	assert(i < this->itemset.size());
-	return this->itemset[i];
+	assert(i < this->itemsetVector.size());
+	return this->itemsetVector[i];
 }
 
 inline void Itemset::flip()
 {
 	if (itemsetType == CONSJONCTIVE)
 	{
-		for (auto& elt : itemset)
+		for (auto& elt : itemsetVector)
 		{
 			(*elt).staticBitset->flip();
 		}
