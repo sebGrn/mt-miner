@@ -25,6 +25,7 @@ class Item
 
 private:
 	unsigned int attributeIndex;
+
 	std::unique_ptr<StaticBitset> staticBitset;
 	
 	// true if this item is a clone

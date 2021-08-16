@@ -39,7 +39,7 @@ public:
 	static unsigned int getItemCount();
 	static unsigned int getObjectCount();
 
-	static std::shared_ptr<Item> getItemFromKey(unsigned int key);	
+	static std::shared_ptr<Item> getItemFromKey(unsigned int key);
 
 	static void clear();
 };

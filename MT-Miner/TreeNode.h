@@ -84,8 +84,6 @@ private:
 	
 	void recurseOnClonedItemset(std::shared_ptr<Itemset> itemset, unsigned int iItem);
 
-	void launchPendingTasksChecking();
-
 public:
 	TreeNode(bool useCloneOptimization, bool only_minimal, float threshold);
 	~TreeNode();

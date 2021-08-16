@@ -6,6 +6,8 @@
 #include "Item.h"
 #include "SparseBitset.h"
 
+class BinaryRepresentation;
+
 /// TEST WITH TO EXPLORE
 
 //#define ISESSENTIAL_ON_TOEXPLORE
@@ -24,9 +26,8 @@ private:
 
 
 	/// USEFULL ??? VIRER LE TABLEAU
-	std::vector<Item*> itemsetVector;
+	//std::vector<Item*> itemsetVector;
 	std::vector<unsigned int> itemsetIndexVector;
-
 
 	/// true if bitset_count & or value has to be computed
 	bool dirty; 
@@ -49,10 +50,12 @@ private:
 
 public:	
 	Itemset();
-	Itemset(Item* item, unsigned int binaryRepIndex);
+	//Itemset(Item* item);
+	Itemset(unsigned int binaryRepIndex);
 	Itemset(const std::shared_ptr<Itemset>& itemset);
 	~Itemset();
 	
+	// only for consjonctive
 	void flip();
 	
 	unsigned int getItemCount() const;
@@ -91,25 +94,30 @@ inline bool Itemset::containsAClone() const
 
 inline unsigned int Itemset::getItemCount() const
 {
-	return static_cast<unsigned int>(this->itemsetVector.size());
+	//return static_cast<unsigned int>(this->itemsetVector.size());
+	return static_cast<unsigned int>(this->itemsetIndexVector.size());
 }
 
-inline Item* Itemset::getItem(unsigned int i) const
+/*inline Item* Itemset::getItem(unsigned int i) const
 {
-	assert(i < this->itemsetVector.size());
-	return this->itemsetVector[i];
-}
+	//assert(i < this->itemsetVector.size());
+	//return this->itemsetVector[i];
+	assert(i < this->itemsetIndexVector.size());
+	return BinaryRepresentation::getItemFromKey(this->itemsetIndexVector[i]).get();
+}*/
 
-inline void Itemset::flip()
+/*inline void Itemset::flip()
 {
 	if (itemsetType == CONSJONCTIVE)
 	{
-		for (auto& elt : itemsetVector)
+		//for (auto& elt : itemsetVector)
+		for (auto& elt : itemsetIndexVector)
 		{
+			BinaryRepresentation::getItemFromKey(elt);
 			(*elt).staticBitset->flip();
 		}
 		this->supportBitset->flip();
 		this->supportValue = (*this->supportBitset).count();
 		this->dirty = true;
 	}
-}
+}*/
