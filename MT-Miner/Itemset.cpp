@@ -39,7 +39,6 @@ Itemset::Itemset(/*Item* item,*/ unsigned int binaryRepIndex)
 	if (item->isAClone())
 		this->hasClone = true;
 
-	//this->itemsetVector.push_back(item);
 	this->itemsetIndexVector.push_back(binaryRepIndex);
 }
 
@@ -57,16 +56,13 @@ Itemset::Itemset(const std::shared_ptr<Itemset>& itemset)
 	this->dirty = itemset->dirty;
 	this->hasClone = itemset->hasClone;
 
-	//this->itemsetVector.reserve(itemset->itemsetVector.size());
-	//std::copy(itemset->itemsetVector.begin(), itemset->itemsetVector.end(), std::back_inserter(this->itemsetVector));
-
 	this->itemsetIndexVector.reserve(itemset->itemsetIndexVector.size());
-	std::copy(itemset->itemsetIndexVector.begin(), itemset->itemsetIndexVector.end(), std::back_inserter(this->itemsetIndexVector));
+	this->itemsetIndexVector = itemset->itemsetIndexVector;
+	//std::copy(itemset->itemsetIndexVector.begin(), itemset->itemsetIndexVector.end(), std::back_inserter(this->itemsetIndexVector));
 }
 
 Itemset::~Itemset()
 {
-	//this->itemsetVector.clear();
 	this->itemsetIndexVector.clear();
 }
 
@@ -93,14 +89,12 @@ std::shared_ptr<Itemset> Itemset::createAndReplaceItem(unsigned int iToReplace, 
 			{
 				if (iToReplace == i)
 				{
-					//clonedItemset->itemsetVector.push_back(itemToReplace);
 					clonedItemset->itemsetIndexVector.push_back(itemToReplace->attributeIndex);
 					if (itemToReplace->isAClone())
 						clonedItemset->hasClone = true;
 				}
 				else
 				{
-					//clonedItemset->itemsetVector.push_back(this->itemsetVector[i]);
 					clonedItemset->itemsetIndexVector.push_back(this->itemsetIndexVector[i]);
 				}
 			}
@@ -116,16 +110,13 @@ std::shared_ptr<Itemset> Itemset::createAndReplaceItem(unsigned int iToReplace, 
 
 bool Itemset::isEssentialRapid(std::shared_ptr<Itemset>& left, std::shared_ptr<Itemset>& right)
 {
-	//auto itItemToAdd = right->itemsetVector.end() - 1;
 	unsigned int indexItemToAdd = right->itemsetIndexVector[right->itemsetIndexVector.size() - 1];
 	Item* itItemToAdd = BinaryRepresentation::getItemFromKey(indexItemToAdd).get();
 	
 	StaticBitset combined_bitset;
 	if (itemsetType == CONSJONCTIVE)
-		//combined_bitset = (*(*itItemToAdd)->staticBitset) & (*left->supportBitset);
 		combined_bitset = (*itItemToAdd->staticBitset) & (*left->supportBitset);
 	else
-		//combined_bitset = (*(*itItemToAdd)->staticBitset) | (*left->supportBitset);
 		combined_bitset = (*itItemToAdd->staticBitset) | (*left->supportBitset);
 	
 	unsigned int supportCombined = combined_bitset.count();	
@@ -174,33 +165,25 @@ void Itemset::combineItemset(const Itemset* itemset_right)
 	/// return false --> combine pas ok
 	/// if (support left + right == support left) OR (support left + right == support right) RETURN FALSE
 	/// IF (SUPPORT itemset == SUPPORT cumulatedXorbitset) OR (SUPPORT itemset == bitsetToAdd) RETURN FALSE
-	/// --> rapidEssentiality
-
 
 	// "1" + "2" => "12"
 	// "71" + "72" => "712"
 	// we can always add the last one
 	unsigned int indexItemToAdd = itemset_right->itemsetIndexVector[itemset_right->itemsetIndexVector.size() - 1];
 	Item* itItemToAdd = BinaryRepresentation::getItemFromKey(indexItemToAdd).get();
-	//auto itItemToAdd = itemset_right->itemsetVector.end() - 1;
 
 	// update support
 	if (itemsetType == CONSJONCTIVE)
-		//(*this->supportBitset) = (*(*itItemToAdd)->staticBitset) & (*this->supportBitset);
 		(*this->supportBitset) = (*itItemToAdd->staticBitset) & (*this->supportBitset);
 	else
-		//(*this->supportBitset) = (*(*itItemToAdd)->staticBitset) | (*this->supportBitset);
 		(*this->supportBitset) = (*itItemToAdd->staticBitset) | (*this->supportBitset);
 	
 #ifndef ISESSENTIAL_ON_TOEXPLORE
-	//(*this->noiseBitset) = (*this->noiseBitset) | ((*this->cumulatedXorbitset) & (*(*itItemToAdd)->staticBitset) ^ (*this->cumulatedXorbitset) ^ (*this->cumulatedXorbitset) );
-	//(*this->cumulatedXorbitset) = (*(*itItemToAdd)->staticBitset) ^ (*this->cumulatedXorbitset);
 	(*this->noiseBitset) = (*this->noiseBitset) | ((*this->cumulatedXorbitset) & (*itItemToAdd->staticBitset) ^ (*this->cumulatedXorbitset) ^ (*this->cumulatedXorbitset));
 	(*this->cumulatedXorbitset) = (*itItemToAdd->staticBitset) ^ (*this->cumulatedXorbitset); 
 #endif
 
 	// update clone status
-	//if ((*itItemToAdd)->isAClone())
 	if (itItemToAdd->isAClone())
 		this->hasClone = true;
 
@@ -210,7 +193,6 @@ void Itemset::combineItemset(const Itemset* itemset_right)
 	this->dirty = false;
 
 	// finally add the last item
-	//this->itemsetVector.push_back(*itItemToAdd);
 	this->itemsetIndexVector.push_back(indexItemToAdd);
 };
 
@@ -227,12 +209,9 @@ void Itemset::combineItemset(const Itemset* itemset_right)
 // called every time on combine
 bool Itemset::computeIsEssential(const std::shared_ptr<Itemset>& left, const std::shared_ptr<Itemset>& right)
 {
-	//auto it_item = right->itemsetVector.end() - 1;
-	
 	unsigned int indexItemToAdd = right->itemsetIndexVector[right->itemsetIndexVector.size() - 1];
 	Item* itItemToAdd = BinaryRepresentation::getItemFromKey(indexItemToAdd).get();
 
-	//StaticBitset bitsetToAdd = (*(*it_item)->staticBitset);
 	StaticBitset bitsetToAdd = (*itItemToAdd->staticBitset);
 	{
 		StaticBitset xorBitset = (*left->cumulatedXorbitset) ^ bitsetToAdd;
@@ -243,13 +222,7 @@ bool Itemset::computeIsEssential(const std::shared_ptr<Itemset>& left, const std
 		}
 		else
 		{
-			// create another list to compute essentiality, pick the last one from right list
-			//std::vector<Item*> itemsetList;
-			//std::copy(left->itemset.begin(), left->itemset.end(), std::back_inserter(itemsetList));
-			//itemsetList.push_back(*it_item);
-
 			// add item on left list then pop it (avoid to create another list)
-			//left->itemsetVector.push_back(*it_item);
 			left->itemsetIndexVector.push_back(indexItemToAdd);
 
 			StaticBitset validatorBitset = (*left->noiseBitset);
@@ -269,16 +242,6 @@ bool Itemset::computeIsEssential(const std::shared_ptr<Itemset>& left, const std
 			}
 			left->itemsetIndexVector.pop_back();
 
-			/*for (int i = 0, n = left->itemsetVector.size(); i != n; i++)
-			{
-				StaticBitset res = (*left->itemsetVector[i]->staticBitset) & validatorBitset;
-				if (res.none())
-				{
-					left->itemsetVector.pop_back();
-					return false;
-				}
-			}
-			left->itemsetVector.pop_back();*/
 			return true;
 		}
 	}
@@ -433,12 +396,6 @@ bool Itemset::operator==(const Itemset& other)
 		if (otherAttributeIndex != attributeIndex)
 			return false;
 	}
-	//auto it1 = other.itemsetVector.begin();
-	//for (auto it2 = this->itemsetVector.begin(); it2 != this->itemsetVector.end(); it1++, it2++)
-	//{
-	//	if ((*it1)->getAttributeIndex() != (*it2)->getAttributeIndex())
-	//		return false;
-	//}
 	return true;
 }
 
@@ -450,10 +407,6 @@ std::string Itemset::toString() const
 		res += std::to_string(item->getAttributeIndex());
 		res += ",";
 		});
-	//for_each(this->itemsetIndexVector.begin(), this->itemsetVector.end(), [&](const Item* item) {
-	//	res += std::to_string(item->getAttributeIndex());
-	//	res += ",";
-	//	});
 	res.pop_back();
 	res += "}";
 	return res;
@@ -461,8 +414,6 @@ std::string Itemset::toString() const
 
 Item* Itemset::getItem(unsigned int i) const
 {
-	//assert(i < this->itemsetVector.size());
-	//return this->itemsetVector[i];
 	assert(i < this->itemsetIndexVector.size());
 	return BinaryRepresentation::getItemFromKey(this->itemsetIndexVector[i]).get();
 }
@@ -471,7 +422,6 @@ void Itemset::flip()
 {
 	if (itemsetType == CONSJONCTIVE)
 	{
-		//for (auto& elt : itemsetVector)
 		for (auto& elt : itemsetIndexVector)
 		{
 			Item* item = BinaryRepresentation::getItemFromKey(elt).get();

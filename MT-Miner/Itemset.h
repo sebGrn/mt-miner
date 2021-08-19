@@ -22,11 +22,7 @@ public:
 	static ItemsetType itemsetType;
 
 private:
-	/// list of item
-
-
-	/// USEFULL ??? VIRER LE TABLEAU
-	//std::vector<Item*> itemsetVector;
+	/// list of item index (faster to copy from other itemset)
 	std::vector<unsigned int> itemsetIndexVector;
 
 	/// true if bitset_count & or value has to be computed
@@ -50,7 +46,6 @@ private:
 
 public:	
 	Itemset();
-	//Itemset(Item* item);
 	Itemset(unsigned int binaryRepIndex);
 	Itemset(const std::shared_ptr<Itemset>& itemset);
 	~Itemset();
@@ -94,30 +89,5 @@ inline bool Itemset::containsAClone() const
 
 inline unsigned int Itemset::getItemCount() const
 {
-	//return static_cast<unsigned int>(this->itemsetVector.size());
 	return static_cast<unsigned int>(this->itemsetIndexVector.size());
 }
-
-/*inline Item* Itemset::getItem(unsigned int i) const
-{
-	//assert(i < this->itemsetVector.size());
-	//return this->itemsetVector[i];
-	assert(i < this->itemsetIndexVector.size());
-	return BinaryRepresentation::getItemFromKey(this->itemsetIndexVector[i]).get();
-}*/
-
-/*inline void Itemset::flip()
-{
-	if (itemsetType == CONSJONCTIVE)
-	{
-		//for (auto& elt : itemsetVector)
-		for (auto& elt : itemsetIndexVector)
-		{
-			BinaryRepresentation::getItemFromKey(elt);
-			(*elt).staticBitset->flip();
-		}
-		this->supportBitset->flip();
-		this->supportValue = (*this->supportBitset).count();
-		this->dirty = true;
-	}
-}*/

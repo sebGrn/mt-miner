@@ -63,10 +63,7 @@ void MT_Miner::computeInitalToTraverseList(std::vector<std::shared_ptr<Itemset>>
 		// dont push clones into initial trasverse list
 		if (!item->isAClone())
 		{
-			// get itemset from binary representation and store them into lists
-			// these itemsets will be used in the program
-			// we dont need binary representation anymore here
-			//std::shared_ptr<Itemset> itemset(new Itemset(item.get(), i));
+			// store indexes from binary representation, we must keep binary representation
 			std::shared_ptr<Itemset> itemset(new Itemset(i));
 			itemset->flip();
 			toTraverse.push_back(itemset);
