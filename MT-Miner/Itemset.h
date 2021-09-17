@@ -8,9 +8,7 @@
 
 class BinaryRepresentation;
 
-/// TEST WITH TO EXPLORE
-
-//#define ISESSENTIAL_ON_TOEXPLORE
+#define ISESSENTIAL_ON_TOEXPLORE
 
 class Itemset
 {
@@ -26,7 +24,7 @@ private:
 	std::vector<unsigned int> itemsetIndexVector;
 
 	/// true if bitset_count & or value has to be computed
-	bool dirty; 
+	//bool dirty;
 	/// true if itemset has at least an item which is a clone
 	bool hasClone;
 
@@ -54,7 +52,7 @@ public:
 	void flip();
 	
 	unsigned int getItemCount() const;
-	Item* getItem(unsigned int i) const;
+	static Item* getItem(const std::shared_ptr<Itemset>& itemset, unsigned int i);
 	bool containsAClone() const;
 	std::string toString() const;
 	
@@ -91,3 +89,4 @@ inline unsigned int Itemset::getItemCount() const
 {
 	return static_cast<unsigned int>(this->itemsetIndexVector.size());
 }
+

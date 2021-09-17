@@ -15,6 +15,7 @@
 #include "utils.h"
 #include "BinaryRepresentation.h"
 
+
 /**
  * Minimal tranversals are found while running through a tree which is dynamically build
  */
@@ -34,6 +35,7 @@ private:
 
 	// used to lock tasks execution from task queue
 	static std::mutex task_guard;
+	static std::mutex trace_guard;
 	// used to pause / unpause thread before tasks in process units
 	static std::condition_variable task_signal;
 
@@ -65,6 +67,10 @@ private:
 	// shared memory between threads, contains computed minimaltransverse
 	std::vector<std::shared_ptr<Itemset>> minimalTransverse;
 
+	bool isMinimalTrasverse(const std::shared_ptr<Itemset>& itemset) const;
+	void updateMinimalTraverseList(const std::shared_ptr<Itemset>& itemset);
+	bool isCandidateForMaxClique(const Itemset& cumulatedItemset, const std::shared_ptr<Itemset>& itemset) const;
+
 public:
 	// stored tasks in the list, waiting to be managed, memory consuming
 	static std::atomic_uint pending_task_count;
@@ -76,11 +82,11 @@ public:
 private: 
 	/// compute maxClique list, toExplore list and mt list
 	/// update graph_mt with new minimal transversal itemset
-	void updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&& toTraverse, std::vector<std::shared_ptr<Itemset>>&& toExplore, unsigned int& toExplore_MaxClique_Index);
+	void generateCandidates(std::vector<std::shared_ptr<Itemset>>&& toTraverse, std::vector<std::shared_ptr<Itemset>>&& toExplore, unsigned int& toExplore_MaxClique_Index);
 	
 	void addTaskIntoQueue(std::vector<std::shared_ptr<Itemset>>&& toTraverse);
 
-	void computeMinimalTransversals_task(std::vector<std::shared_ptr<Itemset>>&& toTraverse);
+	void computeMinimalTransversals_task(std::vector<std::shared_ptr<Itemset>>&& toExplore, unsigned int toExplore_MaxClique_Index);
 	
 	void recurseOnClonedItemset(std::shared_ptr<Itemset> itemset, unsigned int iItem);
 

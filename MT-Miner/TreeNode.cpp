@@ -1,6 +1,6 @@
 #include "TreeNode.h"
 
-//#define TRACE
+#define TRACE
 
 #define MAX_PENDING_TASKS_START 1000
 #define MAX_MINIMAL_TRAVERSE_SIZE 9999
@@ -18,6 +18,7 @@ std::deque<std::future<void>> TreeNode::task_queue;
 // synchro stuff for process units and tasks
 std::mutex TreeNode::task_guard;
 std::condition_variable TreeNode::task_signal;
+std::mutex TreeNode::trace_guard;
 // synchro stuff for tasks blocking
 std::mutex TreeNode::memory_guard;
 std::condition_variable TreeNode::memory_signal;
@@ -46,7 +47,7 @@ void TreeNode::recurseOnClonedItemset(std::shared_ptr<Itemset> itemset, unsigned
 {
 	assert(iItem < itemset->getItemCount());
 
-	Item* item = itemset->getItem(iItem);
+	Item* item = Itemset::getItem(itemset, iItem);
 
 	// test if current item contains an original for all its items
 	if (item->isAnOriginal())
@@ -67,7 +68,7 @@ void TreeNode::recurseOnClonedItemset(std::shared_ptr<Itemset> itemset, unsigned
 				this->minimalTransverse.push_back(clonedItemset);
 #ifdef TRACE
 				{
-					const std::lock_guard<std::mutex> guard(task_guard);
+					const std::lock_guard<std::mutex> guard(trace_guard);
 					std::cout << "new minimal traverse found from clone " << clonedItemset->toString() << "kk" << std::endl;
 				}
 #endif
@@ -84,7 +85,95 @@ void TreeNode::recurseOnClonedItemset(std::shared_ptr<Itemset> itemset, unsigned
 	}
 }
 
-void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&& toTraverse, std::vector<std::shared_ptr<Itemset>>&& toExplore, unsigned int& toExplore_MaxClique_Index)
+bool TreeNode::isMinimalTrasverse(const std::shared_ptr<Itemset>& itemset) const
+{
+	// store object count for optimization
+	unsigned int objectCount = this->binaryRepresentation->getObjectCount();
+
+	// Compute disjunctive support for each itemset of toTraverse list
+	//	if disjunctive support is equal to object count --> add the itemset to graphMt list (then process its clones)
+	unsigned int support = itemset->getSupport();
+
+	// check if itemset is a minimal transverse depending on disjunctive or consjonctive (with dual) method
+	bool isMinimalTransverse = false;
+	if (Itemset::itemsetType == Itemset::ItemsetType::DISJUNCTIVE)
+		isMinimalTransverse = ((100 * support) >= (objectCount * TreeNode::threshold));
+	else
+		isMinimalTransverse = ((100 * support) <= (objectCount * (100 - TreeNode::threshold)));
+
+	return isMinimalTransverse;
+}
+
+void TreeNode::updateMinimalTraverseList(const std::shared_ptr<Itemset>& crtItemset)
+{
+	// lock thread and add minimal transverse
+	if (!only_minimal || minimalMt >= MAX_MINIMAL_TRAVERSE_SIZE || crtItemset->getItemCount() <= minimalMt)
+	{
+#ifdef ISESSENTIAL_ON_TOEXPLORE
+		bool isEssential = Itemset::computeIsEssential(crtItemset, true);
+		if (isEssential)
+#endif
+		{
+			{
+				const std::lock_guard<std::mutex> guard(task_guard);
+				this->minimalTransverse.push_back(crtItemset);
+#ifdef TRACE
+				{
+					const std::lock_guard<std::mutex> guard(trace_guard);
+					std::cout << "new minimal traverse found " << crtItemset->toString() << std::endl;
+				}
+#endif
+			}
+
+			// update info
+			nbTotalMt++;
+			if (crtItemset->getItemCount() < minimalMt)
+				minimalMt = crtItemset->getItemCount();
+
+			// manage clones
+			if (this->useCloneOptimization)
+			{
+				for (unsigned int i = 0, n = crtItemset->getItemCount(); i < n; i++)
+					this->recurseOnClonedItemset(crtItemset, i);
+			}
+		}
+	}
+}
+
+bool TreeNode::isCandidateForMaxClique(const Itemset& cumulatedItemset, const std::shared_ptr<Itemset>& crtItemset) const
+{
+	//removeCandidate = false;
+	// store object count for optimization
+	unsigned int objectCount = this->binaryRepresentation->getObjectCount();
+
+	// test support and add itemset in maxClique or toExplore list
+	unsigned int support = Itemset::computeSupport(cumulatedItemset, crtItemset);
+
+	// si support 715 == support 71 ou support 75
+	//if (support == cumulatedItemset.getSupport() || support == crtItemset->getSupport())
+	//{
+	//	removeCandidate = true;
+	//	return false;
+	//}
+
+	bool isMaxClique = false;
+	if (Itemset::itemsetType == Itemset::ItemsetType::DISJUNCTIVE)
+		isMaxClique = (support != objectCount);
+	else
+		isMaxClique = (support != 0);
+
+#ifdef TRACE
+	{
+		const std::lock_guard<std::mutex> guard(trace_guard);
+		if (isMaxClique)
+			std::cout << "add item to maxClique list " << crtItemset->toString() << std::endl;
+	}
+#endif
+	
+	return isMaxClique;
+}
+
+void TreeNode::generateCandidates(std::vector<std::shared_ptr<Itemset>>&& toTraverse, std::vector<std::shared_ptr<Itemset>>&& toExplore, unsigned int& toExplore_MaxClique_Index)
 {	
 	// store object count for optimization
 	unsigned int objectCount = this->binaryRepresentation->getObjectCount();
@@ -92,102 +181,57 @@ void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&&
 	// results of cumulated combined items / must be declared outside of the loop
 	Itemset cumulatedItemset;
 
+	// toExplore list will contain all toExplore itemset on [0, toExplore_MaxClique_Index] and maxClique itemset on [toExplore_MaxClique_Index, toExplore.size]
 	toExplore_MaxClique_Index = 0;
 	toExplore.reserve(toTraverse.size());
 
-	// loop on toTraverse list and build maxClique and toExplore indexes lists
-	for(unsigned int i = 0; i < toTraverse.size(); i++)
+	// loop on toTraverse list and sort all itemset between minimal traverse, toExplore or maxClique candidates
+	for (unsigned int i = 0; i < toTraverse.size(); i++)
 	{
 		auto crtItemset = toTraverse[i];
 
-		// Compute disjunctive support for each itemset of toTraverse list
-		//	if disjunctive support is equal to object count --> add the itemset to graphMt list (then process its clones)
-		unsigned int support = crtItemset->getSupport();		
-
-		// check if itemset is a minimal transverse depending on disjunctive or consjonctive (with dual) method
-		bool isMinimalTransverse = false;
-		if (Itemset::itemsetType == Itemset::ItemsetType::DISJUNCTIVE)
-			isMinimalTransverse = ((100 * support) >= (objectCount * TreeNode::threshold));
-		else
-			isMinimalTransverse = ((100 * support) <= (objectCount * (100 - TreeNode::threshold)));
-		
-		if (isMinimalTransverse)
+		// test if current itemset is a minimal traverse
+		if (isMinimalTrasverse(crtItemset))
 		{
-			// lock thread and add minimal transverse
-			if (!only_minimal || minimalMt >= MAX_MINIMAL_TRAVERSE_SIZE || crtItemset->getItemCount() <= minimalMt)
-			{
-#ifdef ISESSENTIAL_ON_TOEXPLORE
-				bool isEssential = Itemset::computeIsEssential(crtItemset, true);
-				if (isEssential)
-#endif
-				{
-					{
-						const std::lock_guard<std::mutex> guard(task_guard);
-						this->minimalTransverse.push_back(crtItemset);
-#ifdef TRACE
-						{
-							const std::lock_guard<std::mutex> guard(task_guard);
-							std::cout << "new minimal traverse found " << crtItemset->toString() << std::endl;
-						}
-#endif
-					}
-
-					// update info
-					nbTotalMt++;
-					if (crtItemset->getItemCount() < minimalMt)
-						minimalMt = crtItemset->getItemCount();
-
-					// manage clones
-					if (this->useCloneOptimization)
-					{
-						for (unsigned int i = 0, n = crtItemset->getItemCount(); i < n; i++)
-							this->recurseOnClonedItemset(crtItemset, i);
-					}
-				}
-			}
+			updateMinimalTraverseList(crtItemset);
 		}
 		else
 		{
-			// combine itemset one by one from toTraverse list as combine itemset
-			// if disjunctive support for combined itemset is equal to object count --> add the itemset to toExplore list
-			//	if not --> add the itemset to maxClique list
-
-			// if current itemset is the 1st one, store it into a previous itemset variable and use it later for computing combined itemsets
-			if (i == 0 && crtItemset->getItemCount() == 1)
+			if (i == 0)
 			{
-				// must be the 1st element with only one element
-				Itemset* itemsetPtr = crtItemset.get();
-				cumulatedItemset.combineItemset(itemsetPtr);
-				toExplore.push_back(crtItemset);
 #ifdef TRACE
 				{
-					const std::lock_guard<std::mutex> guard(task_guard);
+					const std::lock_guard<std::mutex> guard(trace_guard);
 					std::cout << "add item to maxClique list " << crtItemset->toString() << std::endl;
 				}
 #endif
+				// crtItemset as maxClique
+				toExplore.push_back(crtItemset);
+				// combine current itemset into cumulated itemset
+				Itemset* itemsetPtr = crtItemset.get();
+				cumulatedItemset.combineItemset(itemsetPtr);
 			}
 			else
 			{
-				// test support and add itemset in maxClique or toExplore list
+/*
+				// if (support 715 == support 71) ou (support 715 == support 75), then 715 will not be a candidate
 				unsigned int support = Itemset::computeSupport(cumulatedItemset, crtItemset);
-
-				bool isMaxClique = false;
-				if (Itemset::itemsetType == Itemset::ItemsetType::DISJUNCTIVE)
-					isMaxClique = (support != objectCount);
-				else
-					isMaxClique = (support != 0);
-
-				if (isMaxClique)
+				if (support == cumulatedItemset.getSupport() || support == crtItemset->getSupport())
 				{
+#ifdef TRACE					
+					{
+						const std::lock_guard<std::mutex> guard(trace_guard);
+						std::cout << crtItemset->toString() << " combined with " << cumulatedItemset.toString() << " will never be a candidate" << std::endl;
+					}
+#endif
+				}
+*/
+				if(isCandidateForMaxClique(cumulatedItemset, crtItemset))
+				{
+					// add as max clique
 					Itemset* itemsetPtr = crtItemset.get();
 					cumulatedItemset.combineItemset(itemsetPtr);
 					toExplore.push_back(crtItemset);
-#ifdef TRACE
-					{
-						const std::lock_guard<std::mutex> guard(task_guard);
-						std::cout << "add item to maxClique list " << crtItemset->toString() << std::endl;
-					}
-#endif
 				}
 				else
 				{
@@ -196,27 +240,104 @@ void TreeNode::updateListsFromToTraverse(std::vector<std::shared_ptr<Itemset>>&&
 					if (isEssential)
 #endif
 					{
+#ifdef TRACE
+						{
+							const std::lock_guard<std::mutex> guard(trace_guard);
+							std::cout << "add item to toExplore list " << crtItemset->toString() << std::endl;
+						}
+#endif
+						// add itemset as to explore
 						toExplore.insert(toExplore.begin() + toExplore_MaxClique_Index, crtItemset);
 						toExplore_MaxClique_Index++;
 					}
-#ifdef TRACE
-					{
-						const std::lock_guard<std::mutex> guard(task_guard);
-						std::cout << "add item to toExplore list " << crtItemset->toString() << std::endl;
-					}
-#endif
 				}
 			}
 		}
-	}	
+	}
+
+
+
+
+/*
+	for (unsigned int i = 0; i < toTraverse.size(); i++)
+	{
+		auto crtItemset = toTraverse[i];
+
+		// test if current itemset is a minimal traverse
+		if (isMinimalTrasverse(crtItemset))
+		{
+			updateMinimalTraverseList(crtItemset);
+		}
+		else
+		{
+			// test if current itemset is a maxClique candidate
+			bool removeCandidate = false;
+			if ((i == 0 && crtItemset->getItemCount() == 1) || isCandidateForMaxClique(cumulatedItemset, crtItemset, removeCandidate))
+			{
+				if (removeCandidate)
+				{
+#ifdef TRACE
+					// do not add this candidate into maxClique or toExplore
+					{
+						const std::lock_guard<std::mutex> guard(trace_guard);
+						std::cout << "this itemset is not a candidate in toExplore or maxClique : "  << cumulatedItemset.toString() << " U " << crtItemset->toString() << std::endl;
+					}
+#endif
+					continue;
+				}
+
+				// add current itemset as maxClique, ie push the itemset at the end of toExplore 
+				Itemset* itemsetPtr = crtItemset.get();
+				cumulatedItemset.combineItemset(itemsetPtr);
+				toExplore.push_back(crtItemset);
+#ifdef TRACE
+				{
+					const std::lock_guard<std::mutex> guard(trace_guard);
+					std::cout << "add item to maxClique list " << crtItemset->toString() << std::endl;
+				}
+#endif
+			}
+			else
+			{
+				// add current itemset as candidate as toExplore
+#ifdef ISESSENTIAL_ON_TOEXPLORE
+				bool isEssential = Itemset::computeIsEssential(crtItemset);
+				if (isEssential)
+#endif
+				{
+					toExplore.insert(toExplore.begin() + toExplore_MaxClique_Index, crtItemset);
+					toExplore_MaxClique_Index++;
+				}
+#ifdef TRACE
+				{
+					const std::lock_guard<std::mutex> guard(trace_guard);
+					std::cout << "add item to toExplore list " << crtItemset->toString() << std::endl;
+				}
+#endif
+			}
+		}
+	}
+#ifdef TRACE
+	{
+		const std::lock_guard<std::mutex> guard(trace_guard);
+		std::cout << "sortItemsetFromToTraverse, toExplore size : " << toExplore.size() << ", maxClique_Index : " << toExplore.size() - toExplore_MaxClique_Index << std::endl;
+	}
+#endif
+*/
 }
 
 void TreeNode::addTaskIntoQueue(std::vector<std::shared_ptr<Itemset>>&& toTraverse)
 {
 	assert(!toTraverse.empty());
 
+	// sort itemset
+	std::vector<std::shared_ptr<Itemset>> toExplore;
+	unsigned int toExplore_MaxClique_Index = 0;
+	this->generateCandidates(std::move(toTraverse), std::move(toExplore), toExplore_MaxClique_Index);
+	toTraverse.clear();
+
 	// emit task
-	auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(toTraverse));
+	auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(toExplore), toExplore_MaxClique_Index);
 
 	// ## SPAWN TASK ##
 	{
@@ -245,7 +366,7 @@ void TreeNode::addTaskIntoQueue(std::vector<std::shared_ptr<Itemset>>&& toTraver
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
-void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Itemset>>&& toTraverse)
+void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Itemset>>&& toExplore, unsigned int toExplore_MaxClique_Index)
 {
 	// ## START TASK ##
 	//std::cout << "\nNew task with itemset list : ";
@@ -253,7 +374,7 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 	//std::cout << std::endl;
 
 	// test trivial case
-	if (toTraverse.empty())
+	if (toExplore.empty() || toExplore_MaxClique_Index == 0)
 	{
 		const std::lock_guard<std::mutex> lock(task_guard);
 		//std::cout << "toExplore is empty, unlock a task, pending memory task : " << pending_memory_task_count << std::endl;
@@ -269,135 +390,109 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 	}
 	else
 	{
-		//std::cout << "computeMinimalTransversals_task " << toTraverse.size() << std::endl;
-
-		// toExplore will contains a copy of toTraverse itemsets excepts minimal transverse items
-		// itemsets from [0 to toExplore_MaxClique_Index] are to explore
-		// itemsets from [toExplore_MaxClique_Index to toExplore size] are max clique
-		std::vector<std::shared_ptr<Itemset>> toExplore;
-		unsigned int toExplore_MaxClique_Index = 0;
-		this->updateListsFromToTraverse(std::move(toTraverse), std::move(toExplore), toExplore_MaxClique_Index);
-		// we don't need toTraverse anymore, remove references
-		toTraverse.clear();
-
-#ifdef TRACE
+		// build new toTraverse list and explore next branch
+		// combine each element between [0, toExplore_MaxClique_Index] with the entire combined itemset list
+		for (unsigned int i = toExplore_MaxClique_Index; i--; )
 		{
-			const std::lock_guard<std::mutex> guard(task_guard);
-			std::cout << "updateListsFromToTraverse, toExplore size : " << toExplore.size() << ", maxclique size : " << maxClique.size() << std::endl;
-			std::cout << "toExplore size : ";
-			for_each(toExplore.begin(), toExplore.end(), [&](const std::shared_ptr<Itemset> elt) { std::cout << elt->toString(); });
-			std::cout << std::endl;
-		}
-#endif
+			std::shared_ptr<Itemset> toCombinedLeft = toExplore.front();
+			toExplore.erase(toExplore.begin());
 
-		if (toExplore.empty() || toExplore_MaxClique_Index == 0)
-		{
-			//const std::lock_guard<std::mutex> lock(task_guard);
-			//std::cout << "toExplore is empty, unlock a task, pending memory task : " << pending_memory_task_count << std::endl;
-			if (pending_memory_task_count)
+			if (only_minimal && toCombinedLeft->getItemCount() > minimalMt)
 			{
-				memory_signal.notify_one();
-				pending_memory_task_count--;				
+				// we cut the branches here
+				// this itemset is bigger than the minimal size of found minimal traverse
+				// we dont need to explore this one
+				break;
 			}
-			else
-			{
-				memory_signal.notify_all();
-			}
-		}
-		else
-		{
-			// build new toTraverse list and explore next branch
-
-			// combine each element between [0, toExplore_MaxClique_Index] with the entire combined itemset list
-			// loop on candidate itemset from initial toExplore list
-			for (unsigned int i = 0; i < toExplore_MaxClique_Index; i++)
-			{
-				std::shared_ptr<Itemset> toCombinedLeft = toExplore.front();
-				toExplore.erase(toExplore.begin());
-
-				if (only_minimal && toCombinedLeft->getItemCount() > minimalMt)
-				{
-					// this itemset is bigger than the minimal size of found minimal traverse
-					// we dont need to explore this one
-					break;
-				}
 				
-				// build newTraverse list, reserve with max possible size
-				std::vector<std::shared_ptr<Itemset>> newToTraverse;
-				newToTraverse.reserve(toExplore.size());
-				try
-				{
-					// loop on next candidate itemset
-					for_each(toExplore.begin(), toExplore.end(), [&toTraverse, &newToTraverse, &toCombinedLeft](std::shared_ptr<Itemset>& toCombinedRight) {
+			// build newTraverse list, reserve with max possible size
+			std::vector<std::shared_ptr<Itemset>> newToTraverse;
+			newToTraverse.reserve(toExplore.size());
+			try
+			{
+				// loop on next candidate itemset
+				for_each(toExplore.begin(), toExplore.end(), [&newToTraverse, &toCombinedLeft](std::shared_ptr<Itemset>& toCombinedRight) {
 
-						if (!toCombinedRight->containsAClone())
+					if (!toCombinedRight->containsAClone())
+					{
+						if(Itemset::isEssentialRapid(toCombinedLeft, toCombinedRight))
 						{
-							if(Itemset::isEssentialRapid(toCombinedLeft, toCombinedRight))
-							{
 #ifndef ISESSENTIAL_ON_TOEXPLORE
-								if (Itemset::computeIsEssential(toCombinedLeft, toCombinedRight))
+							if (Itemset::computeIsEssential(toCombinedLeft, toCombinedRight))
 #endif
+							{
+								/// combination of toCombinedRight & toCombinedRight is essential
+								/// we have to test if it will be usefull
+
+								/// 71 75 ==> 715
+								/// 71 76 ==> 716
+
+								/// --> new task --> 715
+
+								/// TEST IF 715 IS USEFULL BEFORE CREATING NEW TASK
+								/// CREER UNE TACHE POUR LES ELEMENTS DE TO EXPLORE
+
+
+								// combine toCombinedRight into toCombinedLeft
+								std::shared_ptr<Itemset> newItemset = std::make_shared<Itemset>(toCombinedLeft);
+								newItemset->combineItemset(toCombinedRight.get());
+
+								//std::vector<std::shared_ptr<Itemset>> toExplore;
+								//unsigned int toExplore_MaxClique_Index = 0;
+								//this->sortItemsetFromToTraverse(newItemset, std::move(toExplore), toExplore_MaxClique_Index);
+
+								//toTraverse.clear();
+								// this is a candidate for next iteration
+								newToTraverse.push_back(newItemset);
+
+#ifdef _DEBUG
 								{
-									/// 71 75 ==> 715
-									/// 71 76 ==> 716
-
-									/// --> new task --> 715
-
-									/// TEST IF 715 IS USEFULL BEFORE CREATING NEW TASK
-									/// CREER UNE TACHE POUR LES ELEMENTS DE TO EXPLORE
-
-									// combine toCombinedRight into toCombinedLeft
-									std::shared_ptr<Itemset> newItemset = std::make_shared<Itemset>(toCombinedLeft);
-									newItemset->combineItemset(toCombinedRight.get());
-
-									//std::cout << "this combined itemset is essential, added to new toTraverse list" << std::endl;
-									// this is a candidate for next iteration
-									newToTraverse.push_back(newItemset);
+									std::cout << "create new itemset for " << newItemset->toString() << std::endl;
 								}
+#endif // _DEBUG
+
+
 							}
 						}
-					});	
-				}
-				catch (std::exception& e)
-				{
-					std::cout << "during computeMinimalTransversals_task " << e.what() << std::endl;
-				}
-
-				// we can free toCombined
-				toCombinedLeft.reset();
-
-				// call process in the loop
-				if (!newToTraverse.empty())
-				{
-					//std::cout << "newToTraverse " << newToTraverse.size() << std::endl;
-
-					std::unique_lock<std::mutex> lock(memory_guard);
-					//std::cout << "stored tasks in the list, waiting to be managed : " << pending_task_count << " - blocked tasks, waiting to be unlock : " << pending_memory_task_count << std::endl;
-					
-					// check if we have too much tasks waiting to be managed by the process units in the task queue
-					// if yes, we stop the thread with a lock (condition variable), this thread will be unlock when a tasks will be finished by the process unit
-					if (pending_task_count > max_pending_task_count)
-					{
-						// do not add the taks into the task queue
-						// wait for other tasks to finish
-						pending_memory_task_count++;						
-						memory_signal.wait(lock);
 					}
-
-					// memory signal has been notified, we can add the task to task queue
-					lock.unlock();
-
-					cpt++;
-
-					// pending task
-					addTaskIntoQueue(std::move(newToTraverse));
-				}
+				});	
 			}
-			toExplore.clear();
-			toTraverse.clear();
-		}
-	}
+			catch (std::exception& e)
+			{
+				std::cout << "during computeMinimalTransversals_task " << e.what() << std::endl;
+			}
 
+			// we can free toCombined
+			toCombinedLeft.reset();
+
+			// call process in the loop
+			if (!newToTraverse.empty())
+			{
+				std::unique_lock<std::mutex> lock(memory_guard);
+				//std::cout << "stored tasks in the list, waiting to be managed : " << pending_task_count << " - blocked tasks, waiting to be unlock : " << pending_memory_task_count << std::endl;
+				
+				// check if we have too much tasks waiting to be managed by the process units in the task queue
+				// if yes, we stop the thread with a lock (condition variable), this thread will be unlock when a tasks will be finished by the process unit
+				if (pending_task_count > max_pending_task_count)
+				{
+					// do not add the taks into the task queue
+					// wait for other tasks to finish
+					pending_memory_task_count++;						
+					memory_signal.wait(lock);
+				}
+
+				// memory signal has been notified, we can add the task to task queue
+				lock.unlock();
+
+				cpt++;
+
+				// pending task
+				addTaskIntoQueue(std::move(newToTraverse));
+			}
+		}
+		toExplore.clear();
+	}
+	
 	// terminate task
 	if (!--pending_task_count)
 	{
@@ -406,7 +501,6 @@ void TreeNode::computeMinimalTransversals_task(std::vector<std::shared_ptr<Items
 		task_signal.notify_all();
 	}
 	// ## EMIT COMPLETE TASK ##
-
 }
 
 std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>&& toTraverse)
@@ -437,9 +531,16 @@ std::vector<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals(std::
 		}
 	});
 
+	// toExplore will contains a copy of toTraverse itemsets excepts minimal transverse items
+	// itemsets from [0 to toExplore_MaxClique_Index] are to explore
+	// itemsets from [toExplore_MaxClique_Index to toExplore size] are max clique
+	std::vector<std::shared_ptr<Itemset>> toExplore;
+	unsigned int toExplore_MaxClique_Index = 0;
+	this->generateCandidates(std::move(toTraverse), std::move(toExplore), toExplore_MaxClique_Index);
+	toTraverse.clear();
 
 	// emit initial task
-	auto task = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(toTraverse));
+	auto task = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(toExplore), toExplore_MaxClique_Index);
 
 	// ## SPAWN task ##
 	{
