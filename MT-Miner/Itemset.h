@@ -23,8 +23,6 @@ private:
 	/// list of item index (faster to copy from other itemset)
 	std::vector<unsigned int> itemsetIndexVector;
 
-	/// true if bitset_count & or value has to be computed
-	//bool dirty;
 	/// true if itemset has at least an item which is a clone
 	bool hasClone;
 
@@ -33,11 +31,12 @@ private:
 	std::unique_ptr<StaticBitset> supportBitset;
 	unsigned int supportValue;
 
+	std::unique_ptr<StaticBitset> cumulatedXorbitset;
+	std::unique_ptr<StaticBitset> noiseBitset;
+
 #ifdef ISESSENTIAL_ON_TOEXPLORE
 	bool isEssential;
 #endif
-	std::unique_ptr<StaticBitset> cumulatedXorbitset;
-	std::unique_ptr<StaticBitset> noiseBitset;
 
 private:
 	static bool computeIsEssentialParameters(const std::shared_ptr<Itemset>& itemset, StaticBitset& cumulatedXorbitset, StaticBitset& noiseBitset);
@@ -52,27 +51,28 @@ public:
 	void flip();
 	
 	unsigned int getItemCount() const;
-	static Item* getItem(const std::shared_ptr<Itemset>& itemset, unsigned int i);
 	bool containsAClone() const;
+	unsigned int getLastItemAttributeIndex() const;
+
 	std::string toString() const;
 	
 	std::shared_ptr<Itemset> createAndReplaceItem(unsigned int i, Item* item);
 	
-	void combineItemset(const Itemset* itemset);
+	void combine(unsigned int rightAttributeIndex);
 	
 	unsigned int getSupport() const;
 	
 	bool operator==(const Itemset& other);
 
-	//static bool computeIsEssential_old(const std::shared_ptr<Itemset>& left, const std::shared_ptr<Itemset>& right);
 #ifndef ISESSENTIAL_ON_TOEXPLORE
 	static bool computeIsEssential(const std::shared_ptr<Itemset>& left, const std::shared_ptr<Itemset>& right);
 #else
 	static bool computeIsEssential(const std::shared_ptr<Itemset>& itemset, bool mtComputation = false);
 #endif
-	static unsigned int computeSupport(const Itemset& left, const std::shared_ptr<Itemset>& right);
-	
-	static bool isEssentialRapid(std::shared_ptr<Itemset>& left, std::shared_ptr<Itemset>& right);
+
+	static unsigned int computeSupport(const Itemset& left, const std::shared_ptr<Itemset>& right);	
+	static Item* getItem(const std::shared_ptr<Itemset>& itemset, unsigned int i);
+	static bool isEssentialRapid(std::shared_ptr<Itemset>& left, unsigned int itemIndexToAdd);
 };
 
 inline unsigned int Itemset::getSupport() const
@@ -88,5 +88,10 @@ inline bool Itemset::containsAClone() const
 inline unsigned int Itemset::getItemCount() const
 {
 	return static_cast<unsigned int>(this->itemsetIndexVector.size());
+}
+
+inline unsigned int Itemset::getLastItemAttributeIndex() const
+{
+	return this->itemsetIndexVector[this->itemsetIndexVector.size() - 1];
 }
 

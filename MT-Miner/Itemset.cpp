@@ -15,7 +15,6 @@ Itemset::Itemset()
 	this->noiseBitset = std::make_unique<StaticBitset>();
 
 	this->supportValue = 0;
-	//this->dirty = true;
 	this->hasClone = false;	
 }
 
@@ -34,7 +33,6 @@ Itemset::Itemset(unsigned int binaryRepIndex)
 #endif
 
 	this->supportValue = item->count();
-	//this->dirty = false;
 	this->hasClone = false;
 	if (item->isAClone())
 		this->hasClone = true;
@@ -53,12 +51,10 @@ Itemset::Itemset(const std::shared_ptr<Itemset>& itemset)
 	this->noiseBitset = std::make_unique<StaticBitset>(*itemset->noiseBitset);
 
 	this->supportValue = itemset->supportValue;
-	//this->dirty = itemset->dirty;
 	this->hasClone = itemset->hasClone;
 
 	this->itemsetIndexVector.reserve(itemset->itemsetIndexVector.size());
 	this->itemsetIndexVector = itemset->itemsetIndexVector;
-	//std::copy(itemset->itemsetIndexVector.begin(), itemset->itemsetIndexVector.end(), std::back_inserter(this->itemsetIndexVector));
 }
 
 Itemset::~Itemset()
@@ -108,10 +104,11 @@ std::shared_ptr<Itemset> Itemset::createAndReplaceItem(unsigned int iToReplace, 
 	return nullptr;
 }
 
-bool Itemset::isEssentialRapid(std::shared_ptr<Itemset>& left, std::shared_ptr<Itemset>& right)
+bool Itemset::isEssentialRapid(std::shared_ptr<Itemset>& left, unsigned int itemIndexToAdd)
 {
-	unsigned int indexItemToAdd = right->itemsetIndexVector[right->itemsetIndexVector.size() - 1];
-	Item* itItemToAdd = BinaryRepresentation::getItemFromKey(indexItemToAdd).get();
+	// CARE : support of 72 is different than support of 2 when combining 71 with 72 ???
+
+	std::shared_ptr<Item> itItemToAdd = BinaryRepresentation::getItemFromKey(itemIndexToAdd);
 	
 	StaticBitset combined_bitset;
 	if (itemsetType == CONSJONCTIVE)
@@ -119,23 +116,25 @@ bool Itemset::isEssentialRapid(std::shared_ptr<Itemset>& left, std::shared_ptr<I
 	else
 		combined_bitset = (*itItemToAdd->staticBitset) | (*left->supportBitset);
 	
+	// must count bits into combined bitset, not so fast...
 	unsigned int supportCombined = combined_bitset.count();
+	unsigned int rightSupport = itItemToAdd->staticBitset->count();
 
 	// si support 715 == support 71 ou support 75
-	if (supportCombined == left->getSupport() || supportCombined == right->getSupport())
+	if (supportCombined == left->getSupport() || supportCombined == rightSupport)
 	{
 #ifdef _DEBUG
 		{
 			std::shared_ptr<Itemset> newItemset = std::make_shared<Itemset>(left);
-			newItemset->combineItemset(right.get());
-			std::cout << left->toString() << " combined with " << right->toString() << " has same support as " << newItemset->toString() << ", no task created for this itemset" << std::endl;
+			newItemset->combine(itemIndexToAdd);
+			std::cout << left->toString() << " combined with " << itemIndexToAdd << " has same support as " << newItemset->toString() << ", no task created for this itemset" << std::endl;
 		}
 #endif // _DEBUG
 		return false;
 	}
 
 	// first test : or(left) xor or(right)
-	StaticBitset tmp_xor = (*left->supportBitset) ^ (*right->supportBitset);
+	StaticBitset tmp_xor = (*left->supportBitset) ^ (*itItemToAdd->staticBitset);
 	if (tmp_xor.none())
 	{
 		// all bits from left and right are "1", this is not essential
@@ -165,7 +164,7 @@ bool Itemset::isEssentialRapid(std::shared_ptr<Itemset>& left, std::shared_ptr<I
 	return true;
 }
 
-void Itemset::combineItemset(const Itemset* itemset_right)
+void Itemset::combine(unsigned int rightAttributeIndex)
 {
 	/// return true / false
 	/// return true --> combine ok
@@ -176,14 +175,15 @@ void Itemset::combineItemset(const Itemset* itemset_right)
 	// "1" + "2" => "12"
 	// "71" + "72" => "712"
 	// we can always add the last one
-	unsigned int indexItemToAdd = itemset_right->itemsetIndexVector[itemset_right->itemsetIndexVector.size() - 1];
-	Item* itItemToAdd = BinaryRepresentation::getItemFromKey(indexItemToAdd).get();
+	//unsigned int indexItemToAdd = itemsetRight->itemsetIndexVector[itemsetRight->itemsetIndexVector.size() - 1];	
+	//Item* itItemToAdd = BinaryRepresentation::getItemFromKey(indexItemToAdd).get();
+	std::shared_ptr<Item> rightItem = BinaryRepresentation::getItemFromKey(rightAttributeIndex);
 
 	// update support
 	if (itemsetType == CONSJONCTIVE)
-		(*this->supportBitset) = (*itItemToAdd->staticBitset) & (*this->supportBitset);
+		(*this->supportBitset) = (*rightItem->staticBitset) & (*this->supportBitset);
 	else
-		(*this->supportBitset) = (*itItemToAdd->staticBitset) | (*this->supportBitset);
+		(*this->supportBitset) = (*rightItem->staticBitset) | (*this->supportBitset);
 
 #ifndef ISESSENTIAL_ON_TOEXPLORE
 	(*this->noiseBitset) = (*this->noiseBitset) | ((*this->cumulatedXorbitset) & (*itItemToAdd->staticBitset) ^ (*this->cumulatedXorbitset) ^ (*this->cumulatedXorbitset));
@@ -191,16 +191,14 @@ void Itemset::combineItemset(const Itemset* itemset_right)
 #endif
 
 	// update clone status
-	if (itItemToAdd->isAClone())
+	if (rightItem->isAClone())
 		this->hasClone = true;
 
 	// update support
 	this->supportValue = (*this->supportBitset).count();
-	// combined item set is not dirty, all supportBitsets have been computed
-	//this->dirty = false;
 
 	// finally add the last item
-	this->itemsetIndexVector.push_back(indexItemToAdd);
+	this->itemsetIndexVector.push_back(rightAttributeIndex);
 };
 
 #ifndef ISESSENTIAL_ON_TOEXPLORE
@@ -406,8 +404,7 @@ void Itemset::flip()
 			item->staticBitset->flip();
 		}
 		this->supportBitset->flip();
-		this->supportValue = (*this->supportBitset).count();
-		//this->dirty = true;
+		this->supportValue = (*this->supportBitset).count();		
 	}
 }
 

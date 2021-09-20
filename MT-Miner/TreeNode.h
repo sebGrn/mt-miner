@@ -65,7 +65,7 @@ private:
 	bool useCloneOptimization;
 
 	// shared memory between threads, contains computed minimaltransverse
-	std::vector<std::shared_ptr<Itemset>> minimalTransverse;
+	std::deque<std::shared_ptr<Itemset>> minimalTransverse;
 
 	bool isMinimalTrasverse(const std::shared_ptr<Itemset>& itemset) const;
 	void updateMinimalTraverseList(const std::shared_ptr<Itemset>& itemset);
@@ -82,11 +82,11 @@ public:
 private: 
 	/// compute maxClique list, toExplore list and mt list
 	/// update graph_mt with new minimal transversal itemset
-	void generateCandidates(std::vector<std::shared_ptr<Itemset>>&& toTraverse, std::vector<std::shared_ptr<Itemset>>&& toExplore, unsigned int& toExplore_MaxClique_Index);
+	void generateCandidates(std::deque<std::shared_ptr<Itemset>>&& toTraverse, std::deque<std::shared_ptr<Itemset>>&& toExplore, std::vector<unsigned int>&& maxClique);
 	
-	void addTaskIntoQueue(std::vector<std::shared_ptr<Itemset>>&& toTraverse);
+	void addTaskIntoQueue(std::deque<std::shared_ptr<Itemset>>&& toTraverse);
 
-	void computeMinimalTransversals_task(std::vector<std::shared_ptr<Itemset>>&& toExplore, unsigned int toExplore_MaxClique_Index);
+	void computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemset>>&& toExplore, std::vector<unsigned int>&& maxClique);
 	
 	void recurseOnClonedItemset(std::shared_ptr<Itemset> itemset, unsigned int iItem);
 
@@ -94,6 +94,6 @@ public:
 	TreeNode(bool useCloneOptimization, bool only_minimal, float threshold);
 	~TreeNode();
 
-	std::vector<std::shared_ptr<Itemset>> computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>&& toTraverse);
+	std::deque<std::shared_ptr<Itemset>> computeMinimalTransversals(std::deque<std::shared_ptr<Itemset>>&& toTraverse);
 };
 

@@ -12,16 +12,16 @@ namespace MTMinerUnitTests_test
 		TEST_METHOD(TestingMinimalTransversalsSize_accident)
 		{
 			HyperGraph hypergraph;
-			bool parserResult = hypergraph.load("../../data/accident/ac.150k.dat");
+			bool parserResult = hypergraph.load("../../data/ac_130k.dat");
 			Assert::AreEqual(true, parserResult);
 
 			MT_Miner miner(true);
 			miner.createBinaryRepresentation(hypergraph);
 
 			// compute minimal transversals
-			std::vector< std::shared_ptr<Itemset>> minimalTransversals;
+			std::deque< std::shared_ptr<Itemset>> minimalTransversals;
 			miner.computeMinimalTransversals(minimalTransversals);
-			Assert::AreEqual(1039, static_cast<int>(minimalTransversals.size()));
+			Assert::AreEqual(1916, static_cast<int>(minimalTransversals.size()));
 		}
 		TEST_METHOD(TestingMinimalTransversalsSize)
 		{
@@ -33,7 +33,7 @@ namespace MTMinerUnitTests_test
 			miner.createBinaryRepresentation(hypergraph);
 
 			// compute minimal transversals
-			std::vector< std::shared_ptr<Itemset>> minimalTransversals;
+			std::deque< std::shared_ptr<Itemset>> minimalTransversals;
 			miner.computeMinimalTransversals(minimalTransversals);
 			//minimalTransversals = Utils::sortVectorOfItemset(minimalTransversals);
 			Assert::AreEqual(6, static_cast<int>(minimalTransversals.size()));
@@ -49,7 +49,7 @@ namespace MTMinerUnitTests_test
 			miner.createBinaryRepresentation(hypergraph);
 
 			// compute minimal transversals
-			std::vector< std::shared_ptr<Itemset>> minimalTransversals;
+			std::deque<std::shared_ptr<Itemset>> minimalTransversals;
 			miner.computeMinimalTransversals(minimalTransversals);
 			//minimalTransversals = Utils::sortVectorOfItemset(minimalTransversals);
 			Assert::AreEqual(15, static_cast<int>(minimalTransversals.size()));
@@ -65,7 +65,7 @@ namespace MTMinerUnitTests_test
 			miner.createBinaryRepresentation(hypergraph);
 
 			// compute minimal transversals
-			std::vector< std::shared_ptr<Itemset>> minimalTransversals;
+			std::deque< std::shared_ptr<Itemset>> minimalTransversals;
 			miner.computeMinimalTransversals(minimalTransversals);
 			//minimalTransversals = Utils::sortVectorOfItemset(minimalTransversals);
 			Assert::AreEqual(15, static_cast<int>(minimalTransversals.size()));

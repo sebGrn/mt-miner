@@ -127,7 +127,7 @@ void runMinimalTransversals(const std::string& file, bool useCloneOptimization, 
 		miner.createBinaryRepresentation(hypergraph);
 	
 		// compute minimal transverses
-		std::vector<std::shared_ptr<Itemset>> minimalTransversals;
+		std::deque<std::shared_ptr<Itemset>> minimalTransversals;
 		miner.computeMinimalTransversals(minimalTransversals);
 
 		// save minimal transversals into a file

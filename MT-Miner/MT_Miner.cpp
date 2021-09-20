@@ -26,15 +26,6 @@ void MT_Miner::createBinaryRepresentation(const HyperGraph& hypergraph)
 
 	if (this->useCloneOptimization)
 	{
-		// avant de commencer l'exploration des TM tu cherches dans le fichier les colonnes clones
-		// qui ont le meme support et qui couvrent exactement les memes objets
-		// si tu fais le ET logique du support de la colonne avec son clone tu obtiens le meme vecteur
-		// donc c'est comme ça que tu identifies ces clones une fois tu les as
-		//
-		// et tu gardes un clone  par groupe tu vois comme l'exemple Hyp1
-		//
-		// tu gardes soit 9 soit 10 dans ton contexte, apres tu n'as pas a explorer la branche de 10
-		// tu vas prendre les MT obtenus de la branche 9 et tu remplaces 9 par 10
 
 		// explore binary representation to check if we have clone
 		// if we have, memorize the indexes of the original and the cloned
@@ -49,7 +40,7 @@ void MT_Miner::createBinaryRepresentation(const HyperGraph& hypergraph)
 	}
 }
 
-void MT_Miner::computeInitalToTraverseList(std::vector<std::shared_ptr<Itemset>>& toTraverse) const
+void MT_Miner::computeInitialToTraverseList(std::deque<std::shared_ptr<Itemset>>& toTraverse) const
 {
 	if (Itemset::itemsetType == Itemset::CONSJONCTIVE)
 		std::cout << "use of CONSJONCTIVE support (AND) with dual context" << std::endl;
@@ -65,21 +56,21 @@ void MT_Miner::computeInitalToTraverseList(std::vector<std::shared_ptr<Itemset>>
 		{
 			// store indexes from binary representation, we must keep binary representation
 			std::shared_ptr<Itemset> itemset(new Itemset(i));
-			itemset->flip();
+			//itemset->flip();
 			toTraverse.push_back(itemset);
 		}
 	}
 }
 
-void MT_Miner::computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>& mt)
+void MT_Miner::computeMinimalTransversals(std::deque<std::shared_ptr<Itemset>>& mt)
 {
 	std::cout << "items count : " << BinaryRepresentation::getItemCount() << std::endl;
 
 	auto beginTime = std::chrono::system_clock::now();
 	
 	// initialise itemset
-	std::vector<std::shared_ptr<Itemset>> toTraverse;
-	computeInitalToTraverseList(toTraverse);
+	std::deque<std::shared_ptr<Itemset>> toTraverse;
+	computeInitialToTraverseList(toTraverse);
 	
 	// create a graph, then compute minimal transversal from the binary representation
 	TreeNode rootNode(this->useCloneOptimization, this->useMinimalSizeOnly, this->threshold);

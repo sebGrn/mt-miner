@@ -31,7 +31,7 @@ private:
 	
 private:
 	/// return the minimal transversals miner
-	void computeInitalToTraverseList(std::vector<std::shared_ptr<Itemset>>& toTraverse) const;
+	void computeInitialToTraverseList(std::deque<std::shared_ptr<Itemset>>& toTraverse) const;
 
 public:
 	MT_Miner(bool useCloneOptimization = true, bool useMinimalSizeOnly = false, float threshold = 1.0f);
@@ -41,6 +41,6 @@ public:
 	void createBinaryRepresentation(const HyperGraph& hypergraph);
 	
 	///
-	void computeMinimalTransversals(std::vector<std::shared_ptr<Itemset>>& mt);
+	void computeMinimalTransversals(std::deque<std::shared_ptr<Itemset>>& mt);
 };
 
