@@ -22,7 +22,7 @@
 class TreeNode
 {
 public:
-	static std::atomic_uint cpt;
+	static std::atomic_uint nbTaskCreated;
 
 private:
 	// to avoid interleaved outputs
@@ -38,19 +38,6 @@ private:
 	static std::mutex trace_guard;
 	// used to pause / unpause thread before tasks in process units
 	static std::condition_variable task_signal;
-
-	// used to lock tasks before being put in the task queue (in order to not have a huge task queue)
-	static std::mutex memory_guard;
-	// used to pause / unpause thread
-	static std::condition_variable memory_signal;
-
-	// blocked tasks, waiting to bepending_memory_task_count unlock, memory is locked
-	static std::atomic_uint pending_memory_task_count;
-
-	// threshold who can vary
-	static std::atomic_uint max_pending_task_count;
-	// if true, a thread is checking if all tasks are pending to adapt inc/dec max_pending_task_count
-	static std::atomic_bool pending_task_checker;
 
 	static std::atomic_bool only_minimal;
 

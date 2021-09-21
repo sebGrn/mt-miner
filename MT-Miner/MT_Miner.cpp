@@ -108,7 +108,7 @@ void MT_Miner::computeMinimalTransversals(std::deque<std::shared_ptr<Itemset>>& 
 	Logger::dataset.minimalSizeOfTransverse = rootNode.minimalMt;
 	std::cout << GREEN << "\nFound " << mt.size() << " minimal transverses in " << duration2 << " s, minimal size is " << rootNode.minimalMt << "\n";
 
-	std::cout << GREEN << "\rtasks created " << rootNode.cpt << "\n";
+	std::cout << GREEN << "\rtasks created " << rootNode.nbTaskCreated << "\n";
 
 	Logger::log();
 

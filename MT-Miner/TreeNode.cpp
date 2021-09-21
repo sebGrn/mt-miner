@@ -1,8 +1,6 @@
 #include "TreeNode.h"
 
 //#define TRACE
-
-#define MAX_PENDING_TASKS_START 1000
 #define MAX_MINIMAL_TRAVERSE_SIZE 9999
 
 std::atomic_ullong TreeNode::nbTotalMt(0);
@@ -19,16 +17,10 @@ std::deque<std::future<void>> TreeNode::task_queue;
 std::mutex TreeNode::task_guard;
 std::condition_variable TreeNode::task_signal;
 std::mutex TreeNode::trace_guard;
-// synchro stuff for tasks blocking
-std::mutex TreeNode::memory_guard;
-std::condition_variable TreeNode::memory_signal;
-std::atomic_uint TreeNode::pending_memory_task_count(0);
 
 std::atomic_uint TreeNode::pending_task_count(0);
-std::atomic_uint TreeNode::max_pending_task_count(MAX_PENDING_TASKS_START);
-std::atomic_bool TreeNode::pending_task_checker(true);
 
-std::atomic_uint TreeNode::cpt(0);
+std::atomic_uint TreeNode::nbTaskCreated(0);
 
 std::shared_ptr<BinaryRepresentation> TreeNode::binaryRepresentation = std::make_shared<BinaryRepresentation>();
 
@@ -248,21 +240,6 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 	//std::cout << std::endl;
 
 	// test trivial case
-	if (toExplore.empty() || maxClique.empty())
-	{
-		const std::lock_guard<std::mutex> lock(task_guard);
-		//std::cout << "toExplore is empty, unlock a task, pending memory task : " << pending_memory_task_count << std::endl;
-		if (pending_memory_task_count)
-		{
-			memory_signal.notify_one();
-			pending_memory_task_count--;
-		}
-		else
-		{
-			memory_signal.notify_all();
-		}
-	}
-	else
 	{
 		// build new toTraverse list and explore next branch
 		// combine each element between [0, toExplore_MaxClique_Index] with the entire combined itemset list
@@ -349,26 +326,10 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 			// call process in the loop
 			if (!newToTraverse.empty())
 			{
-				std::unique_lock<std::mutex> lock(memory_guard);
-				//std::cout << "stored tasks in the list, waiting to be managed : " << pending_task_count << " - blocked tasks, waiting to be unlock : " << pending_memory_task_count << std::endl;
-				
-				// check if we have too much tasks waiting to be managed by the process units in the task queue
-				// if yes, we stop the thread with a lock (condition variable), this thread will be unlock when a tasks will be finished by the process unit
-				if (pending_task_count > max_pending_task_count)
-				{
-					// do not add the taks into the task queue
-					// wait for other tasks to finish
-					pending_memory_task_count++;						
-					memory_signal.wait(lock);
-				}
-
-				// memory signal has been notified, we can add the task to task queue
-				lock.unlock();
-
-				cpt++;
-
 				// pending task
 				addTaskIntoQueue(std::move(newToTraverse));
+				// inc task count
+				nbTaskCreated++;
 			}
 		}
 		toExplore.clear();
@@ -388,30 +349,6 @@ std::deque<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals(std::d
 {
 	// ## START system ##
 	
-	// lambda function called during minimal transverse computing
-	auto ftr = std::async(std::launch::async, []() {
-
-		while (pending_task_checker)
-		{
-			if (pending_task_count >= max_pending_task_count)
-			{
-				// change max task queue to avoid blocking
-				max_pending_task_count++;
-
-				memory_signal.notify_one();
-				if(pending_memory_task_count)
-					pending_memory_task_count--;
-			}
-			else 
-			{
-				if (max_pending_task_count >= MAX_PENDING_TASKS_START)
-				{
-					max_pending_task_count--;
-				}
-			}
-		}
-	});
-
 	// toExplore will contains a copy of toTraverse itemsets excepts minimal transverse items
 	// itemsets from [0 to toExplore_MaxClique_Index] are to explore
 	// itemsets from [toExplore_MaxClique_Index to toExplore size] are max clique
@@ -479,9 +416,7 @@ std::deque<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals(std::d
 	{
 		unit.wait();
 	}
-
-	this->pending_task_checker = false;
-	ftr.get();	
+	
 
 	return this->minimalTransverse;
 }
