@@ -3,8 +3,6 @@
 #include <bit>
 #include "BinaryRepresentation.h"
 
-Itemset::ItemsetType Itemset::itemsetType = Itemset::ItemsetType::DISJUNCTIVE;
-
 Itemset::Itemset()
 {
 	this->supportBitset = std::make_unique<StaticBitset>();
@@ -110,11 +108,7 @@ bool Itemset::isEssentialRapid(std::shared_ptr<Itemset>& left, unsigned int item
 
 	std::shared_ptr<Item> itItemToAdd = BinaryRepresentation::getItemFromKey(itemIndexToAdd);
 	
-	StaticBitset combined_bitset;
-	if (itemsetType == CONSJONCTIVE)
-		combined_bitset = (*itItemToAdd->staticBitset) & (*left->supportBitset);
-	else
-		combined_bitset = (*itItemToAdd->staticBitset) | (*left->supportBitset);
+	StaticBitset combined_bitset = combined_bitset = (*itItemToAdd->staticBitset) | (*left->supportBitset);
 	
 	// must count bits into combined bitset, not so fast...
 	unsigned int supportCombined = combined_bitset.count();
@@ -180,10 +174,7 @@ void Itemset::combine(unsigned int rightAttributeIndex)
 	std::shared_ptr<Item> rightItem = BinaryRepresentation::getItemFromKey(rightAttributeIndex);
 
 	// update support
-	if (itemsetType == CONSJONCTIVE)
-		(*this->supportBitset) = (*rightItem->staticBitset) & (*this->supportBitset);
-	else
-		(*this->supportBitset) = (*rightItem->staticBitset) | (*this->supportBitset);
+	(*this->supportBitset) = (*rightItem->staticBitset) | (*this->supportBitset);
 
 #ifndef ISESSENTIAL_ON_TOEXPLORE
 	(*this->noiseBitset) = (*this->noiseBitset) | ((*this->cumulatedXorbitset) & (*itItemToAdd->staticBitset) ^ (*this->cumulatedXorbitset) ^ (*this->cumulatedXorbitset));
@@ -352,10 +343,7 @@ bool Itemset::computeIsEssential(const std::shared_ptr<Itemset>& itemset, bool m
 unsigned int Itemset::computeSupport(const Itemset& left, const std::shared_ptr<Itemset>& right)
 {
 	StaticBitset* res = new StaticBitset();
-	if (itemsetType == CONSJONCTIVE)
-		(*res) = (*left.supportBitset) & (*right->supportBitset);
-	else
-		(*res) = (*left.supportBitset) | (*right->supportBitset);
+	(*res) = (*left.supportBitset) | (*right->supportBitset);
 	unsigned int r = res->count();
 	delete res;
 	return r;
@@ -392,20 +380,6 @@ std::string Itemset::toString() const
 	res.pop_back();
 	res += "}";
 	return res;
-}
-
-void Itemset::flip()
-{
-	if (itemsetType == CONSJONCTIVE)
-	{
-		for (auto& elt : itemsetIndexVector)
-		{
-			Item* item = BinaryRepresentation::getItemFromKey(elt).get();
-			item->staticBitset->flip();
-		}
-		this->supportBitset->flip();
-		this->supportValue = (*this->supportBitset).count();		
-	}
 }
 
 Item* Itemset::getItem(const std::shared_ptr<Itemset>& itemset, unsigned int i)

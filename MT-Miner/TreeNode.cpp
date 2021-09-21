@@ -95,11 +95,7 @@ bool TreeNode::isMinimalTrasverse(const std::shared_ptr<Itemset>& itemset) const
 	unsigned int support = itemset->getSupport();
 
 	// check if itemset is a minimal transverse depending on disjunctive or consjonctive (with dual) method
-	bool isMinimalTransverse = false;
-	if (Itemset::itemsetType == Itemset::ItemsetType::DISJUNCTIVE)
-		isMinimalTransverse = ((100 * support) >= (objectCount * TreeNode::threshold));
-	else
-		isMinimalTransverse = ((100 * support) <= (objectCount * (100 - TreeNode::threshold)));
+	bool isMinimalTransverse = ((100 * support) >= (objectCount * TreeNode::threshold));
 
 	return isMinimalTransverse;
 }
@@ -148,12 +144,7 @@ bool TreeNode::isCandidateForMaxClique(const Itemset& cumulatedItemset, const st
 	// test support and add itemset in maxClique or toExplore list
 	unsigned int support = Itemset::computeSupport(cumulatedItemset, crtItemset);
 
-	bool isMaxClique = false;
-	if (Itemset::itemsetType == Itemset::ItemsetType::DISJUNCTIVE)
-		isMaxClique = (support != objectCount);
-	else
-		isMaxClique = (support != 0);
-	
+	bool isMaxClique = (support != objectCount);	
 	return isMaxClique;
 }
 

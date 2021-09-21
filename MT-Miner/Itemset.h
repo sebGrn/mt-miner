@@ -12,13 +12,6 @@ class BinaryRepresentation;
 
 class Itemset
 {
-public:
-	enum ItemsetType {
-		CONSJONCTIVE,	// AND
-		DISJUNCTIVE		// OR
-	};
-	static ItemsetType itemsetType;
-
 private:
 	/// list of item index (faster to copy from other itemset)
 	std::vector<unsigned int> itemsetIndexVector;
@@ -27,7 +20,6 @@ private:
 	bool hasClone;
 
 	// disjunctive support : computed with OR
-	// consjonctive support : computed with AND
 	std::unique_ptr<StaticBitset> supportBitset;
 	unsigned int supportValue;
 
@@ -46,10 +38,7 @@ public:
 	Itemset(unsigned int binaryRepIndex);
 	Itemset(const std::shared_ptr<Itemset>& itemset);
 	~Itemset();
-	
-	// only for consjonctive
-	void flip();
-	
+		
 	unsigned int getItemCount() const;
 	bool containsAClone() const;
 	unsigned int getLastItemAttributeIndex() const;
