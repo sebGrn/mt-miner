@@ -1,6 +1,6 @@
 #include "TreeNode.h"
 
-#define TRACE
+//#define TRACE
 
 #define MAX_MINIMAL_TRAVERSE_SIZE 9999
 
@@ -138,11 +138,16 @@ bool TreeNode::isCandidateForMaxClique(const Itemset& cumulatedItemset, const st
 	// store object count for optimization
 	unsigned int objectCount = this->binaryRepresentation->getObjectCount();
 
+	if (cumulatedItemset.getSupport() + crtItemset->getSupport() == objectCount)
+		return false;
+
 	// test support and add itemset in maxClique or toExplore list
 	unsigned int support = Itemset::computeSupport(cumulatedItemset, crtItemset);
 
-	bool isMaxClique = (support != objectCount);	
-	return isMaxClique;
+	if (support != objectCount)
+		return true;
+	else
+		return false;
 }
 
 void TreeNode::generateCandidates(std::deque<std::shared_ptr<Itemset>>&& toTraverse, std::deque<std::shared_ptr<Itemset>>&& toExplore, std::vector<unsigned int>&& maxClique)

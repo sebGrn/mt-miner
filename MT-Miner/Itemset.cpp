@@ -167,8 +167,6 @@ void Itemset::combine(unsigned int rightAttributeIndex)
 	// "1" + "2" => "12"
 	// "71" + "72" => "712"
 	// we can always add the last one
-	//unsigned int indexItemToAdd = itemsetRight->itemsetIndexVector[itemsetRight->itemsetIndexVector.size() - 1];	
-	//Item* itItemToAdd = BinaryRepresentation::getItemFromKey(indexItemToAdd).get();
 	std::shared_ptr<Item> rightItem = BinaryRepresentation::getItemFromKey(rightAttributeIndex);
 
 	// update support
@@ -280,9 +278,6 @@ bool Itemset::computeIsEssentialParameters(const std::shared_ptr<Itemset>& items
 // called only on toExplore 
 bool Itemset::computeIsEssential(const std::shared_ptr<Itemset>& itemset, bool mtComputation)
 {
-	/// if (support left + right == support left) OR (support left + right == support right) RETURN FALSE
-	/// IF (SUPPORT itemset == SUPPORT cumulatedXorbitset) OR (SUPPORT itemset == bitsetToAdd) RETURN FALSE
-
 	if (itemset->getItemCount() == 0)
 	{
 		return false;
