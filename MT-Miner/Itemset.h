@@ -54,7 +54,7 @@ public:
 	bool operator==(const Itemset& other);
 
 #ifndef ISESSENTIAL_ON_TOEXPLORE
-	static bool computeIsEssential(const std::shared_ptr<Itemset>& left, const std::shared_ptr<Itemset>& right);
+	static bool computeIsEssential(const std::shared_ptr<Itemset>& left, unsigned int indexToAdd);
 #else
 	static bool computeIsEssential(const std::shared_ptr<Itemset>& itemset, bool mtComputation = false);
 #endif

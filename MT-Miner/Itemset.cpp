@@ -25,11 +25,9 @@ Itemset::Itemset(unsigned int binaryRepIndex)
 	// update member for isEssential and combine computation
 	this->cumulatedXorbitset = std::make_unique<StaticBitset>(*item->staticBitset);
 	this->noiseBitset = std::make_unique<StaticBitset>();
-
 #ifdef ISESSENTIAL_ON_TOEXPLORE
 	this->isEssential = false;
 #endif
-
 	this->supportValue = item->count();
 	this->hasClone = false;
 	if (item->isAClone())
@@ -117,13 +115,13 @@ bool Itemset::isEssentialRapid(std::shared_ptr<Itemset>& left, unsigned int item
 	// si support 715 == support 71 ou support 75
 	if (supportCombined == left->getSupport() || supportCombined == rightSupport)
 	{
-#ifdef _DEBUG
+/*#ifdef _DEBUG
 		{
 			std::shared_ptr<Itemset> newItemset = std::make_shared<Itemset>(left);
 			newItemset->combine(itemIndexToAdd);
 			std::cout << left->toString() << " combined with " << itemIndexToAdd << " has same support as " << newItemset->toString() << ", no task created for this itemset" << std::endl;
 		}
-#endif // _DEBUG
+#endif*/
 		return false;
 	}
 
@@ -177,8 +175,8 @@ void Itemset::combine(unsigned int rightAttributeIndex)
 	(*this->supportBitset) = (*rightItem->staticBitset) | (*this->supportBitset);
 
 #ifndef ISESSENTIAL_ON_TOEXPLORE
-	(*this->noiseBitset) = (*this->noiseBitset) | ((*this->cumulatedXorbitset) & (*itItemToAdd->staticBitset) ^ (*this->cumulatedXorbitset) ^ (*this->cumulatedXorbitset));
-	(*this->cumulatedXorbitset) = (*itItemToAdd->staticBitset) ^ (*this->cumulatedXorbitset);
+	(*this->noiseBitset) = (*this->noiseBitset) | ((*this->cumulatedXorbitset) & (*rightItem->staticBitset) ^ (*this->cumulatedXorbitset) ^ (*this->cumulatedXorbitset));
+	(*this->cumulatedXorbitset) = (*rightItem->staticBitset) ^ (*this->cumulatedXorbitset);
 #endif
 
 	// update clone status
@@ -193,8 +191,33 @@ void Itemset::combine(unsigned int rightAttributeIndex)
 };
 
 #ifndef ISESSENTIAL_ON_TOEXPLORE
-
-// itemset is essential if and only if we have this pattern
+/*
+  2  3 6  9  
+  0; 0;0; 0; 
+  1; 0;0; 0; 
+  1; 1;0; 0; 
+  0; 1;0; 0; 
+  0; 1;0; 0; 
+  0; 0;1; 0; 
+  1; 0;1; 0; 
+  0; 0;1; 0; 
+  0; 0;0; 0; 
+  0; 0;0; 0; 
+ 
+   	   	  
+  2  3  6  9  
+  1; 0 ;0; 0; 
+  1; 1 ;0; 0; 
+  0; 1 ;0; 0; 
+  0; 0 ;1; 0; 
+  0; 0 ;0; 1; 
+  0; 0 ;1; 0; 
+  1; 0 ;0; 0; 
+  	   	     
+*/ 	   	     
+	  	 		       
+		       		       
+// itemset is  essen tial if and only if we have this pattern
 // 0 1
 // 1 0
 // or
@@ -203,10 +226,9 @@ void Itemset::combine(unsigned int rightAttributeIndex)
 // 0 0 1
 
 // called every time on combine
-bool Itemset::computeIsEssential(const std::shared_ptr<Itemset>& left, const std::shared_ptr<Itemset>& right)
+bool Itemset::computeIsEssential(const std::shared_ptr<Itemset>& left, unsigned int indexItemToAdd)
 {
-	unsigned int indexItemToAdd = right->itemsetIndexVector[right->itemsetIndexVector.size() - 1];
-	Item* itItemToAdd = BinaryRepresentation::getItemFromKey(indexItemToAdd).get();
+	std::shared_ptr<Item> itItemToAdd = BinaryRepresentation::getItemFromKey(indexItemToAdd);
 
 	StaticBitset bitsetToAdd = (*itItemToAdd->staticBitset);
 	{

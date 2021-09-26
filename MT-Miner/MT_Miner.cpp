@@ -18,11 +18,11 @@ void MT_Miner::createBinaryRepresentation(const HyperGraph& hypergraph)
 {
 	// build formal context from hypergraph
 	FormalContext formalContext(hypergraph);
-	//formalContext.serialize("format_context.csv");
+	formalContext.serialize("format_context.csv");
 
 	// build binary representation from formal context
 	BinaryRepresentation::buildFromFormalContext(formalContext);
-	//BinaryRepresentation::serialize("binary_rep.csv");
+	BinaryRepresentation::serialize("binary_rep.csv");
 
 	if (this->useCloneOptimization)
 	{

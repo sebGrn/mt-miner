@@ -1,6 +1,7 @@
 #include "TreeNode.h"
 
-//#define TRACE
+#define TRACE
+
 #define MAX_MINIMAL_TRAVERSE_SIZE 9999
 
 std::atomic_ullong TreeNode::nbTotalMt(0);
@@ -61,7 +62,7 @@ void TreeNode::recurseOnClonedItemset(std::shared_ptr<Itemset> itemset, unsigned
 #ifdef TRACE
 				{
 					const std::lock_guard<std::mutex> guard(trace_guard);
-					std::cout << "new minimal traverse found from clone " << clonedItemset->toString() << std::endl;
+					std::cout << "--> new minimal traverse found from clone " << clonedItemset->toString() << std::endl;
 				}
 #endif
 			}
@@ -86,7 +87,6 @@ bool TreeNode::isMinimalTrasverse(const std::shared_ptr<Itemset>& itemset) const
 	//	if disjunctive support is equal to object count --> add the itemset to graphMt list (then process its clones)
 	unsigned int support = itemset->getSupport();
 
-	// check if itemset is a minimal transverse depending on disjunctive or consjonctive (with dual) method
 	bool isMinimalTransverse = ((100 * support) >= (objectCount * TreeNode::threshold));
 
 	return isMinimalTransverse;
@@ -100,6 +100,11 @@ void TreeNode::updateMinimalTraverseList(const std::shared_ptr<Itemset>& crtItem
 #ifdef ISESSENTIAL_ON_TOEXPLORE
 		bool isEssential = Itemset::computeIsEssential(crtItemset, true);
 		if (isEssential)
+#else
+		unsigned int indexToAdd = crtItemset->getLastItemAttributeIndex();
+		bool isEssential = Itemset::computeIsEssential(crtItemset, indexToAdd);
+		if (isEssential)
+
 #endif
 		{
 			{
@@ -108,7 +113,7 @@ void TreeNode::updateMinimalTraverseList(const std::shared_ptr<Itemset>& crtItem
 #ifdef TRACE
 				{
 					const std::lock_guard<std::mutex> guard(trace_guard);
-					std::cout << "new minimal traverse found " << crtItemset->toString() << std::endl;
+					std::cout << "--> new minimal traverse found " << crtItemset->toString() << std::endl;
 				}
 #endif
 			}
@@ -269,7 +274,7 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 						if(Itemset::isEssentialRapid(toCombinedLeft, indexItemToAdd))
 						{
 #ifndef ISESSENTIAL_ON_TOEXPLORE
-							if (Itemset::computeIsEssential(toCombinedLeft, toCombinedRight))
+							if (Itemset::computeIsEssential(toCombinedLeft, indexItemToAdd))
 #endif
 							{
 								// combine toCombinedRight into toCombinedLeft
@@ -278,12 +283,12 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 
 								// this is a candidate for next iteration
 								newToTraverse.push_back(newItemset);
-#ifdef _DEBUG
+/*#ifdef _DEBUG
 								{
 									const std::lock_guard<std::mutex> guard(trace_guard);
 									std::cout << "create new itemset for " << newItemset->toString() << std::endl;
 								}
-#endif // _DEBUG
+#endif*/
 							}
 						}
 					}
@@ -303,13 +308,13 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 
 							// this is a candidate for next iteration
 							newToTraverse.push_back(newItemset);
-#ifdef _DEBUG
+/*#ifdef _DEBUG
 							{
 								const std::lock_guard<std::mutex> guard(trace_guard);
 								std::cout << "create new itemset for " << newItemset->toString() << std::endl;
 								int k = 0;
 							}
-#endif // _DEBUG
+#endif */
 
 						}
 					}

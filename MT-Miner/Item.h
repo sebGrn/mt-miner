@@ -14,7 +14,7 @@
 // 262144	// dualmatching36 --> 104 sec
 // 524288	// dualmatching38
 // 1600		// lose1600 --> 10.5 sec
-#define BITSET_SIZE 262144
+#define BITSET_SIZE 10
 
 typedef std::bitset<BITSET_SIZE> StaticBitset;
 
