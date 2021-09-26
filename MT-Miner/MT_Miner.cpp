@@ -18,11 +18,11 @@ void MT_Miner::createBinaryRepresentation(const HyperGraph& hypergraph)
 {
 	// build formal context from hypergraph
 	FormalContext formalContext(hypergraph);
-	formalContext.serialize("format_context.csv");
+	//formalContext.serialize("format_context.csv");
 
 	// build binary representation from formal context
 	BinaryRepresentation::buildFromFormalContext(formalContext);
-	BinaryRepresentation::serialize("binary_rep.csv");
+	//BinaryRepresentation::serialize("binary_rep.csv");
 
 	if (this->useCloneOptimization)
 	{
@@ -42,8 +42,6 @@ void MT_Miner::createBinaryRepresentation(const HyperGraph& hypergraph)
 
 void MT_Miner::computeInitialToTraverseList(std::deque<std::shared_ptr<Itemset>>& toTraverse) const
 {
-	std::cout << "use of DISJONCTIVE support (OR)" << std::endl;
-
 	assert(toTraverse.empty());
 	for (unsigned int i = 1; i <= BinaryRepresentation::getItemCount(); i++)
 	{
