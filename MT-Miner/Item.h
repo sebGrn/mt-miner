@@ -11,10 +11,10 @@
 // 32768	// dualmatching30 --> OK, 10 sec --> 6 sec
 // 65536	// dualmatching32 --> OK, 48 sec --> 28 sec --> 5 sec
 // 131072	// dualmatching34 --> OK, 444 sec --> 159 sec --> 114 sec (max 14.5go)
-// 262144	// dualmatching36 --> 104 sec
+// 262144	// dualmatching36 --> 18 - 289 sec, 8.1 Go | 226 sec, 8.3 Go
 // 524288	// dualmatching38
 // 1600		// lose1600 --> 10.5 sec
-#define BITSET_SIZE 65536
+#define BITSET_SIZE 262144
 
 typedef std::bitset<BITSET_SIZE> StaticBitset;
 

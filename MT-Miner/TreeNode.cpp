@@ -249,11 +249,12 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 	//for_each(toTraverse.begin(), toTraverse.end(), [&](const std::shared_ptr<Itemset> elt) { std::cout << elt->toString(), "\n"; });
 	//std::cout << std::endl;
 
-	// test trivial case
+	std::deque<std::shared_ptr<std::deque<std::shared_ptr<Itemset>>>> toTraverseList;
+
 	{
 		// build new toTraverse list and explore next branch
 		// combine each element between [0, toExplore_MaxClique_Index] with the entire combined itemset list
-		while(toExplore.size())
+		while (toExplore.size())
 		{
 			std::shared_ptr<Itemset> toCombinedLeft = toExplore.front();
 			toExplore.pop_front();
@@ -267,7 +268,7 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 			}
 
 			// build newTraverse list, reserve with max possible size
-			std::deque<std::shared_ptr<Itemset>> newToTraverse;
+			std::shared_ptr<std::deque<std::shared_ptr<Itemset>>> newToTraverse = std::make_shared<std::deque<std::shared_ptr<Itemset>>>();
 			try
 			{
 				// first loop on toExplore itemsets
@@ -276,7 +277,7 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 					if (!toCombinedRight->containsAClone())
 					{
 						unsigned int indexItemToAdd = toCombinedRight->getLastItemAttributeIndex();
-						if(Itemset::isEssentialRapid(toCombinedLeft, indexItemToAdd))
+						if (Itemset::isEssentialRapid(toCombinedLeft, indexItemToAdd))
 						{
 #ifndef ISESSENTIAL_ON_TOEXPLORE
 							if (Itemset::computeIsEssential(toCombinedLeft, indexItemToAdd))
@@ -287,17 +288,17 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 								newItemset->combine(indexItemToAdd);
 
 								// this is a candidate for next iteration
-								newToTraverse.push_back(newItemset);
-/*#ifdef _DEBUG
-								{
-									const std::lock_guard<std::mutex> guard(trace_guard);
-									std::cout << "create new itemset for " << newItemset->toString() << std::endl;
-								}
-#endif*/
+								newToTraverse->push_back(newItemset);
+								/*#ifdef _DEBUG
+																{
+																	const std::lock_guard<std::mutex> guard(trace_guard);
+																	std::cout << "create new itemset for " << newItemset->toString() << std::endl;
+																}
+								#endif*/
 							}
 						}
 					}
-				});
+					});
 
 				// then loop on maxClique itemsets
 				for_each(maxClique.begin(), maxClique.end(), [&newToTraverse, &toCombinedLeft](unsigned int attributeIndex) {
@@ -312,18 +313,17 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 							newItemset->combine(attributeIndex);
 
 							// this is a candidate for next iteration
-							newToTraverse.push_back(newItemset);
-/*#ifdef _DEBUG
-							{
-								const std::lock_guard<std::mutex> guard(trace_guard);
-								std::cout << "create new itemset for " << newItemset->toString() << std::endl;
-								int k = 0;
-							}
-#endif */
+							newToTraverse->push_back(newItemset);
+							/*#ifdef _DEBUG
+														{
+															const std::lock_guard<std::mutex> guard(trace_guard);
+															std::cout << "create new itemset for " << newItemset->toString() << std::endl;
+														}
+							#endif */
 
 						}
 					}
-				});
+					});
 			}
 			catch (std::exception& e)
 			{
@@ -334,15 +334,38 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 			toCombinedLeft.reset();
 
 			// call process in the loop
-			if (!newToTraverse.empty())
+			if (!newToTraverse->empty())
 			{
-				// pending task
-				addTaskIntoQueue(std::move(newToTraverse));
-				// inc task count
-				nbTaskCreated++;
+				toTraverseList.push_back(newToTraverse);
+				//	// pending task
+				//	addTaskIntoQueue(std::move(newToTraverse));
+				//	// inc task count
+				//	nbTaskCreated++;
 			}
 		}
 		toExplore.clear();
+
+
+		while (toTraverseList.size())
+		{
+			std::shared_ptr<std::deque<std::shared_ptr<Itemset>>> newToTraverse = toTraverseList.front();
+			toTraverseList.pop_front();
+
+//#ifdef _DEBUG
+			{
+				const std::lock_guard<std::mutex> guard(trace_guard);
+				std::cout << "pending task " << pending_task_count << " -> newToTraverse list size : " << newToTraverse->size() << ", itemset count : " << (*newToTraverse)[0]->getItemCount() << std::endl;
+			}	
+//#endif 
+
+			// pending task
+			addTaskIntoQueue(std::move(*newToTraverse));
+			// inc task count
+			nbTaskCreated++;
+		}
+
+
+
 	}
 	
 	// terminate task
@@ -404,8 +427,6 @@ std::deque<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals(std::d
 						task.wait();
 					}
 					lock.lock(); // reacquire lock
-				
-					//memory_signal.notify_one();
 				}
 				else if (!pending_task_count)
 					break;
