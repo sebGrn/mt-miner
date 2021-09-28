@@ -8,8 +8,6 @@
 
 class BinaryRepresentation;
 
-#define ISESSENTIAL_ON_TOEXPLORE
-
 class Itemset
 {
 private:
@@ -26,9 +24,7 @@ private:
 	std::unique_ptr<StaticBitset> cumulatedXorbitset;
 	std::unique_ptr<StaticBitset> noiseBitset;
 
-#ifdef ISESSENTIAL_ON_TOEXPLORE
 	bool isEssential;
-#endif
 
 private:
 	static bool computeIsEssentialParameters(const std::shared_ptr<Itemset>& itemset, StaticBitset& cumulatedXorbitset, StaticBitset& noiseBitset);
@@ -53,12 +49,7 @@ public:
 	
 	bool operator==(const Itemset& other);
 
-#ifndef ISESSENTIAL_ON_TOEXPLORE
-	static bool computeIsEssential(const std::shared_ptr<Itemset>& left, unsigned int indexToAdd);
-#else
 	static bool computeIsEssential(const std::shared_ptr<Itemset>& itemset, bool mtComputation = false);
-#endif
-
 	static unsigned int computeSupport(const Itemset& left, const std::shared_ptr<Itemset>& right);	
 	static Item* getItem(const std::shared_ptr<Itemset>& itemset, unsigned int i);
 	static bool isEssentialRapid(std::shared_ptr<Itemset>& left, unsigned int itemIndexToAdd);
