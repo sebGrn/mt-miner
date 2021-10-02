@@ -97,15 +97,8 @@ void TreeNode::updateMinimalTraverseList(const std::shared_ptr<Itemset>& crtItem
 	// lock thread and add minimal transverse
 	if (!only_minimal || minimalMt >= MAX_MINIMAL_TRAVERSE_SIZE || crtItemset->getItemCount() <= minimalMt)
 	{
-#ifdef ISESSENTIAL_ON_TOEXPLORE
 		bool isEssential = Itemset::computeIsEssential(crtItemset, true);
 		if (isEssential)
-#else
-		unsigned int indexToAdd = crtItemset->getLastItemAttributeIndex();
-		bool isEssential = Itemset::computeIsEssential(crtItemset, indexToAdd);
-		if (isEssential)
-
-#endif
 		{
 			{
 				const std::lock_guard<std::mutex> guard(task_guard);
@@ -183,10 +176,8 @@ void TreeNode::generateCandidates(std::deque<std::shared_ptr<Itemset>>&& toTrave
 			}
 			else
 			{
-#ifdef ISESSENTIAL_ON_TOEXPLORE
 				bool isEssential = Itemset::computeIsEssential(crtItemset);
 				if (isEssential)
-#endif
 				{
 					// add itemset as to explore
 					toExplore.push_back(crtItemset);
@@ -279,23 +270,18 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 						unsigned int indexItemToAdd = toCombinedRight->getLastItemAttributeIndex();
 						if (Itemset::isEssentialRapid(toCombinedLeft, indexItemToAdd))
 						{
-#ifndef ISESSENTIAL_ON_TOEXPLORE
-							if (Itemset::computeIsEssential(toCombinedLeft, indexItemToAdd))
-#endif
-							{
-								// combine toCombinedRight into toCombinedLeft
-								std::shared_ptr<Itemset> newItemset = std::make_shared<Itemset>(toCombinedLeft);
-								newItemset->combine(indexItemToAdd);
+							// combine toCombinedRight into toCombinedLeft
+							std::shared_ptr<Itemset> newItemset = std::make_shared<Itemset>(toCombinedLeft);
+							newItemset->combine(indexItemToAdd);
 
-								// this is a candidate for next iteration
-								newToTraverse->push_back(newItemset);
-								/*#ifdef _DEBUG
-																{
-																	const std::lock_guard<std::mutex> guard(trace_guard);
-																	std::cout << "create new itemset for " << newItemset->toString() << std::endl;
-																}
-								#endif*/
+							// this is a candidate for next iteration
+							newToTraverse->push_back(newItemset);
+/*#ifdef _DEBUG
+							{
+								const std::lock_guard<std::mutex> guard(trace_guard);
+								std::cout << "create new itemset for " << newItemset->toString() << std::endl;
 							}
+#endif*/
 						}
 					}
 					});
@@ -314,12 +300,12 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 
 							// this is a candidate for next iteration
 							newToTraverse->push_back(newItemset);
-							/*#ifdef _DEBUG
-														{
-															const std::lock_guard<std::mutex> guard(trace_guard);
-															std::cout << "create new itemset for " << newItemset->toString() << std::endl;
-														}
-							#endif */
+/*#ifdef _DEBUG
+						{
+							const std::lock_guard<std::mutex> guard(trace_guard);
+							std::cout << "create new itemset for " << newItemset->toString() << std::endl;
+						}
+#endif */
 
 						}
 					}
