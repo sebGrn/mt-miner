@@ -1,6 +1,5 @@
 #include "TreeNode.h"
 
-//#define TRACE
 
 #define MAX_MINIMAL_TRAVERSE_SIZE 9999
 
@@ -97,7 +96,8 @@ void TreeNode::updateMinimalTraverseList(const std::shared_ptr<Itemset>& crtItem
 	// lock thread and add minimal transverse
 	if (!only_minimal || minimalMt >= MAX_MINIMAL_TRAVERSE_SIZE || crtItemset->getItemCount() <= minimalMt)
 	{
-		bool isEssential = Itemset::computeIsEssential(crtItemset, true);
+		// set storeEssentiality to false, we don't need to store xor & noise bitsets values, this itemset is a minimaltransverse
+		bool isEssential = Itemset::computeIsEssential(crtItemset, false);
 		if (isEssential)
 		{
 			{
@@ -197,7 +197,7 @@ void TreeNode::addTaskIntoQueue(std::deque<std::shared_ptr<Itemset>>&& toTravers
 {
 	assert(!toTraverse.empty());
 
-	// sort itemset
+	// sort items²et
 	std::deque<std::shared_ptr<Itemset>> toExplore;
 	std::vector<unsigned int> maxClique;
 	this->generateCandidates(std::move(toTraverse), std::move(toExplore), std::move(maxClique));
@@ -337,12 +337,12 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 			std::shared_ptr<std::deque<std::shared_ptr<Itemset>>> newToTraverse = toTraverseList.front();
 			toTraverseList.pop_front();
 
-//#ifdef _DEBUG
+/*#ifdef _DEBUG
 			{
 				const std::lock_guard<std::mutex> guard(trace_guard);
 				std::cout << "pending task " << pending_task_count << " -> newToTraverse list size : " << newToTraverse->size() << ", itemset count : " << (*newToTraverse)[0]->getItemCount() << std::endl;
 			}	
-//#endif 
+#endif */
 
 			// pending task
 			addTaskIntoQueue(std::move(*newToTraverse));
