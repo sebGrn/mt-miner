@@ -15,9 +15,9 @@
 // 524288	// dualmatching38
 // 1600		// lose1600 --> 10.5 sec
 
-#define TRACE
+//#define TRACE
 
-#define BITSET_SIZE 1000
+#define BITSET_SIZE 131072
 
 typedef std::bitset<BITSET_SIZE> StaticBitset;
 

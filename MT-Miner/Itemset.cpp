@@ -101,7 +101,7 @@ bool Itemset::isEssentialRapid(std::shared_ptr<Itemset>& left, unsigned int item
 
 	std::shared_ptr<Item> itItemToAdd = BinaryRepresentation::getItemFromKey(itemIndexToAdd);
 	
-	StaticBitset combined_bitset = combined_bitset = itItemToAdd->staticBitset | left->supportBitset;
+	StaticBitset combined_bitset = itItemToAdd->staticBitset | left->supportBitset;
 	
 	// must count bits into combined bitset, not so fast...
 	unsigned int supportCombined = combined_bitset.count();
@@ -129,24 +129,11 @@ bool Itemset::isEssentialRapid(std::shared_ptr<Itemset>& left, unsigned int item
 		return false;
 	}
 
-	/*
-	if (left->getSupport() + right->getSupport() == left->getSupport())
-	{
-		//std::cout << "OPTIMIZED 1" << std::endl;
+	if (supportCombined == rightSupport)
 		return false;
-	}
 
-	if (combined->getSupport() == combined->cumulatedXorbitset->count())
-	{
-		//std::cout << "OPTIMIZED 2" << std::endl;
+	if (left->getSupport() + rightSupport == left->getSupport())
 		return false;
-	}
-
-	if (combined->getSupport() == right->getSupport())
-	{
-		//std::cout << "OPTIMIZED 2" << std::endl;
-		return false;
-	}*/
 
 	return true;
 }

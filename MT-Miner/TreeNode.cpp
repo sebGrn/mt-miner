@@ -79,16 +79,9 @@ void TreeNode::recurseOnClonedItemset(std::shared_ptr<Itemset> itemset, unsigned
 
 bool TreeNode::isMinimalTrasverse(const std::shared_ptr<Itemset>& itemset) const
 {
-	// store object count for optimization
 	unsigned int objectCount = this->binaryRepresentation->getObjectCount();
-
-	// Compute disjunctive support for each itemset of toTraverse list
-	//	if disjunctive support is equal to object count --> add the itemset to graphMt list (then process its clones)
 	unsigned int support = itemset->getSupport();
-
-	bool isMinimalTransverse = ((100 * support) >= (objectCount * TreeNode::threshold));
-
-	return isMinimalTransverse;
+	return ((100 * support) >= (objectCount * TreeNode::threshold));
 }
 
 void TreeNode::updateMinimalTraverseList(const std::shared_ptr<Itemset>& crtItemset)
@@ -197,38 +190,41 @@ void TreeNode::addTaskIntoQueue(std::deque<std::shared_ptr<Itemset>>&& toTravers
 {
 	assert(!toTraverse.empty());
 
-	// sort items²et
+	// sort itemset
 	std::deque<std::shared_ptr<Itemset>> toExplore;
 	std::vector<unsigned int> maxClique;
 	this->generateCandidates(std::move(toTraverse), std::move(toExplore), std::move(maxClique));
 	toTraverse.clear();
 
-	// emit task
-	auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(toExplore), std::move(maxClique));
-
-	// ## SPAWN TASK ##
+	if (!toExplore.empty())
 	{
-		// !!! ne pas ajouter la tâche dans le tableau systématiquement
-		// !!! donner une taille max à task_queue avec un atomic
-		// !!! définir un ID pour cq tâche, pour faire en sorte qu'une tâche parente ne soit pas bloquée par ses tâches filles
-		// !!! ajouter memory_signal de type condition_variable_any
-		// !!! utiliser http://www.cplusplus.com/reference/condition_variable/condition_variable_any/wait/
-		// !!! memory_signal.wait(lock, fct)
-		// !!! laisser toujours une tâche en cours, si la tâche est une feuille de l'arbre, on la bloque pas, on bloque ses frères
+		// emit task
+		auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(toExplore), std::move(maxClique));
 
-		// lock to add task into task_queue
-		//std::cout << "create a new task" << std::endl;
-		std::unique_lock<std::mutex> lock(task_guard);
-		task_queue.emplace_back(std::move(subtask));
-		++pending_task_count;
-		lock.unlock();
+		// ## SPAWN TASK ##
+		{
+			// !!! ne pas ajouter la tâche dans le tableau systématiquement
+			// !!! donner une taille max à task_queue avec un atomic
+			// !!! définir un ID pour cq tâche, pour faire en sorte qu'une tâche parente ne soit pas bloquée par ses tâches filles
+			// !!! ajouter memory_signal de type condition_variable_any
+			// !!! utiliser http://www.cplusplus.com/reference/condition_variable/condition_variable_any/wait/
+			// !!! memory_signal.wait(lock, fct)
+			// !!! laisser toujours une tâche en cours, si la tâche est une feuille de l'arbre, on la bloque pas, on bloque ses frères
+
+			// lock to add task into task_queue
+			//std::cout << "create a new task" << std::endl;
+			std::unique_lock<std::mutex> lock(task_guard);
+			task_queue.emplace_back(std::move(subtask));
+			++pending_task_count;
+			lock.unlock();
+		}
+
+		// be sure at least one unit is awaken
+		task_signal.notify_one();
+
+		// modify delay from 1 to 100 to see idle behaviour
+		//std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
-
-	// be sure at least one unit is awaken
-	task_signal.notify_one();
-
-	// modify delay from 1 to 100 to see idle behaviour
-	//std::this_thread::sleep_for(std::chrono::milliseconds(1));
 }
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
@@ -240,7 +236,7 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 	//for_each(toTraverse.begin(), toTraverse.end(), [&](const std::shared_ptr<Itemset> elt) { std::cout << elt->toString(), "\n"; });
 	//std::cout << std::endl;
 
-	std::deque<std::shared_ptr<std::deque<std::shared_ptr<Itemset>>>> toTraverseList;
+	//std::deque<std::deque<std::shared_ptr<Itemset>>> toTraverseList;
 
 	{
 		// build new toTraverse list and explore next branch
@@ -259,7 +255,7 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 			}
 
 			// build newTraverse list, reserve with max possible size
-			std::shared_ptr<std::deque<std::shared_ptr<Itemset>>> newToTraverse = std::make_shared<std::deque<std::shared_ptr<Itemset>>>();
+			std::deque<std::shared_ptr<Itemset>> newToTraverse;
 			try
 			{
 				// first loop on toExplore itemsets
@@ -275,7 +271,7 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 							newItemset->combine(indexItemToAdd);
 
 							// this is a candidate for next iteration
-							newToTraverse->push_back(newItemset);
+							newToTraverse.push_back(newItemset);
 /*#ifdef _DEBUG
 							{
 								const std::lock_guard<std::mutex> guard(trace_guard);
@@ -299,7 +295,7 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 							newItemset->combine(attributeIndex);
 
 							// this is a candidate for next iteration
-							newToTraverse->push_back(newItemset);
+							newToTraverse.push_back(newItemset);
 /*#ifdef _DEBUG
 						{
 							const std::lock_guard<std::mutex> guard(trace_guard);
@@ -320,38 +316,35 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 			toCombinedLeft.reset();
 
 			// call process in the loop
-			if (!newToTraverse->empty())
+			if (!newToTraverse.empty())
 			{
-				toTraverseList.push_back(newToTraverse);
-				//	// pending task
-				//	addTaskIntoQueue(std::move(newToTraverse));
-				//	// inc task count
-				//	nbTaskCreated++;
+				//toTraverseList.push_back(newToTraverse);
+				// pending task
+				addTaskIntoQueue(std::move(newToTraverse));
+				// inc task count
+				nbTaskCreated++;
 			}
 		}
 		toExplore.clear();
 
 
-		while (toTraverseList.size())
-		{
-			std::shared_ptr<std::deque<std::shared_ptr<Itemset>>> newToTraverse = toTraverseList.front();
-			toTraverseList.pop_front();
-
-/*#ifdef _DEBUG
-			{
-				const std::lock_guard<std::mutex> guard(trace_guard);
-				std::cout << "pending task " << pending_task_count << " -> newToTraverse list size : " << newToTraverse->size() << ", itemset count : " << (*newToTraverse)[0]->getItemCount() << std::endl;
-			}	
-#endif */
-
-			// pending task
-			addTaskIntoQueue(std::move(*newToTraverse));
-			// inc task count
-			nbTaskCreated++;
-		}
-
-
-
+//		while (toTraverseList.size())
+//		{
+//			std::shared_ptr<std::deque<std::shared_ptr<Itemset>>> newToTraverse = toTraverseList.front();
+//			toTraverseList.pop_front();
+//
+//#ifdef _DEBUG
+//			{
+//				const std::lock_guard<std::mutex> guard(trace_guard);
+//				std::cout << "pending task " << pending_task_count << " -> newToTraverse list size : " << newToTraverse->size() << ", itemset count : " << (*newToTraverse)[0]->getItemCount() << std::endl;
+//			}	
+//#endif
+//
+//			// pending task
+//			addTaskIntoQueue(std::move(*newToTraverse));
+//			// inc task count
+//			nbTaskCreated++;
+//		}
 	}
 	
 	// terminate task
