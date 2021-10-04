@@ -6,6 +6,8 @@
 #include "Item.h"
 #include "SparseBitset.h"
 
+#include <ctime>
+
 class BinaryRepresentation;
 
 class Itemset

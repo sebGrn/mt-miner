@@ -96,12 +96,12 @@ void TreeNode::updateMinimalTraverseList(const std::shared_ptr<Itemset>& crtItem
 			{
 				const std::lock_guard<std::mutex> guard(task_guard);
 				this->minimalTransverse.push_back(crtItemset);
-#ifdef TRACE
+//#ifdef TRACE
 				{
 					const std::lock_guard<std::mutex> guard(trace_guard);
 					std::cout << "--> new minimal traverse found " << crtItemset->toString() << std::endl;
 				}
-#endif
+//#endif
 			}
 
 			// update info
@@ -198,8 +198,21 @@ void TreeNode::addTaskIntoQueue(std::deque<std::shared_ptr<Itemset>>&& toTravers
 
 	if (!toExplore.empty())
 	{
+#ifdef _DEBUG
+		{
+			const std::lock_guard<std::mutex> guard(trace_guard);
+			std::cout << nbTaskCreated << " : create new task to combine ";
+			std::for_each(toExplore.begin(), toExplore.end(), [&](const std::shared_ptr<Itemset> elt) { std::cout << elt->toString() << ", "; });
+			std::cout << " with ";
+			std::for_each(maxClique.begin(), maxClique.end(), [&](unsigned int elt) { std::cout << std::to_string(elt) << ", "; });
+			std::cout << std::endl;
+		}
+#endif
 		// emit task
 		auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(toExplore), std::move(maxClique));
+
+		// inc task count
+		nbTaskCreated++;
 
 		// ## SPAWN TASK ##
 		{
@@ -272,12 +285,6 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 
 							// this is a candidate for next iteration
 							newToTraverse.push_back(newItemset);
-/*#ifdef _DEBUG
-							{
-								const std::lock_guard<std::mutex> guard(trace_guard);
-								std::cout << "create new itemset for " << newItemset->toString() << std::endl;
-							}
-#endif*/
 						}
 					}
 					});
@@ -321,8 +328,6 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 				//toTraverseList.push_back(newToTraverse);
 				// pending task
 				addTaskIntoQueue(std::move(newToTraverse));
-				// inc task count
-				nbTaskCreated++;
 			}
 		}
 		toExplore.clear();
