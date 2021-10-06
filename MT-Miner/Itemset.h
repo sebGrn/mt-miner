@@ -6,6 +6,8 @@
 #include "Item.h"
 #include "SparseBitset.h"
 
+#include <ctime>
+
 class BinaryRepresentation;
 
 class Itemset
@@ -18,7 +20,7 @@ private:
 	bool hasClone;
 
 	// disjunctive support : computed with OR
-	std::unique_ptr<StaticBitset> supportBitset;
+	StaticBitset supportBitset;
 	unsigned int supportValue;
 
 	std::unique_ptr<StaticBitset> cumulatedXorbitset;
@@ -49,8 +51,8 @@ public:
 	
 	bool operator==(const Itemset& other);
 
-	static bool computeIsEssential(const std::shared_ptr<Itemset>& itemset, bool mtComputation = false);
-	static unsigned int computeSupport(const Itemset& left, const std::shared_ptr<Itemset>& right);	
+	static bool computeIsEssential(const std::shared_ptr<Itemset>& itemset, bool storeEssentiality = true);
+	static unsigned int computeSupport(const Itemset& left, const std::shared_ptr<Itemset>& right);
 	static Item* getItem(const std::shared_ptr<Itemset>& itemset, unsigned int i);
 	static bool isEssentialRapid(std::shared_ptr<Itemset>& left, unsigned int itemIndexToAdd);
 };
@@ -75,3 +77,7 @@ inline unsigned int Itemset::getLastItemAttributeIndex() const
 	return this->itemsetIndexVector[this->itemsetIndexVector.size() - 1];
 }
 
+inline unsigned int Itemset::computeSupport(const Itemset& left, const std::shared_ptr<Itemset>& right)
+{
+	return(left.supportBitset | right->supportBitset).count();
+}

@@ -14,7 +14,10 @@
 // 262144	// dualmatching36 --> 18 - 289 sec, 8.1 Go | 226 sec, 8.3 Go
 // 524288	// dualmatching38
 // 1600		// lose1600 --> 10.5 sec
-#define BITSET_SIZE 65536
+
+//#define TRACE
+
+#define BITSET_SIZE 32768
 
 typedef std::bitset<BITSET_SIZE> StaticBitset;
 
@@ -26,7 +29,7 @@ class Item
 private:
 	unsigned int attributeIndex;
 
-	std::unique_ptr<StaticBitset> staticBitset;
+	StaticBitset staticBitset;
 	
 	// true if this item is a clone
 	bool isClone;
@@ -37,7 +40,6 @@ private:
 public:
 	Item(int index, unsigned int bitsetSize)
 	{
-		this->staticBitset = std::make_unique<StaticBitset>();
 		this->attributeIndex = index;
 		this->isClone = false;
 	}
@@ -70,17 +72,17 @@ inline unsigned int Item::getAttributeIndex() const
 
 inline void Item::set(unsigned int i, bool value)
 {
-	this->staticBitset->set(i, value);
+	this->staticBitset.set(i, value);
 }
 
 inline bool Item::get(unsigned int i) const
 {
-	return this->staticBitset->test(i);
+	return this->staticBitset.test(i);
 }
 
 inline unsigned int Item::count() const
 {
-	return this->staticBitset->count();
+	return this->staticBitset.count();
 }
 
 inline void Item::addClone(Item* clone)
@@ -123,5 +125,5 @@ inline bool Item::operator==(const Item& other)
 {
 	if(other.attributeIndex == this->attributeIndex)
 		return true;
-	return (*other.staticBitset) == (*this->staticBitset);
+	return other.staticBitset == this->staticBitset;
 }
