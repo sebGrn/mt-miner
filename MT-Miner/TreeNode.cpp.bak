@@ -124,26 +124,20 @@ bool TreeNode::isCandidateForMaxClique(const Itemset& cumulatedItemset, const st
 	// store object count for optimization
 	unsigned int objectCount = this->binaryRepresentation->getObjectCount();
 
-	// compute best estimation to avoid disjonctive support computation
-	if (cumulatedItemset.getSupport() + crtItemset->getSupport() < objectCount)
-		return true;
+	if (cumulatedItemset.getSupport() + crtItemset->getSupport() == objectCount)
+		return false;
 
 	// test support and add itemset in maxClique or toExplore list
 	unsigned int support = Itemset::computeSupport(cumulatedItemset, crtItemset);
 
-	if (support < objectCount)
+	if (support != objectCount)
 		return true;
 	else
 		return false;
 }
 
 void TreeNode::generateCandidates(std::deque<std::shared_ptr<Itemset>>&& toTraverse, std::deque<std::shared_ptr<Itemset>>&& toExplore, std::vector<unsigned int>&& maxClique)
-{
-	// GENERATE MAXCLIQUE EN FONCTION DES ELEMENTS DE TOEXPLORE
-	// Ex {74} avec {1,2,3} et {76} avec {1,2,3,5}
-	// combine {471, 472, 473} et {761, 762, 763, 765}
-
-
+{	
 	// results of cumulated combined items / must be declared outside of the loop
 	Itemset cumulatedItemset;
 
@@ -285,12 +279,32 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 						unsigned int indexItemToAdd = toCombinedRight->getLastItemAttributeIndex();
 						if (Itemset::isEssentialRapid(toCombinedLeft, indexItemToAdd))
 						{
+<<<<<<< HEAD
+#ifndef ISESSENTIAL_ON_TOEXPLORE
+							if (Itemset::computeIsEssential(toCombinedLeft, indexItemToAdd))
+#endif
+							{
+								// combine toCombinedRight into toCombinedLeft
+								std::shared_ptr<Itemset> newItemset = std::make_shared<Itemset>(toCombinedLeft);
+								newItemset->combine(indexItemToAdd);
+
+								// this is a candidate for next iteration
+								newToTraverse->push_back(newItemset);
+/*#ifdef _DEBUG
+								{
+									const std::lock_guard<std::mutex> guard(trace_guard);
+									std::cout << "create new itemset for " << newItemset->toString() << std::endl;
+								}
+#endif*/
+							}
+=======
 							// combine toCombinedRight into toCombinedLeft
 							std::shared_ptr<Itemset> newItemset = std::make_shared<Itemset>(toCombinedLeft);
 							newItemset->combine(indexItemToAdd);
 
 							// this is a candidate for next iteration
 							newToTraverse.push_back(newItemset);
+>>>>>>> ad257629af21cb8e2efb39893615a9df5c6c38a7
 						}
 					}
 					});
@@ -339,6 +353,28 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 		toExplore.clear();
 
 
+<<<<<<< HEAD
+		while (toTraverseList.size())
+		{
+			std::shared_ptr<std::deque<std::shared_ptr<Itemset>>> newToTraverse = toTraverseList.front();
+			toTraverseList.pop_front();
+
+#ifdef _DEBUG
+			{
+				const std::lock_guard<std::mutex> guard(trace_guard);
+				std::cout << "pending task " << pending_task_count << " -> newToTraverse list size : " << newToTraverse->size() << ", itemset count : " << (*newToTraverse)[0]->getItemCount() << std::endl;
+			}
+#endif 
+
+			// pending task
+			addTaskIntoQueue(std::move(*newToTraverse));
+			// inc task count
+			nbTaskCreated++;
+		}
+
+
+
+=======
 //		while (toTraverseList.size())
 //		{
 //			std::shared_ptr<std::deque<std::shared_ptr<Itemset>>> newToTraverse = toTraverseList.front();
@@ -356,6 +392,7 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 //			// inc task count
 //			nbTaskCreated++;
 //		}
+>>>>>>> ad257629af21cb8e2efb39893615a9df5c6c38a7
 	}
 	
 	// terminate task

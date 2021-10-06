@@ -1,0 +1,3 @@
+D:/dev/repository/MT-Miner/MT-Miner/build990/CMakeFiles/mt_miner.dir
+D:/dev/repository/MT-Miner/MT-Miner/build990/CMakeFiles/ALL_BUILD.dir
+D:/dev/repository/MT-Miner/MT-Miner/build990/CMakeFiles/ZERO_CHECK.dir

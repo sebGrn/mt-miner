@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="D:\dev\repository\MT-Miner\MT-Miner\BinaryRepresentation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\repository\MT-Miner\MT-Miner\Itemset.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\repository\MT-Miner\MT-Miner\Logger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\repository\MT-Miner\MT-Miner\MT_Miner.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\repository\MT-Miner\MT-Miner\TreeNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\repository\MT-Miner\MT-Miner\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="D:\dev\repository\MT-Miner\MT-Miner\BinaryRepresentation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\repository\MT-Miner\MT-Miner\FormalContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\repository\MT-Miner\MT-Miner\HyperGraph.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\repository\MT-Miner\MT-Miner\Item.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\repository\MT-Miner\MT-Miner\Itemset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\repository\MT-Miner\MT-Miner\Logger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\repository\MT-Miner\MT-Miner\MT_Miner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\repository\MT-Miner\MT-Miner\SparseBitset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\repository\MT-Miner\MT-Miner\TreeNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\repository\MT-Miner\MT-Miner\utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\dev\repository\MT-Miner\MT-Miner\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{03F4907C-214A-3C4F-AC17-729D7CFD34ED}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{539BD20C-E644-38C8-BEA4-73921EF402C6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
