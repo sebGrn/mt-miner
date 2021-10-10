@@ -125,7 +125,7 @@ bool TreeNode::isCandidateForMaxClique(const Itemset& cumulatedItemset, const st
 	unsigned int objectCount = this->binaryRepresentation->getObjectCount();
 
 	// compute best estimation to avoid disjonctive support computation
-	if (cumulatedItemset.getSupport() + crtItemset->getSupport() < objectCount)
+	if ((cumulatedItemset.getSupport() + crtItemset->getSupport()) < objectCount)
 		return true;
 
 	// test support and add itemset in maxClique or toExplore list
@@ -137,15 +137,15 @@ bool TreeNode::isCandidateForMaxClique(const Itemset& cumulatedItemset, const st
 		return false;
 }
 
-void TreeNode::generateCandidates(std::deque<std::shared_ptr<Itemset>>&& toTraverse, std::deque<std::shared_ptr<Itemset>>&& toExplore, std::vector<unsigned int>&& maxClique)
+void TreeNode::generateCandidates(std::deque<std::shared_ptr<Itemset>>&& toTraverse, std::deque<std::shared_ptr<Itemset>>&& toExplore, std::vector<std::vector<unsigned int>>&& maxCliqueList)
 {
 	// GENERATE MAXCLIQUE EN FONCTION DES ELEMENTS DE TOEXPLORE
 	// Ex {74} avec {1,2,3} et {76} avec {1,2,3,5}
 	// combine {471, 472, 473} et {761, 762, 763, 765}
 
-
 	// results of cumulated combined items / must be declared outside of the loop
 	Itemset cumulatedItemset;
+	std::vector<unsigned int> crtMaxClique;
 
 	// loop on toTraverse list and sort all itemset between minimal traverse, toExplore or maxClique candidates
 	for (unsigned int i = 0; i < toTraverse.size(); i++)
@@ -156,6 +156,8 @@ void TreeNode::generateCandidates(std::deque<std::shared_ptr<Itemset>>&& toTrave
 		if (isMinimalTrasverse(crtItemset))
 		{
 			updateMinimalTraverseList(crtItemset);
+			// comment for previous version
+			//maxCliqueList.push_back(crtMaxClique);
 		}
 		else
 		{
@@ -163,7 +165,7 @@ void TreeNode::generateCandidates(std::deque<std::shared_ptr<Itemset>>&& toTrave
 			{
 				// add crtItemset as maxClique
 				unsigned int rightAttributeIndex = crtItemset->getLastItemAttributeIndex();
-				maxClique.push_back(rightAttributeIndex);
+				crtMaxClique.push_back(rightAttributeIndex);
 				// combine current itemset into cumulated itemset for next round
 				cumulatedItemset.combine(rightAttributeIndex);
 #ifdef TRACE
@@ -180,6 +182,8 @@ void TreeNode::generateCandidates(std::deque<std::shared_ptr<Itemset>>&& toTrave
 				{
 					// add itemset as to explore
 					toExplore.push_back(crtItemset);
+					// comment for previous version
+					//maxCliqueList.push_back(crtMaxClique);
 #ifdef TRACE
 					{
 						const std::lock_guard<std::mutex> guard(trace_guard);
@@ -190,6 +194,10 @@ void TreeNode::generateCandidates(std::deque<std::shared_ptr<Itemset>>&& toTrave
 			}
 		}
 	}
+	// comment for previous version
+	//maxCliqueList[maxCliqueList.size() - 1] = crtMaxClique;
+	// uncomment for previous version
+	maxCliqueList.push_back(crtMaxClique);
 }
 
 void TreeNode::addTaskIntoQueue(std::deque<std::shared_ptr<Itemset>>&& toTraverse)
@@ -198,8 +206,8 @@ void TreeNode::addTaskIntoQueue(std::deque<std::shared_ptr<Itemset>>&& toTravers
 
 	// sort itemset
 	std::deque<std::shared_ptr<Itemset>> toExplore;
-	std::vector<unsigned int> maxClique;
-	this->generateCandidates(std::move(toTraverse), std::move(toExplore), std::move(maxClique));
+	std::vector<std::vector<unsigned int>> maxCliqueList;
+	this->generateCandidates(std::move(toTraverse), std::move(toExplore), std::move(maxCliqueList));
 	toTraverse.clear();
 
 	if (!toExplore.empty())
@@ -210,12 +218,16 @@ void TreeNode::addTaskIntoQueue(std::deque<std::shared_ptr<Itemset>>&& toTravers
 			std::cout << nbTaskCreated << " : create new task to combine ";
 			std::for_each(toExplore.begin(), toExplore.end(), [&](const std::shared_ptr<Itemset> elt) { std::cout << elt->toString() << ", "; });
 			std::cout << " with ";
-			std::for_each(maxClique.begin(), maxClique.end(), [&](unsigned int elt) { std::cout << std::to_string(elt) << ", "; });
+			std::for_each(maxCliqueList.begin(), maxCliqueList.end(), [](const std::vector<unsigned int>& maxClique) {
+				std::cout << "{";
+				std::for_each(maxClique.begin(), maxClique.end(), [](unsigned int elt) { std::cout << std::to_string(elt) << ", "; });
+				std::cout << "}, ";
+			});
 			std::cout << std::endl;
 		}
 #endif
 		// emit task
-		auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(toExplore), std::move(maxClique));
+		auto subtask = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(toExplore), std::move(maxCliqueList));
 
 		// inc task count
 		nbTaskCreated++;
@@ -248,7 +260,7 @@ void TreeNode::addTaskIntoQueue(std::deque<std::shared_ptr<Itemset>>&& toTravers
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
-void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemset>>&& toExplore, std::vector<unsigned int>&& maxClique)
+void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemset>>&& toExplore, std::vector<std::vector<unsigned int>>&& maxClique)
 {
 	// ## START TASK ##
 	//std::cout << "\nNew task with itemset list : ";
@@ -260,6 +272,7 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 	{
 		// build new toTraverse list and explore next branch
 		// combine each element between [0, toExplore_MaxClique_Index] with the entire combined itemset list
+		unsigned int cliqueIndex = 0;
 		while (toExplore.size())
 		{
 			std::shared_ptr<Itemset> toCombinedLeft = toExplore.front();
@@ -291,12 +304,18 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 
 							// this is a candidate for next iteration
 							newToTraverse.push_back(newItemset);
+#ifdef _DEBUG
+							{
+								const std::lock_guard<std::mutex> guard(trace_guard);
+								std::cout << "combined " << toCombinedLeft->toString() << " with " << indexItemToAdd << std::endl;
+							}
+#endif						
 						}
 					}
-					});
+				});
 
 				// then loop on maxClique itemsets
-				for_each(maxClique.begin(), maxClique.end(), [&newToTraverse, &toCombinedLeft](unsigned int attributeIndex) {
+				for_each(maxClique[cliqueIndex].begin(), maxClique[cliqueIndex].end(), [&newToTraverse, &toCombinedLeft](unsigned int attributeIndex) {
 
 					std::shared_ptr<Item> item = BinaryRepresentation::getItemFromKey(attributeIndex);
 					if (!item->isAClone())
@@ -309,16 +328,18 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 
 							// this is a candidate for next iteration
 							newToTraverse.push_back(newItemset);
-/*#ifdef _DEBUG
-						{
-							const std::lock_guard<std::mutex> guard(trace_guard);
-							std::cout << "create new itemset for " << newItemset->toString() << std::endl;
-						}
-#endif */
-
+#ifdef _DEBUG
+							{
+								const std::lock_guard<std::mutex> guard(trace_guard);
+								std::cout << "combined " << toCombinedLeft->toString() << " with " << attributeIndex << std::endl;
+							}
+#endif						
 						}
 					}
-					});
+				});
+
+				// comment for previous version
+				//cliqueIndex++;
 			}
 			catch (std::exception& e)
 			{
@@ -376,12 +397,27 @@ std::deque<std::shared_ptr<Itemset>> TreeNode::computeMinimalTransversals(std::d
 	// itemsets from [0 to toExplore_MaxClique_Index] are to explore
 	// itemsets from [toExplore_MaxClique_Index to toExplore size] are max clique
 	std::deque<std::shared_ptr<Itemset>> toExplore;
-	std::vector<unsigned int> maxClique;
-	this->generateCandidates(std::move(toTraverse), std::move(toExplore), std::move(maxClique));
+	std::vector<std::vector<unsigned int>> maxCliqueList;
+	this->generateCandidates(std::move(toTraverse), std::move(toExplore), std::move(maxCliqueList));
 	toTraverse.clear();
 
+#ifdef _DEBUG
+	{
+		const std::lock_guard<std::mutex> guard(trace_guard);
+		std::cout << nbTaskCreated << " : create new task to combine ";
+		std::for_each(toExplore.begin(), toExplore.end(), [&](const std::shared_ptr<Itemset> elt) { std::cout << elt->toString() << ", "; });
+		std::cout << " with ";
+		std::for_each(maxCliqueList.begin(), maxCliqueList.end(), [](const std::vector<unsigned int>& maxClique) {
+			std::cout << "{";
+			std::for_each(maxClique.begin(), maxClique.end(), [](unsigned int elt) { std::cout << std::to_string(elt) << ", "; });
+			std::cout << "}, ";
+			});
+		std::cout << std::endl;
+	}
+#endif
+
 	// emit initial task
-	auto task = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(toExplore), std::move(maxClique));
+	auto task = std::async(std::launch::deferred, &TreeNode::computeMinimalTransversals_task, this, std::move(toExplore), std::move(maxCliqueList));
 
 	// ## SPAWN task ##
 	{

@@ -69,11 +69,11 @@ public:
 private: 
 	/// compute maxClique list, toExplore list and mt list
 	/// update graph_mt with new minimal transversal itemset
-	void generateCandidates(std::deque<std::shared_ptr<Itemset>>&& toTraverse, std::deque<std::shared_ptr<Itemset>>&& toExplore, std::vector<unsigned int>&& maxClique);
+	void generateCandidates(std::deque<std::shared_ptr<Itemset>>&& toTraverse, std::deque<std::shared_ptr<Itemset>>&& toExplore, std::vector<std::vector<unsigned int>>&& maxClique);
 	
 	void addTaskIntoQueue(std::deque<std::shared_ptr<Itemset>>&& toTraverse);
 
-	void computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemset>>&& toExplore, std::vector<unsigned int>&& maxClique);
+	void computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemset>>&& toExplore, std::vector<std::vector<unsigned int>>&& maxClique);
 	
 	void recurseOnClonedItemset(std::shared_ptr<Itemset> itemset, unsigned int iItem);
 
