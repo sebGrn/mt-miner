@@ -1,6 +1,8 @@
 #include "TreeNode.h"
 
 
+//#define OPTIM_MAXCLIQUE_PER_TOEXPLORE
+
 #define MAX_MINIMAL_TRAVERSE_SIZE 9999
 
 std::atomic_ullong TreeNode::nbTotalMt(0);
@@ -143,6 +145,8 @@ void TreeNode::generateCandidates(std::deque<std::shared_ptr<Itemset>>&& toTrave
 	// Ex {74} avec {1,2,3} et {76} avec {1,2,3,5}
 	// combine {471, 472, 473} et {761, 762, 763, 765}
 
+	maxCliqueList.reserve(toExplore.size());
+
 	// results of cumulated combined items / must be declared outside of the loop
 	Itemset cumulatedItemset;
 	std::vector<unsigned int> crtMaxClique;
@@ -155,19 +159,22 @@ void TreeNode::generateCandidates(std::deque<std::shared_ptr<Itemset>>&& toTrave
 		// test if current itemset is a minimal traverse
 		if (isMinimalTrasverse(crtItemset))
 		{
+			// we have a MinimalTraverse
 			updateMinimalTraverseList(crtItemset);
-			// comment for previous version
+#ifdef OPTIM_MAXCLIQUE_PER_TOEXPLORE
 			//maxCliqueList.push_back(crtMaxClique);
+#endif
 		}
 		else
 		{
 			if ((i == 0) || isCandidateForMaxClique(cumulatedItemset, crtItemset))
 			{
-				// add crtItemset as maxClique
+				// we have a maxClique
 				unsigned int rightAttributeIndex = crtItemset->getLastItemAttributeIndex();
-				crtMaxClique.push_back(rightAttributeIndex);
 				// combine current itemset into cumulated itemset for next round
 				cumulatedItemset.combine(rightAttributeIndex);
+				// add current itemset to maxClique list
+				crtMaxClique.push_back(rightAttributeIndex);
 #ifdef TRACE
 				{
 					const std::lock_guard<std::mutex> guard(trace_guard);
@@ -180,23 +187,45 @@ void TreeNode::generateCandidates(std::deque<std::shared_ptr<Itemset>>&& toTrave
 				bool isEssential = Itemset::computeIsEssential(crtItemset);
 				if (isEssential)
 				{
-					// add itemset as to explore
+					// we have a toExplore
 					toExplore.push_back(crtItemset);
-					// comment for previous version
+#ifdef OPTIM_MAXCLIQUE_PER_TOEXPLORE
+					// add current itemset to maxClique list
+					unsigned int rightAttributeIndex = crtItemset->getLastItemAttributeIndex();
+					crtMaxClique.push_back(rightAttributeIndex);
+
 					//maxCliqueList.push_back(crtMaxClique);
+#endif
 #ifdef TRACE
 					{
 						const std::lock_guard<std::mutex> guard(trace_guard);
 						std::cout << "add item to toExplore list " << crtItemset->toString() << std::endl;
-				}
+					}
 #endif
-			}
+				}
 			}
 		}
 	}
-	// comment for previous version
-	//maxCliqueList[maxCliqueList.size() - 1] = crtMaxClique;
-	// uncomment for previous version
+/*
+#ifdef OPTIM_MAXCLIQUE_PER_TOEXPLORE
+	// add last maxCliques into every previous maxClique lists
+	if (!maxCliqueList.empty())
+	{
+		auto itLastMaxCliqueList = maxCliqueList.end() - 1;
+		unsigned int indexToAdd = crtMaxClique.size() - (*itLastMaxCliqueList).size();
+		if (indexToAdd > 0)
+		{
+			//auto itLastItemToAdd = (*crtMaxClique.end()).end() - indexToAdd;
+			for (auto& clique : maxCliqueList)
+			{
+				clique.insert(clique.end(), crtMaxClique.end() - indexToAdd, crtMaxClique.end());
+			}
+		}
+	}
+#else
+	maxCliqueList.push_back(crtMaxClique);
+#endif
+*/
 	maxCliqueList.push_back(crtMaxClique);
 }
 
@@ -304,42 +333,53 @@ void TreeNode::computeMinimalTransversals_task(std::deque<std::shared_ptr<Itemse
 
 							// this is a candidate for next iteration
 							newToTraverse.push_back(newItemset);
-#ifdef _DEBUG
+/*#ifdef _DEBUG
 							{
 								const std::lock_guard<std::mutex> guard(trace_guard);
 								std::cout << "combined " << toCombinedLeft->toString() << " with " << indexItemToAdd << std::endl;
 							}
-#endif						
+#endif*/
 						}
 					}
 				});
 
-				// then loop on maxClique itemsets
-				for_each(maxClique[cliqueIndex].begin(), maxClique[cliqueIndex].end(), [&newToTraverse, &toCombinedLeft](unsigned int attributeIndex) {
+/*#ifdef _DEBUG
+				{
+					const std::lock_guard<std::mutex> guard(trace_guard);
+					std::cout << cliqueIndex << std::endl;
+				}
+#endif*/
 
-					std::shared_ptr<Item> item = BinaryRepresentation::getItemFromKey(attributeIndex);
-					if (!item->isAClone())
-					{
-						if (Itemset::isEssentialRapid(toCombinedLeft, attributeIndex))
+				
+				if (cliqueIndex < maxClique.size())
+				{
+					// then loop on maxClique itemsets
+					for_each(maxClique[cliqueIndex].begin(), maxClique[cliqueIndex].end(), [&newToTraverse, &toCombinedLeft](unsigned int attributeIndex) {
+
+						std::shared_ptr<Item> item = BinaryRepresentation::getItemFromKey(attributeIndex);
+						if (!item->isAClone())
 						{
-							// combine toCombinedRight into toCombinedLeft
-							std::shared_ptr<Itemset> newItemset = std::make_shared<Itemset>(toCombinedLeft);
-							newItemset->combine(attributeIndex);
-
-							// this is a candidate for next iteration
-							newToTraverse.push_back(newItemset);
-#ifdef _DEBUG
+							if (Itemset::isEssentialRapid(toCombinedLeft, attributeIndex))
 							{
-								const std::lock_guard<std::mutex> guard(trace_guard);
-								std::cout << "combined " << toCombinedLeft->toString() << " with " << attributeIndex << std::endl;
-							}
-#endif						
-						}
-					}
-				});
+								// combine toCombinedRight into toCombinedLeft
+								std::shared_ptr<Itemset> newItemset = std::make_shared<Itemset>(toCombinedLeft);
+								newItemset->combine(attributeIndex);
 
-				// comment for previous version
-				//cliqueIndex++;
+								// this is a candidate for next iteration
+								newToTraverse.push_back(newItemset);
+/*#ifdef _DEBUG
+								{
+									const std::lock_guard<std::mutex> guard(trace_guard);
+									std::cout << "combined " << toCombinedLeft->toString() << " with " << attributeIndex << std::endl;
+								}
+#endif*/
+							}
+						}
+					});
+				}
+#ifdef OPTIM_MAXCLIQUE_PER_TOEXPLORE
+				cliqueIndex++;
+#endif
 			}
 			catch (std::exception& e)
 			{
