@@ -17,7 +17,7 @@
 
 //#define TRACE
 
-#define BITSET_SIZE 1000
+#define BITSET_SIZE 32768
 
 typedef std::bitset<BITSET_SIZE> StaticBitset;
 

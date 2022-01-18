@@ -98,12 +98,12 @@ void TreeNode::updateMinimalTraverseList(const std::shared_ptr<Itemset>& crtItem
 			{
 				const std::lock_guard<std::mutex> guard(task_guard);
 				this->minimalTransverse.push_back(crtItemset);
-//#ifdef TRACE
+#ifdef TRACE
 				{
 					const std::lock_guard<std::mutex> guard(trace_guard);
 					std::cout << "--> new minimal traverse found " << crtItemset->toString() << std::endl;
 				}
-//#endif
+#endif
 			}
 
 			// update info
