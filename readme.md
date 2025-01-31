@@ -88,11 +88,3 @@ A formal context is a triple K = (G, M, I), where G is a set of objects (lines),
 
 # More info
 
-## Paper associated
-
-To come
-
-## Authors
-
-Amira Mouakher (<mouakheramira@gmail.com>)
-Sebastien Gerin (<gerin.seb@gmail.com>)
